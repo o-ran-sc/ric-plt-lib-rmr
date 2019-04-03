@@ -1,0 +1,16 @@
+
+Various RMr man pages. These are maintained in {X}fm format which allows
+them to be rendered into one of these formats:
+	Postscript
+	troff
+	rst
+	markdown
+	html
+
+
+Troff is generated and installed into deb packages such that 'man rmr_call'
+and the like generate expected man page output.  The rst output is likely
+copied to some other directory and snarfed for automatic conversion to 
+html ({X}fm could do that without the extra layer) as a part of the CICD
+gizmo.   Postscript is a benefit for pretty printing, and markdown is 
+available if someone adds a markdown macro file in the parent directory. 

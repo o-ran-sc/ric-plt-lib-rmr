@@ -1,0 +1,1 @@
+/usr/bin/cc   -Wall -Wextra    CMakeFiles/nanocat.dir/tools/nanocat.c.o CMakeFiles/nanocat.dir/tools/options.c.o  -o nanocat -rdynamic libnanomsg.so.5.1.0 -lanl -lrt -lpthread -lnsl -lpthread -Wl,-rpath,/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build: 

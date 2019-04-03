@@ -1,0 +1,38 @@
+
+The RMR library was originally named Uta, and several of the now
+static functions were originally a part of the API and thus they
+retain the uta_ prefix.  When renaming the library, and thus shifting
+the prefix to rmr_, the decision was made to keep the internal names
+unchanged.
+
+The original library was built on top of Nanomsg, and eventually ported
+to NNG.  Sadly, the differences between Nanomsg and NNG were significant
+enough (mostly the change from an integer file descriptor to a struct, 
+return code shifts, and seemingly disassociation from errno) made the
+port a bit messier than just switching nn_ prefixes to nng_.  The code
+was reorganised to keep the nano/nng references as isolated as possible
+and thus we have three sets of files:
+
+Nanomsg specific:
+	rma_private.h
+	rma.c
+	rtable_static.c
+
+NNG Specific:
+	rma_nng_private.h
+	rma_nng.c
+	rtable_nng_static.c
+
+Transport Agnostic:
+	ring_static.c
+	rt_generic_static.c
+	symtab.c
+	tools_static.c
+
+
+We assume that support for Nanomsg will be dropped at somepoint and 
+because of that we decided to completely separate the nng/nano code
+into self contained modules to make that deprecation easier, even
+though there is some duplication between the modules (and to avoid
+a sleu of ifdefs which just make the code impossible to read, and 
+lead to bugs).

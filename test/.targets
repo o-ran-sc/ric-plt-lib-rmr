@@ -1,0 +1,6 @@
+
+# Coverage target values for modules which are not expected to meet the
+# default standard. Lines are <module-name> <target-pct> with module name
+# starting in column 0; e.g.   ../src/common/src/foo.c 65
+
+# there are no alternate coverage targets at the moment

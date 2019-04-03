@@ -1,0 +1,11 @@
+# Target labels
+ nanomsg
+# Source files and their labels
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/CMakeFiles/nanomsg-build
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/CMakeFiles/nanomsg-build.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-build.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-configure.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-update.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-patch.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-download.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-mkdir.rule

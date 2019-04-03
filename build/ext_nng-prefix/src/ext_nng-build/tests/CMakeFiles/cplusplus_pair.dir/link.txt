@@ -1,0 +1,1 @@
+/usr/bin/c++    -Wall -Wextra -fno-omit-frame-pointer     CMakeFiles/cplusplus_pair.dir/cplusplus_pair.cc.o  -o cplusplus_pair -rdynamic ../libnng.so.1.1.0 -Wl,-rpath,/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build 

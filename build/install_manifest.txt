@@ -1,0 +1,13 @@
+/opt/5g/RMR/lib/librmr_nng.so
+/opt/5g/RMR/lib/librmr_nng.a
+/opt/5g/RMR/lib/librmr.so
+/opt/5g/RMR/lib/librmr.a
+/opt/5g/RMR/lib/libnanomsg.so
+/opt/5g/RMR/lib/libnanomsg.so.5
+/opt/5g/RMR/lib/libnanomsg.so.5.1.0
+/opt/5g/RMR/lib/libnng.so
+/opt/5g/RMR/lib/libnng.so.1
+/opt/5g/RMR/lib/libnng.so.1.1.0
+/opt/5g/RMR/include/rmr/rmr.h
+/opt/5g/RMR/include/rmr/rmr_symtab.h
+/opt/5g/RMR/include/rmr/RIC_message_types.h

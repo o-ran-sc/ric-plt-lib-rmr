@@ -1,0 +1,13 @@
+prefix=/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: nanomsg
+Description: High-Performance Scalability Protocols
+URL: http://nanomsg.org/
+Version: 1.1.5-1-ge40de97
+Requires:
+Libs: -L${libdir} -lnanomsg
+Libs.private: -lanl -lrt -lpthread -lnsl
+Cflags: -I${includedir}

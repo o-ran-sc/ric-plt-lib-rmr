@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/CMakeFiles/ext_nng"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/CMakeFiles/ext_nng.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/CMakeFiles/ext_nng-complete.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-install.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-mkdir.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-download.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-update.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-patch.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-configure.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-build.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-test.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"ext_nng"
+		],
+		"name" : "ext_nng"
+	}
+}

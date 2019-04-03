@@ -1,0 +1,1 @@
+/usr/bin/cc   -Wall -Wextra    CMakeFiles/timeo.dir/tests/timeo.c.o  -o timeo -rdynamic libnanomsg.so.5.1.0 -lanl -lrt -lpthread -lnsl -lpthread -Wl,-rpath,/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build 

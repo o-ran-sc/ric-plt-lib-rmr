@@ -1,0 +1,2 @@
+/usr/bin/ar qc librmr.a  src/nanomsg/CMakeFiles/nano_objects.dir/src/rmr.c.o src/common/CMakeFiles/common_objects.dir/src/symtab.c.o src/common/CMakeFiles/common_objects.dir/src/mbuf_api.c.o
+/usr/bin/ranlib librmr.a

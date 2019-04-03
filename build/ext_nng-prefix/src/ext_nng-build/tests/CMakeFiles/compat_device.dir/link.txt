@@ -1,0 +1,1 @@
+/usr/bin/cc   -Wall -Wextra -fno-omit-frame-pointer     CMakeFiles/compat_device.dir/compat_device.c.o CMakeFiles/compat_device.dir/compat_testutil.c.o  -o compat_device -rdynamic ../libnng.so.1.1.0 -Wl,-rpath,/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build 

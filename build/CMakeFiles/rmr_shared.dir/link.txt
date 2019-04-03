@@ -1,0 +1,1 @@
+/usr/bin/cc  -fPIC   -shared -Wl,-soname,librmr.so -o librmr.so src/nanomsg/CMakeFiles/nano_objects.dir/src/rmr.c.o src/common/CMakeFiles/common_objects.dir/src/symtab.c.o src/common/CMakeFiles/common_objects.dir/src/mbuf_api.c.o 

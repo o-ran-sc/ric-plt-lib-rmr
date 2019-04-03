@@ -1,0 +1,14 @@
+# Target labels
+ ext_nng
+# Source files and their labels
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/CMakeFiles/ext_nng
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/CMakeFiles/ext_nng.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/CMakeFiles/ext_nng-complete.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-install.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-mkdir.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-download.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-update.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-patch.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-configure.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-build.rule
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-stamp/ext_nng-test.rule

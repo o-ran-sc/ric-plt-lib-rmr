@@ -1,0 +1,37 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/CMakeFiles/nanomsg-build"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/CMakeFiles/nanomsg-build.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-build.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-configure.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-update.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-patch.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-download.rule"
+		},
+		{
+			"file" : "/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-stamp/nanomsg-mkdir.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"nanomsg"
+		],
+		"name" : "nanomsg-build"
+	}
+}

@@ -1,0 +1,1 @@
+/usr/bin/cc   -Wall -Wextra -fno-omit-frame-pointer     CMakeFiles/sock.dir/sock.c.o CMakeFiles/sock.dir/convey.c.o  -o sock -rdynamic ../libnng.so.1.1.0 -lpthread -Wl,-rpath,/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build 

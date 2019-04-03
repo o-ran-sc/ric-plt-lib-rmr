@@ -1,0 +1,1 @@
+/usr/bin/cc   -Wall -Wextra -fno-omit-frame-pointer     CMakeFiles/compat_options.dir/compat_options.c.o CMakeFiles/compat_options.dir/convey.c.o  -o compat_options -rdynamic ../libnng.so.1.1.0 -lpthread -Wl,-rpath,/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build 

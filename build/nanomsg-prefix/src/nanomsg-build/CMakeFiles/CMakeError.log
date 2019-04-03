@@ -1,0 +1,183 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_39487/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_39487.dir/build.make CMakeFiles/cmTC_39487.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_39487.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -Wall -Wextra     -o CMakeFiles/cmTC_39487.dir/CheckSymbolExists.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_39487
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_39487.dir/link.txt --verbose=1
+/usr/bin/cc   -Wall -Wextra      CMakeFiles/cmTC_39487.dir/CheckSymbolExists.c.o  -o cmTC_39487 -rdynamic 
+CMakeFiles/cmTC_39487.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0x16): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_39487.dir/build.make:97: recipe for target 'cmTC_39487' failed
+make[4]: *** [cmTC_39487] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_39487/fast' failed
+make[3]: *** [cmTC_39487/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+
+File /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_ecfcb/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_ecfcb.dir/build.make CMakeFiles/cmTC_ecfcb.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ecfcb.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -Wall -Wextra  -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_ecfcb.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_ecfcb
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ecfcb.dir/link.txt --verbose=1
+/usr/bin/cc   -Wall -Wextra  -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_ecfcb.dir/CheckFunctionExists.c.o  -o cmTC_ecfcb -rdynamic -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_ecfcb.dir/build.make:97: recipe for target 'cmTC_ecfcb' failed
+make[4]: *** [cmTC_ecfcb] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_ecfcb/fast' failed
+make[3]: *** [cmTC_ecfcb/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function gethrtime exists failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_dc969/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_dc969.dir/build.make CMakeFiles/cmTC_dc969.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_dc969.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -Wall -Wextra  -DCHECK_FUNCTION_EXISTS=gethrtime   -o CMakeFiles/cmTC_dc969.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_dc969
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_dc969.dir/link.txt --verbose=1
+/usr/bin/cc   -Wall -Wextra  -DCHECK_FUNCTION_EXISTS=gethrtime    CMakeFiles/cmTC_dc969.dir/CheckFunctionExists.c.o  -o cmTC_dc969 -rdynamic 
+CMakeFiles/cmTC_dc969.dir/CheckFunctionExists.c.o: In function `main':
+CheckFunctionExists.c:(.text+0x15): undefined reference to `gethrtime'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_dc969.dir/build.make:97: recipe for target 'cmTC_dc969' failed
+make[4]: *** [cmTC_dc969] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_dc969/fast' failed
+make[3]: *** [cmTC_dc969/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function kqueue exists failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_15e1f/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_15e1f.dir/build.make CMakeFiles/cmTC_15e1f.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_15e1f.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -Wall -Wextra  -DCHECK_FUNCTION_EXISTS=kqueue   -o CMakeFiles/cmTC_15e1f.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_15e1f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_15e1f.dir/link.txt --verbose=1
+/usr/bin/cc   -Wall -Wextra  -DCHECK_FUNCTION_EXISTS=kqueue    CMakeFiles/cmTC_15e1f.dir/CheckFunctionExists.c.o  -o cmTC_15e1f -rdynamic 
+CMakeFiles/cmTC_15e1f.dir/CheckFunctionExists.c.o: In function `main':
+CheckFunctionExists.c:(.text+0x15): undefined reference to `kqueue'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_15e1f.dir/build.make:97: recipe for target 'cmTC_15e1f' failed
+make[4]: *** [cmTC_15e1f] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_15e1f/fast' failed
+make[3]: *** [cmTC_15e1f/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function sem_wait exists in the rt failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_b32ea/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_b32ea.dir/build.make CMakeFiles/cmTC_b32ea.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b32ea.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -Wall -Wextra  -DCHECK_FUNCTION_EXISTS=sem_wait   -o CMakeFiles/cmTC_b32ea.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_b32ea
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b32ea.dir/link.txt --verbose=1
+/usr/bin/cc   -Wall -Wextra  -DCHECK_FUNCTION_EXISTS=sem_wait    CMakeFiles/cmTC_b32ea.dir/CheckFunctionExists.c.o  -o cmTC_b32ea -rdynamic -lrt 
+CMakeFiles/cmTC_b32ea.dir/CheckFunctionExists.c.o: In function `main':
+CheckFunctionExists.c:(.text+0x15): undefined reference to `sem_wait'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_b32ea.dir/build.make:97: recipe for target 'cmTC_b32ea' failed
+make[4]: *** [cmTC_b32ea] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_b32ea/fast' failed
+make[3]: *** [cmTC_b32ea/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function socket exists in the socket failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_f896c/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_f896c.dir/build.make CMakeFiles/cmTC_f896c.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f896c.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -Wall -Wextra  -DCHECK_FUNCTION_EXISTS=socket   -o CMakeFiles/cmTC_f896c.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_f896c
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f896c.dir/link.txt --verbose=1
+/usr/bin/cc   -Wall -Wextra  -DCHECK_FUNCTION_EXISTS=socket    CMakeFiles/cmTC_f896c.dir/CheckFunctionExists.c.o  -o cmTC_f896c -rdynamic -lsocket 
+/usr/bin/ld: cannot find -lsocket
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_f896c.dir/build.make:97: recipe for target 'cmTC_f896c' failed
+make[4]: *** [cmTC_f896c] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_f896c/fast' failed
+make[3]: *** [cmTC_f896c/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+
+
+Determining if the atomic_cas_32 exist failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_320b6/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_320b6.dir/build.make CMakeFiles/cmTC_320b6.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_320b6.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -Wall -Wextra     -o CMakeFiles/cmTC_320b6.dir/CheckSymbolExists.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:2:20: fatal error: atomic.h: No such file or directory
+compilation terminated.
+CMakeFiles/cmTC_320b6.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_320b6.dir/CheckSymbolExists.c.o' failed
+make[4]: *** [CMakeFiles/cmTC_320b6.dir/CheckSymbolExists.c.o] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_320b6/fast' failed
+make[3]: *** [cmTC_320b6/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp'
+
+File /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <atomic.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef atomic_cas_32
+  return ((int*)(&atomic_cas_32))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+

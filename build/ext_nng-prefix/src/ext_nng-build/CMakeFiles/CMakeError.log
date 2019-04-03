@@ -1,0 +1,407 @@
+Determining if the system is big endian passed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_3d97d/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_3d97d.dir/build.make CMakeFiles/cmTC_3d97d.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3d97d.dir/TestEndianess.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer      -o CMakeFiles/cmTC_3d97d.dir/TestEndianess.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/TestEndianess.c
+Linking C executable cmTC_3d97d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3d97d.dir/link.txt --verbose=1
+/usr/bin/cc   -Wall -Wextra -fno-omit-frame-pointer       CMakeFiles/cmTC_3d97d.dir/TestEndianess.c.o  -o cmTC_3d97d -rdynamic 
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+TestEndianess.c:
+/* A 16 bit integer is required. */
+typedef unsigned short cmakeint16;
+
+/* On a little endian machine, these 16bit ints will give "THIS IS LITTLE ENDIAN."
+   On a big endian machine the characters will be exchanged pairwise. */
+const cmakeint16 info_little[] =  {0x4854, 0x5349, 0x4920, 0x2053, 0x494c, 0x5454, 0x454c, 0x4520, 0x444e, 0x4149, 0x2e4e, 0x0000};
+
+/* on a big endian machine, these 16bit ints will give "THIS IS BIG ENDIAN."
+   On a little endian machine the characters will be exchanged pairwise. */
+const cmakeint16 info_big[] =     {0x5448, 0x4953, 0x2049, 0x5320, 0x4249, 0x4720, 0x454e, 0x4449, 0x414e, 0x2e2e, 0x0000};
+
+#ifdef __CLASSIC_C__
+int main(argc, argv) int argc; char *argv[];
+#else
+int main(int argc, char *argv[])
+#endif
+{
+  int require = 0;
+  require += info_little[argc];
+  require += info_big[argc];
+  (void)argv;
+  return require;
+}
+
+
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_e1dee/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_e1dee.dir/build.make CMakeFiles/cmTC_e1dee.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e1dee.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer      -o CMakeFiles/cmTC_e1dee.dir/CheckSymbolExists.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_e1dee
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e1dee.dir/link.txt --verbose=1
+/usr/bin/cc   -Wall -Wextra -fno-omit-frame-pointer       CMakeFiles/cmTC_e1dee.dir/CheckSymbolExists.c.o  -o cmTC_e1dee -rdynamic 
+CMakeFiles/cmTC_e1dee.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0x16): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_e1dee.dir/build.make:97: recipe for target 'cmTC_e1dee' failed
+make[4]: *** [cmTC_e1dee] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_e1dee/fast' failed
+make[3]: *** [cmTC_e1dee/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+File /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_d83a2/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_d83a2.dir/build.make CMakeFiles/cmTC_d83a2.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d83a2.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_d83a2.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_d83a2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d83a2.dir/link.txt --verbose=1
+/usr/bin/cc   -Wall -Wextra -fno-omit-frame-pointer   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_d83a2.dir/CheckFunctionExists.c.o  -o cmTC_d83a2 -rdynamic -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_d83a2.dir/build.make:97: recipe for target 'cmTC_d83a2' failed
+make[4]: *** [cmTC_d83a2] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_d83a2/fast' failed
+make[3]: *** [cmTC_d83a2/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function socket exists in the socket failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_39c23/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_39c23.dir/build.make CMakeFiles/cmTC_39c23.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_39c23.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer   -DCHECK_FUNCTION_EXISTS=socket   -o CMakeFiles/cmTC_39c23.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_39c23
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_39c23.dir/link.txt --verbose=1
+/usr/bin/cc   -Wall -Wextra -fno-omit-frame-pointer   -DCHECK_FUNCTION_EXISTS=socket    CMakeFiles/cmTC_39c23.dir/CheckFunctionExists.c.o  -o cmTC_39c23 -rdynamic -lsocket 
+/usr/bin/ld: cannot find -lsocket
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_39c23.dir/build.make:97: recipe for target 'cmTC_39c23' failed
+make[4]: *** [cmTC_39c23] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_39c23/fast' failed
+make[3]: *** [cmTC_39c23/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+
+Determining if the kqueue exist failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_4022e/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_4022e.dir/build.make CMakeFiles/cmTC_4022e.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_4022e.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer      -o CMakeFiles/cmTC_4022e.dir/CheckSymbolExists.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:2:23: fatal error: sys/event.h: No such file or directory
+compilation terminated.
+CMakeFiles/cmTC_4022e.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_4022e.dir/CheckSymbolExists.c.o' failed
+make[4]: *** [CMakeFiles/cmTC_4022e.dir/CheckSymbolExists.c.o] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_4022e/fast' failed
+make[3]: *** [cmTC_4022e/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+File /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <sys/event.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef kqueue
+  return ((int*)(&kqueue))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the port_create exist failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_8489b/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_8489b.dir/build.make CMakeFiles/cmTC_8489b.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_8489b.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer      -o CMakeFiles/cmTC_8489b.dir/CheckSymbolExists.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:2:18: fatal error: port.h: No such file or directory
+compilation terminated.
+CMakeFiles/cmTC_8489b.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_8489b.dir/CheckSymbolExists.c.o' failed
+make[4]: *** [CMakeFiles/cmTC_8489b.dir/CheckSymbolExists.c.o] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_8489b/fast' failed
+make[3]: *** [cmTC_8489b/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+File /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <port.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef port_create
+  return ((int*)(&port_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the getpeereid exist failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_ef1bb/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_ef1bb.dir/build.make CMakeFiles/cmTC_ef1bb.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ef1bb.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer      -o CMakeFiles/cmTC_ef1bb.dir/CheckSymbolExists.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: error: ‘getpeereid’ undeclared (first use in this function)
+   return ((int*)(&getpeereid))[argc];
+                   ^
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: note: each undeclared identifier is reported only once for each function it appears in
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:4:14: warning: parameter ‘argc’ set but not used [-Wunused-but-set-parameter]
+ int main(int argc, char** argv)
+              ^
+CMakeFiles/cmTC_ef1bb.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_ef1bb.dir/CheckSymbolExists.c.o' failed
+make[4]: *** [CMakeFiles/cmTC_ef1bb.dir/CheckSymbolExists.c.o] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_ef1bb/fast' failed
+make[3]: *** [cmTC_ef1bb/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+File /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef getpeereid
+  return ((int*)(&getpeereid))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Performing C SOURCE FILE Test NNG_HAVE_SOCKPEERCRED failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_4805e/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_4805e.dir/build.make CMakeFiles/cmTC_4805e.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_4805e.dir/src.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer   -DNNG_HAVE_SOCKPEERCRED   -o CMakeFiles/cmTC_4805e.dir/src.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/src.c
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/src.c:6:43: error: dereferencing pointer to incomplete type ‘struct sockpeercred’
+    (void)sizeof(((struct sockpeercred *)0)->uid);
+                                           ^
+CMakeFiles/cmTC_4805e.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_4805e.dir/src.c.o' failed
+make[4]: *** [CMakeFiles/cmTC_4805e.dir/src.c.o] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_4805e/fast' failed
+make[3]: *** [cmTC_4805e/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+Source file was:
+
+#include <sys/socket.h>
+
+int main()
+{
+   (void)sizeof(((struct sockpeercred *)0)->uid);
+   return 0;
+}
+
+Determining if the LOCAL_PEERCRED exist failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_1cad7/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_1cad7.dir/build.make CMakeFiles/cmTC_1cad7.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1cad7.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer      -o CMakeFiles/cmTC_1cad7.dir/CheckSymbolExists.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: error: ‘LOCAL_PEERCRED’ undeclared (first use in this function)
+   return ((int*)(&LOCAL_PEERCRED))[argc];
+                   ^
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: note: each undeclared identifier is reported only once for each function it appears in
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:4:14: warning: parameter ‘argc’ set but not used [-Wunused-but-set-parameter]
+ int main(int argc, char** argv)
+              ^
+CMakeFiles/cmTC_1cad7.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_1cad7.dir/CheckSymbolExists.c.o' failed
+make[4]: *** [CMakeFiles/cmTC_1cad7.dir/CheckSymbolExists.c.o] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_1cad7/fast' failed
+make[3]: *** [cmTC_1cad7/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+File /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <sys/un.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef LOCAL_PEERCRED
+  return ((int*)(&LOCAL_PEERCRED))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the getpeerucred exist failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_1d2f1/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_1d2f1.dir/build.make CMakeFiles/cmTC_1d2f1.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1d2f1.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer      -o CMakeFiles/cmTC_1d2f1.dir/CheckSymbolExists.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:2:19: fatal error: ucred.h: No such file or directory
+compilation terminated.
+CMakeFiles/cmTC_1d2f1.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_1d2f1.dir/CheckSymbolExists.c.o' failed
+make[4]: *** [CMakeFiles/cmTC_1d2f1.dir/CheckSymbolExists.c.o] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_1d2f1/fast' failed
+make[3]: *** [cmTC_1d2f1/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+File /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <ucred.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef getpeerucred
+  return ((int*)(&getpeerucred))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the strlcat exist failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_cd14c/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_cd14c.dir/build.make CMakeFiles/cmTC_cd14c.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_cd14c.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer      -o CMakeFiles/cmTC_cd14c.dir/CheckSymbolExists.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: error: ‘strlcat’ undeclared (first use in this function)
+   return ((int*)(&strlcat))[argc];
+                   ^
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: note: each undeclared identifier is reported only once for each function it appears in
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:4:14: warning: parameter ‘argc’ set but not used [-Wunused-but-set-parameter]
+ int main(int argc, char** argv)
+              ^
+CMakeFiles/cmTC_cd14c.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_cd14c.dir/CheckSymbolExists.c.o' failed
+make[4]: *** [CMakeFiles/cmTC_cd14c.dir/CheckSymbolExists.c.o] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_cd14c/fast' failed
+make[3]: *** [cmTC_cd14c/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+File /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <string.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strlcat
+  return ((int*)(&strlcat))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the strlcpy exist failed with the following output:
+Change Dir: /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_502e3/fast"
+make[3]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_502e3.dir/build.make CMakeFiles/cmTC_502e3.dir/build
+make[4]: Entering directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_502e3.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -Wall -Wextra -fno-omit-frame-pointer      -o CMakeFiles/cmTC_502e3.dir/CheckSymbolExists.c.o   -c /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: error: ‘strlcpy’ undeclared (first use in this function)
+   return ((int*)(&strlcpy))[argc];
+                   ^
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: note: each undeclared identifier is reported only once for each function it appears in
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:4:14: warning: parameter ‘argc’ set but not used [-Wunused-but-set-parameter]
+ int main(int argc, char** argv)
+              ^
+CMakeFiles/cmTC_502e3.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_502e3.dir/CheckSymbolExists.c.o' failed
+make[4]: *** [CMakeFiles/cmTC_502e3.dir/CheckSymbolExists.c.o] Error 1
+make[4]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_502e3/fast' failed
+make[3]: *** [cmTC_502e3/fast] Error 2
+make[3]: Leaving directory '/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp'
+
+File /home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <string.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strlcpy
+  return ((int*)(&strlcpy))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+

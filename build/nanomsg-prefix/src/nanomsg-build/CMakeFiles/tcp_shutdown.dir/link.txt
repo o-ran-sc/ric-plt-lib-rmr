@@ -1,0 +1,1 @@
+/usr/bin/cc   -Wall -Wextra    CMakeFiles/tcp_shutdown.dir/tests/tcp_shutdown.c.o  -o tcp_shutdown -rdynamic libnanomsg.so.5.1.0 -lanl -lrt -lpthread -lnsl -lpthread -Wl,-rpath,/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/nanomsg-prefix/src/nanomsg-build 

@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/ext/nng/include/nng/nng.h
+stdbool.h
+-
+stddef.h
+-
+stdint.h
+-
+
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/ext/nng/include/nng/protocol/pair1/pair.h
+
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/ext/nng/tests/cplusplus_pair.cc
+nng/nng.h
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/ext/nng/tests/nng/nng.h
+nng/protocol/pair1/pair.h
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/ext/nng/tests/nng/protocol/pair1/pair.h
+cstring
+-
+iostream
+-
+

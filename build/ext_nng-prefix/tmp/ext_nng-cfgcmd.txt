@@ -1,0 +1,1 @@
+cmd='/usr/bin/cmake;-DBUILD_SHARED_LIBS=1;-DCMAKE_INSTALL_PREFIX=/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build;-GUnix Makefiles;/home/asridharan/projects/ric-co/ric-plt/lib/rmr/ext/nng'

@@ -1,0 +1,2 @@
+/usr/bin/ar qc librmr_nng.a  src/nng/CMakeFiles/nng_objects.dir/src/rmr_nng.c.o src/common/CMakeFiles/common_objects.dir/src/symtab.c.o src/common/CMakeFiles/common_objects.dir/src/mbuf_api.c.o
+/usr/bin/ranlib librmr_nng.a

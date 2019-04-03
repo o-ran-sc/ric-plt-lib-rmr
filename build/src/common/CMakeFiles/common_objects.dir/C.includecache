@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../src/common/include/rmr.h
+
+../src/common/include/rmr_agnostic.h
+
+../src/common/include/rmr_symtab.h
+
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/src/common/src/mbuf_api.c
+stdlib.h
+-
+netdb.h
+-
+errno.h
+-
+string.h
+-
+unistd.h
+-
+rmr.h
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/src/common/src/rmr.h
+rmr_agnostic.h
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/src/common/src/rmr_agnostic.h
+
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/src/common/src/symtab.c
+stdio.h
+-
+unistd.h
+-
+string.h
+-
+stdlib.h
+-
+memory.h
+-
+rmr_symtab.h
+/home/asridharan/projects/ric-co/ric-plt/lib/rmr/src/common/src/rmr_symtab.h
+

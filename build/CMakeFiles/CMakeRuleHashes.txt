@@ -1,0 +1,23 @@
+# Hashes of file build rules.
+e92142797fd82eab4446a075e3b6e573 CMakeFiles/ext_nng
+e92142797fd82eab4446a075e3b6e573 CMakeFiles/ext_nng-build
+8b7ee82cdafd7ed41e7ef793e79ace70 CMakeFiles/ext_nng-complete
+e92142797fd82eab4446a075e3b6e573 CMakeFiles/nanomsg
+e92142797fd82eab4446a075e3b6e573 CMakeFiles/nanomsg-build
+eef3cb303bcdd244d82ff162721ec0e9 CMakeFiles/nanomsg-complete
+d0e296a43f17c0686cf6b21b2bed3086 ext_nng-prefix/src/ext_nng-stamp/ext_nng-build
+ff5c1ca878a240bea8a55dbca48e2d1f ext_nng-prefix/src/ext_nng-stamp/ext_nng-configure
+e409e15a312cd2c9b5e360a57ad1f94f ext_nng-prefix/src/ext_nng-stamp/ext_nng-download
+955f461f47fb2945df79cbffe8e45b06 ext_nng-prefix/src/ext_nng-stamp/ext_nng-install
+b116abe95756f1846fcebb14c612ce17 ext_nng-prefix/src/ext_nng-stamp/ext_nng-mkdir
+9d40881d27ad61c3a4c1cdf2ae94e947 ext_nng-prefix/src/ext_nng-stamp/ext_nng-patch
+fde95becce6a7bc699e15f04903ce8a1 ext_nng-prefix/src/ext_nng-stamp/ext_nng-test
+c51c380e819c0ee42476ef69f3ffc4d6 ext_nng-prefix/src/ext_nng-stamp/ext_nng-update
+f85a17d250bc37195d682e2dbd3db5e7 nanomsg-prefix/src/nanomsg-stamp/nanomsg-build
+9fe69465fa8e3567c797501be4fb01ac nanomsg-prefix/src/nanomsg-stamp/nanomsg-configure
+dfa34e0b9592f18ec5ed2be23dc6af35 nanomsg-prefix/src/nanomsg-stamp/nanomsg-download
+497ce2bff7e5adfeba7e623b79aeb520 nanomsg-prefix/src/nanomsg-stamp/nanomsg-install
+d7090cd22109aedc4c5bee801334c221 nanomsg-prefix/src/nanomsg-stamp/nanomsg-mkdir
+48a9088b6feef82d74eed87c0ab9b240 nanomsg-prefix/src/nanomsg-stamp/nanomsg-patch
+0f3258cd00f33be99aa8848fd89ce03c nanomsg-prefix/src/nanomsg-stamp/nanomsg-test
+81631a2b15a3737a2994e813349aa85f nanomsg-prefix/src/nanomsg-stamp/nanomsg-update

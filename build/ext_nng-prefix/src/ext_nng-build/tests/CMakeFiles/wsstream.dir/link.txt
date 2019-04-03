@@ -1,0 +1,1 @@
+/usr/bin/cc   -Wall -Wextra -fno-omit-frame-pointer     CMakeFiles/wsstream.dir/wsstream.c.o CMakeFiles/wsstream.dir/convey.c.o  -o wsstream -rdynamic ../libnng.so.1.1.0 -lpthread -Wl,-rpath,/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build 

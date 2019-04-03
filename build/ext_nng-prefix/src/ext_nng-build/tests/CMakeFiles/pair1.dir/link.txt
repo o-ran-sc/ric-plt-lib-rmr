@@ -1,0 +1,1 @@
+/usr/bin/cc   -Wall -Wextra -fno-omit-frame-pointer     CMakeFiles/pair1.dir/pair1.c.o CMakeFiles/pair1.dir/convey.c.o  -o pair1 -rdynamic ../libnng.so.1.1.0 -lpthread -Wl,-rpath,/home/asridharan/projects/ric-co/ric-plt/lib/rmr/build/ext_nng-prefix/src/ext_nng-build 
