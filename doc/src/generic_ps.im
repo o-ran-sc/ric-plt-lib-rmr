@@ -1,0 +1,75 @@
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia 
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+.** macros compatable with the roff/troff and rts imbed files
+.** this is included when generating postscript from the man source.
+
+	.hn off
+	.dv text_size 10p
+	.dv ex_size 8p
+	.dv text_font Helvetica
+	.dv ital_font Helvetica-Oblique
+	.dv bold_font Helvetica-Bold
+	.dv cw_font  Courier
+	.st &text_size
+	.sf &text_font
+	.dh 1 f=&bold_font p=12 e=no s=2,1 m=.5i i=0i
+	.dh 2 f=&bold_font p=12 s=1,.5 m=.5i i=0i
+	.dh 3 f=&bold_font p=12 s=1,0 m=.5i i=0i
+
+	.dv comment .** ignore
+	
+	.dv h1 .h1 $1
+	.dv h2 .h2 $1
+	.dv h3 .h3 $1
+	
+	.dv fig 
+	.dv set_font_cw .sf ^&cw_font
+	
+	.dv nf .nf
+	.dv fo .fo
+	
+	.dv line_len .ll $1
+	.dv space .sp 1
+	.dv half_space .sp .5
+	.dv beg_list .bl $1
+	.dv end_list .el
+	.dv beg_dlist .bd $1 $2
+	.dv end_dlist .ed
+	.dv ditem .di $1 ^:
+	.dv di .di $1 ^:
+	.dv li .li
+	
+	.dv ex_start .st ^&ex_size .sf ^&cw_font .nf
+	.dv ex_end .fo on .sf ^&text_font .st ^&text_size .sp 1
+	
+	.** fonts and font macros
+	.dv ital .tf ^&ital_font ^&text_size $1 ^:
+	.dv bold .tf ^&bold_font ^&text_size $1 ^:
+	.dv cw .tf ^&cw_font ^&text_size $1 ^:
+	.dv set_font_prop .sf ^&text_font
+	
+	.cd 1 6.5i
+	.ll 6i
+	.pn off
+	.ju on
+	.in .5i
+	
+	.dv indent .ll -0.5i .in +0.25i
+	.dv uindent .in -0.25i .ll +0.5i

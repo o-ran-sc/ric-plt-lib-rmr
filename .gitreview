@@ -1,0 +1,5 @@
+[gerrit]
+host=gerrit.ranco-dev-tools.eastus.cloudapp.azure.com
+port=29418
+project=ric-plt/lib/rmr
+defaultbranch=master
