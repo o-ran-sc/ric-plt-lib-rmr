@@ -1,0 +1,6 @@
+[submodule "ext/nng"]
+	path = ext/nng
+	url = https://github.com/nanomsg/nng.git
+[submodule "ext/nanomsg"]
+	path = ext/nanomsg
+	url = https://github.com/nanomsg/nanomsg.git

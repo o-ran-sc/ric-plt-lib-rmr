@@ -1,0 +1,416 @@
+#!/usr/bin/env ksh
+# this will fail if run with bash!
+
+#==================================================================================
+#        Copyright (c) 2019 Nokia 
+#        Copyright (c) 2018-2019 AT&T Intellectual Property.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#==================================================================================
+
+
+#
+#	Mnemonic:	unit_test.ksh
+#	Abstract:	Execute unit test(s) in the directory and produce a more 
+#				meaningful summary than gcov gives by default (exclude
+#				coverage  on the unit test functions).
+#
+#				Test files must be named *_test.c, or must explicitly be 
+#				supplied on the command line. Functions in the test
+#				files will not be reported on provided that they have
+#				their prototype (all on the SAME line) as:
+#					static type name() {
+#
+#				Functions with coverage less than 80% will be reported as 
+#				[LOW] in the output.  A file is considered to pass if the
+#				overall execution percentage for the file is >= 80% regardless
+#				of the number of functions that reported low.
+#
+#				Test programmes are built prior to execution. Plan-9 mk is
+#				the preferred builder, but as it's not widly adopted (sigh)
+#				make is assumed and -M will shift to Plan-9. Use -C xxx to 
+#				invoke a customised builder.
+#
+#				For a module which does not pass, we will attempt to boost
+#				the coverage by discounting the unexecuted lines which are
+#				inside of if() statements that are checking return from 
+#				(m)alloc() calls or are checking for nil pointers as these
+#				cases are likely impossible to drive. When discount testing
+#				is done both the failure message from the original analysis
+#				and a pass/fail message from the discount test are listed, 
+#				but only the result of the discount test is taken into 
+#				consideration with regard to overall success.
+#
+#	Date:		16 January 2018
+#	Author:		E. Scott Daniels
+# -------------------------------------------------------------------------
+
+function usage {
+	echo "usage: $0 [-G|-M|-C custom-command-string] [-c cov-target]  [-f] [-v]  [files]"
+	echo "  if -C is used to provide a custom build command then it must "
+	echo "  contain a %s which will be replaced with the unit test file name."
+	echo '  e.g.:  -C "mk -a %s"'
+	echo "  -c allows user to set the target coverage for a module to pass; default is 80"
+	echo "  -f forces a discount check (normally done only if coverage < target)"
+	echo "  -v will write additional information to the tty and save the disccounted file if discount run or -f given"
+}
+
+# read through the given file and add any functions that are static to the 
+# ignored list.  Only test and test tools files should be parsed.
+#
+function add_ignored_func {
+	if [[ ! -r $1 ]]
+	then
+		return
+	fi
+
+	typeset f=""
+	grep "^static.*(.*).*{" $1 | awk '		# get list of test functions to ignore
+		{ 
+			gsub( "[(].*", "" )
+			print $3
+		}
+	' | while read f
+	do
+		iflist+="$f "	
+	done
+}
+
+#
+#	Parse the .gcov file and discount any unexecuted lines which are in if() 
+#	blocks that are testing the result of alloc/malloc calls, or testing for
+#	nil pointers.  The feeling is that these might not be possible to drive
+#	and shoudn't contribute to coverage deficencies.
+#
+#	In verbose mode, the .gcov file is written to stdout and any unexecuted
+#	line which is discounted is marked with ===== replacing the ##### marking
+#	that gcov wrote.
+#
+#	The return value is 0 for pass; non-zero for fail.
+function discount_an_checks {
+	typeset f="$1"
+
+	mct=$( get_mct ${1%.gcov} )			# see if a special coverage target is defined for this
+
+	if [[ ! -f $1 ]]
+	then
+		if [[ -f ${1##*/} ]]
+		then
+			f=${1##*/} 
+		else
+			echo "cant find: $f"
+			return
+		fi
+	fi
+
+	awk -v module_cov_target=$mct \
+		-v full_name="${1}"  \
+		-v module="${f%.*}"  \
+		-v chatty=$verbose \
+	'
+	function spit_line( ) {
+		if( chatty ) {
+			printf( "%s\n", $0 )
+		}
+	}
+
+	/-:/ { 				# skip unexecutable lines
+		spit_line()
+		seq++					# allow blank lines in a sequence group
+		next 
+	}
+
+	{
+		nexec++			# number of executable lines
+	}
+
+	/#####:/ {
+		unexec++;
+		if( $2+0 != seq+1 ) {
+			prev_malloc = 0
+			prev_if = 0
+			seq = 0
+			spit_line()
+			next
+		}
+
+		if( prev_if && prev_malloc ) {
+			if( prev_malloc ) {
+				#printf( "allow discount: %s\n", $0 )
+				if( chatty ) {
+					gsub( "#####", "=====", $0 )
+				}
+				discount++;
+			}
+		}
+
+		seq++;;
+		spit_line()
+		next;
+	}
+
+	/if[(].*alloc.*{/ {			# if( (x = malloc( ... )) != NULL ) or if( (p = sym_alloc(...)) != NULL )
+		seq = $2+0
+		prev_malloc = 1
+		prev_if = 1
+		spit_line()
+		next
+	}
+
+	/if[(].* == NULL/ {				# a nil check likely not easily forced if it wasnt driven
+		prev_malloc = 1
+		prev_if = 1
+		spit_line()
+		seq = $2+0
+		next
+	}
+
+	/if[(]/ {
+		if( seq+1 == $2+0 && prev_malloc ) {		// malloc on previous line
+			prev_if = 1
+		} else {
+			prev_malloc = 0
+			prev_if = 0
+		}
+		spit_line()
+		next
+	}
+
+	/alloc[(]/ {
+		seq = $2+0
+		prev_malloc = 1
+		spit_line()
+		next
+	}
+
+	{ 
+		spit_line()
+	}
+
+	END {
+		net = unexec - discount
+		orig_cov = ((nexec-unexec)/nexec)*100		# original coverage
+		adj_cov = ((nexec-net)/nexec)*100			# coverage after discount
+		pass_fail = adj_cov < module_cov_target ? "FAIL" : "PASS"
+		rc = adj_cov < module_cov_target ? 1 : 0
+		if( chatty ) {
+			printf( "[%s] %s executable=%d unexecuted=%d discounted=%d net_unex=%d  cov=%d% ==> %d%%%  target=%d%%\n", 
+				pass_fail, full_name ? full_name : module, nexec, unexec, discount, net, orig_cov, adj_cov, module_cov_target )
+		} else {
+			printf( "[%s] %d%% (%d%%) %s\n", pass_fail, adj_cov, orig_cov, full_name ? full_name : module )
+		}
+
+		exit( rc )
+	}
+	' $f
+}
+
+# Given a file name ($1) see if it is in the ./.targets file. If it is 
+# return the coverage listed, else return (echo)  the default $module_cov_target
+#
+function get_mct {
+	typeset v=$module_cov_target
+
+	if [[ -f ./.targets ]]
+	then
+		grep "^$1 " ./.targets | head -1 | read junk tv
+	fi
+
+	echo ${tv:-$v}
+}
+
+
+# ------------------------------------------------------------------------
+
+export C_INCLUDE_PATH="../src/common/include"
+
+module_cov_target=80
+builder="make -B %s"		# default to plain ole make
+verbose=0
+trigger_discount_str="FAIL"
+
+while [[ $1 == "-"* ]]
+do
+	case $1 in 
+		-C)	builder="$2"; shift;;		# custom build command
+		-G)	builder="gmake %s";;
+		-M)	builder="mk -a %s";;		# use plan-9 mk (better, but sadly not widly used)
+
+		-c)	module_cov_target=$2; shift;;
+		-f)	force_discounting=1; 
+			trigger_discount_str="FAIL|PASS"		# check all outcomes for each module
+			;;
+
+		-v)	(( verbose++ ));;
+
+		-h) 	usage; exit 0;;
+		--help) usage; exit 0;;
+		-\?) 	usage; exit 0;;
+
+		*)	echo "unrecognised option: $1" >&2
+			usage >&2
+			exit 1
+			;;
+	esac
+
+	shift
+done
+
+if [[ -z $1 ]]
+then
+	flist=""
+	for tfile in *_test.c
+	do
+		flist+="$tfile "
+	done
+else
+	flist="$@"
+fi
+
+errors=0
+for tfile in $flist
+do
+	echo "$tfile --------------------------------------"
+	bcmd=$( printf "$builder" "${tfile%.c}" )
+	if ! $bcmd >/tmp/PID$$.log 2>&1
+	then
+		echo "[FAIL] cannot build $tfile"
+		cat /tmp/PID$$.log
+		rm -f /tmp/PID$$
+		exit 1
+	fi
+
+	iflist="main sig_clean_exit "		# ignore external functions from our tools
+	add_ignored_func $tfile				# ignore all static functions in our test driver
+	add_ignored_func test_support.c		# ignore all static functions in our test tools
+	
+	if ! ${tfile%.c} >/tmp/PID$$.log 2>&1
+	then
+		echo "[FAIL] unit test failed for: $tfile"
+		cat /tmp/PID$$.log
+		continue
+	fi
+
+	(
+		touch ./.targets
+		sed '/^#/ d; /^$/ d; s/^/TARGET: /' ./.targets
+		gcov -f ${tfile%.c} | sed "s/'//g" 
+	) | awk \
+		-v ignore_list="$iflist" \
+		-v module_cov_target=$module_cov_target \
+		-v chatty=$verbose \
+		'
+		BEGIN {
+			nignore = split( ignore_list, ignore, " " )
+			for( i = 1; i <= nignore; i++ ) {
+				imap[ignore[i]] = 1
+			}
+
+			exit_code = 0		# assume good
+		}
+
+		/^TARGET:/ {
+			if( NF > 1 ) {
+				target[$2] = $NF
+			}
+			next;
+		}
+
+		/File.*_test/ || /File.*test_/ {		# dont report on test files
+			skip = 1
+			file = 1
+			fname = $2
+			next
+		}
+
+		/File/ {
+			skip = 0
+			file = 1
+			fname = $2
+			next
+		}
+
+		/Function/ {
+			fname = $2
+			file = 0
+			if( imap[fname] ) {
+				fname = "skipped: " fname		# should never see and make it smell if we do
+				skip = 1
+			} else {
+				skip = 0
+			}
+			next
+		}
+
+		skip { next }
+
+		/Lines executed/ {
+			split( $0, a, ":" )
+			pct = a[2]+0
+
+			if( file ) {
+				if( target[fname] ) {
+					mct = target[fname] 
+				} else {
+					mct = module_cov_target
+				}
+				if( chatty ) {
+					printf( "[INFO] target coverage for %s is %d%%\n", fname, mct )
+				}
+				if( pct < mct ) {
+					printf( "[FAIL] %3d%% %s\n\n", pct, fname )	# CAUTION: write only 3 things  here
+					exit_code = 1
+				} else {
+					printf( "[PASS] %3d%% %s\n\n", pct, fname )
+				}
+			} else {
+				if( pct < 80 ) {
+					printf( "[LOW]  %3d%% %s\n", pct, fname )
+				} else {
+					printf( "[OK]   %3d%% %s\n", pct, fname )
+				}
+			}
+		}
+
+		END {
+			exit( exit_code )
+		}
+	' >/tmp/PID$$.log					# capture output to run discount on failures
+	rc=$?
+	cat /tmp/PID$$.log
+	if (( rc  || force_discounting )) 	# didn't pass, or forcing, see if discounting helps
+	then
+		egrep "$trigger_discount_str"  /tmp/PID$$.log | while read state junk  name
+		do
+			echo "[INFO] checking to see if discounting improves coverage for $name"
+			if ! discount_an_checks $name.gcov >/tmp/PID$$.disc
+			then
+				(( errors++ ))
+			fi
+			tail -1 /tmp/PID$$.disc
+			if (( verbose )) 			# updated file was generated, keep here
+			then
+				echo "[INFO] discounted coverage info in: ${tfile##*/}.dcov"
+				mv /tmp/PID$$.disc ${tfile##*/}.dcov
+			fi
+		done
+	fi
+done
+
+rm -f /tmp/PID$$.*
+if (( errors ))
+then
+	exit 1
+fi
+exit 0
+

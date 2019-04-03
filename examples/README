@@ -1,0 +1,6 @@
+
+This directory contains a few sample programmes which demonstrate
+various aspects of how a user programme can use RMr to send
+and/or receive messages.  These programmes are fairly simple
+in nature, and in most cases error checking is not performed
+to keep the code simple.  

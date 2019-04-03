@@ -1,0 +1,14 @@
+
+The common modules are mostly static functions which are included
+directly by the main API modules (rmr.c and rmr_nng.c). The 
+static approach is to isolate them from the user application. Code
+is reused as though it were linked from a library, but is only
+available to our code. 
+
+Wormholes was designed to be compiled on its own and included 
+in the library as it contains the wormhole API functions, however
+Cmake seems unable to generate (easily) two, differently named,
+object modules from the same source, so we resort to including
+it directly as though it were a static module. The symtab code
+is a standalone compile, and is also available to the user 
+application.

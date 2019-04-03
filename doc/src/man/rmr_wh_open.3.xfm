@@ -1,0 +1,131 @@
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia 
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+.if false
+	Mnemonic	rmr_wh_open.xfm
+	Abstract	The manual page for the rmr_wh_open function.
+	Author		E. Scott Daniels
+	Date		20 February 2019
+.fi
+
+.** if formatting with tfm, the roff.im will cause roff output to be generated
+.** if formatting with pfm, then pretty postscript will be generated
+.gv e LIB lib
+.if pfm
+	.im &{lib}/generic_ps.im
+.ei
+	.gv e OUTPUT_RST use_rst
+	.if .ev &use_rst 1 = 
+		.im &{lib}/rst.im
+	.ei
+		.im &{lib}/roff.im
+	.fi
+.fi
+
+&line_len(6i)
+
+&h1(RMR Library Functions)
+&h2(NAME)
+	rmr_wh_open
+
+&h2(SYNOPSIS)
+&indent
+&ex_start
+#include <rmr/rmr.h>
+
+void* rmr_open( void* vctx, char* target )
+&ex_end
+
+&uindent
+
+&h2(DESCRIPTION)
+The &cw(rmr_wh_open) function creates a direct link for sending, a wormhole, to another
+RMr based process.
+Sending messages through a wormhole requires that the connection be established overtly
+by the user application (via this function), and that the ID returned by &cw(rmr_wh_open)
+be passed to the &cw(rmr_wh_send_msg) function.
+
+&space
+&ital(Target) is the &ital(name:port,) or &ital(IP-address:port,) combination of the 
+processess that the wormhole should be connected to.  
+&ital(Vctx) is the RMr void context pointer that was returned by the &cw(rmr_init) function.
+
+&space
+When invoked, this function immediatly attempts to connect to the target process. 
+If the connection cannot be established, an error is returned to the caller, and no 
+direct messages can be sent to the target. 
+Once a wormhole is connected, the underlying transport mechanism (e.g. NNG) will provide
+reconnects should the connection be lost, however the handling of messages sent when
+a connection is broken is undetermined as each underlying transport mechanism may handle
+buffering and retries differently.
+
+
+&h2(RETURN VALUE)
+The &cw(rmr_wh_open) function returns a type &cw(rmr_whid_t) which must be passed to 
+the &cw(rmr_wh_send_msg) function when sending a message. 
+The id may also be tested to determine success or failure of the connection by
+using the RMR_WH_CONNECTED macro and passing the ID as the parameter; a result of 
+1 indicates that the connection was esablished and that the ID is valid.
+
+&h2(ERRORS)
+The following error values are specifically set by this RMR function. In some cases the
+error message of a system call is propagated up, and thus this list might be incomplete.
+
+&beg_dlist(.75i : ^&bold_font )
+&di(EINVAL) A parameter passed was not valid.
+&di(EACCESS) The user applicarion does not have the ability to establish a wormhole to the
+		indicated target (or maybe any target).
+&di(ECONNREFUSED) The connection was refused.
+&end_dlist
+
+&h2(EXAMPLE)
+&ex_start
+   void*  rmc;
+   rmr_whid_t wh;
+
+   rmc = rmr_init( "43086", 4096, 0 ); // init context
+   wh = rmr_open( rmc, "localhost:6123" );
+   if( !RMR_WH_CONNECTED( wh ) ) { 
+	 fprintf( stderr, "unable to connect wormhole: %s\n",
+             strerror( errno ) );
+   }
+&ex_end
+
+&h2(SEE ALSO )
+rmr_alloc_msg(3),
+rmr_call(3),
+rmr_free_msg(3),
+rmr_get_rcvfd(3),
+rmr_payload_size(3),
+rmr_send_msg(3),
+rmr_rcv_msg(3),
+rmr_rcv_specific(3),
+rmr_rts_msg(3),
+rmr_ready(3),
+rmr_fib(3),
+rmr_has_str(3),
+rmr_tokenise(3),
+rmr_mk_ring(3),
+rmr_ring_free(3),
+rmr_wh_send_msg(3),
+rmr_wh_close(3)
+
+
+.qu
+
