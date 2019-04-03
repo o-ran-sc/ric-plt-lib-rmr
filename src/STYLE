@@ -1,0 +1,126 @@
+
+Coding conventions/style for the ricmsg library.
+
+Line width
+A hard line width will not be enforced, but a soft maximum of 150
+characters is preferred.
+
+
+Indention
+Indention is with TABS. Tab width is 4. Please ensure the line
+		// :vi ts=4 sw=4 noet:
+is include in any new source file.
+	
+
+Comments
+A "two column" approach is preferred so as to prevent small comments from
+disrupting the "flow" of the logic; for example:
+
+	switch( *(tokens[0]) ) {
+		case 'n':												// newrt|{start|end}
+			if( strcmp( tokens[1], "end" ) == 0 ) {				// wrap up the table we were building
+				if( nrt ) {
+					uta_rt_drop( ctx->old_rtable );				// time to drop one that was previously replaced
+					ctx->old_rtable = ctx->rtable;				// currently active becomes old and allowed to 'drain'
+					ctx->rtable = nrt;							// one we've been adding to becomes active
+					nrt = NULL;
+				} else {
+					nrt = NULL;
+				}
+			} else {											// start a new table.
+				if( nrt != NULL ) {								// one in progress?  this forces it out
+					uta_rt_drop( nrt );
+				}	
+
+Comment Blocks
+Major sections of code may be commented with multi-line blocks. These comments
+should be enclosed in /* and */, indented to match the current top line of the block.
+Each line should NOT contain a leading * or #, and a row of dashes at the top
+and bottom should only be used for critical comments.  For example:
+
+	/*
+		Return true if routing table is initialised etc. and app can send/receive.
+	*/
+
+Function Headers
+All functions should have a header comment block which describes:
+	- the purpose of the function
+	- any non-obvious parameters
+	- parameter limits/values where applicable
+	- general caution or warning statement to future programmers
+
+
+Parenthesess and Brackets
+When parentheses are used on function calls, if and while statements, there should be
+a single space between the opening paraen and first token, and a similar space 
+between the end of the last token and the closing paren; this makes the code easier
+to read in a monochrome environment. 
+
+Parentheses used for expressions and type casting should abutt the tokens in the expression, 
+and further helps to make the code readable when an expression is used in an if/while. 
+To illustrate:
+
+	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {		// this is readable
+	if((ctx=(uta_ctx_t *)vctx) == NULL) {			// this is not
+
+Opening parens should NOT be separated from the function or keyword token; 'if(' not 
+'if ('.
+
+Return is NOT a function, and thus the return value should NOT be placed in parens.
+
+
+Curly Brace Enclosed Blocks
+Go's enforced curly brace policy actually makes senes, so that is used here. The bodies 
+of ALL if statements, even when just a single line, are to be enclosed in curly braces. 
+Further, curly braces are placed on the same line as the if and else tokens.  The final 
+closing curly brace is aligned with the corresponding if. For example:
+
+	if( key_len < 10 ) {					// TESTING -- use dummy seed function as nn_rcv likley never to find a publisher
+		mlen = dummy_nn_rtg_rcv( mbuf );	// TESTING ONLY -- get a seed table
+		key_len = 16;						// after seeding, we can wait
+	} else {
+       	mlen = nn_recv( nn_sock, mbuf, sizeof( mbuf )-1, 0 );		// blocks until next buffer
+	}
+
+Functions
+Function types should be placed on the same line as the function name as this allows
+for simple generation of prototype statements in the header files.
+
+Variable Declaration and Type Specification
+C's variable declaration opens the programmer to a world of accdental maintence bugs
+when multple varlables are defined using a comma operator.  Therefore, one variable 
+definition, per line is to be used here.  Further, pointer types are to be declared 
+as 'type* var'  rather than 'type *var' because the variable type is a pointer and
+declaring it this way envforces it.  Yes, this can lead to issues as 'int* k,n'
+isn't what you probalby want, but is exactly why using multiple declarations on a
+single line is considered bad.  Again, Go's approach to variable declaration got 
+this correct.
+
+When declaring types (typedef) the preferred convention is to add "_t" to the type 
+name; e.g. msg_t.   On the other hand, variable names should NOT indicate the type
+(state_b is wrong as state might not always be boolean).
+
+All variables for a function should be declared at the TOP of the function. This makes
+maintenence easier, and modern compilers are good at allocating variables as they 
+enter/leave scope, so there is no reason to allocate variables "script style".
+It is also wise to initialise all variables at allocation; use your best judgement.
+
+Camel Case
+Sucks; use underbars.  
+	This_is_easy_to_read
+	ThisIsNotEasyToRead
+
+External names and contants
+All outward facing external names and constants will begin with rmr_ or RMR_ as approprate.
+
+
+Mk and Makefile confentions
+Not much here other than there should be 2 "cleanup" rules: clean and nuke. Clean should
+remove all intermediate files, leaving desired output (libraries, .ps or .pdf files). The
+nuke rule should remove everything that can be built including libraries, binaries, .pdf
+files etc.
+
+Mk is preferred as the recipes are easier to define and maintain (no silly end of line
+continuation, mkfile variables are passed, etc.).  However, both mkfiles and Makefiles 
+should be created so as not to require mk.  Yes this is duplicate work, and dropping 
+make support is certainly acceptable :)

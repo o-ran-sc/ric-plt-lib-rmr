@@ -1,0 +1,82 @@
+
+Unit test
+
+The means to unit testing the RMr library is contained in
+this directory.  It is somewhat difficult to accurately generate
+coverage information for parts of the library because the library
+is a fair amount of static functions (to keep them from being
+visible to the user programme).  
+
+To run the tests:
+	ksh unit_test.sh [specific-test]
+
+If a specific test (e.g. ring_test.c) is not given on the command line,
+all *_test.c files are sussed out and an attempt to build and run them
+is made by the script. 
+
+Output is an interpretation of the resulting gcov output (in more useful
+and/or easier to read format).  For example:
+
+unit_test.ksh ring_test.c
+ring_test.c --------------------------------------
+[OK]   100% uta_ring_insert
+[OK]   100% uta_ring_extract
+[OK]   100% uta_ring_free
+[LOW]   76% uta_mk_ring
+[PASS]  91% ../src/common/src/ring_static.c
+
+
+The output shows, for each function, the coverage (column 2) and an 
+interpretation (ok or low) wthin an overall pass or fail.
+
+
+File Names
+The unit test script will find all files named *_test.c and assume that
+they can be compiled and executed using the local Makefile. Files
+which are needed by these programmes (e.g. common functions) are expected
+to reside in this directory as test_*.c and test_*.h files and should 
+be directly included by the test programmes (not built and linked). This 
+allows the unit test script to isngore the functions, and files, when 
+generating coverage reports. 
+
+
+Discounting
+The unit test script makes a discount pass on low coverage files in
+attempt to discount the coverage rate by ignoring what are considered
+to be difficult to reach blocks in the code.  Currently, these blocks
+are limited to what appear to be tests for memory allocation, failure
+and/or nil pointer handling.  If code blocks of this sort are found,
+they are not counted against the coverage for the module.  If the -v
+option is given, an augmented coverage listing is saved in .dcov which
+shows the discounted lines with a string of equal signs (====) rather
+than the gcov hash string (###).
+
+The discount check is applied only if an entire module has a lower 
+than accepted coverage rate, and can be forced for all modules with 
+the -f option.
+
+To illustrate, the following code checks the return from the system
+library strdup() call which is very unlikely to fail under test without
+going to extremes and substituting for the system lib.  Thus, the 
+block which checks for a nil pointer has been discounted:
+
+     -:  354:
+     1:  355:    dbuf = strdup( buf );
+     1:  356:    if( dbuf == NULL  ) {
+ =====:  357:        errno = ENOMEM;
+ =====:  358:        return 0;
+     -:  359:    }
+
+
+Target Coverage
+By default, a target coverage of 80% is used. For some modules this may
+be impossible to achieve, so to prevent always failing these modules 
+may be listed in the .targets file with their expected minimum coverage.
+Module names need to be qualified (e.g. ../src/common/src/foo.c.
+
+
+-----------------------------------------------------------------------
+A note about ksh (A.K.A Korn shell, or kshell)
+Ksh is preferred for more complex scripts such as the unit test 
+script as it does not have some of the limitations that bash
+(and other knock-offs) have. 

@@ -1,0 +1,4 @@
+*.gcov
+*.dcov
+*.gcno
+*.gcda

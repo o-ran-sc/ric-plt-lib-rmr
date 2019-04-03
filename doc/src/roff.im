@@ -1,0 +1,78 @@
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia 
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+.if false
+	Mnemonic:	troff.im
+	Abstract:	This file provides macros allowing {X}fm source to generate
+				troff input from {X}fm source when the doc is passed through
+				tfm, and to generate postscirpt output when passed through 
+				pfm. About the only real use of this is to be able to maintain
+				manual pages in the more easily read {X}fm source format.
+
+	Author:		E. Scott Daniels
+	Date:		27 January 2019
+
+		Some roff information was gleanded from this page:
+		http://cmd.inp.nsk.su/old/cmd2/manuals/unix/UNIX_Unleashed/ch08.htm
+.fi
+
+.if tfm
+	.** assume that we're generating roff output when tfm is used. These macros
+	.** convert {X}fm input into troff.
+	
+	.dv h1 .sp 1 ^&bold($1) .br  ^&space
+	.dv h2 .sp 1 ^&bold($1) .br ^&space
+	.dv h3 .sp 1 ^&bold($1) .br ^&space
+	
+	.dv fig 
+	.dv set_font_cw .br ^^.ft CW
+	
+	.dv nf ^^.nf .br .nf
+	.dv fo .fo ^^.fi  .br
+	
+	.dv line_len ^^.ll $1
+	.dv space .br ^^.sp 1 .br
+	.dv half_space .br ^^.sp 1 .br
+	.dv beg_list
+	.dv end_list
+	.dv beg_dlist .dv udi -$1 ^: ^^.in +$1 .br ^^.sp 1 .br
+	.dv end_dlist .br ^^.in &udi .br
+	.dv ditem ^^.ti ^&udi  .br ^&space .br \fB$1\fR .br
+	.dv item ^&space \(bu
+	.** .dv di ^&ditem
+	.dv di ^^.ti ^&udi  .br ^&space .br \fB$1\fR .br
+	
+	.dv ex_start ^^.IP .br ^^.nf .br ^^.ft CW .br .nf
+	.dv ex_end .fo on .br ^^.ft P .br ^^.fi .br ^&space
+	
+	.** fonts and font macros
+	.dv ital \fI$1\fR
+	.dv bold \fB$1\fR
+	.dv cw \f(CW$1\fP
+	.dv set_font_prop .br ^^.ft P
+	
+	.ju off
+	.in 0
+	
+	.dv indent ^^.ll -0.5i &space ^^.in +0.25i
+	.dv uindent ^^.in -0.25i &space ^^.ll +0.5i
+.ei
+	.** for postscript output we just pass through to pfm commands
+	.im generic_ps.im
+.fi

@@ -1,0 +1,158 @@
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia 
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+.if false
+	Mnemonic	rmr_support_man.xfm
+	Abstract	The manual page for the rmr_ functions that support the library
+				and are available to support other applications such as the route
+				table generator, but are not directly related to message sending
+				and receiving.  These "second class" functions therefore are 
+				likely not to need a dedicated man page, so we lump them all
+				here.
+	Author		E. Scott Daniels
+	Date		28 January 2019
+.fi
+
+.** if formatting with tfm, the roff.im will cause roff output to be generated
+.** if formatting with pfm, then pretty postscript will be generated
+.gv e LIB lib
+.if pfm
+	.im &{lib}/generic_ps.im
+.ei
+	.gv e OUTPUT_RST use_rst
+	.if .ev &use_rst 1 = 
+		.im &{lib}/rst.im
+	.ei
+		.im &{lib}/roff.im
+	.fi
+.fi
+
+&line_len(6i)
+
+&h1(RMR Library Functions)
+&h2(NAME)
+	RMR support functions
+
+&h2(SYNOPSIS )
+&indent
+&ex_start
+#include <rmr/rmr.h>
+#include <rmr/ring_inline.h>
+
+char* rmr_fib( char* fname );
+int rmr_has_str( char const* buf, char const* str, char sep, int max );
+int rmr_tokenise( char* buf, char** tokens, int max, char sep );
+void* rmr_mk_ring( int size );
+void rmr_ring_free( void* vr );
+
+static inline void* rmr_ring_extract( void* vr )
+static inline int rmr_ring_insert( void* vr, void* new_data )
+&ex_end
+&uindent
+
+&h2(DESCRIPTION)
+These functions support the RMR library, and are made available to user applications
+as some (e.g. route table generators) might need and/or want to make use of them.
+
+
+
+The &cw(rmr_fib) function accepts a file name and reads the entire file into a single buffer.
+The intent is to provide an easy way to load a static route table without a lot of 
+buffered I/O hoops.
+
+&space
+The &cw(rmr_has_str) function accepts a &ital(buffer) containing a set of delimited tokens (e.g. foo,bar,goo)
+and returns true if the target string, &ital(str,) matches one of the tokens.
+The &ital(sep) parameter provides the separation character in the buffer (e.g a comma)
+and &ital(max) indicates the maximum number of tokens to split the buffer into
+before checking.
+
+&space
+The &cw(rmr_tokenise) function is a simple tokeniser which splits &ital(buf) into tokens
+at each occurrence of &ital(sep). 
+Multiple occurrences of the separator character (e.g. a,,b) result in a nil token.
+Pointers to the tokens are placed into the &ital(tokens) array provided by the caller which
+is assumed to have at least enough space for &ital(max) entries.
+
+&space
+The &cw(rmr_mk_ring) function creates a buffer ring with &ital(size) entries.
+
+&space
+The &cw(rmr_ring_free) function accepts a pointer to a ring context and frees the associated memory.
+
+&space
+The &cw(rmr_ring_insert) and &cw(rmr_ring_extract) functions are provided as static inline functions
+via the &ital(rmr/ring_inline.h) header file.
+These functions both accept the ring &ital(context) returned by &cw(mk_ring,) and either insert a 
+pointer at the next available slot (tail) or extract the data at the head.
+
+&h2(RETURN VALUES)
+The following are the return values for each of these functions.
+
+&space
+The &cw(rmr_fib) function returns a pointer to the buffer containing the contents of the 
+file.  
+The buffer is terminated with a single nil character (0) making it a legitimate C string.
+If the file was empty or nonexistent, a buffer with an immediate nil character. 
+If it is important to the calling programme to know if the file was empty or did not exist, 
+the caller should use the system stat function call to make that determination.
+
+&space
+The &cw(rmr_has_str) function returns 1 if &ital(buf) contains the token referenced by &ita(str,)
+and false (0) if it does not.
+On error, a -1 value is returned and &cw(errno) is set accordingly.
+
+&space
+The &cw(rmr_tokenise) function returns the actual number of token pointers placed into &ital(tokens)
+
+&space
+The &cw(rmr_mk_ring) function  returns a void pointer which is the &ital(context) for the ring.
+
+&space
+The &cw(rmr_ring_insert) function returns 1 if the data was successfully inserted into the ring, and
+0 if the ring is full and the pointer could not be deposited.
+
+&space
+The &cw(rmr_ring_extract) will return the data which is at the head of the ring, or NULL if the 
+ring is empty.
+
+&h2(ERRORS)
+Not many of these functions set the value in &cw(errno,) however the value may be one of the following:
+&beg_dlist(.75i : ^&bold_font )
+&di(INVAL) Parameter(s) passed to the function were not valid.
+&end_dlist
+
+&h2(EXAMPLE)
+
+&h2(SEE ALSO )
+.ju off
+rmr_alloc_msg(3),
+rmr_call(3),
+rmr_free_msg(3),
+rmr_init(3),
+rmr_payload_size(3),
+rmr_send_msg(3),
+rmr_rcv_msg(3),
+rmr_rcv_specific(3),
+rmr_rts_msg(3),
+rmr_ready(3),
+.ju on
+
+
+.qu
+
