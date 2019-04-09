@@ -24,7 +24,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "1" )
 set( minor_version "0" )
-set( patch_level "15" )
+set( patch_level "16" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_lib "lib" )

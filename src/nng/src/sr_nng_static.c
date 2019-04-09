@@ -230,7 +230,7 @@ static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  ) {
 	nm->payload = nm->header + sizeof( uta_mhdr_t );		// point past header to payload (single buffer allocation above)
 	nm->xaction = ((uta_mhdr_t *)nm->header)->xid;			// point at transaction id in header area
 	nm->state = old_msg->state;								// fill in caller's state (likely the state of the last operation)
-	nm->flags |= MFL_ZEROCOPY;								// this is a zerocopy sendable message
+	nm->flags = old_msg->flags | MFL_ZEROCOPY;				// this is a zerocopy sendable message
 
 	memcpy( ((uta_mhdr_t *)nm->header)->src, ((uta_mhdr_t *)old_msg->header)->src, RMR_MAX_SID );
 	memcpy( nm->payload, old_msg->payload, old_msg->len );

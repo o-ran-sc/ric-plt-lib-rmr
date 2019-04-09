@@ -92,7 +92,7 @@ static void* rtc( void* vctx ) {
 	int		state;						// processing state of some nng function
 	char*	tokens[128];
 	char	wbuf[128];
-	char*	pbuf;
+	char*	pbuf = NULL;
 	int		pbuf_size = 0;				// number allocated in pbuf
 	int		ntoks;
 	int		raw_interface = 1;			// rtg is using raw NNG/Nano not RMr to send updates
@@ -183,8 +183,12 @@ static void* rtc( void* vctx ) {
 				if( pbuf ) {
 					free( pbuf );
 				}
-				pbuf = (char *) malloc( sizeof( char ) * mlen *2 );
-				pbuf_size = mlen * 2;
+				if( mlen < 512 ) {
+					pbuf_size = 512;
+				} else {
+					pbuf_size = mlen * 2;
+				}
+				pbuf = (char *) malloc( sizeof( char ) * pbuf_size );
 			}
 			memcpy( pbuf, payload, mlen );
 			pbuf[mlen] = 0;										// don't depend on sender making this a legit string
