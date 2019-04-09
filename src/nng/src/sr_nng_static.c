@@ -131,8 +131,9 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 	}
 
 	msg->header = nng_msg_body( msg->tp_buf );
-	hdr = (uta_mhdr_t *) msg->header;
-	hdr->rmr_ver = RMR_MSG_VER;								// version info should we need to recognised old style messages someday
+	if( (hdr = (uta_mhdr_t *) msg->header) != NULL ) {
+		hdr->rmr_ver = RMR_MSG_VER;								// version info should we need to recognised old style messages someday
+	}
 	msg->len = 0;											// length of data in the payload
 	msg->alloc_len = mlen;									// length of allocated payload
 	msg->payload = msg->header + sizeof( uta_mhdr_t );		// point past header to payload (single buffer allocation above)
