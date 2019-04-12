@@ -104,7 +104,7 @@ extern int rmr_payload_size( rmr_mbuf_t* msg ) {
 	}
 
 	errno = 0;
-	return msg->alloc_len - sizeof( uta_mhdr_t );						// figure size should we not have a msg buffer
+	return msg->alloc_len - RMR_HDR_LEN( msg->header );				// allocated transport size less the header and other data bits
 }
 
 /*
@@ -575,8 +575,8 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	int		state;
 
 	if( ! announced ) {
-		fprintf( stderr, "[INFO] ric message routing library on NNG (%s %s.%s.%s built: %s)\n", 
-			QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
+		fprintf( stderr, "[INFO] ric message routing library on NNG mv=%d (%s %s.%s.%s built: %s)\n", 
+			RMR_MSG_VER, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
 	}
 
@@ -596,16 +596,10 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	ctx->send_retries = 1;							// default is not to sleep at all; RMr will retry about 10K times before returning
 	ctx->mring = uta_mk_ring( 128 );				// message ring to hold asynch msgs received while waiting for call response
 
-	ctx->max_plen = RMR_MAX_RCV_BYTES + sizeof( uta_mhdr_t );		// default max buffer size
+	ctx->max_plen = RMR_MAX_RCV_BYTES;				// max user payload lengh
 	if( max_msg_size > 0 ) {
-		if( max_msg_size <= ctx->max_plen ) {						// user defined len can be smaller
-			ctx->max_plen = max_msg_size;
-		} else {
-			fprintf( stderr, "[WRN] rmr_init: attempt to set max payload len > than allowed maximum; capped at %d bytes\n", ctx->max_plen );
-		}
+		ctx->max_plen = max_msg_size;
 	}
-
-	ctx->max_mlen = ctx->max_plen + sizeof( uta_mhdr_t );
 
 	// we're using a listener to get rtg updates, so we do NOT need this.
 	//uta_lookup_rtg( ctx );							// attempt to fill in rtg info; rtc will handle missing values/errors
@@ -719,7 +713,7 @@ extern int rmr_get_rcvfd( void* vctx ) {
 	}
 
 	if( (state = nng_getopt_int( ctx->nn_sock, NNG_OPT_RECVFD, &fd )) != 0 ) {
-		fprintf( stderr, ">>> cannot get recv fd: %s\n", nng_strerror( state ) );
+		fprintf( stderr, "[WRN] rmr cannot get recv fd: %s\n", nng_strerror( state ) );
 		return -1;
 	}
 

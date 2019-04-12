@@ -38,7 +38,7 @@ extern "C" {
 #define RMR_MAX_XID			32		// space in header reserved for user xaction id
 #define RMR_MAX_SID			32		// spece in header reserved for sender id
 #define RMR_MAX_MEID		32		// spece in header reserved for managed element id
-#define RMR_MAX_SRC			16		// max length of hostname
+#define RMR_MAX_SRC			64		// max length of hostname (which could be IPv6 addr with [...]:port so more than the 39 bytes of a plain addr
 #define RMR_MAX_RCV_BYTES	4096	// max bytes we support in a receive message
 
 									// various flags for function calls
@@ -130,6 +130,7 @@ extern int rmr_send_to( void* vctx, int time );		// DEPRECATED -- replaced with 
 
 // --- uta compatability defs if needed user should define UTA_COMPAT  ----------------------------------
 #ifdef UTA_COMPAT
+#pragma message( "use of UTA_COMPAT is deprecated and soon to be removed" )
 
 #define UTA_MAX_XID RMR_MAX_XID 
 #define UTA_MAX_SID	RMR_MAX_SID 

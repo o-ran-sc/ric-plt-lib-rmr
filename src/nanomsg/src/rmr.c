@@ -154,7 +154,7 @@ extern int rmr_payload_size( rmr_mbuf_t* msg ) {
 	}
 
 	errno = 0;
-	return msg->alloc_len - sizeof( uta_mhdr_t );						// figure size should we not have a msg buffer
+	return msg->alloc_len - RMR_HDR_LEN( msg->header );			// transport buffer less header and other data bits
 }
 
 /*

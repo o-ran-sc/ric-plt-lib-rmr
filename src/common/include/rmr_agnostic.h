@@ -44,7 +44,7 @@ typedef struct uta_ctx  uta_ctx_t;
 #define QUOTE_DEF(a) QUOTE(a)	// allow a #define value to be quoted (e.g. QUOTE(MAJOR_VERSION) )
 
 
-#define RMR_MSG_VER	1			// potental to treat messages differently if from backlevel version
+#define RMR_MSG_VER	2			// message version this code was designed to handle
 
 									// environment variable names we'll suss out
 #define ENV_BIND_IF "RMR_BIND_IF"	// the interface to bind to for both normal comma and RTG (0.0.0.0 if missing) 
@@ -73,12 +73,43 @@ typedef struct uta_ctx  uta_ctx_t;
 #define DEF_RTG_PORT	"tcp:4561"		// default port that we accept rtg connections on
 #define DEF_COMM_PORT	"tcp:4560"		// default port we use for normal communications
 
+// -- header length/offset macros which ensure network conversion ----
+#define RMR_HDR_LEN(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2)+htonl(((uta_mhdr_t *)h)->len3))	// convert from net byte order
+#define PAYLOAD_OFFSET(h)	(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2)+htonl(((uta_mhdr_t *)h)->len3))
+#define TRACE_OFFSET(h)		(ntohl(((uta_mhdr_t *)h)->len0))
+#define DATA1_OFFSET(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1))
+#define DATA2_OFFSET(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl((uta_mhdr_t *)h)->len2)
+#define RMR_TR_LEN(h) 		(ntohl(((uta_mhdr_t *)h)->len1))
+#define RMR_D1_LEN(h) 		(ntohl(((uta_mhdr_t *)h)->len2))
+#define RMR_D2_LEN(h) 		(ntohl(((uta_mhdr_t *)h)->len3))
+
+#define SET_HDR_LEN(h)		(((uta_mhdr_t *)h)->len0=htonl((int32_t)sizeof(uta_mhdr_t)))		// convert to network byte order on insert
+#define SET_HDR_TR_LEN(h,l)	(((uta_mhdr_t *)h)->len1=htonl((int32_t)l))
+#define SET_HDR_D1_LEN(h,l)	(((uta_mhdr_t *)h)->len2=htonl((int32_t)l))
+#define SET_HDR_D2_LEN(h,l)	(((uta_mhdr_t *)h)->len3=htonl((int32_t)l))
+
+
+#define V1_PAYLOAD_OFFSET(h)	(sizeof(uta_v1mhdr_t))
+
+										// v2 header flags
+#define HFL_HAS_TRACE	0x01			// Trace data is populated
+#define HFL_SUBID		0x02			// subscription ID is populated
+
 /*
 	Message header; interpreted by the other side, but never seen by
 	the user application.
 
 	DANGER: Add new fields AT THE END of the struct. Adding them any where else
 			will break any code that is currently running.
+
+	The transport layer buffer allocated will be divided this way:
+		| RMr header | Trace data | data1 | data2 | User paylaod |
+
+		Len 0 is the length of the RMr header
+		Len 1 is the length of the trace data
+		Len 2 and 3 are lengths of data1 and data2 and are unused at the moment
+
+	To point at the payload, we take the address of the header and add all 4 lengths.
 */
 typedef struct {
 	int32_t	mtype;						// message type  ("long" network integer)
@@ -86,10 +117,30 @@ typedef struct {
 	int32_t rmr_ver;					// our internal message version number
 	unsigned char xid[RMR_MAX_XID];		// space for user transaction id or somesuch
 	unsigned char sid[RMR_MAX_SID];		// sender ID for return to sender needs
-	unsigned char src[RMR_MAX_SRC];		// name of the sender (source)
+	unsigned char src[RMR_MAX_SRC];		// name:port of the sender (source)
 	unsigned char meid[RMR_MAX_MEID];	// managed element id.
 	struct timespec	ts;					// timestamp ???
+
+										// V2 extension
+	int32_t	flags;						// HFL_* constants	
+	int32_t	len0;						// length of the RMr header data
+	int32_t	len1;						// length of the tracing data
+	int32_t	len2;						// length of data 1 (d1)
+	int32_t	len3;						// length of data 2 (d2)
+
 } uta_mhdr_t;
+
+
+typedef struct {						// old (inflexible) v1 header
+	int32_t	mtype;						// message type  ("long" network integer)
+	int32_t	plen;						// payload length
+	int32_t rmr_ver;					// our internal message version number
+	unsigned char xid[RMR_MAX_XID];		// space for user transaction id or somesuch
+	unsigned char sid[RMR_MAX_SID];		// sender ID for return to sender needs
+	unsigned char src[16];				// name of the sender (source) (old size was 16)
+	unsigned char meid[RMR_MAX_MEID];	// managed element id.
+	struct timespec	ts;					// timestamp ???
+} uta_v1mhdr_t;
 
 /*
 	Round robin group.
@@ -137,8 +188,6 @@ typedef struct {
 	char**	addrs;			// all ip addresses we found
 	int		naddrs;			// num actually used
 } if_addrs_t;
-
-
 
 // --------------- ring things  -------------------------------------------------
 typedef struct ring {

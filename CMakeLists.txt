@@ -22,9 +22,9 @@ project( rmr LANGUAGES C )
 cmake_minimum_required( VERSION 3.5 )
 
 
-set( major_version "1" )
+set( major_version "0" )		# automatically populated from git tag later
 set( minor_version "0" )
-set( patch_level "16" )
+set( patch_level "0" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_lib "lib" )
@@ -43,17 +43,42 @@ if( NOT BUILD_LIB )
 	set( BUILD_LIB lib )
 endif()
 
-# ---------------- set version info (not perfect, but better than nothing) ----
+# ---------------- extract some things from git ------------------------------
+
+# commit id for the version string
 execute_process( 
 	COMMAND bash -c "git rev-parse --short HEAD|awk '{printf\"%s\", $0}'" 
 	OUTPUT_VARIABLE git_id
 )
 
+# version information for library names and version string
+execute_process( 
+	COMMAND bash -c "git describe --tags --abbrev=0 HEAD 2>/dev/null | awk -v tag=0.0.4095 ' { tag=$1 } END{ print  tag suffix }'|sed 's/\\./;/g' "
+	OUTPUT_VARIABLE mmp_version_str
+	ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# extra indicator to show that the build was based on modified file(s) and not the true commit
+# (no hope of reproducing the exact library for debugging). Used only for the internal version 
+# string.
+execute_process( 
+	COMMAND bash -c "git diff --shortstat|awk -v fmt=%s -v r=-rotten '{ s=r } END { printf( fmt, s ) }'" 
+	OUTPUT_VARIABLE spoiled_str
+)
+
+set( mmp_version ${mmp_version_str} )
+list( GET mmp_version 0 major_version )
+list( GET mmp_version 1 minor_version )
+list( GET mmp_version 2 patch_level )
+
+message( "+++ building ${major_version}.${minor_version}.${patch_level}${spoiled_str}" )
+
+# define constants used in the version string
 add_definitions( 
 	-DGIT_ID=${git_id} 
 	-DMAJOR_VER=${major_version}
 	-DMINOR_VER=${minor_version}
-	-DPATCH_VER=${patch_level}
+	-DPATCH_VER=${patch_level}${spoiled_str}
 )
 
 
@@ -153,13 +178,22 @@ add_subdirectory( doc )				# this will auto skip if {X}fm is not available
 add_library( rmr_shared SHARED "$<TARGET_OBJECTS:nano_objects>;$<TARGET_OBJECTS:common_objects>" )
 add_library( rmr_static STATIC "$<TARGET_OBJECTS:nano_objects>;$<TARGET_OBJECTS:common_objects>" )
 
-# both libraries to be named with librmr prefix
-set_target_properties( rmr_shared PROPERTIES OUTPUT_NAME "rmr" )
-set_target_properties( rmr_static PROPERTIES OUTPUT_NAME "rmr" )
+# both libraries to be named with librmr prefix and given version numbers with sym links
+set_target_properties( rmr_shared 
+	PROPERTIES 
+		OUTPUT_NAME "rmr" 
+		SOVERSION ${major_version} 
+		VERSION ${major_version}.${minor_version}.${patch_level} )
+
+set_target_properties( rmr_static 
+	PROPERTIES 
+		OUTPUT_NAME "rmr" 
+		SOVERSION ${major_version} 
+		VERSION ${major_version}.${minor_version}.${patch_level} )
 
 
 # NNG based library (librmr_nng )
-# library is built by pulling objects from nng and common subdirs
+# library is built by pulling objects from nng and common subdirs.
 #
 add_library( rmr_nng_shared SHARED "$<TARGET_OBJECTS:nng_objects>;$<TARGET_OBJECTS:common_objects>" )
 add_library( rmr_nng_static STATIC "$<TARGET_OBJECTS:nng_objects>;$<TARGET_OBJECTS:common_objects>" )
@@ -173,10 +207,18 @@ if( need_ext )
 endif()
 
 
-# both libraries to be named with librmr_nng prefix
-#
-set_target_properties( rmr_nng_shared PROPERTIES OUTPUT_NAME "rmr_nng" )
-set_target_properties( rmr_nng_static PROPERTIES OUTPUT_NAME "rmr_nng" )
+# both libraries to be named with librmr_nng prefix and given version numbers with sym links
+set_target_properties( rmr_nng_shared 
+	PROPERTIES 
+		OUTPUT_NAME "rmr_nng" 
+		SOVERSION ${major_version} 
+		VERSION ${major_version}.${minor_version}.${patch_level} )
+
+set_target_properties( rmr_nng_static 
+	PROPERTIES 
+		OUTPUT_NAME "rmr_nng" 
+		SOVERSION ${major_version} 
+		VERSION ${major_version}.${minor_version}.${patch_level} )
 
 #
 if( APPLE  )
@@ -191,6 +233,7 @@ endif()
 # the moment, there are no header files specific to either nano or nng, so to the public
 # header directive is moot, but needed if some day there is one.
 #
+#install( TARGETS rmr_nng_shared;rmr_nng_static;rmr_shared;rmr_static;rmr_nng_shared_mm EXPORT LibraryConfig
 install( TARGETS rmr_nng_shared;rmr_nng_static;rmr_shared;rmr_static EXPORT LibraryConfig
     ARCHIVE  DESTINATION ${install_lib}
     LIBRARY  DESTINATION ${install_lib}
@@ -231,7 +274,7 @@ IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 	set( CPACK_PACKAGE_VERSION_MAJOR "${major_version}" )
 	set( CPACK_PACKAGE_VERSION_MINOR "${minor_version}" )
 	set( CPACK_PACKAGE_VERSION_PATCH "${patch_level}" )
-	set( CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${major_version}.${minor_version}.${CPACK_PACKAGE_VERSION_PATCH}" )
+	set( CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${major_version}.${minor_version}.${CPACK_PACKAGE_VERSION_PATCH}${spoiled_str}" )
 	set( CPACK_SOURCE_PACKAGE_FILE_NAME "vric${CMAKE_PROJECT_NAME}_${major_version}.${minor_version}.${CPACK_PACKAGE_VERSION_PATCH}" )
 
 	# we build and ship the libraries, so there is NO dependency

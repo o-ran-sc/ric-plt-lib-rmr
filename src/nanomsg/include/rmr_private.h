@@ -59,6 +59,9 @@ struct uta_ctx {
 	int	flags;					// CTXFL_ constants
 	int nrtele;					// number of elements in the routing table
 	int	nn_sock;				// our general listen socket
+	int	trace_data_len;			// len of tracing data that sits just past header (0 means none)
+	int	d1_len;					// lengths for additional post header, pre payload data areas
+	int d2_len;
 	route_table_t* rtable;		// the active route table
 	route_table_t* old_rtable;	// the previously used rt, sits here to allow for draining
 	route_table_t* new_rtable;	// route table under construction
