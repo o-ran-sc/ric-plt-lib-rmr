@@ -27,10 +27,15 @@
 	Date:		6 January 2019
 */
 
+#ifndef _test_support_c
+#define _test_support_c
+
 #include <signal.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #ifndef BAD
 #define BAD 1			// these are exit codes unless user overrides
@@ -81,21 +86,21 @@ static void set_signals( void ) {
 
 static int fail_if_nil( void* p, char* what ) {
 	if( !p ) {
-		fprintf( stderr, "[FAIL] pointer to '%s' was nil\n", what );
+		fprintf( stderr, "<FAIL> %s: pointer was nil\n", what );
 	}
 	return p ? GOOD : BAD;
 }
 
 static int fail_not_nil( void* p, char* what ) {
 	if( p ) {
-		fprintf( stderr, "[FAIL] pointer to '%s' was not nil\n", what );
+		fprintf( stderr, "<FAIL> %s: pointer was not nil\n", what );
 	}
 	return !p ? GOOD : BAD;
 }
 
 static int fail_if_false( int bv, char* what ) {
 	if( !bv ) {
-		fprintf( stderr, "[FAIL] boolean was false (%d) %s\n", bv, what );
+		fprintf( stderr, "<FAIL> %s: expected true, boolean test was false (%d)\n", what, bv );
 	}
 
 	return bv ? GOOD : BAD;
@@ -103,7 +108,7 @@ static int fail_if_false( int bv, char* what ) {
 
 static int fail_if_true( int bv, char* what ) {
 	if( bv ) {
-		fprintf( stderr, "[FAIL] boolean was true (%d) %s\n", bv, what );
+		fprintf( stderr, "<FAIL> %s: expected false, boolean test was true (%d)\n", what, bv );
 	}
 	return bv ? BAD : GOOD;
 }
@@ -114,21 +119,23 @@ static int fail_if_true( int bv, char* what ) {
 static int fail_if( int bv, char* what ) {
 
 	if( bv ) {
-		fprintf( stderr, "[FAIL] boolean was true (%d) %s\n", bv, what );
+		fprintf( stderr, "<FAIL> %s: expected false, boolean test was true (%d)\n", what, bv );
 	}
 	return bv ? BAD : GOOD;
 }
 
 static int fail_not_equal( int a, int b, char* what ) {
 	if( a != b ) {
-		fprintf( stderr, "[FAIL] %s values were not equal a=%d b=%d\n", what, a, b );
+		fprintf( stderr, "<FAIL> %s: values were not equal a=%d b=%d\n", what, a, b );
 	}
 	return a == b ? GOOD : BAD;			// user may override good/bad so do NOT return a==b directly!
 }
 
 static int fail_if_equal( int a, int b, char* what ) {
 	if( a == b ) {
-		fprintf( stderr, "[FAIL] %s values were equal a=%d b=%d\n", what, a, b );
+		fprintf( stderr, "<FAIL> %s values were equal a=%d b=%d\n", what, a, b );
 	}
 	return a != b ? GOOD : BAD;			// user may override good/bad so do NOT return a==b directly!
 }
+
+#endif

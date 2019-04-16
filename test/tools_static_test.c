@@ -20,56 +20,19 @@
 
 
 /*
-	Mnemonic:	tools_testh.c
-	Abstract:	Unit tests for the RMr tools module.
+	Mnemonic:	tools_static_test.c
+	Abstract:	Unit tests for the RMr tools module. This file is a static include
+				that is pulle in at compile time by the test driver.  The driver is
+				expected to include necessary rmr*.h and test_support files before
+				including this file.  In addition, a context struct, or dummy, must
+				be provided based on the type of testing being done.
+
 	Author:		E. Scott Daniels
-	Date:		21 January 2019
+	Date:		3 April 2019
 */
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <netdb.h>
-#include <errno.h>
-#include <string.h>
-#include <errno.h>
-#include <pthread.h>
-#include <ctype.h>
-
-#include "../src/common/include/rmr.h"
-#include "../src/common/include/rmr_agnostic.h"
-#include "test_support.c"		// our private library of test tools
-
-// ===== dummy context for tools testing so we don't have to pull in all of the nano/nng specific stuff =====
-struct uta_ctx {
-	char*	my_name;			// dns name of this host to set in sender field of a message
-	int	shutdown;				// thread notification if we need to tell them to stop
-	int max_mlen;				// max message length payload+header
-	int	max_plen;				// max payload length
-	int	flags;					// CTXFL_ constants
-	int nrtele;					// number of elements in the routing table
-	int send_retries;			// number of retries send_msg() should attempt if eagain/timeout indicated by nng
-	//nng_socket	nn_sock;		// our general listen socket
-	route_table_t* rtable;		// the active route table
-	route_table_t* old_rtable;	// the previously used rt, sits here to allow for draining
-	route_table_t* new_rtable;	// route table under construction
-	if_addrs_t*	ip_list;		// list manager of the IP addresses that are on our known interfaces
-	void*	mring;				// ring where msgs are queued while waiting for a call response msg
-	
-	char*	rtg_addr;			// addr/port of the route table generation publisher
-	int		rtg_port;			// the port that the rtg listens on
-	
-	wh_mgt_t*	wormholes;		// management of user opened wormholes
-	//epoll_stuff_t*	eps;		// epoll information needed for the rcv with timeout call
-
-	//pthread_t	rtc_th;			// thread info for the rtc listener
-};
-
-
-#include "../src/common/src/tools_static.c"
-
-
-int main( ) {
+static int tools_test( ) {
 	int i;
 	int j;
 	int errors = 0;
@@ -140,6 +103,18 @@ int main( ) {
 	i = uta_lookup_rtg( &ctx );
 	errors += fail_if_true( i, "rtg lookup returned that it found something when not expected to" );
 
+/*
+//==== moved out of generic tools ==========
+	// -------------- test link2 stuff ----------------------------------------------------------
+	i = uta_link2( "bad" );					// should fail
+	errors += fail_if_true( i >= 0, "uta_link2 didn't fail when given bad address" );
+
+	i = uta_link2( "nohost:-1234" );
+	errors += fail_if_true( i >= 0, "uta_link2 did not failed when given a bad (negative) port " );
+
+	i = uta_link2( "nohost:1234" );					// nn should go off and set things up, but it will never successd, but uta_ call should
+	errors += fail_if_true( i < 0, "uta_link2 failed when not expected to" );
+*/
 
 	// ------------ my ip stuff -----------------------------------------------------------------
 
@@ -175,5 +150,5 @@ int main( ) {
 	i = has_myip( "192.168.4.30:1235", if_list, ',', 128 );											// should find our ip when only in list
 	errors += fail_if_false( i, "has_myip did not find IP when only one in list" );
 
-	return errors > 0;			// overall exit code bad if errors
+	return !!errors;			// 1 or 0 regardless of count
 }

@@ -1,7 +1,7 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-        Copyright (c) 2019 Nokia 
+        Copyright (c) 2019 Nokia
         Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,41 +18,41 @@
 ==================================================================================
 */
 
-/*
-	Mmemonic:	ring_test.c
-	Abstract:	This is a stand alone test driver for the ring module. It 
-				includes the static tests after setting up the environment
-				then invokes it.
 
+/*
+	Mnemonic:	mbuf_api_test.c
+	Abstract:	Unit tests for the mbuf common API functions.
 	Author:		E. Scott Daniels
-	Date:		3 April 2019
+	Date:		2 April 2019
 */
 
-#include <unistd.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <netdb.h>
 #include <errno.h>
 #include <string.h>
-#include <stdint.h>
+#include <errno.h>
+#include <pthread.h>
+#include <ctype.h>
+
 
 #include "../src/common/include/rmr.h"
 #include "../src/common/include/rmr_agnostic.h"
-#include "../src/common/src/ring_static.c"
 
-#include "test_support.c"					// things like fail_if()
-#include "ring_static_test.c"				// the actual tests
+#include "../src/common/src/mbuf_api.c"			// module under test
+
+#include "test_support.c"						// our private library of test tools
+#include "mbuf_api_static_test.c"				// test functions
 
 int main( ) {
 	int errors = 0;
 
-	errors += ring_test( );
+	errors += mbuf_api_test( );
 
 	if( errors ) {
-		fprintf( stderr, "<FAIL> ring tests failed\n" );
+		fprintf( stderr, "<FAIL> mbuf_api tests failed\n" );
 	} else {
-		fprintf( stderr, "<OK>	 ring tests pass\n" );
+		fprintf( stderr, "<OK>	 mbuf_api tests pass\n" );
 	}
-
-	return errors;
 }
