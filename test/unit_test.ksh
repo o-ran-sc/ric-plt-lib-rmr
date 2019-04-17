@@ -216,7 +216,7 @@ function discount_an_checks {
 		rc = adj_cov < module_cov_target ? 1 : 0
 		if( pass_fail == cfail || show_all ) {
 			if( chatty ) {
-				printf( "[%s] %s executable=%d unexecuted=%d discounted=%d net_unex=%d  cov=%d% ==> %d%%%  target=%d%%\n", 
+				printf( "[%s] %s executable=%d unexecuted=%d discounted=%d net_unex=%d  cov=%d%% ==> %d%%  target=%d%%\n", 
 					pass_fail, full_name ? full_name : module, nexec, unexec, discount, net, orig_cov, adj_cov, module_cov_target )
 			} else {
 				printf( "[%s] %d%% (%d%%) %s\n", pass_fail, adj_cov, orig_cov, full_name ? full_name : module )
@@ -259,7 +259,7 @@ else
 	fi
 fi
 
-export C_INCLUDE_PATH="../src/common/include"
+export C_INCLUDE_PATH="../src/common/include:$C_INCLUDE_PATH"
 
 module_cov_target=80
 builder="make -B %s"		# default to plain ole make
@@ -348,7 +348,7 @@ do
 		add_ignored_func $f
 	done
 	
-	if ! ${tfile%.c} >/tmp/PID$$.log 2>&1
+	if ! ./${tfile%.c} >/tmp/PID$$.log 2>&1
 	then
 		echo "[FAIL] unit test failed for: $tfile"
 		cat /tmp/PID$$.log
