@@ -125,6 +125,7 @@ PATH=$PATH:.
 export LD_LIBRARY_PATH=/usr/local/lib
 export C_INCLUDE_PATH=../.build/include			# must reference nano/nng from the build tree
 
+log_it "[INFO] unit testing starts"
 (
 	set -e
 	cd test
@@ -135,6 +136,7 @@ export C_INCLUDE_PATH=../.build/include			# must reference nano/nng from the bui
 rc=$?
 err_cat $rc /tmp/utest.log
 abort_on_err $rc "unit tests failed"
+log_it "[OK]   unit testing passes"
 
 echo ""
 log_it "[PASS]  all testing successful"
