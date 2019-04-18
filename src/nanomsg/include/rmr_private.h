@@ -99,7 +99,7 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name );
 static int uta_epsock_rr( route_table_t *rt, int mtype, int group, int* more );
 
 // ------ msg ------------------------------------------------
-static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int state );
+static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int state, int tr_size );
 static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  );
 static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg );
 static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg );

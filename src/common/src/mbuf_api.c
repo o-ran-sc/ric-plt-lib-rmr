@@ -33,6 +33,7 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include "rmr.h"				// things the users see
 #include "rmr_agnostic.h"		// agnostic things (must be included before private)
@@ -214,4 +215,104 @@ extern unsigned char*  rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest ) {
 	memcpy( dest, hdr->meid, RMR_MAX_XID );
 
 	return dest;
+}
+
+// ------------------- trace related access functions --------------------------------------
+/*
+	The set_trace function will copy the supplied data for size bytes into the 
+	header.  If the header trace area is not large enough, a new one will be allocated
+	which will cause a payload copy based on the msg->len value (if 0 no payload
+	data is copied).
+
+	The return value is the number of bytes actually coppied. If 0 bytes are coppied
+	errno should indicate the reason. If 0 is returned and errno is 0, then size
+	passed was 0.  The state in the message is left UNCHANGED.
+*/
+extern int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size ) {
+	uta_mhdr_t*	hdr;
+	rmr_mbuf_t* nm;			// new message if larger is needed
+	int		len;
+	void*	old_tp_buf;		// if we need to realloc, must hold old to free
+	void*	old_hdr;
+
+	if( msg == NULL ) {
+		errno = EINVAL;
+		return 0;
+	}
+
+	errno = 0;
+	if( size <= 0 ) {
+		return 0;
+	}
+	
+	hdr = (uta_mhdr_t *) msg->header;
+	len = RMR_TR_LEN( hdr );
+
+	if( len != size ) {							// different sized trace data, must realloc the buffer
+		nm = rmr_realloc_msg( msg, size );		// realloc with changed trace size
+		old_tp_buf = msg->tp_buf;
+		old_hdr = msg->header;
+
+		msg->tp_buf = nm->tp_buf;				// reference the reallocated buffer
+		msg->header = nm->header;
+		msg->id = NULL;							// currently unused
+		msg->xaction = nm->xaction;
+		msg->payload = nm->payload;
+
+		nm->tp_buf = old_tp_buf;				// set to free
+		nm->header = old_hdr;					// nano frees on hdr, so must set both
+		rmr_free_msg( nm );
+
+		hdr = (uta_mhdr_t *) msg->header;		// header WILL be different
+		len = RMR_TR_LEN( hdr );
+	}
+
+	memcpy( TRACE_ADDR( hdr ), data, size );
+	
+	return size;
+}
+
+
+/*
+	Copies the trace bytes from the message header into the buffer provided by 
+	the user. If the trace data in the header is less than size, then only
+	that number of bytes are copied, else exactly size bytes are copied. The
+	number actually copied is returned.
+*/
+extern int rmr_get_trace( rmr_mbuf_t* msg, unsigned char* dest, int size ) {
+	uta_mhdr_t*	hdr = NULL;
+	int n2copy = 0;
+
+	if( msg == NULL ) {
+		return 0;
+	}
+
+	if( size <= 0 || dest == NULL ) {
+		return 0;
+	}
+
+	hdr = msg->header;
+	if( (n2copy = size < RMR_TR_LEN( hdr ) ? size : RMR_TR_LEN( hdr )) <= 0  ) {
+		return 0;
+	}
+
+	memcpy( dest, TRACE_ADDR( hdr ), n2copy );
+
+	return n2copy;
+}
+
+/*
+	Returns the number of bytes currently allocated for trace data in the message
+	buffer.
+*/
+extern int rmr_get_trlen( rmr_mbuf_t* msg ) {
+	uta_mhdr_t*	hdr;
+
+	if( msg == NULL ) {
+		return 0;
+	}
+
+	hdr = msg->header;
+
+	return RMR_TR_LEN( hdr );
 }

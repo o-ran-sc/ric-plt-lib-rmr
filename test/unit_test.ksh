@@ -266,6 +266,7 @@ builder="make -B %s"		# default to plain ole make
 verbose=0
 show_all=1					# show all things -F sets to show failures only
 strict=0					# -s (strict) will set; when off, coverage state ignored in final pass/fail
+show_output=0				# show output from each test execution (-S)
 
 while [[ $1 == "-"* ]]
 do
@@ -282,6 +283,7 @@ do
 		-F)	show_all=0;;
 
 		-s)	strict=1;;					# coverage counts toward pass/fail state
+		-S)	show_output=1;;				# test output shown even on success
 		-v)	(( verbose++ ));;
 
 		-h) 	usage; exit 0;;
@@ -354,6 +356,13 @@ do
 		cat /tmp/PID$$.log
 		(( ut_errors++ ))				# cause failure even if not in strict mode
 		continue						# skip coverage tests for this
+	else
+		if (( show_output ))
+		then
+			printf "\n============= test programme output =======================\n"
+			cat /tmp/PID$$.log
+			printf "===========================================================\n"
+		fi
 	fi
 
 	(

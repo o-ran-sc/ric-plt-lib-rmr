@@ -138,4 +138,33 @@ static int fail_if_equal( int a, int b, char* what ) {
 	return a != b ? GOOD : BAD;			// user may override good/bad so do NOT return a==b directly!
 }
 
+
+#ifndef NO_DUMMY_RMR
+/*
+	Dummy message allocator for testing without sr_static functions
+*/
+static rmr_mbuf_t* test_mk_msg( int len, int tr_len ) {
+	rmr_mbuf_t*	new_msg;
+	uta_mhdr_t* hdr;
+	size_t	alen;
+
+	alen = sizeof( *hdr ) + tr_len + len;
+
+	new_msg = (rmr_mbuf_t *) malloc( sizeof *new_msg );
+	new_msg->tp_buf = (void *) malloc( alen );
+	memset( new_msg->tp_buf, 0, alen );
+
+	hdr = (uta_mhdr_t*) new_msg->tp_buf;
+	SET_HDR_LEN( hdr );
+	SET_HDR_TR_LEN( hdr, tr_len );
+
+	new_msg->header = new_msg->tp_buf;
+	new_msg->payload =  new_msg->header + PAYLOAD_OFFSET( hdr );
+	new_msg->alloc_len = alen;
+	new_msg->len = 0;
+	
+	return new_msg;
+}
+#endif
+
 #endif

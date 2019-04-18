@@ -173,14 +173,16 @@ static int sr_nng_test() {
 	errors += fail_if( state != 99, "xlate_nng_state did not return  default for unknown error" );
 	errors += fail_if( errno == 0, "xlate_nng_state did not set errno (6)" );
 
-	// ---- drive rtc in a 'static' (not pthreaded) mode -----
-	setenv( "ENV_VERBOSE_FILE", ".ut_rmr_verbose", 1 );			// allow for verbose code in rtc to be driven
-	i = open( ".rmr_verbose", O_CREAT, 0664 );
+	// ---- drive rtc in a 'static' (not pthreaded) mode to get some coverage; no 'results' to be verified -----
+	setenv( ENV_RTG_RAW, "1", 1 );								// rtc should expect raw messages (mostly coverage here)
+	setenv( ENV_VERBOSE_FILE, ".ut_rmr_verbose", 1 );			// allow for verbose code in rtc to be driven
+	i = open( ".ut_rmr_verbose", O_RDWR | O_CREAT, 0654 );
 	if( i >= 0 ) {
-		write( i, "0\n", 2 );
+		write( i, "2\n", 2 );
 		close( i );
 	}
 	ctx->shutdown = 1;			// should force rtc to quit on first pass
+	rtc( NULL );				// coverage test with nil pointer
 	rtc( ctx );
 	
 

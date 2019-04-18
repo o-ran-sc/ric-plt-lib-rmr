@@ -27,6 +27,8 @@
 	Author: 	E. Scott Daniels
 */
 
+#define NO_DUMMY_RMR 1			// no dummy rmr functions; we don't pull in rmr.h or agnostic.h
+
 #include "../src/common/include/rmr_symtab.h"
 #include "../src/common/src/symtab.c"
 

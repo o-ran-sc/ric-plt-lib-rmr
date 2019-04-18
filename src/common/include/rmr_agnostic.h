@@ -72,16 +72,23 @@ typedef struct uta_ctx  uta_ctx_t;
 //#define DEF_RTG_MSGID	""				// default to pick up all messages from rtg
 #define DEF_RTG_PORT	"tcp:4561"		// default port that we accept rtg connections on
 #define DEF_COMM_PORT	"tcp:4560"		// default port we use for normal communications
+#define DEF_TR_LEN		-1				// use default trace data len from context
 
-// -- header length/offset macros which ensure network conversion ----
-#define RMR_HDR_LEN(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2)+htonl(((uta_mhdr_t *)h)->len3))	// convert from net byte order
-#define PAYLOAD_OFFSET(h)	(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2)+htonl(((uta_mhdr_t *)h)->len3))
-#define TRACE_OFFSET(h)		(ntohl(((uta_mhdr_t *)h)->len0))
-#define DATA1_OFFSET(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1))
-#define DATA2_OFFSET(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl((uta_mhdr_t *)h)->len2)
+// -- header length/offset macros must ensure network conversion ----
+#define RMR_HDR_LEN(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2)+htonl(((uta_mhdr_t *)h)->len3)) // ALL things, not just formal struct
 #define RMR_TR_LEN(h) 		(ntohl(((uta_mhdr_t *)h)->len1))
 #define RMR_D1_LEN(h) 		(ntohl(((uta_mhdr_t *)h)->len2))
 #define RMR_D2_LEN(h) 		(ntohl(((uta_mhdr_t *)h)->len3))
+
+#define TRACE_OFFSET(h)		((ntohl(((uta_mhdr_t *)h)->len0)))
+#define DATA1_OFFSET(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1))
+#define DATA2_OFFSET(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2))
+#define PAYLOAD_OFFSET(h)	(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2)+htonl(((uta_mhdr_t *)h)->len3))
+
+#define TRACE_ADDR(h)		(((void *)h)+ntohl(((uta_mhdr_t *)h)->len0))
+#define DATA1_ADDR(h)		(((void *)h)+ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1))
+#define DATA2_ADDR(h)		(((void *)h)+ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2))
+#define PAYLOAD_ADDR(h)		(((void *)h)+ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2)+htonl(((uta_mhdr_t *)h)->len3))
 
 #define SET_HDR_LEN(h)		(((uta_mhdr_t *)h)->len0=htonl((int32_t)sizeof(uta_mhdr_t)))		// convert to network byte order on insert
 #define SET_HDR_TR_LEN(h,l)	(((uta_mhdr_t *)h)->len1=htonl((int32_t)l))
@@ -189,6 +196,7 @@ typedef struct {
 	int		naddrs;			// num actually used
 } if_addrs_t;
 
+
 // --------------- ring things  -------------------------------------------------
 typedef struct ring {
 	uint16_t head;				// index of the head of the ring (insert point)
@@ -230,6 +238,7 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, int mtype, int nrrgroups );
 static endpoint_t* uta_get_ep( route_table_t* rt, char const* ep_name );
 static void read_static_rt( uta_ctx_t* ctx, int vlevel );
 static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel );
+static rmr_mbuf_t* realloc_msg( rmr_mbuf_t* msg, int size );
 static void* rtc( void* vctx );
 static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name );
 

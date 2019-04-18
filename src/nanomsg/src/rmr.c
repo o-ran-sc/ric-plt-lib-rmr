@@ -169,8 +169,42 @@ extern rmr_mbuf_t* rmr_alloc_msg( void* vctx, int size ) {
 		return NULL;
 	}
 
-	m = alloc_zcmsg( ctx, NULL, size, 0 );
+	m = alloc_zcmsg( ctx, NULL, size, 0, DEF_TR_LEN );
 	return  m;
+}
+
+/*
+	Allocates a send message as a zerocopy message allowing the underlying message protocol
+	to send the buffer without copy. In addition, a trace data field of tr_size will be
+	added and the supplied data coppied to the buffer before returning the message to
+	the caller.
+*/
+extern rmr_mbuf_t* rmr_tralloc_msg( void* vctx, int size, int tr_size, unsigned const char* data ) {
+	uta_ctx_t*	ctx;
+	rmr_mbuf_t*	m;
+	int state;
+
+	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
+		return NULL;
+	}
+
+	m = alloc_zcmsg( ctx, NULL, size, 0, tr_size );				// alloc with specific tr size
+	if( m != NULL ) {
+		state = rmr_set_trace( m, data, tr_size );				// roll their data in
+		if( state != tr_size ) {
+			m->state = RMR_ERR_INITFAILED;
+		}
+	}
+
+	return  m;
+}
+
+/*
+	Need an external path to the realloc static function as it's called by an
+	outward facing mbuf api function.
+*/
+extern rmr_mbuf_t* rmr_realloc_msg( rmr_mbuf_t* msg, int new_tr_size ) {
+	return realloc_msg( msg, new_tr_size );
 }
 
 /*

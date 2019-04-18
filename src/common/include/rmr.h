@@ -63,6 +63,7 @@ extern "C" {
 #define RMR_ERR_TIMEOUT		12		// message processing call timed out
 #define RMR_ERR_UNSET		13		// the message hasn't been populated with a transport buffer
 #define	RMR_ERR_TRUNC		14		// received message likely truncated
+#define RMR_ERR_INITFAILED	15		// initialisation of something (probably message) failed
 
 #define RMR_WH_CONNECTED(a) (a>=0)	// for now whid is integer; it could be pointer at some future date
 
@@ -96,6 +97,7 @@ extern rmr_mbuf_t* rmr_alloc_msg( void* vctx, int size );
 extern rmr_mbuf_t* rmr_call( void* vctx, rmr_mbuf_t* msg );
 extern void rmr_close( void* vctx );
 extern void* rmr_init( char* proto_port, int max_msg_size, int flags );
+extern int rmr_init_trace( void* vctx, int size );
 extern int rmr_payload_size( rmr_mbuf_t* msg );
 extern rmr_mbuf_t* rmr_send_msg( void* vctx, rmr_mbuf_t* msg );
 extern rmr_mbuf_t* rmr_mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to );
@@ -107,6 +109,7 @@ extern int rmr_set_rtimeout( void* vctx, int time );
 extern int rmr_set_stimeout( void* vctx, int time );
 extern int rmr_get_rcvfd( void* vctx );								// only supported with nng
 extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to );
+extern rmr_mbuf_t*  rmr_tralloc_msg( void* context, int msize, int trsize, unsigned const char* data );
 extern rmr_whid_t rmr_wh_open( void* vctx, char const* target );
 extern rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg );
 extern void rmr_wh_close( void* vctx, int whid );
@@ -118,11 +121,15 @@ extern void rmr_bytes2payload( rmr_mbuf_t* mbuf, unsigned char const* src, int l
 extern int rmr_bytes2xact( rmr_mbuf_t* mbuf, unsigned char const* src, int len );
 extern void rmr_free_msg( rmr_mbuf_t* mbuf );
 extern unsigned char*  rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest );
+extern rmr_mbuf_t* rmr_realloc_msg( rmr_mbuf_t* mbuf, int new_tr_size );
 extern int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char const* str );
 extern void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str );
 extern void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str );
 extern int rmr_str2xact( rmr_mbuf_t* mbuf, unsigned char const* str );
 
+extern int rmr_get_trlen( rmr_mbuf_t* msg );
+extern int rmr_get_trace( rmr_mbuf_t* msg, unsigned char* dest, int size );
+extern int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size );
 
 extern int rmr_rcv_to( void* vctx, int time );		// DEPRECATED -- replaced with set_rtimeout
 extern int rmr_send_to( void* vctx, int time );		// DEPRECATED -- replaced with set_stimeout

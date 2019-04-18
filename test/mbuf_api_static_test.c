@@ -42,6 +42,7 @@
 int mbuf_api_test( ) {
 	unsigned char* c;
 	int i;
+	int state;
 	int errors = 0;
 	rmr_mbuf_t*	mbuf;
 	unsigned char src_buf[256];
@@ -57,6 +58,7 @@ int mbuf_api_test( ) {
 	mbuf->header = mbuf->payload;
 	mbuf->alloc_len = 1024;
 
+	// --- test payload field  access functions ---------------------------------------------------
 	memset( src_buf, 0, sizeof( src_buf ) );
 	rmr_bytes2payload( mbuf, NULL, strlen( src_buf) );				// errno should be set on return
 	errors += fail_if( errno == 0, "buf copy to payload with nil src returned good errno" );
@@ -76,6 +78,8 @@ int mbuf_api_test( ) {
 	snprintf( src_buf, sizeof( src_buf ), "This is some text in the buffer" );
 	rmr_str2payload( mbuf, src_buf );							// this uses bytes2payload, so only one invocation needed
 
+
+	// --- test meid field  access functions ---------------------------------------------------
 	errno = 0;
 	i = rmr_bytes2meid( NULL, src_buf, RMR_MAX_MEID );
 	errors += fail_if( errno == 0, "(errno) attempt to copy bytes to meid with nil message" );
@@ -121,6 +125,24 @@ int mbuf_api_test( ) {
 	errors += fail_if( i == RMR_OK, "(rv) attempt to copy string to meid with large source buffer" );
 
 
+	snprintf( src_buf, sizeof( src_buf ), "test-meid" );
+	rmr_str2meid( mbuf, src_buf );
+
+	errno = 0;
+	c = rmr_get_meid( NULL, NULL );
+	errors += fail_if( c != NULL, "get meid with nil message buffer" );
+	errors += fail_if( errno == 0, "(errno bad) get meid with nil msg buffer" ); 
+	
+	c = rmr_get_meid( mbuf, NULL );			// should allocate and return c
+	errors += fail_if( c == NULL, "get meid with nil dest pointer (did not allocate a buffer)" );
+	errors += fail_if( strcmp( c, "test-meid" ) != 0, "did not get expected meid from mbuffer" );
+
+	c = rmr_get_meid( mbuf, c );
+	errors += fail_if( c == NULL, "get meid with a dest pointer returned no pointer" );
+	errors += fail_if( strcmp( c, "test-meid" ) != 0, "did not get expected meid from mbuffer" );
+
+
+	// --- test transaction field  access functions ---------------------------------------------------
 	errno = 0;
 	i = rmr_bytes2xact( NULL, src_buf, RMR_MAX_XID );
 	errors += fail_if( errno == 0, "(errno) attempt to copy bytes to xact with nil message" );
@@ -165,23 +187,67 @@ int mbuf_api_test( ) {
 	errors += fail_if( errno == 0, "(errno) attempt to copy string to xact with large source buffer" );
 	errors += fail_if( i == RMR_OK, "(rv) attempt to copy string to xact with large source buffer" );
 
+
+
+	// ------------ trace data tests ----------------------------------------------------------------
+	// CAUTION: to support standalone mbuf api tests, the underlying buffer reallocation functions are NOT used
+	//			if this is driven by the mbuf_api_test.c driver
+
+	mbuf = test_mk_msg( 2048, 0 );		// initially no trace size to force realloc
+
+	state = TRACE_OFFSET( mbuf->header ) - PAYLOAD_OFFSET( mbuf->header );		// no trace data, payload and trace offset should be the same
+	errors += fail_not_equal( state, 0, "trace offset and payload offset do NOT match when trace data is absent" );
+
+	state = rmr_get_trlen( mbuf );
+	errors += fail_not_equal( state, 0, "initial trace len reported (a) does not match expected (b)" );
+
+	state = rmr_set_trace( NULL, src_buf, 100 );				// coverage test on nil check
+	errors += fail_not_equal( state, 0, "set trace with nil msg didn't return expected 0 status" );
+
+	state = rmr_set_trace( mbuf, src_buf, 0 );				// coverage test on length check
+	errors += fail_not_equal( state, 0, "set trace with 0 len didn't return expected 0 status" );
+
+	state = rmr_get_trace( NULL, src_buf, 100 );				// coverage test on nil check
+	errors += fail_not_equal( state, 0, "get trace with nil msg didn't return expected 0 status" );
+
+	state = rmr_get_trace( mbuf, NULL, 100 );					// coverage test on nil check
+	errors += fail_not_equal( state, 0, "get trace with nil dest didn't return expected 0 status" );
+
+	state = rmr_get_trlen( NULL );								// coverage test on nil check
+	errors += fail_not_equal( state, 0, "get trace length with nil msg didn't return expected 0 status" );
+
 	
-	snprintf( src_buf, sizeof( src_buf ), "test-meid" );
-	rmr_str2meid( mbuf, src_buf );
+	src_buf[0] = 0;
+	state = rmr_set_trace( mbuf, "foo bar was here", 17 );		// should force a realloc
+	errors += fail_not_equal( state, 17, "bytes copied to trace (a) did not match expected size (b)" );
 
-	errno = 0;
-	c = rmr_get_meid( NULL, NULL );
-	errors += fail_if( c != NULL, "get meid with nil message buffer" );
-	errors += fail_if( errno == 0, "(errno bad) get meid with nil msg buffer" ); 
+	state = rmr_get_trace( mbuf, src_buf, 17 );
+	errors += fail_not_equal( state, 17, "bytes retrieved from trace (a) did not match expected size (b)" );
 
-	
-	c = rmr_get_meid( mbuf, NULL );			// should allocate and return c
-	errors += fail_if( c == NULL, "get meid with nil dest pointer (did not allocate a buffer)" );
-	errors += fail_if( strcmp( c, "test-meid" ) != 0, "did not get expected meid from mbuffer" );
+	state = rmr_get_trlen( mbuf );
+	errors += fail_not_equal( state, 17, "trace len reported (a) does not match expected (b)" );
+	state = strcmp( src_buf, "foo bar was here" );
+	errors+= fail_not_equal( state, 0, "compare of pulled trace info did not match" );
 
-	c = rmr_get_meid( mbuf, c );
-	errors += fail_if( c == NULL, "get meid with a dest pointer returned no pointer" );
-	errors += fail_if( strcmp( c, "test-meid" ) != 0, "did not get expected meid from mbuffer" );
+	state = TRACE_OFFSET( mbuf->header ) - PAYLOAD_OFFSET( mbuf->header );		// when there is a trace area these should NOT be the same
+	errors += fail_if_equal( state, 0, "trace offset and payload offset match when trace data is present" );
+
+
+											// second round of trace testing, allocating a message with a trace size that matches
+	mbuf = test_mk_msg( 2048, 17 );			// trace size that matches what we'll stuff in, no realloc
+	state = rmr_get_trlen( mbuf );
+	errors += fail_not_equal( state, 17, "alloc with trace size: initial trace len reported (a) does not match expected (b)" );
+
+	src_buf[0] = 0;
+	state = rmr_set_trace( mbuf, "foo bar was here", 17 );		// should force a realloc
+	errors += fail_not_equal( state, 17, "bytes copied to trace (a) did not match expected size (b)" );
+
+	state = rmr_get_trace( mbuf, src_buf, 17 );
+	errors += fail_not_equal( state, 17, "bytes retrieved from trace (a) did not match expected size (b)" );
+	state = strcmp( src_buf, "foo bar was here" );
+	errors+= fail_not_equal( state, 0, "compare of pulled trace info did not match" );
+
+	i = rmr_get_trlen( mbuf );
 	
 
 	return errors > 0;			// overall exit code bad if errors
