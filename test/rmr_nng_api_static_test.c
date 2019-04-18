@@ -73,7 +73,7 @@ static void send_n_msgs( void* ctx, int n ) {
 	}
 
 	for( i = 0; i < n; i++ ) {
-fprintf( stderr, "mass send\n" );
+		//fprintf( stderr, "mass send\n" );
 		msg->len = 100;
 		msg->mtype = 1;
 		msg->state = 999;
@@ -91,6 +91,7 @@ static int rmr_api_test( ) {
 	int		v = 0;					// some value
 	char	wbuf[128];
 	int		i;
+	int		state;
 
 	v = rmr_ready( NULL );
 	errors += fail_if( v != 0, "rmr_ready returned true before initialisation" );
@@ -253,6 +254,22 @@ static int rmr_api_test( ) {
 	}
 	errors += fail_if( i >= 40, "torcv_msg never returned a timeout" );
 
+
+	// ---- trace things that are not a part of the mbuf_api functions and thus must be tested here
+	state = rmr_init_trace( NULL, 37 );						// coverage test nil context
+	errors += fail_not_equal( state, 0, "attempt to initialise trace with nil context returned non-zero state (a)" );
+	errors += fail_if_equal( errno, 0, "attempt to initialise trace with nil context did not set errno as expected" );
+
+	state = rmr_init_trace( rmc, 37 );
+	errors += fail_if_equal( state, 0, "attempt to set trace len in context was not successful" );
+	errors += fail_not_equal( errno, 0, "attempt to set trace len in context did not clear errno" );
+
+	msg = rmr_tralloc_msg( rmc, 1024, 17, "1904308620110417" );
+	errors += fail_if_nil( msg, "attempt to allocate message with trace data returned nil message" );
+	state = rmr_get_trace( msg, wbuf, 17 );
+	errors += fail_not_equal( state, 17, "len of trace data (a) returned after msg allocation was not expected size (b)" );
+	state = strcmp( wbuf, "1904308620110417" );
+	errors += fail_not_equal( state, 0, "trace data returned after tralloc was not correct" );
 	
 	em_send_failures = 1;
 	send_n_msgs( rmc, 30 );			// send 30 messages with emulation failures
@@ -261,10 +278,6 @@ static int rmr_api_test( ) {
 	
 	rmr_close( NULL );			// drive for coverage
 	rmr_close( rmc );			// no return to check; drive for coverage
-
-//extern rmr_mbuf_t* rmr_mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
-//extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to ) {
-
 
 
 	if( ! errors ) {

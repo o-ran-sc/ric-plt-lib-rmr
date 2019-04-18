@@ -119,9 +119,46 @@ extern rmr_mbuf_t* rmr_alloc_msg( void* vctx, int size ) {
 		return NULL;
 	}
 
-	m = alloc_zcmsg( ctx, NULL, size, 0 );
+	m = alloc_zcmsg( ctx, NULL, size, 0, DEF_TR_LEN );				// alloc with default trace data
 	return  m;
 }
+
+
+/*
+	Allocates a send message as a zerocopy message allowing the underlying message protocol
+	to send the buffer without copy. In addition, a trace data field of tr_size will be
+	added and the supplied data coppied to the buffer before returning the message to
+	the caller.
+*/
+extern rmr_mbuf_t* rmr_tralloc_msg( void* vctx, int size, int tr_size, unsigned const char* data ) {
+	uta_ctx_t*	ctx;
+	rmr_mbuf_t*	m;
+	int state;
+
+	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
+		return NULL;
+	}
+
+	m = alloc_zcmsg( ctx, NULL, size, 0, tr_size );				// alloc with specific tr size
+	if( m != NULL ) {
+		state = rmr_set_trace( m, data, tr_size );				// roll their data in
+		if( state != tr_size ) {
+			m->state = RMR_ERR_INITFAILED;
+		}
+	}
+
+	return  m;
+}
+
+/*
+	This provides an external path to the realloc static function as it's called by an
+	outward facing mbuf api function. Used to reallocate a message with a different
+	trace data size.
+*/
+extern rmr_mbuf_t* rmr_realloc_msg( rmr_mbuf_t* msg, int new_tr_size ) {
+	return realloc_msg( msg, new_tr_size );
+}
+
 
 /*
 	Return the message to the available pool, or free it outright.
@@ -436,7 +473,7 @@ extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to ) {
 	if( old_msg ) {
 		msg = old_msg;
 	} else {
-		msg = alloc_zcmsg( ctx, NULL, RMR_MAX_RCV_BYTES, RMR_OK );			// will abort on failure, no need to check
+		msg = alloc_zcmsg( ctx, NULL, RMR_MAX_RCV_BYTES, RMR_OK, DEF_TR_LEN );			// will abort on failure, no need to check
 	}
 
 	if( ms_to < 0 ) {
@@ -679,6 +716,27 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 */
 extern void* rmr_init( char* uproto_port, int max_msg_size, int flags ) {
 	return init( uproto_port, max_msg_size, flags & UFL_MASK  );		// ensure any internal flags are off
+}
+
+/*
+	This sets the default trace length which will be added to any message buffers
+	allocated.  It can be set at any time, and if rmr_set_trace() is given a 
+	trace len that is different than the default allcoated in a message, the message
+	will be resized.
+
+	Returns 0 on failure and 1 on success. If failure, then errno will be set.
+*/
+extern int rmr_init_trace( void* vctx, int tr_len ) {
+	uta_ctx_t* ctx;
+
+	errno = 0;
+	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
+		errno = EINVAL;
+		return 0;
+	}
+
+	ctx->trace_data_len = tr_len;
+	return 1;
 }
 
 /*

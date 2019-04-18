@@ -71,6 +71,7 @@
 
 #include "../src/common/src/symtab.c"
 #include "../src/nng/src/rmr_nng.c"
+#include "../src/common/src/mbuf_api.c"
 
 static void gen_rt( uta_ctx_t* ctx );		// defined in sr_nng_static_test, but used by a few others (eliminate order requirement below)
 
@@ -84,6 +85,7 @@ static void gen_rt( uta_ctx_t* ctx );		// defined in sr_nng_static_test, but use
 #include "sr_nng_static_test.c"
 #include "wormhole_static_test.c"
 #include "rmr_nng_api_static_test.c"
+#include "mbuf_api_static_test.c"
 
 
 /*
@@ -118,6 +120,10 @@ int main() {
 
 	fprintf( stderr, "<INFO> starting send/receive tests\n" );
 	errors += sr_nng_test();				// test the send/receive static functions
+	fprintf( stderr, "<INFO> error count: %d\n", errors );
+
+	fprintf( stderr, "<INFO> starting mbuf api tests\n" );
+	errors +=  mbuf_api_test( );
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
 	if( errors == 0 ) {

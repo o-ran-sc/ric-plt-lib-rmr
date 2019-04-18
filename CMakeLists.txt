@@ -22,9 +22,9 @@ project( rmr LANGUAGES C )
 cmake_minimum_required( VERSION 3.5 )
 
 
-set( major_version "0" )		# automatically populated from git tag later
+set( major_version "1" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "0" )
-set( patch_level "0" )
+set( patch_level "17" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_lib "lib" )
@@ -66,10 +66,11 @@ execute_process(
 	OUTPUT_VARIABLE spoiled_str
 )
 
-set( mmp_version ${mmp_version_str} )
-list( GET mmp_version 0 major_version )
-list( GET mmp_version 1 minor_version )
-list( GET mmp_version 2 patch_level )
+# uncomment these lines once CI starts adding a tag on merge
+#set( mmp_version ${mmp_version_str} )
+#list( GET mmp_version 0 major_version )
+#list( GET mmp_version 1 minor_version )
+#list( GET mmp_version 2 patch_level )
 
 message( "+++ building ${major_version}.${minor_version}.${patch_level}${spoiled_str}" )
 

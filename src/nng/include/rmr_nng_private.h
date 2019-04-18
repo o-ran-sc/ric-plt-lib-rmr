@@ -109,12 +109,13 @@ static inline int xlate_nng_state( int state, int def_state );
 
 
 // --- msg ---------------------------------------
-static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int state );
+static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int state, int trlo );
 static rmr_mbuf_t* alloc_mbuf( uta_ctx_t* ctx, int state );
 static void ref_tpbuf( rmr_mbuf_t* msg, size_t alen ) ;
 static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  );
 static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg );
 static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg );
+static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  );
 static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock, int retries );
 static rmr_mbuf_t* send2ep( uta_ctx_t* ctx, endpoint_t* ep, rmr_mbuf_t* msg );
 

@@ -75,8 +75,9 @@ static int rt_test( ) {
 	nng_socket nn_sock;		// this is a struct in nng, so difficult to validate
 
 	setenv( "ENV_VERBOSE_FILE", ".ut_rmr_verbose", 1 );			// allow for verbose code in rtc to be driven
-	i = open( ".rmr_verbose", O_CREAT, 0664 );
+	i = open( ".ut_rmr_verbose", O_RDWR | O_CREAT, 0644 );
 	if( i >= 0 ) {
+		write( 1, "2\n", 2 );
 		close( i );
 	}
 
