@@ -72,7 +72,10 @@ typedef struct uta_ctx  uta_ctx_t;
 //#define DEF_RTG_MSGID	""				// default to pick up all messages from rtg
 #define DEF_RTG_PORT	"tcp:4561"		// default port that we accept rtg connections on
 #define DEF_COMM_PORT	"tcp:4560"		// default port we use for normal communications
-#define DEF_TR_LEN		-1				// use default trace data len from context
+#define DEF_TR_LEN		(-1)			// use default trace data len from context
+
+#define UNSET_SUBID		(-1)			// initial value on msg allocation indicating not set
+#define UNSET_MSGTYPE	(-1)
 
 // -- header length/offset macros must ensure network conversion ----
 #define RMR_HDR_LEN(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2)+htonl(((uta_mhdr_t *)h)->len3)) // ALL things, not just formal struct
@@ -134,7 +137,7 @@ typedef struct {
 	int32_t	len1;						// length of the tracing data
 	int32_t	len2;						// length of data 1 (d1)
 	int32_t	len3;						// length of data 2 (d2)
-
+	int32_t	sub_id;						// subscription id (-1 invalid)
 } uta_mhdr_t;
 
 

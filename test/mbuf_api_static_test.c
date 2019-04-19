@@ -44,6 +44,7 @@ int mbuf_api_test( ) {
 	int i;
 	int state;
 	int errors = 0;
+	char*	buf;
 	rmr_mbuf_t*	mbuf;
 	unsigned char src_buf[256];
 
@@ -248,6 +249,20 @@ int mbuf_api_test( ) {
 	errors+= fail_not_equal( state, 0, "compare of pulled trace info did not match" );
 
 	i = rmr_get_trlen( mbuf );
+
+
+	// ------------- source field tests ------------------------------------------------------------
+	// we cannot force anything into the message source field, so no way to test the content, but we 
+	// can test pointers and expected nils
+
+	buf = rmr_get_src( NULL, src_buf );					// coverage test for nil msg check
+	errors += fail_not_nil( buf, "rmr_get_src returned a pointer when given a nil message" );
+
+	buf = rmr_get_src( mbuf, NULL );					// coverage test for nil dst check
+	errors += fail_not_nil( buf, "rmr_get_src returned a pointer when given a nil dest buffer" );
+
+	buf = rmr_get_src( mbuf, src_buf );
+	errors += fail_not_equal( buf, src_buf, "rmr_get_src didn't return expexted buffer pointer" );
 	
 
 	return errors > 0;			// overall exit code bad if errors
