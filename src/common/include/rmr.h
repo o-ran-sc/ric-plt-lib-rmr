@@ -74,11 +74,12 @@ extern "C" {
 	into or out of their environment they dup it all, not just what we choose to expose.)
 */
 typedef struct {
-	int		state;				// state of processing
+	int	state;					// state of processing
 	int	mtype;					// message type
 	int	len;					// length of data in the payload (send or received)
 	unsigned char* payload;		// transported data
 	unsigned char* xaction;		// pointer to fixed length transaction id bytes
+	int sub_id;					// subscription id
 
 								// these things are off limits to the user application
 	void*	tp_buf;				// underlying transport allocated pointer (e.g. nng message)	
@@ -121,6 +122,7 @@ extern void rmr_bytes2payload( rmr_mbuf_t* mbuf, unsigned char const* src, int l
 extern int rmr_bytes2xact( rmr_mbuf_t* mbuf, unsigned char const* src, int len );
 extern void rmr_free_msg( rmr_mbuf_t* mbuf );
 extern unsigned char*  rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest );
+extern unsigned char*  rmr_get_src( rmr_mbuf_t* mbuf, unsigned char* dest );
 extern rmr_mbuf_t* rmr_realloc_msg( rmr_mbuf_t* mbuf, int new_tr_size );
 extern int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char const* str );
 extern void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str );

@@ -1,7 +1,7 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-        Copyright (c) 2019 Nokia 
+        Copyright (c) 2019 Nokia
         Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@
 /*
 	Mmemonic:	mbuf_api_static_test.c
 	Abstract:	Test the message buffer  funcitons. These are meant to be included at compile
-				time by the test driver.  
+				time by the test driver.
 
 	Author:		E. Scott Daniels
 	Date:		3 April 2019
@@ -44,6 +44,7 @@ int mbuf_api_test( ) {
 	int i;
 	int state;
 	int errors = 0;
+	char*	buf;
 	rmr_mbuf_t*	mbuf;
 	unsigned char src_buf[256];
 
@@ -131,7 +132,7 @@ int mbuf_api_test( ) {
 	errno = 0;
 	c = rmr_get_meid( NULL, NULL );
 	errors += fail_if( c != NULL, "get meid with nil message buffer" );
-	errors += fail_if( errno == 0, "(errno bad) get meid with nil msg buffer" ); 
+	errors += fail_if( errno == 0, "(errno bad) get meid with nil msg buffer" );
 	
 	c = rmr_get_meid( mbuf, NULL );			// should allocate and return c
 	errors += fail_if( c == NULL, "get meid with nil dest pointer (did not allocate a buffer)" );
@@ -248,6 +249,20 @@ int mbuf_api_test( ) {
 	errors+= fail_not_equal( state, 0, "compare of pulled trace info did not match" );
 
 	i = rmr_get_trlen( mbuf );
+
+
+	// ------------- source field tests ------------------------------------------------------------
+	// we cannot force anything into the message source field, so no way to test the content, but we
+	// can test pointers and expected nils
+
+	buf = rmr_get_src( NULL, src_buf );					// coverage test for nil msg check
+	errors += fail_not_nil( buf, "rmr_get_src returned a pointer when given a nil message" );
+
+	buf = rmr_get_src( mbuf, NULL );					// coverage test for nil dst check
+	errors += fail_not_nil( buf, "rmr_get_src returned a pointer when given a nil dest buffer" );
+
+	buf = rmr_get_src( mbuf, src_buf );
+	errors += fail_not_equal( buf, src_buf, "rmr_get_src didn't return expexted buffer pointer" );
 	
 
 	return errors > 0;			// overall exit code bad if errors
