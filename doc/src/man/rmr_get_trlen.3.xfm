@@ -1,0 +1,92 @@
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia 
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+.if false
+	Mnemonic	rmr_get_trlen
+	Abstract	The manual page for the get trace len function.
+	Author		E. Scott Daniels
+	Date		29 January 2019
+.fi
+
+.** if formatting with tfm, the roff.im will cause roff output to be generated
+.** if formatting with pfm, then pretty postscript will be generated
+.gv e LIB lib
+.if pfm
+	.im &{lib}/generic_ps.im
+.ei
+	.gv e OUTPUT_RST use_rst
+	.if .ev &use_rst 1 = 
+		.im &{lib}/rst.im
+	.ei
+		.im &{lib}/roff.im
+	.fi
+.fi
+
+
+&line_len(6i)
+
+&h1(RMR Library Functions)
+&h2(NAME)
+	rmr_get_trlen
+
+&h2(SYNOPSIS )
+&indent
+&ex_start
+#include <rmr/rmr.h>
+
+int rmr_get_trlen( rmr_mbuf_t* msg );
+&ex_end
+&uindent
+
+&h2(DESCRIPTION)
+Given a message buffer, this function returns the amount of space (bytes)
+that have been allocated for trace data. 
+If no trace data has been allocated, then 0 is returned.
+
+&h2(RETURN VALUE)
+The number of bytes allocated for trace information in the given message.
+
+&h2(ERRORS)
+&beg_dlist(.75i : ^&bold_font )
+&di(INVAL) Parameter(s) passed to the function were not valid.
+&end_dlist
+
+
+&h2(SEE ALSO )
+rmr_alloc_msg(3),
+rmr_call(3),
+rmr_free_msg(3),
+rmr_get_trace(3),
+rmr_init(3),
+rmr_init_trace(3),
+rmr_send_msg(3),
+rmr_rcv_msg(3),
+rmr_rcv_specific(3),
+rmr_rts_msg(3),
+rmr_ready(3),
+rmr_fib(3),
+rmr_has_str(3),
+rmr_tokenise(3),
+rmr_mk_ring(3),
+rmr_ring_free(3),
+rmr_set_trace(3),
+rmr_tralloc_msg(3)
+
+
+.qu
+
