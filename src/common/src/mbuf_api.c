@@ -316,3 +316,28 @@ extern int rmr_get_trlen( rmr_mbuf_t* msg ) {
 
 	return RMR_TR_LEN( hdr );
 }
+
+/*
+	Returns the string in the source portion of the header. This is assumed to be
+	something that can be used for direct sends (hostname:port). Regardless, it
+	will be a nil terminated, ascii string with max of 64 characters including
+	the final nil. So, the user must ensure that dest is at least 64 bytes.
+
+	As a convenience, the pointer to dest is returned on success; nil on failure
+	with errno set.
+*/
+extern unsigned char* rmr_get_src( rmr_mbuf_t* msg, unsigned char* dest ) {
+	uta_mhdr_t*	hdr = NULL;
+
+	if( msg == NULL ) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if( dest != NULL ) {
+		hdr = msg->header;
+		strcpy( dest, hdr->src );
+	}
+
+	return dest;
+}
