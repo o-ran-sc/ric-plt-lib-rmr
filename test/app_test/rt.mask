@@ -1,0 +1,21 @@
+
+# This is a 'mask' such that the run command can generate with the 
+# host name for the sender.
+
+newrt|start
+rte|0|localhost:4560
+rte|1|localhost:4560
+rte|2|localhost:4560
+rte|3|localhost:4560
+rte|4|localhost:4560
+rte|5|localhost:4560
+rte|6|localhost:4560
+rte|7|localhost:4560
+rte|8|localhost:4560
+rte|9|localhost:4560
+rte|10|localhost:4560
+rte|11|localhost:4560
+rte|12|localhost:4560
+rte|13|localhost:4560
+rte|999|%%hostname%%:43086
+newrt|end

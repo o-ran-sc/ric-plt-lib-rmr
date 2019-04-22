@@ -1,0 +1,12 @@
+
+This directory contains various sender/receiver applications that can be
+driven together to test message exchange through the RMr library. 
+The run_app_test.ksh script should support building the library, building
+a sender and receiver, then running a short test to verify.
+
+The basic sender and receiver
+Sender and receiver perform lightweight check sums on the message body 
+and on trace data to verify that the messages are being reeived correctly.
+The receiver acks message type 5, so the reciver should receive acks at
+about the volume of 1/10th the number of messages sent.
+
