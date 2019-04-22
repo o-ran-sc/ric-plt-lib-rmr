@@ -155,20 +155,6 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 	}
 
 	ep = rt_ensure_ep( rt, ep_name ); 			// get the ep and create one if not known
-	/*
-	if( (ep = uta_get_ep( rt, ep_name )) == NULL ) { 					// not there yet, make
-		if( (ep = (endpoint_t *) malloc( sizeof( *ep ) )) == NULL ) {
-			fprintf( stderr, "uta: [WARN] malloc failed for endpoint creation: %s\n", ep_name );
-			return NULL;
-		}
-
-		ep->open = 0;					// not connected
-		ep->addr = uta_h2ip( ep_name );
-		ep->name = strdup( ep_name );
-
-		rmr_sym_put( rt->hash, ep_name, 1, ep );
-	}
-	*/
 
 	if( rrg != NULL ) {
 		if( rrg->nused >= rrg->nendpts ) {
@@ -199,11 +185,12 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_s
 		return FALSE;
 	}
 
-
 	ep =  rmr_sym_get( rt->hash, ep_name, 1 );
 	if( ep == NULL ) {
 		if( DEBUG ) fprintf( stderr, "[DBUG] get ep by name for %s not in hash!\n", ep_name );
-		return FALSE;
+		if( ! ep_name || (ep = rt_ensure_ep( rt, ep_name)) == NULL ) {				// create one if not in rt (support rts without entry in our table)
+			return FALSE;
+		}
 	}
 
 	if( ! ep->open )  {										// not open -- connect now

@@ -172,7 +172,9 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name ) {
 
 	ep =  rmr_sym_get( rt->hash, ep_name, 1 );
 	if( ep == NULL ) {
-		return -1;
+		if( ! ep_name || (ep = rt_ensure_ep( rt, ep_name)) == NULL ) {				// create one if not in rt (support rts without entry in our table)
+			return -1;
+		}
 	}
 
 	if( !ep->open  ) {								// not connected; must connect now
