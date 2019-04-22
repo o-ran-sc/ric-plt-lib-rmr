@@ -80,8 +80,8 @@ static void free_ctx( uta_ctx_t* ctx ) {
 // --------------- public functions --------------------------------------------------------------------------
 
 /*
-	Set the receive timeout to time. If time >1000 we assume the time is milliseconds,
-	else we assume seconds. Setting -1 is always block.
+	Set the receive timeout to time (ms). A value of 0 is the same as a non-blocking
+	receive and -1 is block for ever.
 	Returns the nn value (0 on success <0 on error).
 */
 extern int rmr_set_rtimeout( void* vctx, int time ) {
@@ -92,11 +92,11 @@ extern int rmr_set_rtimeout( void* vctx, int time ) {
 		return -1;
 	}
 
-	if( time > 0 ) {
-		if( time < 1000 ) {	
-			time = time * 1000;			// assume seconds, nn wants ms
-		}
-	} 
+	if( ctx->last_rto == time ) {
+		return 0;
+	}
+
+	ctx->last_rto = time;
 
 	return nn_setsockopt( ctx->nn_sock, NN_SOL_SOCKET, NN_RCVTIMEO, &time, sizeof( time ) );
 }
@@ -107,7 +107,6 @@ extern int rmr_set_rtimeout( void* vctx, int time ) {
 extern int rmr_rcv_to( void* vctx, int time ) {
 	return rmr_rcv_to( vctx, time );
 }
-
 
 /*
 	Set the send timeout to time. If time >1000 we assume the time is milliseconds,
@@ -448,7 +447,14 @@ extern rmr_mbuf_t* rmr_rcv_msg( void* vctx, rmr_mbuf_t* old_msg ) {
 	nanomsg as it just sets the rcv timeout and calls rmr_rcv_msg(). 
 */
 extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to ) {
-	rmr_set_rtimeout( vctx, ms_to );
+	uta_ctx_t*	ctx;
+
+	if( (ctx = (uta_ctx_t *) vctx) != NULL ) {
+		if( ctx->last_rto != ms_to ) {							// avoid call overhead
+			rmr_set_rtimeout( vctx, ms_to );
+		}
+	}
+
 	return rmr_rcv_msg( vctx, old_msg );
 }
 
@@ -554,6 +560,7 @@ static void* init( char* uproto_port, int max_msg_size, int flags ) {
 
 
 	ctx->mring = uta_mk_ring( 128 );				// message ring to hold asynch msgs received while waiting for call response
+	ctx->last_rto = -2;								// last receive timeout that was set; invalid value to force first to set
 
 	ctx->max_plen = RMR_MAX_RCV_BYTES + sizeof( uta_mhdr_t );		// default max buffer size
 	if( max_msg_size > 0 ) {
