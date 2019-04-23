@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-        Copyright (c) 2019 Nokia 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019 Nokia
+	    Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,7 @@
 	Abstract:	Specific tests related to the API functions in rmr_nng.c/rmr.c.
 				This should be included by a driver, but only the main RMr
 				driver and there likely not be a specific stand alone driver
-				for just this small set of tests because of the depth of the 
+				for just this small set of tests because of the depth of the
 				library needed to test at this level.
 
 				The message buffer specific API tests are in a different static
@@ -130,7 +130,7 @@ static int rmr_api_test( ) {
 	} else {
 		errors += fail_if( v < 0, "rmr_payload_size returned invalid size for good message" );
 	}
-	
+
 	v = rmr_get_rcvfd( NULL );
 	errors += fail_if( v >= 0, "rmr_get_rcvfd returned a valid file descriptor when given nil context" );
 	v = rmr_get_rcvfd( rmc );
@@ -221,7 +221,7 @@ static int rmr_api_test( ) {
 	}
 
 	errors += fail_if( i >= 16, "did not find expected message on queue" );
-		
+
 	if( ! msg ) {
 		msg = rmr_alloc_msg( rmc, 2048 );				// something buggered above; get a new one
 	}
@@ -270,12 +270,12 @@ static int rmr_api_test( ) {
 	errors += fail_not_equal( state, 17, "len of trace data (a) returned after msg allocation was not expected size (b)" );
 	state = strcmp( wbuf, "1904308620110417" );
 	errors += fail_not_equal( state, 0, "trace data returned after tralloc was not correct" );
-	
+
 	em_send_failures = 1;
 	send_n_msgs( rmc, 30 );			// send 30 messages with emulation failures
 	em_send_failures = 0;
 
-	
+
 	rmr_close( NULL );			// drive for coverage
 	rmr_close( rmc );			// no return to check; drive for coverage
 

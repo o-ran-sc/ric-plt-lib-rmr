@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-        Copyright (c) 2019 Nokia 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019 Nokia
+	    Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -65,7 +65,7 @@ void sig_clean_exit( int sign ) {
 	exit( 0 );
 }
 
-/*	
+/*
 	Setup all of the signal handling for signals that we want to force a clean exit:
 	term, intr, hup, quit, usr1/2 alarm, etc.  All others we'll let default.
 */
@@ -74,7 +74,7 @@ static void set_signals( void ) {
 	int	sig_list[] = { SIGINT, SIGQUIT, SIGILL, SIGALRM, SIGTERM, SIGUSR1 , SIGUSR2 };
 	int i;
 	int nele;		// number of elements in the list
-	
+
 	nele = (int) ( sizeof( sig_list )/sizeof( int ) );		// convert raw size to the number of elements
 	for( i = 0; i < nele; i ++ ) {
 		memset( &sa, 0, sizeof( sa ) );
@@ -162,7 +162,7 @@ static rmr_mbuf_t* test_mk_msg( int len, int tr_len ) {
 	new_msg->payload =  new_msg->header + PAYLOAD_OFFSET( hdr );
 	new_msg->alloc_len = alen;
 	new_msg->len = 0;
-	
+
 	return new_msg;
 }
 #endif

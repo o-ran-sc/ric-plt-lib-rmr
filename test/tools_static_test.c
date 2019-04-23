@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-        Copyright (c) 2019 Nokia 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019 Nokia
+	    Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,7 +43,7 @@ static int tools_test( ) {
 	uta_ctx_t ctx;				// context for uta_lookup test
 	void*	if_list;
 
-	
+
 	// ------------------ tokenise tests -----------------------------------------------------------
 	dbuf = strdup( buf );
 	i = uta_tokenise( dbuf, tokens, 127, ',' );
@@ -69,7 +69,7 @@ static int tools_test( ) {
 
 	j = uta_has_str( buf, "Mrs. Slate", ',', 27 );
 	errors += fail_if_true( j >= 0, "has string not found Mrs. Slate" );
-	
+
 	// ------------ host name 2 ip tests ---------------------------------------------------------
 	hname = uta_h2ip( "192.168.1.2" );
 	errors += fail_not_equal( strcmp( hname, "192.168.1.2" ), 0, "h2ip did not return IP address when given address" );
@@ -84,7 +84,7 @@ static int tools_test( ) {
 	// ------------ rtg lookup test -------------------------------------------------------------
 	ctx.rtg_port = 0;
 	ctx.rtg_addr = NULL;
-       
+
 	i = uta_lookup_rtg( NULL );						// ensure it handles a nil context
 	errors += fail_if_true( i, "rtg lookup returned that it found something when not expected to (nil context)" );
 

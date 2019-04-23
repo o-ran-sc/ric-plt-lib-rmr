@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-        Copyright (c) 2019 Nokia
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019 Nokia
+	    Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,8 +23,8 @@
 	Mnemonic:	mbuf_api_test.c
 	Abstract:	Unit tests for the mbuf common API functions.
 				To allow the mbuf functions to be tested without the bulk of the
-				RMr mechanics, we dummy up a couple of functions that are in 
-				rmr[_nng].c. 
+				RMr mechanics, we dummy up a couple of functions that are in
+				rmr[_nng].c.
 
 	Author:		E. Scott Daniels
 	Date:		2 April 2019
@@ -63,7 +63,7 @@ extern void rmr_free_msg( rmr_mbuf_t* mbuf ) {
 	we actually pulled in the sr static set.
 
 	WARNING:  this is NOT a complete realloc.  We assume that we are testing
-			just the trace length adjustment portion of the set_trace() 
+			just the trace length adjustment portion of the set_trace()
 			API and are not striving to test the real realloc function. That
 			will be tested when the mbuf_api_static_test code is used by the
 			more generic RMr test.  So, not all fields in the realloc'd buffer

@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -82,7 +82,7 @@ typedef struct {
 	int sub_id;					// subscription id
 
 								// these things are off limits to the user application
-	void*	tp_buf;				// underlying transport allocated pointer (e.g. nng message)	
+	void*	tp_buf;				// underlying transport allocated pointer (e.g. nng message)
 	void*	header;				// internal message header (whole buffer: header+payload)
 	unsigned char* id;			// if we need an ID in the message separate from the xaction id
 	int		flags;				// various MFL_ (private) flags as needed
@@ -141,23 +141,23 @@ extern int rmr_send_to( void* vctx, int time );		// DEPRECATED -- replaced with 
 #ifdef UTA_COMPAT
 #pragma message( "use of UTA_COMPAT is deprecated and soon to be removed" )
 
-#define UTA_MAX_XID RMR_MAX_XID 
-#define UTA_MAX_SID	RMR_MAX_SID 
-#define UTA_MAX_SRC RMR_MAX_SRC 
-#define UTA_MAX_RCV_BYTES RMR_MAX_RCV_BYTES 
+#define UTA_MAX_XID RMR_MAX_XID
+#define UTA_MAX_SID	RMR_MAX_SID
+#define UTA_MAX_SRC RMR_MAX_SRC
+#define UTA_MAX_RCV_BYTES RMR_MAX_RCV_BYTES
 
-#define UTAFL_NONE		RMRFL_NONE 
-#define UTAFL_AUTO_ALLOC RMRFL_AUTO_ALLOC 
+#define UTAFL_NONE		RMRFL_NONE
+#define UTAFL_AUTO_ALLOC RMRFL_AUTO_ALLOC
 
-#define UTA_DEF_SIZE	RMRFL_AUTO_ALLOC 
+#define UTA_DEF_SIZE	RMRFL_AUTO_ALLOC
 
-#define UTA_OK			 RMR_OK 
-#define UTA_ERR_BADARG	RMR_ERR_BADARG 
-#define UTA_ERR_NOENDPT RMR_ERR_NOENDPT 	
+#define UTA_OK			 RMR_OK
+#define UTA_ERR_BADARG	RMR_ERR_BADARG
+#define UTA_ERR_NOENDPT RMR_ERR_NOENDPT
 #define UTA_ERR_EMPTY	RMR_ERR_EMPTY
-#define UTA_ERR_NOHDR	RMR_ERR_NOHDR 
-#define UTA_ERR_SENDFAILED RMR_ERR_SENDFAILED 
-#define UTA_ERR_CALLFAILED RMR_ERR_CALLFAILED 
+#define UTA_ERR_NOHDR	RMR_ERR_NOHDR
+#define UTA_ERR_SENDFAILED RMR_ERR_SENDFAILED
+#define UTA_ERR_CALLFAILED RMR_ERR_CALLFAILED
 
 #define uta_mbuf_t rmr_mbuf_t
 

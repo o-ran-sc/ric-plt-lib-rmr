@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-        Copyright (c) 2019 Nokia 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019 Nokia
+	    Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,7 @@
 /*
 	Mmemonic:	ring_static_test.c
 	Abstract:	Test the ring funcitons. These are meant to be included at compile
-				time by the test driver.  
+				time by the test driver.
 
 	Author:		E. Scott Daniels
 	Date:		3 April 2019
@@ -41,9 +41,9 @@
 
 
 /*
-	Conduct a series of interleaved tests inserting i-factor 
+	Conduct a series of interleaved tests inserting i-factor
 	values before beginning to pull values (i-factor must be
-	size - 2 smaller than the ring. 
+	size - 2 smaller than the ring.
 	Returns 0 on success, 1 on insert failure and 2 on pull failure.
 */
 static int ie_test( void* r, int i_factor, long inserts ) {
@@ -118,7 +118,7 @@ static int ring_test( ) {
 			} else {
 				break;
 			}
-		}	
+		}
 
 		if( *dp != i ) {
 			fprintf( stderr, "<FAIL> data at i=% isnt right; expected %d got %d\n", i, i, *dp );
@@ -129,7 +129,7 @@ static int ring_test( ) {
 		return 1;
 	}
 	fprintf( stderr, "<OK>   extracted values were sane, got: %d\n", i-1 );
-		
+
 	uta_ring_free( NULL );							// ensure this doesn't blow up
 	uta_ring_free( r );
 	for( i = 2; i < 15; i++ ) {
@@ -151,7 +151,7 @@ static int ring_test( ) {
 				fprintf( stderr, "<FAIL> ie test for 66K inserts didn't return 0\n" );
 				return 1;
 			}
-	
+
 			uta_ring_free( r );
 		}
 		fprintf( stderr, "<OK>   all large insert/exctract tests pass ring size=%d\n", size );

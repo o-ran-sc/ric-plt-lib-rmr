@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,14 +22,14 @@
 ------------------------------------------------------------------------------
 Mnemonic:	symtab.c
 Abstract:	Symbol table -- slightly streamlined from it's original 2000 version
-			(a part of the {X}fm opensource code), though we must retain the 
+			(a part of the {X}fm opensource code), though we must retain the
 			original copyright.
 
 			Things changed for the Ric Msg implemention (Nov 2018):
 				- no concept of copy/free of the user data (functions removed)
 				- add ability to support an integer key (class 0)
 				- externally visible names given a rmr_ extension as it's being
-				  incorporated into the RIC msg routing library and will be 
+				  incorporated into the RIC msg routing library and will be
 				  available to user applications.
 
 Date:		11 Feb 2000
@@ -60,7 +60,7 @@ typedef struct Sym_ele
 	void *val;              /* user data associated with name */
 	unsigned long mcount;   /* modificaitons to value */
 	unsigned long rcount;   /* references to symbol */
-	//unsigned int flags; 
+	//unsigned int flags;
 	unsigned int class;		/* helps divide things up and allows for duplicate names */
 } Sym_ele;
 
@@ -68,7 +68,7 @@ typedef struct Sym_tab {
 	Sym_ele **symlist;			/* pointer to list of element pointerss */
 	long	inhabitants;		/* number of active residents */
 	long	deaths;				/* number of deletes */
-	long	size;	
+	long	size;
 } Sym_tab;
 
 // -------------------- internal ------------------------------------------------------------------
@@ -107,7 +107,7 @@ static void del_ele( Sym_tab *table, int hv, Sym_ele *eptr )
 			eptr->next->prev = eptr->prev;
 
 		if( eptr->class && eptr->name ) {				// class 0 entries are numeric, so name is NOT a pointer
-			free( (void *) eptr->name );			// and if free fails, what?  panic? 
+			free( (void *) eptr->name );			// and if free fails, what?  panic?
 		}
 
 		free( eptr );
@@ -130,14 +130,14 @@ static inline int same( unsigned int c1, unsigned int c2, const char *s1, const 
 	return 0;
 }
 
-/*	
+/*
 	Generic routine to put something into the table
 	called by sym_map or sym_put since the logic for each is pretty
 	much the same.
 */
 static int putin( Sym_tab *table, const char *name, unsigned int class, void *val ) {
-	Sym_ele *eptr;    	/* pointer into hash table */ 
-	Sym_ele **sym_tab;    	/* pointer into hash table */ 
+	Sym_ele *eptr;    	/* pointer into hash table */
+	Sym_ele **sym_tab;    	/* pointer into hash table */
 	int hv;                  /* hash value */
 	int rc = 0;              /* assume it existed */
 	unsigned int	nkey = 0;	// numeric key if class == 0
@@ -156,12 +156,12 @@ static int putin( Sym_tab *table, const char *name, unsigned int class, void *va
 	if( ! eptr ) { 			// not found above, so add
 		rc++;
 		table->inhabitants++;
-	
+
 		eptr = (Sym_ele *) malloc( sizeof( Sym_ele) );
 		if( ! eptr ) {
 			fprintf( stderr, "[FAIL] symtab/putin: out of memory\n" );
 			return -1;
-		} 
+		}
 
 		eptr->prev = NULL;
 		eptr->class = class;
@@ -193,13 +193,13 @@ extern void rmr_sym_clear( void *vtable )
 {
 	Sym_tab *table;
 	Sym_ele **sym_tab;
-	int i; 
+	int i;
 
 	table = (Sym_tab *) vtable;
 	sym_tab = table->symlist;
 
 	for( i = 0; i < table->size; i++ )
-		while( sym_tab[i] ) 
+		while( sym_tab[i] )
 			del_ele( table, i, sym_tab[i] );
 }
 
@@ -222,7 +222,7 @@ extern void rmr_sym_free( void *vtable ) {
 extern void rmr_sym_dump( void *vtable )
 {
 	Sym_tab *table;
-	int i; 
+	int i;
 	Sym_ele *eptr;
 	Sym_ele **sym_tab;
 
@@ -232,7 +232,7 @@ extern void rmr_sym_dump( void *vtable )
 	for( i = 0; i < table->size; i++ )
 	{
 		if( sym_tab[i] )
-		for( eptr = sym_tab[i]; eptr; eptr = eptr->next )  
+		for( eptr = sym_tab[i]; eptr; eptr = eptr->next )
 		{
 			if( eptr->val && eptr->class ) {
 				fprintf( stderr, "key=%s val@=%p\n", eptr->name, eptr->val );
@@ -263,7 +263,7 @@ extern void *rmr_sym_alloc( int size )
 
 	memset( table, 0, sizeof( *table ) );
 
-	if((table->symlist = (Sym_ele **) malloc( sizeof( Sym_ele *) * size ))) 
+	if((table->symlist = (Sym_ele **) malloc( sizeof( Sym_ele *) * size )))
 	{
 		memset( table->symlist, 0, sizeof( Sym_ele *) * size );
 		table->size = size;
@@ -277,14 +277,14 @@ extern void *rmr_sym_alloc( int size )
 	return (void *) table;    /* user might want to know what the size is */
 }
 
-/* 
+/*
 	Delete an element given name/class or numeric key (class 0).
 */
 extern void rmr_sym_del( void *vtable, const char *name, unsigned int class )
 {
 	Sym_tab	*table;
 	Sym_ele **sym_tab;
-	Sym_ele *eptr;    /* pointer into hash table */ 
+	Sym_ele *eptr;    /* pointer into hash table */
 	int hv;                  /* hash value */
 	unsigned int nkey;		// class 0, name points to integer not string
 
@@ -347,7 +347,7 @@ extern void *rmr_sym_pull(  void *vtable, int key ) {
 	return rmr_sym_get( vtable, (const char *) &key, 0 );
 }
 
-/* 
+/*
 	Put an element with a string key into the table. Replaces the element
 	if it was already there.  Class must be >0 and if not 1 will be forced.
 	(class 0 keys are numeric).
@@ -365,10 +365,10 @@ extern int rmr_sym_put( void *vtable, const char *name, unsigned int class, void
 	return putin( table, name, class, val );
 }
 
-/* 
+/*
 	Add a new entry assuming that the key is an unsigned integer.
 
-	Returns 1 if new, 0 if existed 
+	Returns 1 if new, 0 if existed
 */
 extern int rmr_sym_map( void *vtable, unsigned int key, void *val ) {
 	Sym_tab	*table;
@@ -377,8 +377,8 @@ extern int rmr_sym_map( void *vtable, unsigned int key, void *val ) {
 	return putin( table, (const char *) &key, 0, val );
 }
 
-/* 
-	Dump some statistics to stderr dev. Higher level is the more info dumpped 
+/*
+	Dump some statistics to stderr dev. Higher level is the more info dumpped
 */
 extern void rmr_sym_stats( void *vtable, int level )
 {
@@ -400,7 +400,7 @@ extern void rmr_sym_stats( void *vtable, int level )
 		ch_count = 0;
 		if( sym_tab[i] )
 		{
-			for( eptr = sym_tab[i]; eptr; eptr = eptr->next )  
+			for( eptr = sym_tab[i]; eptr; eptr = eptr->next )
 			{
 				ch_count++;
 				if( level > 3 ) {
@@ -415,7 +415,7 @@ extern void rmr_sym_stats( void *vtable, int level )
 		else
 			empty++;
 
-		if( ch_count > max_chain ) 
+		if( ch_count > max_chain )
 		{
 			max_chain = ch_count;
 			maxi = i;
@@ -439,7 +439,7 @@ extern void rmr_sym_stats( void *vtable, int level )
 		}
 	}
 
-	fprintf( stderr, "sym:%ld(size)  %ld(inhab) %ld(occupied) %ld(dead) %ld(maxch) %d(>2per)\n", 
+	fprintf( stderr, "sym:%ld(size)  %ld(inhab) %ld(occupied) %ld(dead) %ld(maxch) %d(>2per)\n",
 			table->size, table->inhabitants, table->size - empty, table->deaths, max_chain, twoper );
 }
 

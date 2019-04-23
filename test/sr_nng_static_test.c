@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-        Copyright (c) 2019 Nokia 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019 Nokia
+	    Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,7 @@
 /*
 	Mmemonic:	sr_nng_static_test.c
 	Abstract:	Test the send/receive funcitons. These are meant to be included at compile
-				time by the test driver.  
+				time by the test driver.
 
 	Author:		E. Scott Daniels
 	Date:		3 April 2019
@@ -45,16 +45,16 @@ static void gen_rt( uta_ctx_t* ctx ) {
 	int		fd;
 	char* 	rt_stuff;		// strings for the route table
 
-	rt_stuff = 
-		"newrt|start\n"								// false start to drive detection 
+	rt_stuff =
+		"newrt|start\n"								// false start to drive detection
 		"xxx|badentry to drive default case"
 		"newrt|start\n"
-        "rte|0|localhost:4560,localhost:4562\n"
-        "rte|1|localhost:4562;localhost:4561,localhost:4569\n"
-        "rte|2|localhost:4562\n"
+	    "rte|0|localhost:4560,localhost:4562\n"
+	    "rte|1|localhost:4562;localhost:4561,localhost:4569\n"
+	    "rte|2|localhost:4562\n"
 	    "rte|4|localhost:4561\n"
 		"rte|5|localhost:4563\n"
-        "rte|6|localhost:4562\n"
+	    "rte|6|localhost:4562\n"
 		"newrt|end\n";
 
 	fd = open( "utesting.rt", O_WRONLY | O_CREAT, 0600 );
@@ -77,7 +77,7 @@ static void gen_rt( uta_ctx_t* ctx ) {
 
 	Send and receive functions are indirectly exercised from the rmr_nng_static_test
 	module as it tests the user facing send/receive/call/rts functions. These tests
-	should exercise specific cases for the internal functions as they will not 
+	should exercise specific cases for the internal functions as they will not
 	specifically be driven elsewhere.
 */
 static int sr_nng_test() {
@@ -121,7 +121,7 @@ static int sr_nng_test() {
 	errors += fail_not_equal( mbuf->flags, mb2->flags, "clone did not duplicate flags" );
 	errors += fail_not_equal( mbuf->alloc_len, mb2->alloc_len, "clone did not dup alloc-len" );
 	errors += fail_not_equal( mbuf->state, mb2->state, "clone did not dup state" );
-	rmr_free_msg( mb2 );	
+	rmr_free_msg( mb2 );
 
 	mbuf = rmr_send_msg( NULL, mbuf );
 	errors += fail_if_nil( mbuf, "send with nil context but buffere didn't return buffer" );
@@ -184,7 +184,7 @@ static int sr_nng_test() {
 	ctx->shutdown = 1;			// should force rtc to quit on first pass
 	rtc( NULL );				// coverage test with nil pointer
 	rtc( ctx );
-	
+
 
 	return !!errors;
 }

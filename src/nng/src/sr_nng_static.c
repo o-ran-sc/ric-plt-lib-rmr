@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,7 @@
 
 /*
 	Mnemonic:	sr_nng_static.c
-	Abstract:	These are static send/receive primatives which (sadly) 
+	Abstract:	These are static send/receive primatives which (sadly)
 				differ based on the underlying protocol (nng vs nanomsg).
 				Split from rmr_nng.c  for easier wormhole support.
 
@@ -55,7 +55,7 @@ static inline int xlate_nng_state( int state, int def_state ) {
 			state = RMR_ERR_RETRY;
 			errno = EAGAIN;
 			break;
-			
+
 		case NNG_ETIMEDOUT:
 			state = RMR_ERR_RETRY;
 			errno = EAGAIN;
@@ -85,7 +85,7 @@ static inline int xlate_nng_state( int state, int def_state ) {
 			errno  = EBADFD;				// file des not in a good state for the operation
 			state = def_state;
 			break;
-		
+
 		default:
 			errno = EBADE;
 			state = def_state;
@@ -159,7 +159,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 }
 
 /*
-	Allocates only the mbuf and does NOT allocate an underlying transport buffer since 
+	Allocates only the mbuf and does NOT allocate an underlying transport buffer since
 	NNG receive must allocate that on its own.
 */
 static rmr_mbuf_t* alloc_mbuf( uta_ctx_t* ctx, int state ) {
@@ -190,7 +190,7 @@ static rmr_mbuf_t* alloc_mbuf( uta_ctx_t* ctx, int state ) {
 /*
 	This accepts a message with the assumption that only the tp_buf pointer is valid. It
 	sets all of the various header/payload/xaction pointers in the mbuf to the proper
-	spot in the transport layer buffer.  The len in the header is assumed to be the 
+	spot in the transport layer buffer.  The len in the header is assumed to be the
 	allocated len (a receive buffer that nng created);
 
 	The alen parm is the assumed allocated length; assumed because it's a value likely
@@ -210,7 +210,7 @@ static void ref_tpbuf( rmr_mbuf_t* msg, size_t alen )  {
 	msg->header = nng_msg_body( msg->tp_buf );				// header is the start of the transport buffer
 	v1hdr = (uta_v1mhdr_t *) msg->header;					// v1 will always allow us to suss out the version
 
-	if( v1hdr->rmr_ver == 1 ) {			// bug in verion 1 didn't encode the version in network byte order 
+	if( v1hdr->rmr_ver == 1 ) {			// bug in verion 1 didn't encode the version in network byte order
 		ver = 1;
 		v1hdr->rmr_ver = htonl( 1 );		// save it correctly in case we clone the message
 	} else {
@@ -241,7 +241,7 @@ static void ref_tpbuf( rmr_mbuf_t* msg, size_t alen )  {
 			msg->flags |= MFL_ZEROCOPY;								// this is a zerocopy sendable message
 			msg->mtype = ntohl( hdr->mtype );						// capture and convert from network order to local order
 			msg->sub_id = ntohl( hdr->sub_id );
-			hlen = RMR_HDR_LEN( hdr );								// len to use for truncated check later		
+			hlen = RMR_HDR_LEN( hdr );								// len to use for truncated check later
 			break;
 	}
 
@@ -290,7 +290,7 @@ static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  ) {
 			nm->payload = PAYLOAD_ADDR( hdr );				// at user payload
 			break;
 	}
-		
+
 	// --- these are all version agnostic -----------------------------------
 	nm->mtype = old_msg->mtype;
 	nm->sub_id = old_msg->sub_id;
@@ -351,7 +351,7 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 			if( RMR_D1_LEN( hdr )  ) {
 				coffset = DATA1_OFFSET( hdr );												// offset to d1
 				memcpy( hdr + coffset, old_msg->header + coffset, RMR_D1_LEN( hdr ) );	 	// copy data1 and data2 if necessary
-			
+
 			}
 			if( RMR_D2_LEN( hdr )  ) {
 				coffset = DATA2_OFFSET( hdr );												// offset to d2
@@ -363,7 +363,7 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 			SET_HDR_TR_LEN( hdr, tr_len );										// do NOT copy old trace data, just set the new header
 			break;
 	}
-		
+
 	// --- these are all version agnostic -----------------------------------
 	nm->mtype = old_msg->mtype;
 	nm->sub_id = old_msg->sub_id;
@@ -397,10 +397,10 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 
 
 	In the NNG msg world it must allocate the receive buffer rather
-	than accepting one that we allocated from their space and could 
+	than accepting one that we allocated from their space and could
 	reuse.  They have their reasons I guess.  Thus, we will free
 	the old transport buffer if user passes the message in; at least
-	our mbuf will be reused. 
+	our mbuf will be reused.
 */
 static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
 	int state;
@@ -440,7 +440,7 @@ static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
 		hdr = (uta_mhdr_t *) msg->header;
 		msg->flags |= MFL_ADDSRC;					// turn on so if user app tries to send this buffer we reset src
 
-		if( DEBUG > 1 ) fprintf( stderr, "[DBUG] rcv_msg: got something: type=%d state=%d len=%d diff=%ld\n", 
+		if( DEBUG > 1 ) fprintf( stderr, "[DBUG] rcv_msg: got something: type=%d state=%d len=%d diff=%ld\n",
 				msg->mtype, msg->state, msg->len,  msg->payload - (unsigned char *) msg->header );
 	} else {
 		msg->state = RMR_ERR_EMPTY;
@@ -458,11 +458,11 @@ static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
 
 /*
 	Receives a 'raw' message from a non-RMr sender (no header expected). The returned
-	message buffer cannot be used to send, and the length information may or may 
+	message buffer cannot be used to send, and the length information may or may
 	not be correct (it is set to the length received which might be more than the
 	bytes actually in the payload).
 
-	Mostly this supports the route table collector, but could be extended with an 
+	Mostly this supports the route table collector, but could be extended with an
 	API external function.
 */
 static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
@@ -500,8 +500,8 @@ static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
 
 /*
 	This does the hard work of actually sending the message to the given socket. On success,
-	a new message struct is returned. On error, the original msg is returned with the state 
-	set to a reasonable value. If the message being sent as MFL_NOALLOC set, then a new 
+	a new message struct is returned. On error, the original msg is returned with the state
+	set to a reasonable value. If the message being sent as MFL_NOALLOC set, then a new
 	buffer will not be allocated and returned (mostly for call() interal processing since
 	the return message from call() is a received buffer, not a new one).
 
@@ -561,7 +561,7 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock
 		if( (state = nng_send( nn_sock, msg->header, sizeof( uta_mhdr_t ) + msg->len, nng_flags )) != 0 ) {
 			msg->state = state;
 			//if( DEBUG ) fprintf( stderr, ">>>>> copy buffer send failed: %s\n", nng_strerror( state ) );
-		} 
+		}
 		*/
 	}
 

@@ -8,7 +8,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -84,7 +84,7 @@ static void* rtc( void* vctx ) {
 	char*	port;						// a port number we listen/connect to
 	char*	fport;						// pointer to the real buffer to free
 	size_t	buf_size;					// nng needs var pointer not just size?
-	char*	nextr;						// pointer at next record in the message	
+	char*	nextr;						// pointer at next record in the message
 	char*	curr;						// current record
 	int 	i;
 	long	blabber = 0;				// time of last blabber so we don't flood if rtg goes bad
@@ -106,7 +106,7 @@ static void* rtc( void* vctx ) {
 	}
 
 	if( (eptr = getenv( ENV_VERBOSE_FILE )) != NULL ) {
-		vfd = open( eptr, O_RDONLY ); 
+		vfd = open( eptr, O_RDONLY );
 		if( vfd >= 0 ) {
 			wbuf[0] = 0;
 			lseek( vfd, 0, 0 );
@@ -131,7 +131,7 @@ static void* rtc( void* vctx ) {
 
 	ntoks = uta_tokenise( port, tokens, 120, ':' );			// assume tcp:port, but it could be port or old style host:port
 	switch( ntoks ) {
-		case 1:	
+		case 1:
 				port = tokens[0];			// just the port
 				break;
 
@@ -196,19 +196,19 @@ static void* rtc( void* vctx ) {
 			curr = pbuf;
 			while( curr ) {								// loop over each record in the buffer
 				nextr = strchr( curr, '\n' );			// allow multiple newline records, find end of current and mark
-	
+
 				if( nextr ) {
 					*(nextr++) = 0;
 				}
-	
+
 				if( vlevel > 1 ) {
 					fprintf( stderr, "[DBUG] rmr_rtc: processing (%s)\n", curr );
 				}
 				parse_rt_rec( ctx, curr, vlevel );		// parse record and add to in progress table
-		
+
 				curr = nextr;
 			}
-	
+
 			if( ctx->shutdown ) {		// mostly for testing, but allows user app to close us down if rmr_*() function sets this
 				break;
 			}

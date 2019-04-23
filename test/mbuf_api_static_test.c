@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-        Copyright (c) 2019 Nokia
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019 Nokia
+	    Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -74,7 +74,7 @@ int mbuf_api_test( ) {
 	rmr_bytes2payload( mbuf, src_buf, 8192 );						// bust the limit
 	errors += fail_if( mbuf->state == RMR_OK, "huge buf copy to payload returned good state in mbuf" );
 	errors += fail_if( errno == 0, "huge buf copy to payload returned good state in errno" );
-	
+
 
 	snprintf( src_buf, sizeof( src_buf ), "This is some text in the buffer" );
 	rmr_str2payload( mbuf, src_buf );							// this uses bytes2payload, so only one invocation needed
@@ -133,7 +133,7 @@ int mbuf_api_test( ) {
 	c = rmr_get_meid( NULL, NULL );
 	errors += fail_if( c != NULL, "get meid with nil message buffer" );
 	errors += fail_if( errno == 0, "(errno bad) get meid with nil msg buffer" );
-	
+
 	c = rmr_get_meid( mbuf, NULL );			// should allocate and return c
 	errors += fail_if( c == NULL, "get meid with nil dest pointer (did not allocate a buffer)" );
 	errors += fail_if( strcmp( c, "test-meid" ) != 0, "did not get expected meid from mbuffer" );
@@ -217,7 +217,7 @@ int mbuf_api_test( ) {
 	state = rmr_get_trlen( NULL );								// coverage test on nil check
 	errors += fail_not_equal( state, 0, "get trace length with nil msg didn't return expected 0 status" );
 
-	
+
 	src_buf[0] = 0;
 	state = rmr_set_trace( mbuf, "foo bar was here", 17 );		// should force a realloc
 	errors += fail_not_equal( state, 17, "bytes copied to trace (a) did not match expected size (b)" );
@@ -263,7 +263,7 @@ int mbuf_api_test( ) {
 
 	buf = rmr_get_src( mbuf, src_buf );
 	errors += fail_not_equal( buf, src_buf, "rmr_get_src didn't return expexted buffer pointer" );
-	
+
 
 	return errors > 0;			// overall exit code bad if errors
 }

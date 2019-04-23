@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,7 +47,7 @@ typedef struct uta_ctx  uta_ctx_t;
 #define RMR_MSG_VER	2			// message version this code was designed to handle
 
 									// environment variable names we'll suss out
-#define ENV_BIND_IF "RMR_BIND_IF"	// the interface to bind to for both normal comma and RTG (0.0.0.0 if missing) 
+#define ENV_BIND_IF "RMR_BIND_IF"	// the interface to bind to for both normal comma and RTG (0.0.0.0 if missing)
 #define ENV_RTG_PORT "RMR_RTG_SVC"	// the port we'll listen on for rtg connections
 #define ENV_SEED_RT	"RMR_SEED_RT"	// where we expect to find the name of the seed route table
 #define ENV_RTG_RAW "RMR_RTG_ISRAW"	// if > 0 we expect route table gen messages as raw (not sent from an RMr application)
@@ -132,7 +132,7 @@ typedef struct {
 	struct timespec	ts;					// timestamp ???
 
 										// V2 extension
-	int32_t	flags;						// HFL_* constants	
+	int32_t	flags;						// HFL_* constants
 	int32_t	len0;						// length of the RMr header data
 	int32_t	len1;						// length of the tracing data
 	int32_t	len2;						// length of data 1 (d1)
@@ -181,7 +181,7 @@ typedef struct {
 } route_table_t;
 
 /*
-	A wormhole is a direct connection between two endpoints that the user app can 
+	A wormhole is a direct connection between two endpoints that the user app can
 	send to without message type based routing.
 */
 typedef struct {

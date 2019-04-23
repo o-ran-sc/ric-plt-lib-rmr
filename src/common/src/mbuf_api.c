@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,8 @@
 
 /*
 	Mnemonic:	mbuf_api.c
-	Abstract:	These are common functions which work only on the mbuf and 
-				thus (because they do not touch an endpoint or context) 
+	Abstract:	These are common functions which work only on the mbuf and
+				thus (because they do not touch an endpoint or context)
 				can be agnostic to the underlying transport.
 
 	Author:		E. Scott Daniels
@@ -42,14 +42,14 @@
 // ---------- some wrappers need explicit copy-in functions, also header field setters -----
 
 /*
-	Allow the user programme to set the meid in the header.  The meid is a fixed 
+	Allow the user programme to set the meid in the header.  The meid is a fixed
 	length buffer in the header and thus we must ensure it is not overrun. If
 	the  user gives a source buffer that is too large, we truncate. The return
 	value is the number of bytes copied, or -1 for absolute failure (bad pointer
 	etc.).  Errno is set:
 		EINVAL id poitner, buf or buf header are bad.
 		EOVERFLOW if the bytes given would have overrun
-	
+
 */
 extern int rmr_bytes2meid( rmr_mbuf_t* mbuf, unsigned char const* src, int len ) {
 	uta_mhdr_t* hdr;
@@ -91,7 +91,7 @@ extern int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char const* str ) {
 		errno = EOVERFLOW;
 		return RMR_ERR_OVERFLOW;
 	}
-	
+
 	rmr_bytes2meid( mbuf, str, len+1 );
 	return RMR_OK;
 }
@@ -100,7 +100,7 @@ extern int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char const* str ) {
 
 /*
 	This will copy n bytes from source into the payload. If len is larger than
-	the payload only the bytes which will fit are copied, The user should 
+	the payload only the bytes which will fit are copied, The user should
 	check errno on return to determine success or failure.
 */
 extern void rmr_bytes2payload( rmr_mbuf_t* mbuf, unsigned char const* src, int len ) {
@@ -138,7 +138,7 @@ extern void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str ) {
 	etc.).  Errno is set:
 		EINVAL id poitner, buf or buf header are bad.
 		EOVERFLOW if the bytes given would have overrun
-	
+
 */
 extern int rmr_bytes2xact( rmr_mbuf_t* mbuf, unsigned char const* src, int len ) {
 	uta_mhdr_t* hdr;
@@ -182,7 +182,7 @@ extern int rmr_str2xact( rmr_mbuf_t* mbuf, unsigned char const* str ) {
 		errno = EOVERFLOW;
 		return RMR_ERR_OVERFLOW;
 	}
-	
+
 	rmr_bytes2xact( mbuf, str, len+1 );
 	return RMR_OK;
 }
@@ -219,7 +219,7 @@ extern unsigned char*  rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest ) {
 
 // ------------------- trace related access functions --------------------------------------
 /*
-	The set_trace function will copy the supplied data for size bytes into the 
+	The set_trace function will copy the supplied data for size bytes into the
 	header.  If the header trace area is not large enough, a new one will be allocated
 	which will cause a payload copy based on the msg->len value (if 0 no payload
 	data is copied).
@@ -244,7 +244,7 @@ extern int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size )
 	if( size <= 0 ) {
 		return 0;
 	}
-	
+
 	hdr = (uta_mhdr_t *) msg->header;
 	len = RMR_TR_LEN( hdr );
 
@@ -268,13 +268,13 @@ extern int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size )
 	}
 
 	memcpy( TRACE_ADDR( hdr ), data, size );
-	
+
 	return size;
 }
 
 
 /*
-	Copies the trace bytes from the message header into the buffer provided by 
+	Copies the trace bytes from the message header into the buffer provided by
 	the user. If the trace data in the header is less than size, then only
 	that number of bytes are copied, else exactly size bytes are copied. The
 	number actually copied is returned.

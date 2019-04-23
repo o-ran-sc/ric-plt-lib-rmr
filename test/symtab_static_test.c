@@ -1,13 +1,13 @@
 /*
 ==================================================================================
-        Copyright (c) 2019 Nokia 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019 Nokia
+	    Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,7 @@
 
 /*
 	Mnemonic:	symtab_static_test.c
-	Abstract:	This is the static function that should be included by 
+	Abstract:	This is the static function that should be included by
 				any test that wants to test the symbol table. It must
 				be included in the compile, and not built to object.
 
@@ -33,7 +33,7 @@
 
 #include "test_support.c"
 
-#ifndef GOOD 
+#ifndef GOOD
 #define GOOD 0
 #define BAD 1
 #endif
@@ -50,7 +50,7 @@ static void st_fetch( void* st, char* key, int class, int expected ) {
 		if( !expected ) {
 			symtab_state = BAD;
 		}
-		
+
 	} else {
 		fprintf( stderr, "<%s> string key st_fetch return nil\n", expected ? "FAIL" : "OK" );
 		if( expected ) {
@@ -85,9 +85,9 @@ static void each_counter( void* a, void* b, const char* c, void* d, void* e ) {
 }
 
 static int symtab_test( ) {
-    void*   st;
-    char*   foo = "foo";
-    char*   bar = "bar";
+	void*   st;
+	char*   foo = "foo";
+	char*   bar = "bar";
 	char*	goo = "goo";				// name not in symtab
 	int		i;
 	int		class = 1;
@@ -95,27 +95,27 @@ static int symtab_test( ) {
 	void*	p;
 	int		errors = 0;
 
-    st = rmr_sym_alloc( 10 );						// alloc with small value to force adjustment inside
+	st = rmr_sym_alloc( 10 );						// alloc with small value to force adjustment inside
 	errors += fail_if_nil( st, "symtab pointer" );
 
-    s = rmr_sym_put( st, foo, class, bar );			// add entry with string key; returns 1 if it was inserted
+	s = rmr_sym_put( st, foo, class, bar );			// add entry with string key; returns 1 if it was inserted
 	errors += fail_if_false( s, "insert foo existed" );
 
-    s = rmr_sym_put( st, foo, class+1, bar );		// add to table with a different class
+	s = rmr_sym_put( st, foo, class+1, bar );		// add to table with a different class
 	errors += fail_if_false( s, "insert foo existed" );
 
-    s = rmr_sym_put( st, foo, class, bar );			// inserted above, should return not inserted (0)
+	s = rmr_sym_put( st, foo, class, bar );			// inserted above, should return not inserted (0)
 	errors += fail_if_true( s, "insert foo existed" );
 
 	st_fetch( st, foo, class, 1 );
 	st_fetch( st, goo, class, 0 );					// st_fetch non existant
-    rmr_sym_stats( st, 4 );							// early stats at verbose level 4 so chatter is minimised
+	rmr_sym_stats( st, 4 );							// early stats at verbose level 4 so chatter is minimised
 	rmr_sym_dump( st );
 
 	for( i = 2000; i < 3000; i++ ) {			// bunch of dummy things to force chains in the table
 		rmr_sym_map( st, i, foo );					// add entry with unsigned integer key
 	}
-    rmr_sym_stats( st, 0 );							// just the small facts to verify the 1000 we stuffed in
+	rmr_sym_stats( st, 0 );							// just the small facts to verify the 1000 we stuffed in
 	rmr_sym_ndel( st, 2001 );						// force a numeric key delete
 	rmr_sym_ndel( st, 12001 );						// delete numeric key not there
 
@@ -131,12 +131,12 @@ static int symtab_test( ) {
 	st_nfetch( st, 1234, 1 );
 	st_nfetch( st, 2345, 1 );
 
-    rmr_sym_del( st, foo, 0 );		// drive for coverage
-    rmr_sym_stats( st, 0 );
+	rmr_sym_del( st, foo, 0 );		// drive for coverage
+	rmr_sym_stats( st, 0 );
 
 	rmr_sym_free( NULL );			// ensure it doesn't barf when given a nil pointer
 	rmr_sym_free( st );
 
-    return !!( errors + symtab_state );
+	return !!( errors + symtab_state );
 }
 

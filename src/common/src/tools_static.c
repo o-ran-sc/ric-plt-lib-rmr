@@ -1,14 +1,14 @@
 // :vi sw=4 ts=4 noet:
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -130,7 +130,7 @@ static char* uta_h2ip( char const* hname ) {
 
 
 /*
-	Looks for the environment variable RMR_RTG_SVC which we assume to be name[:port], and 
+	Looks for the environment variable RMR_RTG_SVC which we assume to be name[:port], and
 	does a dns lookup on the name. If the env does not have such a variable, we default to
 	"rtg" and a port of 5656.
 
@@ -177,18 +177,18 @@ static int uta_lookup_rtg( uta_ctx_t* ctx ) {
 
 	return ctx->rtg_addr != NULL;
 }
-	
+
 
 /*
 	Expects a buffer of 'sep' separated tokens and looks to see if
-	the given string is one of those tokens. Returns the token 
+	the given string is one of those tokens. Returns the token
 	index (0 - n-1) if the string is found; -1 otherwise. The max
 	parameter supplies the maximum number of tokens to search in
 	the buffer.
 
 	On failure (-1) errno will be set in cases where memory cannot
 	be alocated (is this even possible any more?). If errno is 0
-	and failure is returned, then the caller should assume that 
+	and failure is returned, then the caller should assume that
 	the token isn't in the list, or the list had no elements.
 */
 static int uta_has_str( char const* buf, char const* str, char sep, int max ) {
@@ -220,7 +220,7 @@ static int uta_has_str( char const* buf, char const* str, char sep, int max ) {
 	for( i = 0; rc < 0 && i < ntokens; i++ ) {
 		if( tokens[i] ) {
 			if( strcmp( tokens[i], str ) == 0 ) {
-				rc = i;	
+				rc = i;
 			}
 		}
 	}
@@ -250,7 +250,7 @@ if_addrs_t*  mk_ip_list( char* port ) {
 	char*	fmt;
 	char*	envp;				// at the environment var if there
 
-	
+
 
 	if( (l = (if_addrs_t *) malloc( sizeof( if_addrs_t ) )) == NULL ) {
 		return NULL;
@@ -306,7 +306,7 @@ if_addrs_t*  mk_ip_list( char* port ) {
 	Check the address:port passed in and return true if it matches
 	one of the addresses we saw when we built the list. Right now
 	this isn't a speed intensive part of our processing, so we just
-	do a straight search through the list. We don't expect this to 
+	do a straight search through the list. We don't expect this to
 	ever be a higly driven functions so not bothering to optimise.
 */
 int is_this_myip( if_addrs_t* l, char* addr ) {
@@ -341,7 +341,7 @@ static int has_myip( char const* buf, if_addrs_t* list, char sep, int max ) {
 	if( max < 2 ) {
 		return 0;
 	}
-	
+
 	if( buf == NULL ) {
 		return 0;
 	}
@@ -369,7 +369,7 @@ static int has_myip( char const* buf, if_addrs_t* list, char sep, int max ) {
 	for( i = 0; ! rc  && i < ntokens; i++ ) {
 		if( tokens[i] ) {
 			if( is_this_myip( list, tokens[i] ) ) {
-				rc = 1;	
+				rc = 1;
 				break;
 			}
 		}

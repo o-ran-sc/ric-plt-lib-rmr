@@ -1,14 +1,14 @@
 // :vim ts=4 sw=4 noet:
 /*
 ==================================================================================
-    Copyright (c) 2019 Nokia
-    Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019 Nokia
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,19 +28,19 @@
 					ck1 ck2|<msg text><nil>
 
 				ck1 is a simple checksum of the message text (NOT including the
-				nil at the end of the string. 
+				nil at the end of the string.
 
 				ck2 is a simple checksum of the trace data which for the purposes
 				of testing is assumed to have a terminating nil to keep this simple.
 
 				Good messages are messages where both computed checksums match
-				the ck1 and ck2 values. 
+				the ck1 and ck2 values.
 
 				The receiver will send an 'ack' message back to the sender for
 				all type 5 messages received.
 
 				The sender and receiver can be run on the same host/container
-				or on different hosts. The route table is the key to setting 
+				or on different hosts. The route table is the key to setting
 				things up properly.  See the sender code for rt information.
 
 				Define these environment variables to have some control:
@@ -73,7 +73,7 @@ static int sum( char* str ) {
 
 /*
 	Split the message at the first sep and return a pointer to the first
-	character after. 
+	character after.
 */
 static char* split( char* str, char sep ) {
 	char*	s;
@@ -89,8 +89,8 @@ static char* split( char* str, char sep ) {
 }
 
 int main( int argc, char** argv ) {
-    void* mrc;      					// msg router context
-    rmr_mbuf_t* msg = NULL;				// message received
+	void* mrc;      					// msg router context
+	rmr_mbuf_t* msg = NULL;				// message received
 	int i;
 	int		state;
 	int		errors = 0;
@@ -117,10 +117,10 @@ int main( int argc, char** argv ) {
 	if( argc > 2 ) {
 		listen_port = argv[2];
 	}
-	
+
 	fprintf( stderr, "<RCVR> listening on port: %s for a max of %d messages\n", listen_port, nmsgs );
 
-    mrc = rmr_init( listen_port, RMR_MAX_RCV_BYTES, RMRFL_NONE );	// start your engines!
+	mrc = rmr_init( listen_port, RMR_MAX_RCV_BYTES, RMRFL_NONE );	// start your engines!
 	if( mrc == NULL ) {
 		fprintf( stderr, "<RCVR> ABORT:  unable to initialise RMr\n" );
 		exit( 1 );
@@ -139,9 +139,9 @@ int main( int argc, char** argv ) {
 	fprintf( stderr, "<RCVR> rmr now shows ready, listening begins\n" );
 
 	timeout = time( NULL ) + 20;
-    while( count < nmsgs ) {
+	while( count < nmsgs ) {
 		msg = rmr_torcv_msg( mrc, msg, 1000 );				// wait for about 1s so that if sender never starts we eventually escape
-		
+
 		if( msg ) {
 			if( msg->state == RMR_OK ) {
 				if( (data = split( msg->payload, '|'  )) != NULL ) {
@@ -187,7 +187,7 @@ int main( int argc, char** argv ) {
 			errors++;
 			break;
 		}
-    }
+	}
 
 	fprintf( stderr, "<RCVR> [%s] %ld messages;  good=%ld  acked=%ld bad=%ld  bad-trace=%ld\n", !!(errors + bad + bad_tr) ? "FAIL" : "PASS", count, good, ack_count, bad, bad_tr );
 	sleep( 2 );									// let any outbound acks flow before closing

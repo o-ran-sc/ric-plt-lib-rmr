@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,7 +45,7 @@ struct endpoint {
 };
 
 /*
-	Context describing our world. Should be returned to user programme on 
+	Context describing our world. Should be returned to user programme on
 	call to initialise, and passed as first parm on all calls to other
 	visible functions.
 
@@ -68,7 +68,7 @@ struct uta_ctx {
 	route_table_t* new_rtable;	// route table under construction
 	if_addrs_t*	ip_list;		// list manager of the IP addresses that are on our known interfaces
 	void*	mring;				// ring where msgs are queued while waiting for a call response msg
-	
+
 	char*	rtg_addr;			// addr/port of the route table generation publisher
 	int		rtg_port;			// the port that the rtg listens on
 

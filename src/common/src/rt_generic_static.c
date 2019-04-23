@@ -1,14 +1,14 @@
 // :vi sw=4 ts=4 noet:
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,12 +20,12 @@
 
 /*
 	Mnemonic:	rt_generic_static.c
-	Abstract:	These are route table functions which are not specific to the 
+	Abstract:	These are route table functions which are not specific to the
 				underlying protocol.  rtable_static, and rtable_nng_static
 				have transport provider specific code.
 
 				This file must be included before the nng/nano specific file as
-				it defines types. 
+				it defines types.
 
 	Author:		E. Scott Daniels
 	Date:		5  February 2019
@@ -47,7 +47,7 @@
 
 
 /*
-	Passed to a symtab foreach callback to construct a list of pointers from 
+	Passed to a symtab foreach callback to construct a list of pointers from
 	a current symtab.
 */
 typedef struct thing_list {
@@ -95,9 +95,9 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, int mtype, int nrrgroups ) 
 
 /*
 	Parse a single record recevied from the route table generator, or read
-	from a static route table file.  Start records cause a new table to 
+	from a static route table file.  Start records cause a new table to
 	be started (if a partial table was received it is discarded. Table
-	entry records are added to the currenly 'in progress' table, and an 
+	entry records are added to the currenly 'in progress' table, and an
 	end record causes the in progress table to be finalised and the
 	currently active table is replaced.
 */
@@ -144,7 +144,7 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 					if( ctx->new_rtable != NULL ) {					// one in progress?  this forces it out
 						if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] new table; dropping incomplete table\n" );
 						uta_rt_drop( ctx->new_rtable );
-					}	
+					}
 
 					if( ctx->rtable )  {
 						ctx->new_rtable = uta_rt_clone( ctx->rtable );	// create by cloning endpoint entries from active table
@@ -162,10 +162,10 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 
 				if( ((tok = strchr( tokens[1], ',' )) == NULL ) || 					// no sender names
 					(uta_has_str( tokens[1],  ctx->my_name, ',', 127) >= 0) ||		// our name isn't in the list
-					has_myip( tokens[1], ctx->ip_list, ',', 127 ) ) {				// the list has one of our IP addresses 
+					has_myip( tokens[1], ctx->ip_list, ',', 127 ) ) {				// the list has one of our IP addresses
 
 					if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] create rte for mtype=%s\n", tokens[1] );
-					
+
 					if( (ngtoks = uta_tokenise( tokens[2], gtokens, 64, ';' )) > 0 ) {					// split last field by groups first
 						rte = uta_add_rte( ctx->new_rtable, atoi( tokens[1] ), ngtoks );			// get/create entry for message type
 						for( grp = 0; grp < ngtoks; grp++ ) {
@@ -178,7 +178,7 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 						}
 					}
 				} else {
-					if( DEBUG || (vlevel > 2) ) 
+					if( DEBUG || (vlevel > 2) )
 						fprintf( stderr, "entry not included, sender not matched: %s\n", tokens[1] );
 				}
 
@@ -195,9 +195,9 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 	This function attempts to open a static route table in order to create a 'seed'
 	table during initialisation.  The environment variable RMR_SEED_RT is expected
 	to contain the necessary path to the file. If missing, or if the file is empty,
-	no route table will be available until one is received from the generator. 
+	no route table will be available until one is received from the generator.
 
-	This function is probably most useful for testing situations, or extreme 
+	This function is probably most useful for testing situations, or extreme
 	cases where the routes are static.
 */
 static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
@@ -250,8 +250,8 @@ static void collect_things( void* st, void* entry, char const* name, void* thing
 }
 
 /*
-	Called to delete a route table entry struct. We delete the array of endpoint 
-	pointers, but NOT the endpoints referenced as those are referenced from 
+	Called to delete a route table entry struct. We delete the array of endpoint
+	pointers, but NOT the endpoints referenced as those are referenced from
 	multiple entries.
 */
 static void del_rte( void* st, void* entry, char const* name, void* thing, void* data ) {
@@ -291,7 +291,7 @@ static char* uta_fib( char* fname ) {
 	off_t		nread;			// number of bytes read
 	int			fd;
 	char*		buf;			// input buffer
-	
+
 	if( (fd = open( fname, O_RDONLY )) >= 0 ) {
 		if( fstat( fd, &stats ) >= 0 ) {
 			if( stats.st_size <= 0 ) {					// empty file
@@ -362,7 +362,7 @@ static route_table_t* uta_rt_init( ) {
 	the context.
 */
 static route_table_t* uta_rt_clone( route_table_t* srt ) {
-	endpoint_t*		ep;		// an endpoint 
+	endpoint_t*		ep;		// an endpoint
 	route_table_t*	nrt;	// new route table
 	route_table_t*	art;	// active route table
 	void*	sst;			// source symtab
@@ -396,7 +396,7 @@ static route_table_t* uta_rt_clone( route_table_t* srt ) {
 	nst = nrt->hash;
 
 	rmr_sym_foreach_class( sst, 1, collect_things, &things );		// collect the named endpoints in the active table
-	
+
 	for( i = 0; i < things.nused; i++ ) {
 		ep = (endpoint_t *) things.things[i];
 		rmr_sym_put( nst, ep->name, 1, ep );						// slam this one into the new table

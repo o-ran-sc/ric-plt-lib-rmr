@@ -1,14 +1,14 @@
 // :vim ts=4 sw=4 noet:
 /*
 ==================================================================================
-    Copyright (c) 2019 Nokia
-    Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019 Nokia
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,11 +47,11 @@
 #include <rmr/rmr.h>
 
 int main( int argc, char** argv ) {
-    void* mrc;      						//msg router context
-    struct epoll_event events[1];			// list of events to give to epoll
-    struct epoll_event epe;                 // event definition for event to listen to
-    int     ep_fd = -1;						// epoll's file des (given to epoll_wait)
-    int rcv_fd;     						// file des that NNG tickles -- give this to epoll to listen on
+	void* mrc;      						//msg router context
+	struct epoll_event events[1];			// list of events to give to epoll
+	struct epoll_event epe;                 // event definition for event to listen to
+	int     ep_fd = -1;						// epoll's file des (given to epoll_wait)
+	int rcv_fd;     						// file des that NNG tickles -- give this to epoll to listen on
 	int nready;								// number of events ready for receive
 	rmr_mbuf_t*		sbuf;					// send buffer
 	rmr_mbuf_t*		rbuf;					// received buffer
@@ -74,12 +74,12 @@ int main( int argc, char** argv ) {
 
 	fprintf( stderr, "<DEMO> listen port: %s; mtype: %d; delay: %d\n", listen_port, mtype, delay );
 
-    if( (mrc = rmr_init( listen_port, 1400, RMRFL_NONE )) == NULL ) {
+	if( (mrc = rmr_init( listen_port, 1400, RMRFL_NONE )) == NULL ) {
 		fprintf( stderr, "<DEMO> unable to initialise RMr\n" );
 		exit( 1 );
 	}
 
-    rcv_fd = rmr_get_rcvfd( mrc );					// set up epoll things, start by getting the FD from MRr
+	rcv_fd = rmr_get_rcvfd( mrc );					// set up epoll things, start by getting the FD from MRr
 	if( rcv_fd < 0 ) {
 		fprintf( stderr, "<DEMO> unable to set up polling fd\n" );
 		exit( 1 );
@@ -88,10 +88,10 @@ int main( int argc, char** argv ) {
 		fprintf( stderr, "[FAIL] unable to create epoll fd: %d\n", errno );
 		exit( 1 );
 	}
-    epe.events = EPOLLIN;
-    epe.data.fd = rcv_fd;
+	epe.events = EPOLLIN;
+	epe.data.fd = rcv_fd;
 
-    if( epoll_ctl( ep_fd, EPOLL_CTL_ADD, rcv_fd, &epe ) != 0 )  {
+	if( epoll_ctl( ep_fd, EPOLL_CTL_ADD, rcv_fd, &epe ) != 0 )  {
 		fprintf( stderr, "[FAIL] epoll_ctl status not 0 : %s\n", strerror( errno ) );
 		exit( 1 );
 	}
@@ -105,7 +105,7 @@ int main( int argc, char** argv ) {
 	fprintf( stderr, "<DEMO> rmr is ready\n" );
 	
 
-    while( 1 ) {										// send messages until the cows come home
+	while( 1 ) {										// send messages until the cows come home
 		snprintf( sbuf->payload, 200, "count=%d received= %d ts=%lld %d stand up and cheer!", 	// create the payload
 			count, rcvd_count, (long long) time( NULL ), rand() );
 
@@ -133,6 +133,6 @@ int main( int argc, char** argv ) {
 		}
 
 		usleep( delay );
-    }
+	}
 }
 

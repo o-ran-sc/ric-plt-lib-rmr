@@ -8,7 +8,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -80,7 +80,7 @@ static int uta_link2( char* target, nng_socket* nn_sock, nng_dialer* dialer ) {
 		nng_close( *nn_sock );
 		return FALSE;
 	}
-		
+
 	nng_dialer_setopt_ms( *dialer,  NNG_OPT_RECONNMAXT, 2000 );		// cap backoff on retries to reasonable amount (2s)
 	nng_dialer_setopt_ms( *dialer,  NNG_OPT_RECONNMINT, 100 );		// start retry 100m after last failure with 2s cap
 
@@ -114,7 +114,7 @@ static int rt_link2_ep( endpoint_t* ep ) {
 
 
 /*
-	Add an endpoint to a route table entry for the group given. If the endpoint isn't in the 
+	Add an endpoint to a route table entry for the group given. If the endpoint isn't in the
 	hash we add it and create the endpoint struct.
 
 	The caller must supply the specific route table (we assume it will be pending, but they
@@ -207,7 +207,7 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_s
 	} else {
 		*nn_sock = ep->nn_sock;
 		state = TRUE;
-	}	
+	}
 
 	return state;
 }
@@ -285,7 +285,7 @@ static int uta_epsock_rr( route_table_t *rt, int mtype, int group, int* more, nn
 			//if( DEBUG ) fprintf( stderr, ">>>> _rr returning socket with one choice in group \n" );
 			state = TRUE;
 			break;
-	
+
 		default:										// need to pick one and adjust rr counts
 			ep = rrg->epts[rrg->ep_idx++];				// select next endpoint
 			//if( DEBUG ) fprintf( stderr, ">>>> _rr returning socket with multiple choices in group idx=%d \n", rrg->ep_idx );

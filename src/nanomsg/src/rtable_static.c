@@ -1,14 +1,14 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -56,14 +56,14 @@ static int uta_link2( char* target ) {
 		return -1;
 	}
 
-    nn_sock = nn_socket( AF_SP, NN_PUSH );		// the socket we'll use to connect to the target
+	nn_sock = nn_socket( AF_SP, NN_PUSH );		// the socket we'll use to connect to the target
 	if( nn_sock < 0 ) {
 		fprintf( stderr, "[WARN] rmr: link2: unable to create socket for link to target: %s: %d\n", target, errno );
 		return -1;
 	}
 
 	snprintf( conn_info, sizeof( conn_info ), "tcp://%s", target );
-    if( nn_connect( nn_sock, conn_info ) < 0 ) {							// connect failed
+	if( nn_connect( nn_sock, conn_info ) < 0 ) {							// connect failed
 		fprintf( stderr, "[WARN] rmr: link2: unable to create link to target: %s: %d\n", target, errno );
 		nn_close( nn_sock );
 		return -1;
@@ -91,7 +91,7 @@ static int rt_link2_ep( endpoint_t* ep ) {
 }
 
 /*
-	Add an endpoint to a route table entry for the group given. If the endpoint isn't in the 
+	Add an endpoint to a route table entry for the group given. If the endpoint isn't in the
 	hash we add it and create the endpoint struct.
 
 	The caller must supply the specific route table (we assume it will be pending, but they
@@ -194,7 +194,7 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name ) {
 	entry. Returns the nanomsg socket number if there is a rte for the message
 	type, and group is defined, else returns -1.
 
-	The group is the group number to select from. 
+	The group is the group number to select from.
 
 	The user supplied integer 'more' will be set if there are additional groups
 	defined to the matching route table entry which have a higher group number.
@@ -248,7 +248,7 @@ static int uta_epsock_rr( route_table_t *rt, int mtype, int group, int* more ) {
 			nn_sock = rrg->epts[0]->nn_sock;
 			ep = rrg->epts[0];
 			break;
-	
+
 		default:										// need to pick one and adjust rr counts
 			ep = rrg->epts[rrg->ep_idx];
 			nn_sock = rrg->epts[rrg->ep_idx++]->nn_sock;

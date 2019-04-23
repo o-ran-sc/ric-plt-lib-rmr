@@ -1,13 +1,13 @@
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@
 
 /*
 	Mnemonic:	test_nng_em.c
-	Abstract:	A nano/NNG message emulator for testing without needing to 
+	Abstract:	A nano/NNG message emulator for testing without needing to
 				actually have nanomsg, nng, or external processes.
 				We also emulate the epoll_wait() function for controlled
 				poll related testing.
@@ -39,13 +39,13 @@ static int em_send_failures = 0;	// test programme can set this to emulate eagai
 
 // ----------- epoll emulation ---------------------------------------------
 
-// CAUTION: sys/epoll.h must be included before this define and function will properly compile. 
+// CAUTION: sys/epoll.h must be included before this define and function will properly compile.
 #define epoll_wait em_wait
 /*
-	Every other call returns 1 ready; alternate calls return 0 ready. 
-	Mostly for testing the timeout receive call. First call should return 
+	Every other call returns 1 ready; alternate calls return 0 ready.
+	Mostly for testing the timeout receive call. First call should return
 	something ready and the second should return nothing ready so we can
-	drive both cases. 
+	drive both cases.
 */
 static int em_wait( int fd, void* events, int n, int to ) {
 	static int ready = 0;
@@ -76,7 +76,7 @@ static void en_set_retur( int rv ) {
 
 static int em_nng_foo() {
 	fprintf( stderr, "emulated functions in play" );
-}                              
+}
 
 
 /*
@@ -96,7 +96,7 @@ struct em_msg {
 */
 
 /*
-	v2 message; should be able to use it for everything that is set up here as 
+	v2 message; should be able to use it for everything that is set up here as
 	we don't add a payload even if setting a v1 type.
 */
 #define ALT_MSG_VER 1	// alternate every so often
@@ -111,12 +111,12 @@ struct em_msg {
 	unsigned char meid[32];				// managed element id.
 	struct timespec	ts;					// timestamp ???
 
-                                        // V2 extension
-    int32_t flags;                      // HFL_* constants
-    int32_t len0;                       // length of the RMr header data
-    int32_t len1;                       // length of the tracing data
-    int32_t len2;                       // length of data 1 (d1)
-    int32_t len3;                       // length of data 2 (d2)
+	                                    // V2 extension
+	int32_t flags;                      // HFL_* constants
+	int32_t len0;                       // length of the RMr header data
+	int32_t len1;                       // length of the tracing data
+	int32_t len2;                       // length of data 1 (d1)
+	int32_t len3;                       // length of data 2 (d2)
 
 };
 
@@ -205,7 +205,7 @@ static int em_nng_send( nng_socket s, void* m, int l, int f ) {
 
 /*
 	Emulate sending a message. If the global em_send_failures is set,
-	then every so often we fail with an EAGAIN to drive that part 
+	then every so often we fail with an EAGAIN to drive that part
 	of the code in RMr.
 */
 static int em_sendmsg( nng_socket s, nng_msg* m, int i ) {
@@ -277,20 +277,20 @@ static int em_nng_getopt_int( nng_socket s, void* con, int* target ) {
 
 
 // nng redefines some of these to point directly to various 'versions' of the function (ugg, function versions, really?)
-#undef nng_recvmsg 
-#undef nng_free 
-#undef nng_pull_open 
-#undef nng_pull0_open 
-#undef nng_listen 
-#undef nng_close 
-#undef nng_getopt_int 
-#undef nng_push0_open 
-#undef nng_dial 
-#undef nng_setopt 
-#undef nng_sub_open 
-#undef nng_sub0_open 
-#undef nng_recv 
-#undef nng_alloc 
+#undef nng_recvmsg
+#undef nng_free
+#undef nng_pull_open
+#undef nng_pull0_open
+#undef nng_listen
+#undef nng_close
+#undef nng_getopt_int
+#undef nng_push0_open
+#undef nng_dial
+#undef nng_setopt
+#undef nng_sub_open
+#undef nng_sub0_open
+#undef nng_recv
+#undef nng_alloc
 
 #define nng_msg_alloc em_nng_msg_alloc
 #define nng_recvmsg em_nng_recvmsg
@@ -374,7 +374,7 @@ static int em_nn_recvmsg (int s, struct nn_msghdr *msghdr, int flags ) {
 	return 1;
 }
 
-// nanomsg 
+// nanomsg
 #define nn_socket  em_nn_socket
 #define nn_close  em_nn_close
 #define nn_setsockopt  em_nn_setsockopt
@@ -387,7 +387,7 @@ static int em_nn_recvmsg (int s, struct nn_msghdr *msghdr, int flags ) {
 #define nn_sendmsg  em_nn_sendmsg
 #define nn_recvmsg  em_nn_recvmsg
 
-#endif 
+#endif
 
 
 #endif

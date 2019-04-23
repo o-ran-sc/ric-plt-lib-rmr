@@ -1,14 +1,14 @@
 // :vim ts=4 sw=4 noet:
 /*
 ==================================================================================
-    Copyright (c) 2019 Nokia
-    Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019 Nokia
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,9 +49,9 @@
 
 
 int main( int argc, char** argv ) {
-    void* mrc;      					// msg router context
+	void* mrc;      					// msg router context
 	long long total = 0;
-    rmr_mbuf_t* msg = NULL;				// message received
+	rmr_mbuf_t* msg = NULL;				// message received
 	int stat_freq = 10;				// write stats after reciving this many messages
 	int i;
 	char*	listen_port;
@@ -68,7 +68,7 @@ int main( int argc, char** argv ) {
 	fprintf( stderr, "<DEMO> listening on port: %s\n", listen_port );
 	fprintf( stderr, "<DEMO> stats will be reported every %d messages\n", stat_freq );
 
-    mrc = rmr_init( listen_port, RMR_MAX_RCV_BYTES, RMRFL_NONE );	// start your engines!
+	mrc = rmr_init( listen_port, RMR_MAX_RCV_BYTES, RMRFL_NONE );	// start your engines!
 	if( mrc == NULL ) {
 		fprintf( stderr, "<DEMO> ABORT:  unable to initialise RMr\n" );
 		exit( 1 );
@@ -80,7 +80,7 @@ int main( int argc, char** argv ) {
 	}
 	fprintf( stderr, "<DEMO> rmr now shows ready\n" );
 
-    while( 1 ) {											// forever; ctl-c, kill -15, etc to end
+	while( 1 ) {											// forever; ctl-c, kill -15, etc to end
 		msg = rmr_rcv_msg( mrc, msg );						// block until one arrives
 		
 		if( msg ) {
@@ -97,6 +97,6 @@ int main( int argc, char** argv ) {
 			fprintf( stderr, "<DEMO> total msg received: %lld  errors: %lld   empty: %lld\n", count, bad, empty );
 		}
 
-    }
+	}
 }
 
