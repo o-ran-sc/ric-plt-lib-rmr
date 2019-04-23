@@ -147,6 +147,8 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 	}
 	msg->len = 0;											// length of data in the payload
 	msg->alloc_len = mlen;									// length of allocated transport buffer
+	msg->sub_id = UNSET_SUBID;
+	msg->mtype = UNSET_MSGTYPE;
 	msg->payload = PAYLOAD_ADDR( hdr );						// point to payload (past all header junk)
 	msg->xaction = ((uta_mhdr_t *)msg->header)->xid;		// point at transaction id in header area
 	msg->state = state;										// fill in caller's state (likely the state of the last operation)
@@ -175,6 +177,8 @@ static rmr_mbuf_t* alloc_mbuf( uta_ctx_t* ctx, int state ) {
 
 	memset( msg, 0, sizeof( *msg ) );
 
+	msg->sub_id = UNSET_SUBID;
+	msg->mtype = UNSET_MSGTYPE;
 	msg->tp_buf = NULL;
 	msg->header = NULL;
 	msg->len = -1;											// no payload; invalid len

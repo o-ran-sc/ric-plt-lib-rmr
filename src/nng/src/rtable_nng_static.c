@@ -231,7 +231,7 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_s
 	during test that different entries are being seleted; we cannot depend on the nng
 	socket being different as we could with nano.
 */
-static int uta_epsock_rr( route_table_t *rt, int mtype, int group, int* more, nng_socket* nn_sock ) {
+static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more, nng_socket* nn_sock ) {
 	rtable_ent_t* rte;			// matching rt entry
 	endpoint_t*	ep;				// seected end point
 	int  state = FALSE;			// processing state
@@ -254,20 +254,20 @@ static int uta_epsock_rr( route_table_t *rt, int mtype, int group, int* more, nn
 		return FALSE;
 	}
 
-	if( (rte = rmr_sym_pull( rt->hash, mtype )) == NULL ) {
+	if( (rte = rmr_sym_pull( rt->hash, key )) == NULL ) {
 		*more = 0;
-		//if( DEBUG ) fprintf( stderr, ">>>> rte not found for type = %d\n", mtype );
+		//if( DEBUG ) fprintf( stderr, ">>>> rte not found for type = %lu\n", key );
 		return FALSE;
 	}
 
 	if( group < 0 || group >= rte->nrrgroups ) {
-		//if( DEBUG ) fprintf( stderr, ">>>> group out of range: mtype=%d group=%d max=%d\n", mtype, group, rte->nrrgroups );
+		//if( DEBUG ) fprintf( stderr, ">>>> group out of range: key=%lu group=%d max=%d\n", key, group, rte->nrrgroups );
 		*more = 0;
 		return FALSE;
 	}
 
 	if( (rrg = rte->rrgroups[group]) == NULL ) {
-		//if( DEBUG ) fprintf( stderr, ">>>> rrg not found for type = %d\n", mtype );
+		//if( DEBUG ) fprintf( stderr, ">>>> rrg not found for type key=%lu\n", key );
 		*more = 0; 					// groups are inserted contig, so nothing should be after a nil pointer
 		return FALSE;
 	}

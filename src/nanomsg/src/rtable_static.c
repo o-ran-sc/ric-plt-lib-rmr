@@ -58,13 +58,13 @@ static int uta_link2( char* target ) {
 
 	nn_sock = nn_socket( AF_SP, NN_PUSH );		// the socket we'll use to connect to the target
 	if( nn_sock < 0 ) {
-		fprintf( stderr, "[WARN] rmr: link2: unable to create socket for link to target: %s: %d\n", target, errno );
+		fprintf( stderr, "[WARN] rmr: link2: unable to create socket for link to target: %s: %d\n\n\n", target, errno );
 		return -1;
 	}
 
 	snprintf( conn_info, sizeof( conn_info ), "tcp://%s", target );
 	if( nn_connect( nn_sock, conn_info ) < 0 ) {							// connect failed
-		fprintf( stderr, "[WARN] rmr: link2: unable to create link to target: %s: %d\n", target, errno );
+		fprintf( stderr, "[WARN] rmr: link2: unable to create link to target: %s: %d\n\n\n", target, errno );
 		nn_close( nn_sock );
 		return -1;
 	}
@@ -138,6 +138,7 @@ static endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 		}
 
 		ep->nn_sock = -1;					// not connected
+		ep->open = 0;
 		ep->addr = uta_h2ip( ep_name );
 		ep->name = strdup( ep_name );
 
@@ -203,14 +204,15 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name ) {
 	invoke this function again to make a selection against that group. If there
 	are no more groups, more is set to 0.
 */
-static int uta_epsock_rr( route_table_t *rt, int mtype, int group, int* more ) {
+static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more ) {
 	rtable_ent_t* rte;			// matching rt entry
 	endpoint_t*	ep;				// seected end point
-	int nn_sock = -1;
+	int nn_sock = -2;
 	int dummy;
 	rrgroup_t* rrg;
 
-	if( ! more ) {				// eliminate cheks each time we need to user
+
+	if( ! more ) {				// eliminate checks each time we need to use
 		more = &dummy;
 	}
 
@@ -219,20 +221,20 @@ static int uta_epsock_rr( route_table_t *rt, int mtype, int group, int* more ) {
 		return -1;
 	}
 
-	if( (rte = rmr_sym_pull( rt->hash, mtype )) == NULL ) {
+	if( (rte = rmr_sym_pull( rt->hash, key )) == NULL ) {
 		*more = 0;
-		//if( DEBUG ) fprintf( stderr, ">>>> rte not found for type = %d\n", mtype );
+		//if( DEBUG ) fprintf( stderr, "#### >>> rte not found for type key=%lu\n", key );
 		return -1;
 	}
 
 	if( group < 0 || group >= rte->nrrgroups ) {
-		//if( DEBUG ) fprintf( stderr, ">>>> group out of range: mtype=%d group=%d max=%d\n", mtype, group, rte->nrrgroups );
+		//if( DEBUG ) fprintf( stderr, ">>>> group out of range: key=%lu group=%d max=%d\n", key, group, rte->nrrgroups );
 		*more = 0;
 		return -1;
 	}
 
 	if( (rrg = rte->rrgroups[group]) == NULL ) {
-		//if( DEBUG ) fprintf( stderr, ">>>> rrg not found for type = %d\n", mtype );
+		//if( DEBUG ) fprintf( stderr, ">>>> rrg not found for type = %lu\n", key );
 		*more = 0; 					// groups are inserted contig, so nothing should be after a nil pointer
 		return -1;
 	}
@@ -241,10 +243,10 @@ static int uta_epsock_rr( route_table_t *rt, int mtype, int group, int* more ) {
 
 	switch( rrg->nused ) {
 		case 0:				// nothing allocated, just punt
-			//if( DEBUG ) fprintf( stderr, ">>>> nothing allocated for the rrg\n" );
+			//if( DEBUG )
 			return -1;
 
-		case 1:				// exactly one, no rr to deal with and more is not possible even if fanout > 1
+		case 1:				// exactly one, no rr to deal with
 			nn_sock = rrg->epts[0]->nn_sock;
 			ep = rrg->epts[0];
 			break;
@@ -258,7 +260,7 @@ static int uta_epsock_rr( route_table_t *rt, int mtype, int group, int* more ) {
 			break;
 	}
 
-	if( ! ep->open ) {				// not connected
+	if( ep && ! ep->open ) {				// not connected
 		if( ep->addr == NULL ) {					// name didn't resolve before, try again
 			ep->addr = uta_h2ip( ep->name );
 		}

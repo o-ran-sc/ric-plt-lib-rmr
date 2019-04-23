@@ -28,6 +28,8 @@
 #ifndef _rmr_symtab_h
 #define _rmr_symtab_h
 
+#include <netdb.h>
+
 /* --------- symtab ---------------- */
 #define UT_FL_NOCOPY 0x00          /* use user pointer */
 #define UT_FL_COPY 0x01            /* make a copy of the string data */
@@ -39,12 +41,12 @@ extern void rmr_sym_clear( void *s );
 extern void rmr_sym_dump( void *s );
 extern void *rmr_sym_alloc( int size );
 extern void rmr_sym_del( void *s, const char *name, unsigned int class );
-extern void *rmr_sym_ndel( void *vtable, int key );
+extern void *rmr_sym_ndel( void *vtable, uint64_t key );
 extern void rmr_sym_free( void *vtable );
 extern void *rmr_sym_get( void *s,  const char *name, unsigned int class );
 extern int rmr_sym_put( void *s,  const char *name, unsigned int class, void *val );
-extern int rmr_sym_map( void *s,  unsigned int key, void *val );
-extern void *rmr_sym_pull(  void *vtable, int key );
+extern int rmr_sym_map( void *s,  uint64_t key, void *val );
+extern void *rmr_sym_pull(  void *vtable, uint64_t key );
 extern void rmr_sym_stats( void *s, int level );
 extern void rmr_sym_foreach_class( void *vst, unsigned int class, void (* user_fun)( void*, void*, const char*, void*, void* ), void *user_data );
 

@@ -44,6 +44,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <netdb.h>
 
 
 /*
@@ -56,13 +57,43 @@ typedef struct thing_list {
 	void** things;
 } thing_list_t;
 
+// ------------------------------------------------------------------------------------------------
+
+
+/*
+	Little diddy to trim whitespace and trailing comments. Like shell, trailing comments
+	must be at the start of a word (i.e. must be immediatly preceeded by whitespace).
+*/
+static char* clip( char* buf ) {
+	char* 	tok;
+
+	while( *buf && isspace( *buf ) ) {							// skip leading whitespace
+		buf++;
+	}
+
+	if( (tok = strchr( buf, '#' )) != NULL ) {
+		if( tok == buf ) {
+			return buf;					// just push back; leading comment sym handled there
+		}
+
+		if( isspace( *(tok-1) ) ) {
+			*tok = 0;
+		}
+	}
+
+	for( tok = buf + (strlen( buf ) - 1); tok > buf && isspace( *tok ); tok-- );	// trim trailing spaces too
+	*(tok+1) = 0;
+
+	return buf;
+}
+
 
 /*
 	Given a message type create a route table entry and add to the hash keyed on the
 	message type.  Once in the hash, endpoints can be added with uta_add_ep. Size
 	is the number of group slots to allocate in the entry.
 */
-static rtable_ent_t* uta_add_rte( route_table_t* rt, int mtype, int nrrgroups ) {
+static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups ) {
 	rtable_ent_t* rte;
 
 	if( rt == NULL ) {
@@ -87,10 +118,65 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, int mtype, int nrrgroups ) 
 	memset( rte->rrgroups, 0, sizeof( rrgroup_t *) * nrrgroups );
 	rte->nrrgroups = nrrgroups;
 
-	rmr_sym_map( rt->hash, mtype, rte );							// add to hash using numeric mtype as key
+	rmr_sym_map( rt->hash, key, rte );							// add to hash using numeric mtype as key
 
-	if( DEBUG ) fprintf( stderr, "[DBUG] route table entry created: mt=%d groups=%d\n", mtype, nrrgroups );
+	if( DEBUG ) fprintf( stderr, "[DBUG] route table entry created: k=%lu groups=%d\n", key, nrrgroups );
 	return rte;
+}
+
+/*
+	This accepts partially parsed information from a record sent by route manager or read from
+	a file such that:
+		ts_field is the msg-type,sender field
+		subid is the integer subscription id
+		rr_field is the endpoint information for round robening message over
+
+	If all goes well, this will add an RTE to the table under construction.
+
+	The ts_field is checked to see if we should ingest this record. We ingest if one of
+	these is true:
+		there is no sender info (a generic entry for all)
+		there is sender and our host:port matches one of the senders
+		the sender info is an IP address that matches one of our IP addresses
+*/
+static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* rr_field, int vlevel ) {
+	rtable_ent_t*	rte;		// route table entry added
+	char*	tok;
+	int		ntoks;
+	uint64_t key = 0;			// the symtab key will be mtype or sub_id+mtype
+	char* 	tokens[128];
+	char* 	gtokens[64];
+	int		i;
+	int		ngtoks;				// number of tokens in the group list
+	int		grp;				// index into group list
+
+	ts_field = clip( ts_field );				// ditch extra whitespace and trailing comments
+	rr_field = clip( rr_field );
+
+	if( ((tok = strchr( ts_field, ',' )) == NULL ) || 					// no sender names (generic entry for all)
+		(uta_has_str( ts_field,  ctx->my_name, ',', 127) >= 0) ||		// our name is in the list
+		has_myip( ts_field, ctx->ip_list, ',', 127 ) ) {				// the list has one of our IP addresses
+
+			key = build_rt_key( subid, atoi( ts_field ) );
+
+			if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] create rte for mtype=%s subid=%d key=%lu\n", ts_field, subid, key );
+
+			if( (ngtoks = uta_tokenise( rr_field, gtokens, 64, ';' )) > 0 ) {					// split round robin groups
+				rte = uta_add_rte( ctx->new_rtable, key, ngtoks );								// get/create entry for this key
+
+				for( grp = 0; grp < ngtoks; grp++ ) {
+					if( (ntoks = uta_tokenise( gtokens[grp], tokens, 64, ',' )) > 0 ) {
+						for( i = 0; i < ntoks; i++ ) {
+							if( DEBUG > 1  || (vlevel > 1)) fprintf( stderr, "[DBUG]    add endpoint  %s\n", ts_field );
+							uta_add_ep( ctx->new_rtable, rte, tokens[i], grp );
+						}
+					}
+				}
+			}
+		} else {
+			if( DEBUG || (vlevel > 2) )
+				fprintf( stderr, "entry not included, sender not matched: %s\n", tokens[1] );
+		}
 }
 
 /*
@@ -100,6 +186,11 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, int mtype, int nrrgroups ) 
 	entry records are added to the currenly 'in progress' table, and an
 	end record causes the in progress table to be finalised and the
 	currently active table is replaced.
+
+	We expect one of several types:
+		newrt|{start|end}
+		rte|<mtype>[,sender]|<endpoint-grp>[;<endpoint-grp>,...]
+		mse|<mtype>[,sender]|<sub-id>|<endpoint-grp>[;<endpoint-grp>,...]
 */
 static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 	int i;
@@ -129,6 +220,7 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 				break;
 
 			case 'n':												// newrt|{start|end}
+				tokens[1] = clip( tokens[1] );
 				if( strcmp( tokens[1], "end" ) == 0 ) {				// wrap up the table we were building
 					if( ctx->new_rtable ) {
 						uta_rt_drop( ctx->old_rtable );				// time to drop one that was previously replaced
@@ -155,33 +247,29 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 				}
 				break;
 
+			case 'm':					// assume mse entry
+				if( ! ctx->new_rtable ) {			// bad sequence, or malloc issue earlier; ignore siliently
+					break;
+				}
+
+				if( ntoks < 4 ) {
+					if( DEBUG ) fprintf( stderr, "[WRN] rmr_rtc: mse record had too few fields: %d instead of 4\n", ntoks );
+					break;
+				}
+
+				build_entry( ctx, tokens[1], atoi( tokens[2] ), tokens[3], vlevel );
+				break;
+
 			case 'r':					// assume rt entry
 				if( ! ctx->new_rtable ) {			// bad sequence, or malloc issue earlier; ignore siliently
 					break;
 				}
 
-				if( ((tok = strchr( tokens[1], ',' )) == NULL ) || 					// no sender names
-					(uta_has_str( tokens[1],  ctx->my_name, ',', 127) >= 0) ||		// our name isn't in the list
-					has_myip( tokens[1], ctx->ip_list, ',', 127 ) ) {				// the list has one of our IP addresses
-
-					if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] create rte for mtype=%s\n", tokens[1] );
-
-					if( (ngtoks = uta_tokenise( tokens[2], gtokens, 64, ';' )) > 0 ) {					// split last field by groups first
-						rte = uta_add_rte( ctx->new_rtable, atoi( tokens[1] ), ngtoks );			// get/create entry for message type
-						for( grp = 0; grp < ngtoks; grp++ ) {
-							if( (ntoks = uta_tokenise( gtokens[grp], tokens, 64, ',' )) > 0 ) {
-								for( i = 0; i < ntoks; i++ ) {
-									if( DEBUG > 1  || (vlevel > 1)) fprintf( stderr, "[DBUG]    add endpoint  %s\n", tokens[i] );
-									uta_add_ep( ctx->new_rtable, rte, tokens[i], grp );
-								}
-							}
-						}
-					}
+				if( ntoks > 3 ) {													// assume new entry with subid last
+					build_entry( ctx, tokens[1], atoi( tokens[3] ), tokens[2], vlevel );
 				} else {
-					if( DEBUG || (vlevel > 2) )
-						fprintf( stderr, "entry not included, sender not matched: %s\n", tokens[1] );
+					build_entry( ctx, tokens[1], UNSET_SUBID, tokens[2], vlevel );			// old school entry has no sub id
 				}
-
 				break;
 
 			default:
@@ -460,6 +548,23 @@ static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name ) {
 	}
 
 	return ep;
+}
+
+
+/*
+	Given a session id and message type build a key that can be used to look up the rte in the route
+	table hash. Sub_id is expected to be -1 if there is no session id associated with the entry.
+*/
+static inline uint64_t build_rt_key( int32_t sub_id, int32_t mtype ) {
+	uint64_t key;
+
+	if( sub_id == UNSET_SUBID ) {
+		key = 0xffffffff00000000 | mtype;
+	} else {
+		key = (((uint64_t) sub_id) << 32) | (mtype & 0xffffffff);
+	}
+
+	return key;
 }
 
 

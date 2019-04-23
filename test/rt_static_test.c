@@ -228,5 +228,15 @@ static int rt_test( ) {
 	}
 */
 
+	state = uta_link2( "worm", NULL, NULL );
+	errors += fail_if_true( state, "link2 did not return false when given nil pointers" );
+    
+	state = uta_epsock_rr( rt, 122, 0, NULL, NULL );
+	errors += fail_if_true( state, "uta_epsock_rr returned bad state when given nil socket pointer" );
+
+	rt = uta_rt_init( );										// get us a route table
+	state = uta_epsock_rr( rt, 0, -1, NULL, &nn_sock );
+	errors += fail_if_true( state, "uta_epsock_rr returned bad state (true) when given negative group number" );
+
 	return !!errors;			// 1 or 0 regardless of count
 }

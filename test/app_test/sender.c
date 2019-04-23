@@ -32,8 +32,11 @@
 				will give up and fail.
 
 
-				Message types will vary between 1 and 10, so the route table must
-				be set up to support those message types.
+				Message types will vary between 0 and 9, so the route table must
+				be set up to support those message types. Further, for message types
+				0, 1 and 2, the subscription ID will be set to type x 10, so the route
+				table must be set to include the sub-id for those types in order for
+				the messages to reach their destination.
 
 				Message format is:
 					ck1 ck2|<msg-txt><nil>
@@ -42,7 +45,10 @@
 				Ck2 is the simple check sum of the trace data which is a nil terminated
 				series of bytes.
 
-				Parms:	argv[1] == nmsgs; argv[2] == delay; argv[3] == listen port
+				Parms:	argv[1] == number of msgs to send (10)
+						argv[2] == delay		(mu-seconds, 1000000 default)
+						argv[3] == max msg type (not inclusive; default 10)
+						argv[4] == listen port
 
 				Sender will send for at most 20 seconds, so if nmsgs and delay extend
 				beyond that period the total number of messages sent will be less
@@ -75,16 +81,17 @@ static int sum( char* str ) {
 
 int main( int argc, char** argv ) {
 	void* mrc;      						// msg router context
-	struct epoll_event events[1];			// list of events to give to epoll
-	struct epoll_event epe;                 // event definition for event to listen to
+	struct	epoll_event events[1];			// list of events to give to epoll
+	struct	epoll_event epe;				// event definition for event to listen to
 	int     ep_fd = -1;						// epoll's file des (given to epoll_wait)
-	int rcv_fd;     						// file des that NNG tickles -- give this to epoll to listen on
-	int nready;								// number of events ready for receive
+	int		rcv_fd;    						// file des that NNG tickles -- give this to epoll to listen on
+	int		nready;							// number of events ready for receive
 	rmr_mbuf_t*		sbuf;					// send buffer
 	rmr_mbuf_t*		rbuf;					// received buffer
-	int	count = 0;
-	int	rt_count = 0;						// number of messages requiring a spin retry
-	int	rcvd_count = 0;
+	int		count = 0;
+	int		rt_count = 0;					// number of messages requiring a spin retry
+	int		rcvd_count = 0;
+	int		fail_count = 0;					// # of failure sends after first successful send
 	char*	listen_port = "43086";
 	int		mtype = 0;
 	int		stats_freq = 100;
@@ -94,6 +101,7 @@ int main( int argc, char** argv ) {
 	long	timeout = 0;
 	int		delay = 100000;					// usec between send attempts
 	int		nmsgs = 10;						// number of messages to send
+	int		max_mt = 10;					// reset point for message type
 
 	if( argc > 1 ) {
 		nmsgs = atoi( argv[1] );
@@ -102,7 +110,10 @@ int main( int argc, char** argv ) {
 		delay = atoi( argv[2] );
 	}
 	if( argc > 3 ) {
-		listen_port = argv[3];
+		max_mt = atoi( argv[3] );
+	}
+	if( argc > 4 ) {
+		listen_port = argv[4];
 	}
 
 	fprintf( stderr, "<SNDR> listen port: %s; sending %d messages; delay=%d\n", listen_port, nmsgs, delay );
@@ -150,13 +161,19 @@ int main( int argc, char** argv ) {
 
 	timeout = time( NULL ) + 20;
 
-	while( count < nmsgs ) {								// we send 10 messages after the first message is successful
+	while( count < nmsgs ) {								// we send n messages after the first message is successful
 		snprintf( trace, 100, "%lld", (long long) time( NULL ) );
 		rmr_set_trace( sbuf, trace, strlen( trace ) + 1 );
 		snprintf( wbuf, 200, "count=%d tr=%s %d stand up and cheer!", count, trace, rand() );
 		snprintf( sbuf->payload, 300, "%d %d|%s", sum( wbuf ), sum( trace ), wbuf );
 
 		sbuf->mtype = mtype;							// fill in the message bits
+		if( mtype < 3 ) {
+			sbuf->sub_id = mtype * 10;
+		} else {
+			sbuf->sub_id = -1;
+		}
+
 		sbuf->len =  strlen( sbuf->payload ) + 1;		// our receiver likely wants a nice acsii-z string
 		sbuf->state = 0;
 		sbuf = rmr_send_msg( mrc, sbuf );				// send it (send returns an empty payload on success, or the original payload on fail/retry)
@@ -167,7 +184,13 @@ int main( int argc, char** argv ) {
 				while( sbuf->state == RMR_ERR_RETRY ) {			// soft failure (device busy?) retry
 					sbuf = rmr_send_msg( mrc, sbuf );			// retry send until it's good (simple test; real programmes should do better)
 				}
-				successful = 1;
+				if( sbuf->state == RMR_OK ) {
+					successful = 1; 							// indicates only that we sent one successful message, not the current state
+				} else {
+					if( successful ) {
+						fail_count++;							// count failures after first successful message
+					}
+				}
 				break;
 
 			case RMR_OK:
@@ -175,15 +198,19 @@ int main( int argc, char** argv ) {
 				break;
 
 			default:
+				if( successful ) {
+					fail_count++;							// count failures after first successful message
+				}
 				// some error (not connected likely), don't count this
+				//sleep( 1 );
 				break;
 		}
 
 		if( successful ) {				// once we have a message that was sent, start to increase things
 			count++;
 			mtype++;
-			if( mtype > 10 ) {			// if large number of sends don't require infinite rt entries :)
-				mtype = 1;
+			if( mtype >= max_mt ) {			// if large number of sends don't require infinite rt entries :)
+				mtype = 0;
 			}
 		}
 
@@ -237,7 +264,7 @@ int main( int argc, char** argv ) {
 			}
 		}
 
-	fprintf( stderr, "<SNDR> [%s] sent %d messages   received %d acks retries=%d\n", count == nmsgs ? "PASS" : "FAIL",  count, rcvd_count, rt_count );
+	fprintf( stderr, "<SNDR> [%s] sent=%d  rcvd-acks=%d  failures=%d retries=%d\n", count == nmsgs ? "PASS" : "FAIL",  count, rcvd_count, fail_count, rt_count );
 	rmr_close( mrc );
 
 	return !( count == nmsgs );

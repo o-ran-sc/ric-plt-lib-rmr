@@ -47,6 +47,8 @@ extern "C" {
 
 #define RMR_DEF_SIZE		0		// pass as size to have msg allocation use the default msg size
 
+#define RMR_VOID_MSGTYPE	(-1)	// unset/invalid message type and sub id
+#define RMR_VOID_SUBID		(-1)
 
 #define RMR_OK				0		// state is good
 #define RMR_ERR_BADARG		1		// argument passd to function was unusable

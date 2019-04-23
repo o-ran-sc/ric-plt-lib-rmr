@@ -48,6 +48,7 @@ static int worm_test( ) {
 	char	wbuf[1024];
 	int errors = 0;			// number errors found
 	int	i;
+	void* p;
 
 	rmr_mbuf_t*	mbuf;		// mbuf to send to peer
 	int		whid = -1;
@@ -100,11 +101,22 @@ static int worm_test( ) {
 	whid = rmr_wh_open( ctx, "localhost:21961" );
 	errors += fail_not_equal( whid, 3, "attempt to fill in a hole didn't return expected" );
 
-	rmr_wh_send_msg( NULL, 0, NULL );			// tests for coverage
-	rmr_wh_send_msg( ctx, 0, NULL );
+	p = rmr_wh_send_msg( NULL, 0, NULL );			// tests for coverage
+	fail_not_nil( p, "wh_send_msg returned a pointer when given nil context and message" );
+
+	p = rmr_wh_send_msg( ctx, 0, NULL );
+	fail_not_nil( p, "wh_send_msg returned a pointer when given nil message with valid context" );
 
 	mbuf = rmr_alloc_msg( ctx, 2048 );			// get an muf to pass round
 	errors += fail_if_nil( mbuf, "unable to allocate mbuf for send tests (giving up on send tests)" );
+
+	mbuf->state = 0;
+	mbuf = rmr_wh_send_msg( NULL, 0, mbuf );
+	if( mbuf ) {
+		fail_if_equal( mbuf->state, 0, "wh_send_msg returned a zero state when given a nil context" );
+	}
+	fail_if_nil( mbuf, "wh_send_msg returned a nil message buffer when given a nil context"  );
+
 	while( mbuf ) {
 		if( !(mbuf = rmr_wh_send_msg( ctx, 50, mbuf )) ) {		// test for coverage
 			errors += fail_if_nil( mbuf, "send didn't return an mbuf (skip rest of send tests)" );

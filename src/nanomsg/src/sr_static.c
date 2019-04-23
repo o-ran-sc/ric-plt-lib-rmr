@@ -98,6 +98,8 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 		exit( 1 );
 	}
 
+	memset( msg->header, 0, sizeof( uta_mhdr_t ) );			// must ensure that header portion of tpbuf is 0
+	msg->tp_buf = msg->header;
 	hdr = (uta_mhdr_t *) msg->header;
 	hdr->rmr_ver = htonl( RMR_MSG_VER );								// current version
 	hdr->sub_id = htonl( UNSET_SUBID );
@@ -108,6 +110,8 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 
 	msg->len = 0;											// length of data in the payload
 	msg->alloc_len = mlen;									// length of allocated payload
+	msg->sub_id = UNSET_SUBID;
+	msg->mtype = UNSET_MSGTYPE;
 	msg->payload = PAYLOAD_ADDR( hdr );						// point at the payload in transport
 	msg->xaction = ((uta_mhdr_t *)msg->header)->xid;		// point at transaction id in header area
 	msg->state = state;										// fill in caller's state (likely the state of the last operation)
@@ -323,6 +327,7 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int nn_sock ) {
 
 	// future: ensure that application did not overrun the XID buffer; last byte must be 0
 
+	//fprintf( stderr, ">>>>>> sending to %d %d\n", nn_sock, msg->mtype );
 	hdr = (uta_mhdr_t *) msg->header;
 	hdr->mtype = htonl( msg->mtype );								// stash type/len/sub-id in network byte order for transport
 	hdr->sub_id = htonl( msg->sub_id );

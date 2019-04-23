@@ -46,14 +46,21 @@ static void gen_rt( uta_ctx_t* ctx ) {
 	char* 	rt_stuff;		// strings for the route table
 
 	rt_stuff =
+		"newrt|end\n"								// end of table check before start of table found
+		"# comment to drive full comment test\n"
+		"\n"										// handle blank lines
+		"   \n"										// handle blank lines
+	    "mse|4|10|localhost:4561\n"					// entry before start message
+	    "rte|4|localhost:4561\n"					// entry before start message
 		"newrt|start\n"								// false start to drive detection
 		"xxx|badentry to drive default case"
 		"newrt|start\n"
-	    "rte|0|localhost:4560,localhost:4562\n"
+	    "rte|0|localhost:4560,localhost:4562\n"					// these are legitimate entries for our testing
 	    "rte|1|localhost:4562;localhost:4561,localhost:4569\n"
-	    "rte|2|localhost:4562\n"
-	    "rte|4|localhost:4561\n"
-		"rte|5|localhost:4563\n"
+	    "rte|2|localhost:4562| 10\n"								// new subid at end
+	    "mse|4|10|localhost:4561\n"									// new msg/subid specifier rec
+	    "mse|4|localhost:4561\n"									// new mse entry with less than needed fields
+		"   rte|   5   |localhost:4563    #garbage comment\n"		// tests white space cleanup
 	    "rte|6|localhost:4562\n"
 		"newrt|end\n";
 
@@ -92,6 +99,7 @@ static int sr_nng_test() {
 	nng_socket nn_dummy_sock;					// dummy needed to drive send
 	int		size;
 	int		i;
+	void*	p;
 
 	//ctx = rmr_init( "tcp:4360", 2048, 0 );				// do NOT call init -- that starts the rtc thread which isn't good here
 	ctx = (uta_ctx_t *) malloc( sizeof( uta_ctx_t ) );		// alloc the context manually
@@ -104,6 +112,10 @@ static int sr_nng_test() {
 	uta_lookup_rtg( ctx );
 
 	gen_rt( ctx );								// forces a static load with some known info since we don't start the rtc()
+	gen_rt( ctx );								// force a second load to test cloning
+
+	p = rt_ensure_ep( NULL, "foo" );				// drive for coverage
+	errors += fail_not_nil( p,  "rt_ensure_ep did not return nil when given nil route table" );
 
 	state = rmr_ready( NULL );
 	errors += fail_if_true( state, "reported ready when given a nil context" );

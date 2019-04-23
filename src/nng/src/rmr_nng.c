@@ -204,6 +204,7 @@ extern rmr_mbuf_t* rmr_mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 	int send_again;				// true if the message must be sent again
 	rmr_mbuf_t*	clone_m;		// cloned message for an nth send
 	int sock_ok;				// got a valid socket from round robin select
+	uint64_t key;				// mtype or sub-id/mtype sym table key
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL || msg == NULL ) {		// bad stuff, bail fast
 		errno = EINVAL;												// if msg is null, this is their clue
@@ -229,8 +230,9 @@ extern rmr_mbuf_t* rmr_mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 	send_again = 1;											// force loop entry
 	group = 0;												// always start with group 0
 
+	key = build_rt_key( msg->sub_id, msg->mtype );			// route table key to find the entry
 	while( send_again ) {
-		sock_ok = uta_epsock_rr( ctx->rtable, msg->mtype, group, &send_again, &nn_sock );		// round robin sel epoint; again set if mult groups
+		sock_ok = uta_epsock_rr( ctx->rtable, key, group, &send_again, &nn_sock );		// round robin sel epoint; again set if mult groups
 		if( DEBUG ) fprintf( stderr, "[DBUG] send msg: type=%d again=%d group=%d len=%d sock_ok=%d\n",
 				msg->mtype, send_again, group, msg->len, sock_ok );
 		group++;

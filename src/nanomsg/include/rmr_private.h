@@ -97,7 +97,7 @@ static int uta_link2( char* target );
 static int rt_link2_ep( endpoint_t* ep );
 static endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_name, int group  );
 static int uta_epsock_byname( route_table_t* rt, char* ep_name );
-static int uta_epsock_rr( route_table_t *rt, int mtype, int group, int* more );
+static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more );
 
 // ------ msg ------------------------------------------------
 static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int state, int tr_size );
@@ -106,48 +106,6 @@ static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg );
 static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg );
 static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int nn_sock );
 static rmr_mbuf_t* send2ep( uta_ctx_t* ctx, endpoint_t* ep, rmr_mbuf_t* msg );
-
-
-
-/*
-// --- message ring --------------------------
-static void* uta_mk_ring( int size );
-static void uta_ring_free( void* vr );
-static inline void* uta_ring_extract( void* vr );
-static inline int uta_ring_insert( void* vr, void* new_data );
-
-// --- message and context management --------
-static int ie_test( void* r, int i_factor, long inserts );
-static void free_ctx( uta_ctx_t* ctx );
-static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int state );
-static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  );
-static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg );
-
-// ----- route table static things ---------
-static void collect_things( void* st, void* entry, char const* name, void* thing, void* vthing_list );
-static void del_rte( void* st, void* entry, char const* name, void* thing, void* data );
-static char* uta_fib( char* fname );
-static route_table_t* uta_rt_init( );
-static route_table_t* uta_rt_clone( route_table_t* srt );
-static void uta_rt_drop( route_table_t* rt );
-static endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_name, int group  );
-static rtable_ent_t* uta_add_rte( route_table_t* rt, int mtype, int nrrgroups );
-static endpoint_t* uta_get_ep( route_table_t* rt, char const* ep_name );
-static int uta_epsock_byname( route_table_t* rt, char* ep_name );
-static int uta_epsock_rr( route_table_t *rt, int mtype, int group, int* more );
-static void read_static_rt( uta_ctx_t* ctx, int vlevel );
-static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel );
-static void* rtc( void* vctx );
-static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name );
-
-
-// --- tools_static protos ------------------
-static int uta_tokenise( char* buf, char** tokens, int max, char sep );
-static char* uta_h2ip( char const* hname );
-static int uta_link2( char* target );
-static int uta_lookup_rtg( uta_ctx_t* ctx );
-static int uta_has_str( char const* buf, char const* str, char sep, int max );
-*/
 
 static int rt_link2_ep( endpoint_t* ep );
 static rmr_mbuf_t* send2ep( uta_ctx_t* ctx, endpoint_t* ep, rmr_mbuf_t* msg );

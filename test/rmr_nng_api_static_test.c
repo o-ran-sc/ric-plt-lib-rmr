@@ -139,6 +139,10 @@ static int rmr_api_test( ) {
 	msg2 = rmr_send_msg( NULL, NULL );			// drive for coverage
 	errors += fail_not_nil( msg2, "send_msg returned msg pointer when given a nil message and context" );
 
+	msg->state = 0;
+	msg = rmr_send_msg( NULL, msg );
+	errors += fail_if( msg->state == 0, "rmr_send_msg did not set msg state when msg given with nil context" );
+
 	// --- sends will fail with a no endpoint error until a dummy route table is set, so we test fail case first.
 	msg->len = 100;
 	msg->mtype = 1;
@@ -194,17 +198,28 @@ static int rmr_api_test( ) {
 	rmr_rts_msg( rmc, NULL );
 	errors += fail_if( errno == 0, "rmr_rts_msg did not set errno when given a nil message" );
 
+	msg->state = 0;
+	msg = rmr_rts_msg( NULL, msg );			// should set state in msg
+	errors += fail_if_equal( msg->state, 0, "rmr_rts_msg did not set state when given valid message but no context" );
+	
+
 	msg = rmr_rts_msg( rmc, msg );			// return the buffer to the sender
 	errors += fail_if_nil( msg, "rmr_rts_msg did not return a message pointer" );
 	errors += fail_if( errno != 0, "rmr_rts_msg did not reset errno" );
 
 
 	snprintf( msg->xaction, 17, "%015d", 16 );		// dummy transaction id (emulation generates, this should arrive after a few calls to recv)
+
+	msg->state = 0;
+	msg = rmr_call( NULL, msg );
+	errors += fail_if( msg->state == 0, "rmr_call did not set message state when given message with nil context" );
+
+	msg->mtype = 0;
 	msg = rmr_call( rmc, msg );						// this call should return a message as we can anticipate a dummy message in
 	errors += fail_if_nil( msg, "rmr_call returned a nil message on call expected to succeed" );
 	if( msg ) {
 		errors += fail_not_equal( msg->state, RMR_OK, "rmr_call did not properly set state on successful return" );
-		errors += fail_if( errno != 0, "rmr_call did not properly set errno on successful return" );
+		errors += fail_not_equal( errno, 0, "rmr_call did not properly set errno (a) on successful return" );
 	}
 
 	snprintf( wbuf, 17, "%015d", 14 );				// if we call receive we should find this in the first 15 tries
@@ -239,6 +254,11 @@ static int rmr_api_test( ) {
 	rmr_free_msg( NULL ); 			// drive for coverage; nothing to check
 	rmr_free_msg( msg2 );
 
+
+	msg2 = rmr_torcv_msg( NULL, NULL, 10 );
+	errors += fail_not_nil( msg2, "rmr_torcv_msg returned a pointer when given nil information" );
+	msg2 = rmr_torcv_msg( rmc, NULL, 10 );
+	errors += fail_if_nil( msg2, "rmr_torcv_msg did not return a message pointer when given a nil old msg" );
 
 	// ---  test timeout receive; our dummy epoll function will return 1 ready on first call and 0 ready (timeout emulation) on second
 	// 		however we must drain the swamp (queue) first, so run until we get a timeout error, or 20 and report error if we get to 20.

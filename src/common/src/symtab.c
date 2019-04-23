@@ -28,6 +28,7 @@ Abstract:	Symbol table -- slightly streamlined from it's original 2000 version
 			Things changed for the Ric Msg implemention (Nov 2018):
 				- no concept of copy/free of the user data (functions removed)
 				- add ability to support an integer key (class 0)
+				  Numeric key is an unsigned, 64bit key.
 				- externally visible names given a rmr_ extension as it's being
 				  incorporated into the RIC msg routing library and will be
 				  available to user applications.
@@ -46,6 +47,7 @@ Mod:		2016 23 Feb - converted Symtab refs so that caller need only a
 #include <string.h>
 #include <stdlib.h>
 #include <memory.h>
+#include <netdb.h>
 
 #include "rmr_symtab.h"
 
@@ -56,7 +58,7 @@ typedef struct Sym_ele
 	struct Sym_ele *next;   /* pointer at next element in list */
 	struct Sym_ele *prev;   /* larger table, easier deletes */
 	const char *name;		/* symbol name */
-	unsigned int	nkey;	// the numeric key
+	uint64_t nkey;			// the numeric key
 	void *val;              /* user data associated with name */
 	unsigned long mcount;   /* modificaitons to value */
 	unsigned long rcount;   /* references to symbol */
@@ -136,11 +138,11 @@ static inline int same( unsigned int c1, unsigned int c2, const char *s1, const 
 	much the same.
 */
 static int putin( Sym_tab *table, const char *name, unsigned int class, void *val ) {
-	Sym_ele *eptr;    	/* pointer into hash table */
+	Sym_ele *eptr;    		/* pointer into hash table */
 	Sym_ele **sym_tab;    	/* pointer into hash table */
-	int hv;                  /* hash value */
-	int rc = 0;              /* assume it existed */
-	unsigned int	nkey = 0;	// numeric key if class == 0
+	int hv;                 /* hash value */
+	int rc = 0;             /* assume it existed */
+	uint64_t nkey = 0;		// numeric key if class == 0
 
 	sym_tab = table->symlist;
 
@@ -148,7 +150,7 @@ static int putin( Sym_tab *table, const char *name, unsigned int class, void *va
 		hv = sym_hash( name, table->size );		// hash it
 		for( eptr=sym_tab[hv]; eptr && ! same( class, eptr->class, eptr->name, name); eptr=eptr->next );
 	} else {
-		nkey = *((int *) name);
+		nkey = *((uint64_t *) name);
 		hv = nkey % table->size;					// just hash the number
 		for( eptr=sym_tab[hv]; eptr && eptr->nkey != nkey; eptr=eptr->next );
 	}
@@ -237,7 +239,7 @@ extern void rmr_sym_dump( void *vtable )
 			if( eptr->val && eptr->class ) {
 				fprintf( stderr, "key=%s val@=%p\n", eptr->name, eptr->val );
 			} else {
-				fprintf( stderr, "nkey=%d val@=%p\n", eptr->nkey, eptr->val );
+				fprintf( stderr, "nkey=%lu val@=%p\n", (unsigned long) eptr->nkey, eptr->val );
 			}
 		}
 	}
@@ -284,9 +286,9 @@ extern void rmr_sym_del( void *vtable, const char *name, unsigned int class )
 {
 	Sym_tab	*table;
 	Sym_ele **sym_tab;
-	Sym_ele *eptr;    /* pointer into hash table */
-	int hv;                  /* hash value */
-	unsigned int nkey;		// class 0, name points to integer not string
+	Sym_ele *eptr;			/* pointer into hash table */
+	int hv;                 /* hash value */
+	uint64_t	nkey;		// class 0, name points to integer not string
 
 	table = (Sym_tab *) vtable;
 	sym_tab = table->symlist;
@@ -306,7 +308,7 @@ extern void rmr_sym_del( void *vtable, const char *name, unsigned int class )
 /*
 	Delete element by numberic key.
 */
-extern void *rmr_sym_ndel(  void *vtable, int key ) {
+extern void *rmr_sym_ndel(  void *vtable, uint64_t key ) {
 	rmr_sym_del( vtable, (const char *) &key, 0 );
 }
 
@@ -317,7 +319,7 @@ extern void *rmr_sym_get( void *vtable, const char *name, unsigned int class )
 	Sym_ele **sym_tab;
 	Sym_ele *eptr;			// element from table
 	int hv;                 // hash value of key
-	unsigned int nkey;		// numeric key if class 0
+	uint64_t nkey;			// numeric key if class 0
 
 	table = (Sym_tab *) vtable;
 	sym_tab = table->symlist;
@@ -326,7 +328,7 @@ extern void *rmr_sym_get( void *vtable, const char *name, unsigned int class )
 		hv = sym_hash( name, table->size );
 		for(eptr=sym_tab[hv]; eptr &&  ! same(class, eptr->class, eptr->name, name); eptr=eptr->next );
 	} else {
-		nkey = *((int *) name);
+		nkey = *((uint64_t *) name);
 		hv = nkey % table->size;			// just hash the number
 		for( eptr=sym_tab[hv]; eptr && eptr->nkey != nkey; eptr=eptr->next );
 	}
@@ -343,7 +345,7 @@ extern void *rmr_sym_get( void *vtable, const char *name, unsigned int class )
 /*
 	Retrieve the data referenced by a numerical key.
 */
-extern void *rmr_sym_pull(  void *vtable, int key ) {
+extern void *rmr_sym_pull(  void *vtable, uint64_t key ) {
 	return rmr_sym_get( vtable, (const char *) &key, 0 );
 }
 
@@ -366,11 +368,11 @@ extern int rmr_sym_put( void *vtable, const char *name, unsigned int class, void
 }
 
 /*
-	Add a new entry assuming that the key is an unsigned integer.
+	Add a new entry assuming that the key is an unsigned, 64 bit, integer.
 
 	Returns 1 if new, 0 if existed
 */
-extern int rmr_sym_map( void *vtable, unsigned int key, void *val ) {
+extern int rmr_sym_map( void *vtable, uint64_t key, void *val ) {
 	Sym_tab	*table;
 
 	table = (Sym_tab *) vtable;
@@ -407,7 +409,7 @@ extern void rmr_sym_stats( void *vtable, int level )
 					if( eptr->class  ) {					// a string key
 						fprintf( stderr, "sym: (%d) key=%s val@=%p ref=%ld mod=%lu\n", i, eptr->name, eptr->val, eptr->rcount, eptr->mcount );
 					} else {
-						fprintf( stderr, "sym: (%d) key=%d val@=%p ref=%ld mod=%lu\n", i, eptr->nkey, eptr->val, eptr->rcount, eptr->mcount );
+						fprintf( stderr, "sym: (%d) key=%lu val@=%p ref=%ld mod=%lu\n", i, (unsigned long) eptr->nkey, eptr->val, eptr->rcount, eptr->mcount );
 					}
 				}
 			}
@@ -434,7 +436,7 @@ extern void rmr_sym_stats( void *vtable, int level )
 			if( eptr->class ) {
 				fprintf( stderr, "\t%s\n", eptr->name );
 			} else {
-				fprintf( stderr, "\t%d (numeric key)\n", eptr->nkey );
+				fprintf( stderr, "\t%lu (numeric key)\n", (unsigned long) eptr->nkey );
 			}
 		}
 	}
