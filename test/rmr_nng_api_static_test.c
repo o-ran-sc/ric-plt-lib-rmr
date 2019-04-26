@@ -241,14 +241,14 @@ static int rmr_api_test( ) {
 		msg = rmr_alloc_msg( rmc, 2048 );				// something buggered above; get a new one
 	}
 	msg = rmr_call( rmc, msg );							// make a call that we never expect a response on
-	errors += fail_not_nil( msg, "rmr_call returned a non-nil message on call expected not to receive a response" );
+	errors += fail_if_nil( msg, "rmr_call returned a non-nil message on call expected not to receive a response" );
 	if( msg ) {
-		errors += fail_not_equal( msg->state, RMR_OK, "rmr_call did not properly set state on queued message receive" );
-		errors += fail_if( errno != 0, "rmr_call did not properly set errno on queued message receivesuccessful" );
+		errors += fail_if_equal( msg->state, RMR_OK, "rmr_call did not properly set state on queued message receive" );
+		errors += fail_if( errno == 0, "rmr_call did not properly set errno on queued message receivesuccessful" );
 	}
 
 	msg = rmr_call( rmc, msg );						// this should "timeout" because the message xaction id won't ever appear again
-	errors += fail_not_nil( msg, "rmr_call returned a non-nil message on call expected to fail" );
+	errors += fail_if_nil( msg, "rmr_call returned a nil message on call expected to fail (but return a pointer)" );
 	errors += fail_if( errno == 0, "rmr_call did not set errno on failure" );
 
 	rmr_free_msg( NULL ); 			// drive for coverage; nothing to check
