@@ -634,6 +634,26 @@ static void* init( char* uproto_port, int max_msg_size, int flags ) {
 	return (void *) ctx;
 }
 
+/*
+	This sets the default trace length which will be added to any message buffers
+	allocated.  It can be set at any time, and if rmr_set_trace() is given a
+	trace len that is different than the default allcoated in a message, the message
+	will be resized.
+
+	Returns 0 on failure and 1 on success. If failure, then errno will be set.
+*/
+extern int rmr_init_trace( void* vctx, int tr_len ) {
+	uta_ctx_t* ctx;
+
+	errno = 0;
+	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
+		errno = EINVAL;
+		return 0;
+	}
+
+	ctx->trace_data_len = tr_len;
+	return 1;
+}
 
 /*
 	Publicly facing initialisation function. Wrapper for the init() funcion above
