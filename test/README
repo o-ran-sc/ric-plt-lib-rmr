@@ -55,6 +55,16 @@ Use the command 'unit_test.ksh -?' to see the usage information
 and complete set of options available.
 
 
+Merging .gcov files
+As some unit test programmes may not be able/designed to cover all 
+of a module completely, the script will merge each .gcov prooduced
+with the prior, matching, file after each pass.  The result is a
+final .gcov file that shows the coverage of the module over all 
+tests.  This allows a true coverage value to be determined while 
+permitting more simple tests to be used without the requirement of
+each test to cover everything.
+
+
 Discounting
 The unit test script makes a discount pass on low coverage files in
 attempt to discount the coverage rate by ignoring what are considered
@@ -82,6 +92,10 @@ block which checks for a nil pointer has been discounted:
  =====:  358:        return 0;
      -:  359:    }
 
+A final discount pass is made on all merged .gcov files after all unit 
+tests are finished. This final pass should indicate the true discounted
+coverage
+
 
 Target Coverage
 By default, a target coverage of 80% is used. For some modules this may
@@ -89,6 +103,15 @@ be impossible to achieve, so to prevent always failing these modules
 may be listed in the .targets file with their expected minimum coverage.
 Module names need to be qualified (e.g. ../src/common/src/foo.c.
 
+
+Sonar XML Files
+If the -x option is given on the unit test script, then two XML files 
+will be generated for Sonar.  These are gcov.xml and dcov.xml and are 
+the coverage information as reflected in the merged .gcov files and in
+the .dcov files produced during the final pass.   The XML files should
+be uploaded to Sonar only after a complete unit test run is made, otherwise
+the coverage information may be lacking (reflecting only the last test
+executed and not a full complement of tests).
 
 -----------------------------------------------------------------------
 A note about ksh (A.K.A Korn shell, or kshell)

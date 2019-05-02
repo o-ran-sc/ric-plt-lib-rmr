@@ -84,7 +84,7 @@ extern rmr_mbuf_t* rmr_realloc_msg( rmr_mbuf_t* msg, int new_tr_size ) {
 	new_msg->header = new_msg->tp_buf;
 	new_msg->alloc_len = 2048;
 	new_msg->len = msg->len;
-	
+
 	return new_msg;
 }
 
