@@ -36,6 +36,7 @@
 #define _em_nn
 
 static int em_send_failures = 0;	// test programme can set this to emulate eagain send failures
+static int em_timeout = -1;			// set by set socket option
 
 // ----------- epoll emulation ---------------------------------------------
 
@@ -54,29 +55,6 @@ static int em_wait( int fd, void* events, int n, int to ) {
 	return ready;
 }
 
-
-
-//--------------------------------------------------------------------------
-#ifdef EMULATE_NNG
-struct nn_msghdr {
-	int boo;
-};
-
-static int return_value = 0;
-
-/*
-	Test app can call this to have all emulated functions return failure instead
-	of success.
-*/
-static void en_set_retur( int rv ) {
-	return_value = rv;
-}
-
-
-
-static int em_nng_foo() {
-	fprintf( stderr, "emulated functions in play" );
-}
 
 
 /*
@@ -120,6 +98,30 @@ struct em_msg {
 
 };
 
+static int return_value = 0;
+
+//--------------------------------------------------------------------------
+#ifdef EMULATE_NNG
+struct nn_msghdr {
+	int boo;
+};
+
+
+/*
+	Test app can call this to have all emulated functions return failure instead
+	of success.
+*/
+static void en_set_return( int rv ) {
+	return_value = rv;
+}
+
+
+
+static int em_nng_foo() {
+	fprintf( stderr, "emulated functions in play" );
+}
+
+
 /*
 	Receive message must allocate a new buffer and return the pointer into *m.
 	Every 9 messages or so we'll simulate an old version message
@@ -144,7 +146,7 @@ static int em_nng_recvmsg( nng_socket s, nng_msg ** m, int i ) {
 			msg->rmr_ver = htonl( MSG_VER );
 		}
 		msg->mtype = htonl( 1 );
-		msg->plen = htonl( 129 );
+		msg->plen = htonl( 220 );
 		msg->len0 = htonl( sizeof( struct em_msg ) );
 		msg->len1 = htonl( trace_size );
 		snprintf( msg->xid, 32, "%015d", count++ );		// simple transaction id so we can test receive specific and ring stuff
@@ -197,6 +199,7 @@ static int em_nng_sub0_open(nng_socket * s ) {
 	return return_value;
 }
 static int em_nng_recv(nng_socket s, void * v, size_t * t, int i ) {
+
 	return return_value;
 }
 static int em_nng_send( nng_socket s, void* m, int l, int f ) {
@@ -337,16 +340,16 @@ static int em_nn_close (int s ) {
 	return 1;
 }
 
-static int em_nn_setsockopt (int s, int level, int option, const void *optval, size_t optvallen ) {
-	return 1;
-}
+//static int em_nn_setsockopt (int s, int level, int option, const void *optval, size_t optvallen ) {
+	//return 1;
+//}
 
 static int em_nn_getsockopt (int s, int level, int option, void *optval, size_t *optvallen ) {
 	return 1;
 }
 
 static int em_nn_bind (int s, const char *addr ) {
-fprintf( stderr, ">>> ===== emulated bind called ====\n" );
+	//	fprintf( stderr, ">>> ===== emulated bind called ====\n" );
 	return 1;
 }
 
@@ -362,8 +365,43 @@ static int em_nn_send (int s, const void *buf, size_t len, int flags ) {
 	return 1;
 }
 
-static int em_nn_recv (int s, void *buf, size_t len, int flags ) {
-	return 1;
+static int em_nn_recv (int s, void *m, size_t len, int flags ) {
+	void* b;
+	struct em_msg* msg;
+	static int count = 0;			// we'll simulate a message going in by dropping an rmr-ish msg with transaction id only
+	int trace_size = 0;
+	static int counter = 0;				// if timeout value is set; we return timeout (eagain) every 3 calls
+
+	if( em_timeout > 0 ) {
+		counter++;
+		if( counter % 3 == 0 ) {
+			return EAGAIN;
+		}
+	}
+
+	b = (void *) malloc( 2048 );
+	if( m != NULL ) {						// blindly we assume this is 2k or bigger
+		memset( m, 0, 2048 );
+		msg = (struct em_msg *) m;
+		if( count % 10  == 9 ) {
+			//msg->rmr_ver = htonl( MSG_VER );
+			msg->rmr_ver = ALT_MSG_VER;		// emulate the bug in RMr v1
+		} else {
+			msg->rmr_ver = htonl( MSG_VER );
+		}
+		msg->mtype = htonl( 1 );
+		msg->plen = htonl( 220 );
+		msg->len0 = htonl( sizeof( struct em_msg ) );
+		msg->len1 = htonl( trace_size );
+		snprintf( msg->xid, 32, "%015d", count++ );		// simple transaction id so we can test receive specific and ring stuff
+		snprintf( msg->src, 16, "localhost:4562" );		// set src id (unrealistic) so that rts() can be tested
+		//fprintf( stderr, "<EM>   returning message len=%d\n\n", ntohl( msg->plen ) );
+	} else {
+		fprintf( stderr, "<EM>   message was nil\n\n" );
+	}
+
+	//fprintf( stderr, ">>> simulated received message: %s len=%d\n", msg->xid, msg->plen );
+	return 2048;
 }
 
 static int em_sendmsg (int s, const struct em_nn_msghdr *msghdr, int flags ) {
@@ -374,10 +412,24 @@ static int em_nn_recvmsg (int s, struct nn_msghdr *msghdr, int flags ) {
 	return 1;
 }
 
+static void em_nn_freemsg( void* ptr ) {
+	return;
+}
+
+/*
+	Hacky implementation of set sock opt. We assume value is a pointer to int and ignore size.
+*/
+static int em_setsockopt( int sock, int foo, int action, int* value, int size ) {
+	if( action ==  NN_RCVTIMEO ) {
+		em_timeout = *value;
+	}
+}
+
+
 // nanomsg
 #define nn_socket  em_nn_socket
 #define nn_close  em_nn_close
-#define nn_setsockopt  em_nn_setsockopt
+//#define nn_setsockopt  em_nn_setsockopt
 #define nn_getsockopt  em_nn_getsockopt
 #define nn_bind  em_nn_bind
 #define nn_connect  em_nn_connect
@@ -386,6 +438,8 @@ static int em_nn_recvmsg (int s, struct nn_msghdr *msghdr, int flags ) {
 #define nn_recv  em_nn_recv
 #define nn_sendmsg  em_nn_sendmsg
 #define nn_recvmsg  em_nn_recvmsg
+#define nn_setsockopt  em_setsockopt
+#define nn_freemsg  em_nn_freemsg
 
 #endif
 

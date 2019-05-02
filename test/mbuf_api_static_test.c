@@ -262,7 +262,7 @@ int mbuf_api_test( ) {
 	errors += fail_not_nil( buf, "rmr_get_src returned a pointer when given a nil dest buffer" );
 
 	buf = rmr_get_src( mbuf, src_buf );
-	errors += fail_not_equal( buf, src_buf, "rmr_get_src didn't return expexted buffer pointer" );
+	errors += fail_not_equal( (int) buf, (int) src_buf, "rmr_get_src didn't return expexted buffer pointer" );
 
 
 	return errors > 0;			// overall exit code bad if errors
