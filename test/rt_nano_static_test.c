@@ -43,6 +43,22 @@ typedef struct entry_info {
 	char* ep_name;
 } ei_t;
 
+/*
+	Create a dummy endpoint for some direct function calls.
+*/
+static endpoint_t* mk_ep( char* name ) {
+	endpoint_t* ep;
+
+	ep = (endpoint_t *) malloc( sizeof( struct endpoint ) );
+	ep->name = strdup( name );
+	ep->proto = strdup( "tcp" );
+	ep->addr = strdup( "address" );
+	ep->nn_sock = -1;
+	ep->open = 0;
+
+	return ep;
+}
+
 
 /*
 	This is the main route table test. It sets up a very specific table
@@ -52,32 +68,32 @@ typedef struct entry_info {
 static int rt_test( ) {
 	uta_ctx_t* ctx;			// context needed to test load static rt
 	route_table_t* rt;		// route table
-	route_table_t* crt;		// cloned route table
+	route_table_t*	crt;		// cloned route table
 	rtable_ent_t*	rte;	// entry in the table
-	endpoint_t*	ep;			// endpoint added
-	int more = 0;			// more flag from round robin
-	int errors = 0;			// number errors found
-	int	i;
-	int k;
-	int mtype;
-	int value;
-	int alt_value;
-	ei_t	entries[50];	// end point information
-	int		gcounts[5];		// number of groups in this set
-	int		ecounts[5];		// number of elements per group
-	int		mtypes[5];		// msg type for each group set
-	char*	tok;
-	char*	nxt_tok;
-	int		enu = 0;
-	int		state;
-	char	*buf;
-	char*	seed_fname;		// seed file
-	nng_socket nn_sock;		// this is a struct in nng, so difficult to validate
+	endpoint_t*		ep;			// endpoint added
+	int				more = 0;			// more flag from round robin
+	int				errors = 0;			// number errors found
+	int				i;
+	int				k;
+	int				mtype;
+	int				value;
+	int				alt_value;
+	ei_t			entries[50];	// end point information
+	int				gcounts[5];		// number of groups in this set
+	int				ecounts[5];		// number of elements per group
+	int				mtypes[5];		// msg type for each group set
+	char*			tok;
+	char*			nxt_tok;
+	int				enu = 0;
+	int				state;
+	char			*buf;
+	char*			seed_fname;		// seed file
+	int 			nn_sock;
 
 	setenv( "ENV_VERBOSE_FILE", ".ut_rmr_verbose", 1 );			// allow for verbose code in rtc to be driven
 	i = open( ".ut_rmr_verbose", O_RDWR | O_CREAT, 0644 );
 	if( i >= 0 ) {
-		write( 1, "2\n", 2 );
+		write( i, "2\n", 2 );
 		close( i );
 	}
 
@@ -110,7 +126,6 @@ static int rt_test( ) {
 	ecounts[4] = 1;
 	mtypes[4] = 3;
 	entries[enu].group = 0; entries[enu].ep_name = "localhost:4565"; enu++;
-
 
 
 	rt = uta_rt_init( );										// get us a route table
@@ -150,14 +165,12 @@ static int rt_test( ) {
 	ep = uta_get_ep( rt, "bad_name:4560" );
 	errors += fail_not_nil( ep, "end point (fetch by name with bad name)" );
 
-	state = uta_epsock_byname( rt, "localhost:4561", &nn_sock );		// this should be found
-	errors += fail_if_equal( state, 0, "socket (by name)" );
-	//alt_value = uta_epsock_byname( rt, "localhost:4562" );			// we might do a memcmp on the two structs, but for now nothing
-	//errors += fail_if_equal( value, alt_value, "app1/app2 sockets" );
+	state = uta_epsock_byname( rt, "localhost:4561" );		// this should be found
+	errors += fail_if_true( state < 0, "socket (by name) returned socket less than 0 when expected >= 0 socket" );
 
 	alt_value = -1;
 	for( i = 0; i < 10; i++ ) {										// round robin return value should be different each time
-		value = uta_epsock_rr( rt, 1, 0, &more, &nn_sock );			// msg type 1, group 1
+		value = uta_epsock_rr( rt, 1, 0, &more );					// nano returns the socket which should be different than the last call
 		errors += fail_if_equal( value, alt_value, "round robiin sockets with multiple end points" );
 		errors += fail_if_false( more, "more for mtype==1" );
 		alt_value = value;
@@ -165,7 +178,7 @@ static int rt_test( ) {
 
 	more = -1;
 	for( i = 0; i < 10; i++ ) {							// this mtype has only one endpoint, so rr should be same each time
-		value = uta_epsock_rr( rt, 3, 0, NULL, &nn_sock );		// also test ability to deal properly with nil more pointer
+		value = uta_epsock_rr( rt, 3, 0, NULL );		// also test ability to deal properly with nil more pointer
 		if( i ) {
 			errors += fail_not_equal( value, alt_value, "round robin sockets with one endpoint" );
 			errors += fail_not_equal( more, -1, "more value changed in single group instance" );
@@ -173,15 +186,15 @@ static int rt_test( ) {
 		alt_value = value;
 	}
 
-	value = uta_epsock_rr( rt, 9, 0, &more, &nn_sock );			// non-existant message type; should return false (0)
-	errors += fail_not_equal( value, 0, "socket for bad mtype was valid" );
+	value = uta_epsock_rr( rt, 289486, 0, &more  );			// non-existant message type; should return false (0)
+	errors += fail_if_true( value >= 0, "socket for bad hash key was valid" );
 
 	uta_rt_clone( NULL );								// verify null parms don't crash things
 	uta_rt_drop( NULL );
-	uta_epsock_rr( NULL, 1, 0, &more, &nn_sock );		// drive null case for coverage
+	uta_epsock_rr( NULL, 1, 0, &more );					// drive null case for coverage
 	uta_add_rte( NULL, 99, 1 );
 
-	fprintf( stderr, "[INFO] test: adding end points with nil data; warnings expected\n" );
+	fprintf( stderr, "<INFO> adding end points with nil data; warnings from RMr code are expected\n" );
 	uta_add_ep( NULL, NULL, "foo", 1 );
 	uta_add_ep( rt, NULL, "foo", 1 );
 
@@ -205,7 +218,6 @@ static int rt_test( ) {
 
 		if( (seed_fname = getenv( "RMR_SEED_RT" )) != NULL ) {
 			if( ! (fail_if_nil( rt, "pointer to rt for load test" )) ) {
-				errors++;
 				read_static_rt( ctx, 0 );
 				unsetenv( "RMR_SEED_RT" );			// unset to test the does not exist condition
 				read_static_rt( ctx, 0 );
@@ -219,24 +231,30 @@ static int rt_test( ) {
 
 	uta_fib( "no-suhch-file" );			// drive some error checking for coverage
 
-/*
-	if( ctx ) {
-		if( ctx->rtg_addr ) {
-			free( ctx->rtg_addr );
-		}
-		free( ctx );
-	}
-*/
-
-	state = uta_link2( "worm", NULL, NULL );
-	errors += fail_if_true( state, "link2 did not return false when given nil pointers" );
-
-	state = uta_epsock_rr( rt, 122, 0, NULL, NULL );
-	errors += fail_if_true( state, "uta_epsock_rr returned bad state when given nil socket pointer" );
-
 	rt = uta_rt_init( );										// get us a route table
-	state = uta_epsock_rr( rt, 0, -1, NULL, &nn_sock );
-	errors += fail_if_true( state, "uta_epsock_rr returned bad state (true) when given negative group number" );
+	state = uta_link2( NULL );
+	errors += fail_not_equal( state, -1, "link2 did not return (a==) -1 when given nil pointers" );
+
+	ep = mk_ep( "foo" );
+	state = rt_link2_ep( NULL );
+	errors += fail_not_equal( state, 0, "link2_ep did not return (a) bad  when given nil pointers" );
+
+	state = rt_link2_ep( ep );
+	errors += fail_not_equal( state, 1, "link2_ep did not return (a) bad  when given an ep to use to open" );
+
+	ep->open = 1;
+	state = rt_link2_ep( ep );
+	errors += fail_not_equal( state, 1, "link2_ep did not return (a) bad when given an ep which was set open" );
+
+	state = uta_epsock_rr( rt, 122, 0, NULL );
+	errors += fail_not_equal( state, -1, "uta_epsock_rr returned bad state when given nil socket pointer" );
+
+	state = uta_epsock_rr( rt, 0, -1, NULL );
+	errors += fail_not_equal( state, -1, "uta_epsock_rr returned bad state (a) when given negative group number" );
+
+	state = rt_link2_ep( NULL );
+	errors += fail_if_equal( state, -1, "call to link2_ep with nil ep returned true when false expected" );
+
 
 	return !!errors;			// 1 or 0 regardless of count
 }

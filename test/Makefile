@@ -12,7 +12,7 @@ libs =  -L ../build/lib -lnng -lpthread -lm
 	$(CC) -g $< -c 
 
 %:: %.c
-	$(CC) -I ../src/common/src/ -I ../src/common/include -I ../src/nng/include $(coverage_opts) -fPIC -g $< -o $@  $(libs)
+	$(CC) -I ../src/common/src/ -I ../src/common/include -I ../src/nng/include -I ../src/nanomsg/include  $(coverage_opts) -fPIC -g $< -o $@  $(libs)
 
 # catch all 
 all:
