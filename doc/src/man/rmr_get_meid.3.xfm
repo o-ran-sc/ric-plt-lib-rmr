@@ -49,7 +49,7 @@
 &ex_start
 #include <rmr/rmr.h>
 
-int rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest )
+char* rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest )
 &ex_end
 
 &uindent
