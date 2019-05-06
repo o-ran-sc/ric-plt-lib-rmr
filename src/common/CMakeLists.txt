@@ -22,6 +22,7 @@
 add_library( common_objects OBJECT 
 	src/symtab.c
 	src/mbuf_api.c
+	src/wrapper.c
 )
 
 target_include_directories (common_objects PUBLIC 

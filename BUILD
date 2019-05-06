@@ -101,3 +101,16 @@ will continue to support Nanomsg for a short period of time, but
 new programmes should NOT use Nanomsg.
 
 
+Manual Pages
+By default the deb created does not include the manual pages. To
+enable their creation, and subsequent inclusion in the deb, add
+the following option to the cmake command:
+
+	-DBUILD_DOC=1
+
+This will cause the {X}fm text formatting package to be fetched
+(github) and built at cmake time (must exist before building)
+and will trigger the generation of the man pages in both postscript
+and troff format.  The troff pages are placed into the deb and 
+the postscript pages are left in the build directory for the 
+developer to convert to PDF, or otherwise use.

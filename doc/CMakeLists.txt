@@ -62,6 +62,7 @@ if( BUILD_DOC )
 		rmr_wh_close.3
 		rmr_alloc_msg.3
 		rmr_get_rcvfd.3
+		rmr_get_meid.3
 		rmr_rcv_msg.3
 		rmr_send_msg.3
 		rmr_wh_open.3
