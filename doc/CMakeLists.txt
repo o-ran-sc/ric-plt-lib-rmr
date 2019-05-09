@@ -119,6 +119,6 @@ if( BUILD_DOC )
 	add_custom_target( man_pages ALL DEPENDS ${man3_files};${man7_files} )
 
 else()
-	message( "+++ not building doc, set -DBULID_DOC on cmake commandline to enable" )
+	message( "+++ not building doc, set -DBULID_DOC=1 on cmake command line to enable" )
 endif()
 unset( BUILD_DOC  CACHE )    # prevent it from being applied next build unless specifically set on comd line

@@ -30,6 +30,7 @@
 
 build_path=../../.build
 
+echo "$(date) build starts" >&2
 (
 	set -e
 	mkdir -p $build_path
@@ -37,10 +38,12 @@ build_path=../../.build
 	cd ${build_path##*/}
 	cmake ..
 	make package
-)
+) >/tmp/PID$$.log
 if (( $? != 0 ))
 then
-	echo "build failed"
+	cat /tmp/PID$$>log
+	echo "$(date) build failed" >&2
 	exit 1
 fi
+echo "$(date) build completed" >&2
 

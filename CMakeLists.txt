@@ -21,10 +21,9 @@
 project( rmr LANGUAGES C )
 cmake_minimum_required( VERSION 3.5 )
 
-
 set( major_version "1" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "0" )
-set( patch_level "20" )
+set( patch_level "21" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_lib "lib" )
@@ -39,8 +38,11 @@ endif()
 # locations on all platforms.
 include( GNUInstallDirs )
 
-if( NOT BUILD_LIB )
-	set( BUILD_LIB lib )
+# nano/nng install using LIBDIR as established by the gnu include; it varies from system
+# to system, and we don't trust that it is always set, so we default to lib.
+#
+if( NOT CMAKE_INSTALL_LIBDIR )
+	set( CMAKE_INSTALL_LIBDIR "lib" )
 endif()
 
 # ---------------- extract some things from git ------------------------------
@@ -249,12 +251,12 @@ install( TARGETS rmr_nng_shared;rmr_nng_static;rmr_shared;rmr_static EXPORT Libr
 if( need_ext )
 	message( "including nano and nng libraries in the deb" )
 	install( FILES
-		${CMAKE_CURRENT_BINARY_DIR}/${BUILD_LIB}/libnanomsg${nano_so_suffix}
-		${CMAKE_CURRENT_BINARY_DIR}/${BUILD_LIB}/libnanomsg${nano_so_suffix_m}
-		${CMAKE_CURRENT_BINARY_DIR}/${BUILD_LIB}/libnanomsg${nano_so_suffix_mm}
-		${CMAKE_CURRENT_BINARY_DIR}/${BUILD_LIB}/libnng${nng_so_suffix}
-		${CMAKE_CURRENT_BINARY_DIR}/${BUILD_LIB}/libnng${nng_so_suffix_m}
-		${CMAKE_CURRENT_BINARY_DIR}/${BUILD_LIB}/libnng${nng_so_suffix_mm}
+		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnanomsg${nano_so_suffix}
+		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnanomsg${nano_so_suffix_m}
+		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnanomsg${nano_so_suffix_mm}
+		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnng${nng_so_suffix}
+		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnng${nng_so_suffix_m}
+		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnng${nng_so_suffix_mm}
 
 		DESTINATION ${install_lib}
 	)
