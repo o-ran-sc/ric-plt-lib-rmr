@@ -22,7 +22,7 @@
 
 .EXPORT_ALL_VARIABLES:
 .ONESHELL:
-.SHELLFLAGS = -e
+#.SHELLFLAGS = -e	# hosed on some flavours so keep it off
 SHELL = /bin/ksh
 
 build_path ?= ../../.build

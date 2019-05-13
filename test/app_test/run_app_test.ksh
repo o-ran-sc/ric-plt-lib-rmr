@@ -77,7 +77,7 @@ verbose=0
 
 while [[ $1 == -* ]]
 do
-	case $1 in 
+	case $1 in
 		-B)	rebuild=1;;
 		-d)	delay=$2; shift;;
 		-N)	nano_sender=1
@@ -102,7 +102,7 @@ then
 	export RMR_VCTL_FILE=".verbose"
 fi
 
-if (( rebuild )) 
+if (( rebuild ))
 then
 	build_path=../../.build
 	set -e
@@ -119,7 +119,13 @@ else
 	fi
 fi
 
-export LD_LIBRARY_PATH=$build_path:$build_path/lib
+if [[ -d $build_path/lib64 ]]
+then
+	export LD_LIBRARY_PATH=$build_path:$build_path/lib64
+else
+	export LD_LIBRARY_PATH=$build_path:$build_path/lib
+fi
+
 export LIBRARY_PATH=$LD_LIBRARY_PATH
 export RMR_SEED_RT=${RMR_SEED_RT:-./local.rt}		# allow easy testing with different rt
 

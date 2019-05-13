@@ -21,7 +21,7 @@
 # ---------------------------------------------------------------------------------
 #	Mnemonic:	run_multi_test.ksh
 #	Abstract:	This is a simple script to set up and run the basic send/receive
-#				processes for some library validation on top of nano/nng. This 
+#				processes for some library validation on top of nano/nng. This
 #				particular tests starts several receivers and creates a route table
 #				which causes messages to be sent to all receivers in parallel
 #				(forcing message cloning internally in RMr).
@@ -83,8 +83,8 @@ function set_rt {
 		mse |0 | 0 | $groups
 		mse |1 | 10 | $groups
 		mse |2 | 20 | $groups
-		rte |3 | $groups 
-		rte |4 | $groups 
+		rte |3 | $groups
+		rte |4 | $groups
 		rte |5 | $groups
 		rte |6 | $groups
 		rte |7 | $groups
@@ -116,7 +116,7 @@ nrcvrs=3					# this is sane, but -r allows it to be set up
 
 while [[ $1 == -* ]]
 do
-	case $1 in 
+	case $1 in
 		-B)	rebuild=1;;
 		-d)	delay=$2; shift;;
 		-N)	nano_sender=1
@@ -142,7 +142,7 @@ then
 	export RMR_VCTL_FILE=".verbose"
 fi
 
-if (( rebuild )) 
+if (( rebuild ))
 then
 	build_path=../../.build		# if we rebuild we can insist that it is in .build :)
 	set -e
@@ -159,7 +159,12 @@ else
 	fi
 fi
 
-export LD_LIBRARY_PATH=$build_path:$build_path/lib
+if [[ -d $build_path/lib64 ]]
+then
+	export LD_LIBRARY_PATH=$build_path:$build_path/lib64
+else
+	export LD_LIBRARY_PATH=$build_path:$build_path/lib
+fi
 export LIBRARY_PATH=$LD_LIBRARY_PATH
 export RMR_SEED_RT=./multi.rt
 

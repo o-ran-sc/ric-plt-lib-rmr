@@ -20,7 +20,7 @@
 
 # ---------------------------------------------------------------------------------
 #	Mnemonic:	rebuild.ksh
-#	Abstract:	This is a simple script that will cause RMr to be rebuilt. It 
+#	Abstract:	This is a simple script that will cause RMr to be rebuilt. It
 #				may be invoked by any of the run_* scripts in this directory.
 #
 #	Date:		24 April 2019
