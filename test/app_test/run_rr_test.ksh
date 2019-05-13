@@ -46,9 +46,9 @@ function run_sender {
 	export RMR_RTG_SVC=8990
 	if (( $nano_sender ))
 	then
-		./sender_nano $(( nmsg * nrcvrs )) $delay 1
+		./sender_nano $(( nmsg * nrcvrs )) $delay $max_mtype
 	else
-		./sender $(( nmsg * nrcvrs ))  $delay 1
+		./sender $(( nmsg * nrcvrs ))  $delay $max_mtype
 	fi
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
@@ -85,15 +85,15 @@ function set_rt {
 		rte |0 | $endpoints  |0
 		rte |1 | $endpoints  |10
 		mse |2 | 20 | $endpoints		# new style mtype/subid entry
-		rte |3 | $endpoints  |0
-		rte |4 | $endpoints  |0
-		rte |5 | $endpoints  |0
-		rte |6 | $endpoints  |0
-		rte |7 | $endpoints  |0
-		rte |8 | $endpoints  |0
-		rte |9 | $endpoints  |0
-		rte |10 | $endpoints  |0
-		rte |11 | $endpoints  |0
+		rte |3 | $endpoints  | -1
+		rte |4 | $endpoints  | -1
+		rte |5 | $endpoints  | -1
+		rte |6 | $endpoints  | -1
+		rte |7 | $endpoints  | -1
+		rte |8 | $endpoints  | -1
+		rte |9 | $endpoints  | -1
+		rte |10 | $endpoints  | -1
+		rte |11 | $endpoints  | -1
 		newrt |end
 endKat
 
@@ -114,6 +114,7 @@ nano_receiver=0
 wait=1
 rebuild=0
 verbose=0
+max_mtype=1					# causes all msgs to go with type 1; use -M to set up, but likely harder to validate
 nrcvrs=3					# this is sane, but -r allows it to be set up
 
 while [[ $1 == -* ]]
@@ -121,6 +122,7 @@ do
 	case $1 in
 		-B)	rebuild=1;;
 		-d)	delay=$2; shift;;
+		-m) max_mtype=$2; shift;;
 		-N)	nano_sender=1
 			nano_receiver=1
 			;;
@@ -137,7 +139,6 @@ do
 
 	shift
 done
-
 
 if (( verbose ))
 then

@@ -244,6 +244,7 @@ extern rmr_mbuf_t* rmr_send_msg( void* vctx, rmr_mbuf_t* msg ) {
 	rmr_mbuf_t*	clone_m;		// cloned message for an nth send
 	uint64_t key;				// lookup key is now subid and mtype
 	int max_rt = 1000;
+	int	altk_ok = 0;			// ok to retry with alt key when true
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL || msg == NULL ) {		// bad stuff, bail fast
 		errno = EINVAL;												// if msg is null, this is their clue
@@ -266,18 +267,29 @@ extern rmr_mbuf_t* rmr_send_msg( void* vctx, rmr_mbuf_t* msg ) {
 	group = 0;												// always start with group 0
 
 	key = build_rt_key( msg->sub_id, msg->mtype );			// what we need to find the route table entry
+	if( msg->sub_id != UNSET_SUBID ) {						// if sub id set, allow retry with just mtype if no endpoint when sub-id used
+		altk_ok = 1;
+	}
+
 	while( send_again ) {
 		max_rt = 1000;
 		nn_sock = uta_epsock_rr( ctx->rtable, key, group, &send_again );		// round robin select endpoint; again set if mult groups
-		if( DEBUG ) fprintf( stderr, "[DBUG] send msg: type=%d again=%d group=%d socket=%d len=%d\n",
-				msg->mtype, send_again, group, nn_sock, msg->len );
-		group++;
+		if( DEBUG ) fprintf( stderr, "[DBUG] send msg: type=%d again=%d group=%d socket=%d len=%d ak_ok=%d\n",
+				msg->mtype, send_again, group, nn_sock, msg->len, altk_ok );
 
 		if( nn_sock < 0 ) {
+			if( altk_ok ) {											// ok to retry with alternate key
+				key = build_rt_key( UNSET_SUBID, msg->mtype );		// build key with just mtype and retry
+				send_again = 1;
+				altk_ok = 0;		
+				continue;
+			}
+
 			msg->state = RMR_ERR_NOENDPT;
 			errno = ENXIO;											// must ensure it's not eagain
 			return msg;												// caller can resend (maybe) or free
 		}
+		group++;
 
 		if( send_again ) {
 			clone_m = clone_msg( msg );								// must make a copy as once we send this message is not available
