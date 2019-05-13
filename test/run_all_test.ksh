@@ -113,7 +113,13 @@ log_it "[INFO] validating .deb"
 	set -e
 	cd .build
 	ls -al *.deb
-	dpkg -i *.deb
+	if whence dpkg >/dev/null 2>&1
+	then
+		dpkg -i *.deb
+	else
+		log_it "[INFO]   Deb installation check skipped. dpkg does not exist; trying make install"
+		make install
+	fi
 ) >/tmp/dpkg.log 2>&1
 rc=$?
 err_cat $rc /tmp/dpkg.log
