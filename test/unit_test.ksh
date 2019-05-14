@@ -353,7 +353,7 @@ do
 		-x)	gen_xml=1
 			force_discounting=1
 			trigger_discount_str="WARN|FAIL|PASS"		# check all outcomes for each module
-			rm *cov.xml
+			rm -fr *cov.xml
 			;;
 
 		-h) 	usage; exit 0;;
@@ -397,7 +397,7 @@ else
 fi
 
 
-rm *.gcov			# ditch the previous coverage files
+rm -fr *.gcov			# ditch the previous coverage files
 ut_errors=0			# unit test errors (not coverage errors)
 errors=0
 
