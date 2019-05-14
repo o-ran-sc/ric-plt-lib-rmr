@@ -168,6 +168,8 @@ typedef struct {
 	round robin messags across the list.
 */
 typedef struct {
+	uint64_t key;			// key used to reinsert this entry into a new symtab
+	int	refs;				// number of symtabs which reference the entry
 	int mtype;				// the message type for this list
 	int	nrrgroups;			// number of rr groups to send to
 	rrgroup_t**	rrgroups;	// one or more set of endpoints to round robin messages to

@@ -45,6 +45,38 @@ typedef struct entry_info {
 
 
 /*
+	Driven by symtab foreach element of one space.
+	We count using the data as a counter.
+*/
+static void count_things( void* st, void* entry, char const* name, void* thing, void* vdata ) {
+	int* counter;
+
+	if( thing ) {
+		if( (counter = (int *) vdata) != NULL ) {
+			*counter++;
+		}
+	}
+}
+
+/*
+	Returns the number of entries in the table for the given class.
+*/
+static int count_entries( route_table_t* rt, int class ) {
+	int counter = 0;
+
+	if( ! rt ) {
+		return 0;
+	}
+	if( !rt->hash ) {
+		return 0;
+	}
+
+	rmr_sym_foreach_class( rt->hash, class, count_things, &counter );	// run each and update counter
+
+	return counter;
+}
+
+/*
 	This is the main route table test. It sets up a very specific table
 	for testing (not via the generic setup function for other test
 	situations).
@@ -59,6 +91,8 @@ static int rt_test( ) {
 	int errors = 0;			// number errors found
 	int	i;
 	int k;
+	int	c1;					// general counters
+	int c2;
 	int mtype;
 	int value;
 	int alt_value;
@@ -142,8 +176,33 @@ static int rt_test( ) {
 		}
 	}
 
-	crt = uta_rt_clone( rt );
+	crt = uta_rt_clone( rt );								// clone only the endpoint entries
 	errors += fail_if_nil( crt, "cloned route table" );
+	if( crt ) {
+		c1 = count_entries( rt, 1 );
+		c2 = count_entries( crt, 1 );
+		errors += fail_not_equal( c1, c2, "cloned (endpoints) table entries space 1 count (b) did not match original table count (a)" );
+	
+		c2 = count_entries( crt, 0 );
+		errors += fail_not_equal( c2, 0, "cloned (endpoints) table entries space 0 count (a) was not zero as expected" );
+		uta_rt_drop( crt );
+	}
+
+
+	crt = uta_rt_clone_all( rt );							// clone all entries
+	errors += fail_if_nil( crt, "cloned all route table" );
+
+	if( crt ) {
+		c1 = count_entries( rt, 0 );
+		c2 = count_entries( crt, 0 );
+		errors += fail_not_equal( c1, c2, "cloned (all) table entries space 0 count (b) did not match original table count (a)" );
+	
+		c1 = count_entries( rt, 1 );
+		c2 = count_entries( crt, 1 );
+		errors += fail_not_equal( c1, c2, "cloned (all) table entries space 1 count (b) did not match original table count (a)" );
+		uta_rt_drop( crt );
+	}
+	
 
 	ep = uta_get_ep( rt, "localhost:4561" );
 	errors += fail_if_nil( ep, "end point (fetch by name)" );
@@ -197,8 +256,6 @@ static int rt_test( ) {
 	}
 
 	uta_rt_drop( rt );
-
-	uta_rt_drop( crt );
 
 	if( (ctx = (uta_ctx_t *) malloc( sizeof( uta_ctx_t ) )) != NULL ) {
 		memset( ctx, 0, sizeof( *ctx ) );

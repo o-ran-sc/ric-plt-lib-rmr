@@ -95,6 +95,7 @@ static char* clip( char* buf ) {
 */
 static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups ) {
 	rtable_ent_t* rte;
+	rtable_ent_t* old_rte;		// entry which was already in the table for the key
 
 	if( rt == NULL ) {
 		return NULL;
@@ -105,6 +106,7 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups
 		return NULL;
 	}
 	memset( rte, 0, sizeof( *rte ) );
+	rte->refs = 1;
 
 	if( nrrgroups <= 0 ) {
 		nrrgroups = 10;
@@ -117,6 +119,10 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups
 	}
 	memset( rte->rrgroups, 0, sizeof( rrgroup_t *) * nrrgroups );
 	rte->nrrgroups = nrrgroups;
+
+	if( (old_rte = rmr_sym_pull( rt->hash, key )) != NULL ) {
+		del_rte( NULL, NULL, NULL, old_rte, NULL );				// dec the ref counter and trash if unreferenced
+	}
 
 	rmr_sym_map( rt->hash, key, rte );							// add to hash using numeric mtype as key
 
@@ -341,12 +347,29 @@ static void collect_things( void* st, void* entry, char const* name, void* thing
 	Called to delete a route table entry struct. We delete the array of endpoint
 	pointers, but NOT the endpoints referenced as those are referenced from
 	multiple entries.
+
+	Route table entries can be concurrently referenced by multiple symtabs, so 
+	the actual delete happens only if decrementing the rte's ref count takes it
+	to 0. Thus, it is safe to call this function across a symtab when cleaning up
+	the symtab, or overlaying an entry.
+
+	This function uses ONLY the pointer to the rte (thing) and ignores the other
+	information that symtab foreach function passes (st, entry, and data) which 
+	means that it _can_ safetly be used outside of the foreach setting. If
+	the function is changed to depend on any of these three, then a stand-alone
+	rte_cleanup() function should be added and referenced by this, and refererences
+	to this outside of the foreach world should be changed.
 */
 static void del_rte( void* st, void* entry, char const* name, void* thing, void* data ) {
 	rtable_ent_t*	rte;
 	int i;
 
 	if( (rte = (rtable_ent_t *) thing) == NULL ) {
+		return;
+	}
+
+	rte->refs--;
+	if( rte->refs > 0 ) {			// something still referencing, so it lives
 		return;
 	}
 
@@ -452,7 +475,7 @@ static route_table_t* uta_rt_init( ) {
 static route_table_t* uta_rt_clone( route_table_t* srt ) {
 	endpoint_t*		ep;		// an endpoint
 	route_table_t*	nrt;	// new route table
-	route_table_t*	art;	// active route table
+	//route_table_t*	art;	// active route table
 	void*	sst;			// source symtab
 	void*	nst;			// new symtab
 	thing_list_t things;
@@ -491,6 +514,75 @@ static route_table_t* uta_rt_clone( route_table_t* srt ) {
 	}
 
 	free( things.things );
+	return nrt;
+}
+
+/*
+	Clones _all_ of the given route table (references both endpoints AND the route table
+	entries. Needed to support a partial update where some route table entries will not 
+	be deleted if not explicitly in the update.
+*/
+static route_table_t* uta_rt_clone_all( route_table_t* srt ) {
+	endpoint_t*		ep;		// an endpoint
+	rtable_ent_t*	rte;	// a route table entry
+	route_table_t*	nrt;	// new route table
+	//route_table_t*	art;	// active route table
+	void*	sst;			// source symtab
+	void*	nst;			// new symtab
+	thing_list_t things0;	// things from space 0 (table entries)
+	thing_list_t things1;	// things from space 1 (end points)
+	int i;
+
+	if( srt == NULL ) {
+		return NULL;
+	}
+
+	if( (nrt = (route_table_t *) malloc( sizeof( *nrt ) )) == NULL ) {
+		return NULL;
+	}
+
+	if( (nrt->hash = rmr_sym_alloc( 509 )) == NULL ) {		// modest size, prime
+		free( nrt );
+		return NULL;
+	}
+
+	things0.nalloc = 2048;
+	things0.nused = 0;
+	things0.things = (void **) malloc( sizeof( void * ) * things0.nalloc );
+	if( things0.things == NULL ) {
+		free( nrt->hash );
+		free( nrt );
+		return NULL;
+	}
+
+	things1.nalloc = 2048;
+	things1.nused = 0;
+	things1.things = (void **) malloc( sizeof( void * ) * things1.nalloc );
+	if( things1.things == NULL ) {
+		free( nrt->hash );
+		free( nrt );
+		return NULL;
+	}
+
+	sst = srt->hash;											// convenience pointers (src symtab)
+	nst = nrt->hash;
+
+	rmr_sym_foreach_class( sst, 0, collect_things, &things0 );		// collect the rtes
+	rmr_sym_foreach_class( sst, 1, collect_things, &things1 );		// collect the named endpoints in the active table
+
+	for( i = 0; i < things0.nused; i++ ) {
+		rte = (rtable_ent_t *) things0.things[i];
+		rte->refs++;												// rtes can be removed, so we track references
+		rmr_sym_map( nst, rte->key, rte );							// add to hash using numeric mtype/sub-id as key (default to space 0)
+	}
+
+	for( i = 0; i < things1.nused; i++ ) {
+		ep = (endpoint_t *) things1.things[i];
+		rmr_sym_put( nst, ep->name, 1, ep );						// slam this one into the new table
+	}
+
+	free( things0.things );
+	free( things1.things );
 	return nrt;
 }
 
