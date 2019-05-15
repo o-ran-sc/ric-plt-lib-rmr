@@ -60,8 +60,8 @@ static char* build_sval( char* name, char* val, int add_sep ) {
 
 /*
 	Similar to strcat, bangs src onto the end of target, but UNLIKE
-	strcat src is freed as a convenience. Max is the max amount 
-	that target can accept; we don't bang on if src len is 
+	strcat src is freed as a convenience. Max is the max amount
+	that target can accept; we don't bang on if src len is
 	larger than max.  Return is the size of src; 0 if the
 	target was not modified.  If target is not modified, then
 	src is NOT released.

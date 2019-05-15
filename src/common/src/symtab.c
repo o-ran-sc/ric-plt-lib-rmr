@@ -297,7 +297,7 @@ extern void rmr_sym_del( void *vtable, const char *name, unsigned int class )
 		hv = sym_hash( name, table->size );
 		for(eptr=sym_tab[hv]; eptr &&  ! same(class, eptr->class, eptr->name, name); eptr=eptr->next );
 	} else {
-		nkey = *((int *) name);
+		nkey = *((uint64_t *) name);
 		hv = nkey % table->size;			// just hash the number
 		for( eptr=sym_tab[hv]; eptr && eptr->nkey != nkey; eptr=eptr->next );
 	}

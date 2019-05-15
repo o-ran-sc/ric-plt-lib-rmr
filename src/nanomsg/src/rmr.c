@@ -281,7 +281,7 @@ extern rmr_mbuf_t* rmr_send_msg( void* vctx, rmr_mbuf_t* msg ) {
 			if( altk_ok ) {											// ok to retry with alternate key
 				key = build_rt_key( UNSET_SUBID, msg->mtype );		// build key with just mtype and retry
 				send_again = 1;
-				altk_ok = 0;		
+				altk_ok = 0;
 				continue;
 			}
 

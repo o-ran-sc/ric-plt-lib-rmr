@@ -40,6 +40,10 @@
 
 /*
 	Generate a simple route table (for all but direct route table testing).
+	This gets tricky inasmuch as we generate two in one; first a whole table 
+	and then two update tables. The first is a table with a bad counter in the
+	last record to test that we don't load that table and error. The second
+	is a good update.
 */
 static void gen_rt( uta_ctx_t* ctx ) {
 	int		fd;
@@ -71,9 +75,24 @@ static void gen_rt( uta_ctx_t* ctx ) {
 	}
 
 	setenv( "RMR_SEED_RT", "utesting.rt", 1 );
+	write( fd, rt_stuff, strlen( rt_stuff ) );		// write in the whole table
+
+	rt_stuff =
+		"updatert|start\n"									// this is an update to the table
+	    "mse|4|99|fooapp:9999,barapp:9999;logger:9999\n"	// update just one entry
+		"updatert|end | 3\n";								// bad count; this update should be rejected
 	write( fd, rt_stuff, strlen( rt_stuff ) );
+
+	rt_stuff =
+		"updatert|start\n"									// this is an update to the table
+	    "mse|4|10|fooapp:4561,barapp:4561;logger:9999\n"	// update just one entry
+		"del|2|-1\n"										// delete an entry; not there so no action
+		"del|2|10\n"										// delete an entry
+		"updatert|end | 3\n";								// end table; updates have a count as last field
+	write( fd, rt_stuff, strlen( rt_stuff ) );
+	
 	close( fd );
-	read_static_rt( ctx, 0 );
+	read_static_rt( ctx, 1 );								// force in verbose mode to see stats on tty if failure
 	unlink( "utesting.rt" );
 }
 

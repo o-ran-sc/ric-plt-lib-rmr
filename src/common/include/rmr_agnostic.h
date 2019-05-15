@@ -180,6 +180,7 @@ typedef struct {
 */
 typedef struct {
 	void*	hash;			// hash table.
+	int		updates;		// counter of update records received
 } route_table_t;
 
 /*
@@ -238,6 +239,7 @@ static void del_rte( void* st, void* entry, char const* name, void* thing, void*
 static char* uta_fib( char* fname );
 static route_table_t* uta_rt_init( );
 static route_table_t* uta_rt_clone( route_table_t* srt );
+static route_table_t* uta_rt_clone_all( route_table_t* srt );
 static void uta_rt_drop( route_table_t* rt );
 static endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_name, int group  );
 static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups );

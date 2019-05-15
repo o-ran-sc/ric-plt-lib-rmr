@@ -237,7 +237,7 @@ extern rmr_mbuf_t* rmr_mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 	group = 0;												// always start with group 0
 
 	key = build_rt_key( msg->sub_id, msg->mtype );			// route table key to find the entry
-	if( msg->sub_id != UNSET_SUBID ) {						
+	if( msg->sub_id != UNSET_SUBID ) {
 		altk_ok = 1; 										// if caller's sub-id doesn't hit with mtype, allow mtype only key for retry
 	}
 	while( send_again ) {
