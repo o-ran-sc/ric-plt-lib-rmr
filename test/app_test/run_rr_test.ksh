@@ -113,6 +113,7 @@ nano_sender=0				# start nano version if set (-N)
 nano_receiver=0
 wait=1
 rebuild=0
+nopull=""
 verbose=0
 max_mtype=1					# causes all msgs to go with type 1; use -M to set up, but likely harder to validate
 nrcvrs=3					# this is sane, but -r allows it to be set up
@@ -121,6 +122,7 @@ while [[ $1 == -* ]]
 do
 	case $1 in
 		-B)	rebuild=1;;
+		-b)	rebuild=1; nopull="nopull";;		# build without pulling
 		-d)	delay=$2; shift;;
 		-m) max_mtype=$2; shift;;
 		-N)	nano_sender=1
@@ -148,9 +150,8 @@ fi
 
 if (( rebuild ))
 then
-	build_path=../../.build
 	set -e
-	ksh ./rebuild.ksh
+	ksh ./rebuild.ksh $nopull | read build_path
 	set +e
 else
 	build_path=${BUILD_PATH:-"../../.build"}	# we prefer .build at the root level, but allow user option

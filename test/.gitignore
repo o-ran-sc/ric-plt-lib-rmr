@@ -3,4 +3,4 @@
 *.gcno
 *.gcda
 *.xml
-*test
+*.test

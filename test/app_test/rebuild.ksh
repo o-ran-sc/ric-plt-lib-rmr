@@ -23,19 +23,30 @@
 #	Abstract:	This is a simple script that will cause RMr to be rebuilt. It
 #				may be invoked by any of the run_* scripts in this directory.
 #
+#				NOTE:
+#				The build path is echod onto stdout so that the caller is able
+#				to reference build items for compile/linking. All other communication
+#				should be directed to stderr.
+#
 #	Date:		24 April 2019
 #	Author:		E. Scott Daniels
 # ---------------------------------------------------------------------------------
 
 
-build_path=../../.build
+parent=${PWD%/*}					# allow us to step up gracefully
+gparent=${parent%/*}
+build_path=${gparent}/.build		# where we'll build
 
 echo "$(date) build starts" >&2
 (
 	set -e
 	mkdir -p $build_path
-	cd ${build_path%/*}				# cd barfs on ../../.build, so we do this
-	cd ${build_path##*/}
+	cd $gparent
+	if [[ $1 != "nopull" ]]				# pull by default, but for local dev testing this needs to be avoided
+	then
+		git pull						# get the up to date code so if run from an old image it's a good test
+	fi
+	cd $build_path
 	cmake ..
 	make package
 ) >/tmp/PID$$.log
@@ -45,5 +56,7 @@ then
 	echo "$(date) build failed" >&2
 	exit 1
 fi
+
 echo "$(date) build completed" >&2
+echo "$build_path"
 

@@ -73,12 +73,14 @@ nano_sender=0				# start nano version if set (-N)
 nano_receiver=0
 wait=1
 rebuild=0
+nopull=""					# -b sets so that build does not pull
 verbose=0
 
 while [[ $1 == -* ]]
 do
 	case $1 in
-		-B)	rebuild=1;;
+		-B)	rebuild=1;;						# build with pull first
+		-b)	rebuild=1; nopull="nopull";;	# buld without pull
 		-d)	delay=$2; shift;;
 		-N)	nano_sender=1
 			nano_receiver=1
@@ -104,9 +106,8 @@ fi
 
 if (( rebuild ))
 then
-	build_path=../../.build
 	set -e
-	ksh ./rebuild.ksh
+	ksh ./rebuild.ksh $nopull | read build_path
 	set +e
 else
 	build_path=${BUILD_PATH:-"../../.build"}	# we prefer .build at the root level, but allow user option

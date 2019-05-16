@@ -1,0 +1,118 @@
+
+In general, seeing a "PASS" from the sender(s) and receiver(s) for each execution
+is a good indication that all was successful.  Reeceivers will fail if the 
+simple checksum calculated for the payload and trace data doesn't match. Senders
+will fail if a returned message doesn't have its matching tag (meaning it was
+returned to the wrong sender).  Both will error on a timeout either no route 
+information, or receiver did not receive the expected number of messages.
+
+Receivers send an 'ack' for message type 5, so for some tests the number of ack
+messages sent will not be the same as the number of messages received. Senders
+loop through message types 0-9 inclusive, unless otherwise directed on the
+command line (e.g. the rts test sends nothing but message type 5 messages so that
+all messages are ack'd).   
+
+Receivers will generate a final histogram of message types received. For example
+
+<RCVR> mtype histogram:      0      0      0      0      0 100000      0      0      0      0      0 
+
+is generated for the rts test -- all messages are type 5 and thus all other message
+type bins should be 0.
+
+By default, senders send 10 messages at a rate of about 1/sec.  Receivers give up
+after 20 seconds, so even though the rate and number of messages sent can be 
+adjusted from the command line, if the combination is such that the total number
+of messages sent requires more than 20 seconds to send the tests will fail. 
+
+Specific examples
+The output is chopped to the last few lines.
+
+Return to sender test with 20 senders sending 5K messages each:
+	ksh run_rts_test.ksh -s 20 -d 180 -n 5000
+
+
+	<SNDR> [PASS] sent=5000  rcvd=4999  rts-ok=4999 failures=0 retries=4
+	<RCVR> mtype histogram:      0      0      0      0      0 100000      0      0      0      0      0 
+	<RCVR> [PASS] 100000 messages;  good=100000  acked=99983 bad=0  bad-trace=0 bad-sub_id=0
+	<SNDR> [PASS] sent=5000  rcvd=5000  rts-ok=5000 failures=0 retries=4
+	<SNDR> [PASS] sent=5000  rcvd=4998  rts-ok=4998 failures=0 retries=2
+	<SNDR> [PASS] sent=5000  rcvd=4998  rts-ok=4998 failures=0 retries=2
+	<SNDR> [PASS] sent=5000  rcvd=5000  rts-ok=5000 failures=0 retries=4
+	<SNDR> [PASS] sent=5000  rcvd=4998  rts-ok=4998 failures=0 retries=2
+	<SNDR> [PASS] sent=5000  rcvd=5000  rts-ok=5000 failures=0 retries=4
+	<SNDR> [PASS] sent=5000  rcvd=5000  rts-ok=5000 failures=0 retries=2
+	<SNDR> [PASS] sent=5000  rcvd=5000  rts-ok=5000 failures=0 retries=4
+	<SNDR> [PASS] sent=5000  rcvd=4999  rts-ok=4999 failures=0 retries=2
+	<SNDR> [PASS] sent=5000  rcvd=4999  rts-ok=4999 failures=0 retries=4
+	<SNDR> [PASS] sent=5000  rcvd=4999  rts-ok=4999 failures=0 retries=5
+	<SNDR> [PASS] sent=5000  rcvd=4999  rts-ok=4999 failures=0 retries=1
+	<SNDR> [PASS] sent=5000  rcvd=5000  rts-ok=5000 failures=0 retries=4
+	<SNDR> [PASS] sent=5000  rcvd=4997  rts-ok=4997 failures=0 retries=2
+	<SNDR> [PASS] sent=5000  rcvd=4999  rts-ok=4999 failures=0 retries=2
+	<SNDR> [PASS] sent=5000  rcvd=5000  rts-ok=5000 failures=0 retries=2
+	<SNDR> [PASS] sent=5000  rcvd=5000  rts-ok=5000 failures=0 retries=3
+	<SNDR> [PASS] sent=5000  rcvd=5000  rts-ok=5000 failures=0 retries=1
+	<SNDR> [PASS] sent=5000  rcvd=4998  rts-ok=4998 failures=0 retries=2
+	[PASS] sender rc=0  receiver rc=0
+
+Important notes
+	+ The receiver will only retry acks for a finite number of tries before
+	  giving up, thus the total acs sent may still be less than messages
+	  received. As a cross validation, the total acks sent by the receiver
+	  should match the recvd count sum over all senders. 
+
+	+ The recvd and rts-ok counts for each sender should match. If they don't
+	  the receiver should mark the overall state as a failure as this indicates
+	  that a return to sender message was returned to the wrong place.
+
+
+
+Multiple Receiver test
+Test run with 10 receivers and sender sending 10K messages. The histograms
+and status messages were reorganised for easier reading here.
+
+	ksh run_multi_test.ksh  -r 10 -d 180 -n 10000
+	<RCVR> mtype histogram:   1000   1000   1000   1000   1000   1000   1000   1000   1000   1000      0 
+	<RCVR> mtype histogram:   1000   1000   1000   1000   1000   1000   1000   1000   1000   1000      0 
+	<RCVR> mtype histogram:   1000   1000   1000   1000   1000   1000   1000   1000   1000   1000      0 
+	<RCVR> mtype histogram:   1000   1000   1000   1000   1000   1000   1000   1000   1000   1000      0 
+	<RCVR> mtype histogram:   1000   1000   1000   1000   1000   1000   1000   1000   1000   1000      0 
+	<RCVR> mtype histogram:   1000   1000   1000   1000   1000   1000   1000   1000   1000   1000      0 
+	<RCVR> mtype histogram:   1000   1000   1000   1000   1000   1000   1000   1000   1000   1000      0 
+	<RCVR> mtype histogram:   1000   1000   1000   1000   1000   1000   1000   1000   1000   1000      0 
+	<RCVR> mtype histogram:   1000   1000   1000   1000   1000   1000   1000   1000   1000   1000      0 
+	<RCVR> mtype histogram:   1000   1000   1000   1000   1000   1000   1000   1000   1000   1000      0 
+
+	<RCVR> [PASS] 10000 messages;  good=10000  acked=1000 bad=0  bad-trace=0 bad-sub_id=0
+	<SNDR> [PASS] sent=10000  rcvd=10000  rts-ok=10000 failures=0 retries=0
+	<RCVR> [PASS] 10000 messages;  good=10000  acked=1000 bad=0  bad-trace=0 bad-sub_id=0
+	<RCVR> [PASS] 10000 messages;  good=10000  acked=1000 bad=0  bad-trace=0 bad-sub_id=0
+	<RCVR> [PASS] 10000 messages;  good=10000  acked=1000 bad=0  bad-trace=0 bad-sub_id=0
+	<RCVR> [PASS] 10000 messages;  good=10000  acked=1000 bad=0  bad-trace=0 bad-sub_id=0
+	<RCVR> [PASS] 10000 messages;  good=10000  acked=1000 bad=0  bad-trace=0 bad-sub_id=0
+	<RCVR> [PASS] 10000 messages;  good=10000  acked=1000 bad=0  bad-trace=0 bad-sub_id=0
+	<RCVR> [PASS] 10000 messages;  good=10000  acked=1000 bad=0  bad-trace=0 bad-sub_id=0
+	<RCVR> [PASS] 10000 messages;  good=10000  acked=1000 bad=0  bad-trace=0 bad-sub_id=0
+	<RCVR> [PASS] 10000 messages;  good=10000  acked=1000 bad=0  bad-trace=0 bad-sub_id=0
+	[PASS] sender rc=0  receiver rc=0
+
+Important notes:
+	+ histograms should show messages for all types, except type 10 which are never sent.
+
+	+ sender should receive only 1/10th of the number of messages sent back as acks;
+	  modulo receiver giving up on an ack retry, so as before the sum of ack counts should 
+	  match the sender's received count.
+
+	+ sender should fail if the received count does not match the rts-ok count indicating
+	  that a return to sender was sent to the wrong spot (very unlikely here as there is
+	  only one sender).
+
+
+
+Retries
+The retries counter for a sender is the number of times that a retry send loop had to be
+entered in order to successfully send a message. The sender will never give up on a send
+attempt, but retrying will affect latency of that message. A count of less than 10/10000
+messages is good, but it also depends on the rate that the sender is attempting. The
+higher the rate, the more likely the need to retry, and thus the higher this counter will
+be.
