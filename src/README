@@ -1,13 +1,6 @@
 
-Top level source directory. Each subdirectory contains specific code
-which supports the indicated transport mechanism.  The common subdirectory
-contains modules which are transport mechanism agnostic.
+Top level source directory. 
+	Subdirectories are:
+		rmr		 -- main RMr code
+		bindings -- various language bindings (wrappers)
 
-Each sub directory should contain the following directories:
-	src 	- Actual C source modules
-	include - Header files
-	test 	- Unit test code and scripts to drive when necessary
-
-Also at this level in the file tree, a test directory contains code
-which supports all of the specific unit test code in each of the other
-three directories.

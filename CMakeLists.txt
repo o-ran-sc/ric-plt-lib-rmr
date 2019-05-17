@@ -168,9 +168,9 @@ set( CMAKE_POSITION_INDEPENDENT_CODE ON )
 set( CMAKE_CXX_FLAGS "-g -Wall " )
 
 # Include modules
-add_subdirectory( src/common )
-add_subdirectory( src/nanomsg )
-add_subdirectory( src/nng )
+add_subdirectory( src/rmr/common )
+add_subdirectory( src/rmr/nanomsg )
+add_subdirectory( src/rmr/nng )
 add_subdirectory( doc )				# this will auto skip if {X}fm is not available
 
 
