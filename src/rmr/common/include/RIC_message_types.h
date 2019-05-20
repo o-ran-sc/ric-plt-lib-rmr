@@ -20,8 +20,8 @@
 
 
 
-/* Header  file defining  message types 
-   for various RMR messages 
+/* Header  file defining  message types
+   for various RMR messages
 
 
     ------------------
@@ -30,28 +30,7 @@
 
 */
 
-#define RIC_UNDEFINED                       -1
-
-/* E2 Related messages  should be in the range
-   10000 to 99999
-*/
-
-#define RIC_X2_SETUP                     10000  
-#define RIC_X2_RESPONSE                  10001 
-#define RIC_X2_RESOURCE_STATUS_REQUEST   10002
-#define RIC_X2_RESOURCE_STATUS_RESPONSE  10003
-#define RIC_X2_LOAD_INFORMATION          10004
-#define RIC_E2_TERMINATION_HC_REQUEST    10005
-#define RIC_E2_TERMINATION_HC_RESPONSE   10006
-#define RIC_E2_MANAGER_HC_REQUEST        10007
-#define RIC_E2_MANAGER_HC_RESPONSE       10008
-
-
-/* A1 Related messages should be in the range
-   100000 to 999999
-*/
-#define RIC_CONTROL_XAPP_CONFIG_REQUEST  100000
-#define RIC_CONTROL_XAPP_CONFIG_RESPONSE 100001 
+#define RIC_UNDEFINED				-1
 
 // ---------------------------------------------------------
 #define RIC_SUB_REQ					12010	
@@ -76,6 +55,7 @@
 #define RIC_X2_SETUP_RESP			10061	
 #define RIC_X2_SETUP_FAILURE		10062	
 #define RIC_X2_RESET				10070	
+#define	RIC_X2_RESET_RESP			10071
 
 #define RIC_ENDC_X2_SETUP_REQ		10360	
 #define RIC_ENDC_X2_SETUP_RESP		10361	
@@ -101,3 +81,27 @@
 
 #define DC_ADM_INT_CONTROL			20000	
 #define DC_ADM_INT_CONTROL_ACK		20001	
+
+
+// ---- these are old (release 0) definitions and should not be used ------
+
+/* E2 Related messages  should be in the range
+   10000 to 99999
+*/
+
+#define RIC_X2_SETUP                     10000
+#define RIC_X2_RESPONSE                  10001
+#define RIC_X2_RESOURCE_STATUS_REQUEST   10002
+#define RIC_X2_RESOURCE_STATUS_RESPONSE  10003
+#define RIC_X2_LOAD_INFORMATION          10004
+#define RIC_E2_TERMINATION_HC_REQUEST    10005
+#define RIC_E2_TERMINATION_HC_RESPONSE   10006
+#define RIC_E2_MANAGER_HC_REQUEST        10007
+#define RIC_E2_MANAGER_HC_RESPONSE       10008
+
+
+/* A1 Related messages should be in the range
+   100000 to 999999
+*/
+#define RIC_CONTROL_XAPP_CONFIG_REQUEST  100000
+#define RIC_CONTROL_XAPP_CONFIG_RESPONSE 100001
