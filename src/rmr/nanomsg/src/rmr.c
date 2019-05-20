@@ -44,6 +44,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <arpa/inet.h>
+#include <semaphore.h>
 
 #include <nanomsg/nn.h>
 #include <nanomsg/tcp.h>

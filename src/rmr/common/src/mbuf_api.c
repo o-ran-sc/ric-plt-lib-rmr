@@ -34,6 +34,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <semaphore.h>
 
 #include "rmr.h"				// things the users see
 #include "rmr_agnostic.h"		// agnostic things (must be included before private)
@@ -246,6 +247,11 @@ extern int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size )
 	}
 
 	hdr = (uta_mhdr_t *) msg->header;
+	if( !hdr ) {
+		errno = EINVAL;
+		return 0;
+	}
+
 	len = RMR_TR_LEN( hdr );
 
 	if( len != size ) {							// different sized trace data, must realloc the buffer

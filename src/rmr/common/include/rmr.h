@@ -43,7 +43,9 @@ extern "C" {
 
 									// various flags for function calls
 #define RMRFL_NONE			0x00	// no flags
-#define RMRFL_AUTO_ALLOC	0x01	// send auto allocates a zerocopy buffer
+#define RMRFL_NOTHREAD		0x01	// do not start an additional route collector thread
+#define RMRFL_MTCALL		0x02	// set up multi-threaded call support (rmr_init)
+#define RMRFL_AUTO_ALLOC	0x03	// send auto allocates a zerocopy buffer
 
 #define RMR_DEF_SIZE		0		// pass as size to have msg allocation use the default msg size
 
@@ -66,6 +68,7 @@ extern "C" {
 #define RMR_ERR_UNSET		13		// the message hasn't been populated with a transport buffer
 #define	RMR_ERR_TRUNC		14		// received message likely truncated
 #define RMR_ERR_INITFAILED	15		// initialisation of something (probably message) failed
+#define RMR_ERR_NOTSUPP		16		// the request is not supported, or RMr was not initialised for the request
 
 #define RMR_WH_CONNECTED(a) (a>=0)	// for now whid is integer; it could be pointer at some future date
 
@@ -117,6 +120,9 @@ extern rmr_whid_t rmr_wh_open( void* vctx, char const* target );
 extern rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg );
 extern void rmr_wh_close( void* vctx, int whid );
 
+// ----- mt call support --------------------------------------------------------------------------------
+extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int max_wait );
+extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait );
 
 // ----- msg buffer operations (no context needed) ------------------------------------------------------
 extern int rmr_bytes2meid( rmr_mbuf_t* mbuf, unsigned char const* src, int len );

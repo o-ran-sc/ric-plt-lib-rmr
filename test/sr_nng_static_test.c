@@ -34,9 +34,11 @@
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>
+#include <pthread.h>
+#include <semaphore.h>
 
-#include "../src/common/include/rmr.h"
-#include "../src/common/include/rmr_agnostic.h"
+#include "rmr.h"
+#include "rmr_agnostic.h"
 
 /*
 	Generate a simple route table (for all but direct route table testing).
@@ -162,7 +164,7 @@ static int sr_nng_test() {
 		mbuf = rmr_rcv_msg( ctx, NULL );
 	}
 
-	size = 2048 - sizeof( uta_mhdr_t );		// emulated nng receive allocates 2K payloads
+	size = 2048 - em_hdr_size();		// emulated nng receive allocates 2K buffers -- subtract off header size
 	state = rmr_payload_size( mbuf );
 	errors += fail_not_equal( state, size, "payload size didn't return expected value" );	// receive should always give 4k buffer
 

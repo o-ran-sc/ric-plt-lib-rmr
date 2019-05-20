@@ -34,6 +34,8 @@
 #include <string.h>
 #include <stdint.h>
 #include <netdb.h>
+#include <pthread.h>
+#include <semaphore.h>
 
 #include <nng/nng.h>
 #include <nng/protocol/pubsub0/pub.h>
@@ -41,13 +43,13 @@
 #include <nng/protocol/pipeline0/push.h>
 #include <nng/protocol/pipeline0/pull.h>
 
-#include "../src/common/include/rmr.h"
-#include "../src/common/include/rmr_agnostic.h"
-#include "../src/nng/include/rmr_nng_private.h"
+#include "rmr.h"
+#include "rmr_agnostic.h"
+#include "rmr_nng_private.h"
 
 #define EMULATE_NNG
 #include "test_nng_em.c"
-#include "../src/nng/src/sr_nng_static.c"
+#include "sr_nng_static.c"
 
 #include "test_support.c"
 

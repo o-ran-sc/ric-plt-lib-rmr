@@ -119,7 +119,8 @@ rmr_torcv_msg(3),
 rmr_rcv_specific(3),
 rmr_rts_msg(3),
 rmr_ready(3),
-rmr_ring_free(3)
+rmr_ring_free(3),
+rmr_torcv_msg(3)
 .ju on
 
 

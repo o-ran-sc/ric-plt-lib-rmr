@@ -43,6 +43,7 @@ struct endpoint {
 	nng_socket	nn_sock;	// the nano-msg socket to write to for this entry
 	nng_dialer	dialer;		// the connection specific information (retry timout etc)
 	int		open;			// set to true if we've connected as socket cannot be checked directly)
+	pthread_mutex_t	gate;	// we must serialise when we open/link to the endpoint
 };
 
 /*
@@ -71,7 +72,7 @@ struct uta_ctx {
 	int nrtele;					// number of elements in the routing table
 	int send_retries;			// number of retries send_msg() should attempt if eagain/timeout indicated by nng
 	int	trace_data_len;			// number of bytes to allocate in header for trace data
-	int d1_len;					// extra header data 1 length	(future)
+	int d1_len;					// extra header data 1 length
 	int d2_len;					// extra header data 2 length	(future)
 	nng_socket	nn_sock;		// our general listen socket
 	route_table_t* rtable;		// the active route table
@@ -79,6 +80,7 @@ struct uta_ctx {
 	route_table_t* new_rtable;	// route table under construction
 	if_addrs_t*	ip_list;		// list manager of the IP addresses that are on our known interfaces
 	void*	mring;				// ring where msgs are queued while waiting for a call response msg
+	chute_t*	chutes;
 
 	char*	rtg_addr;			// addr/port of the route table generation publisher
 	int		rtg_port;			// the port that the rtg listens on
@@ -87,6 +89,7 @@ struct uta_ctx {
 	epoll_stuff_t*	eps;		// epoll information needed for the rcv with timeout call
 
 	pthread_t	rtc_th;			// thread info for the rtc listener
+	pthread_t	mtc_th;			// thread info for the multi-thread call receive process
 };
 
 
@@ -101,7 +104,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags );
 static void free_ctx( uta_ctx_t* ctx );
 
 // --- rt table things ---------------------------
-static int uta_link2( char* target, nng_socket* nn_sock, nng_dialer* dialer );
+static int uta_link2( endpoint_t* ep );
 static int rt_link2_ep( endpoint_t* ep );
 static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_sock );
 static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more, nng_socket* nn_sock );

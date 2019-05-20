@@ -24,6 +24,7 @@ coverage_opts = -ftest-coverage -fprofile-arcs
 
 #libs = ../build/librmr_nng.a -L ../build/lib -lnng -lpthread -lm
 libs =  -L ../build/lib -lnng -lpthread -lm
+ipaths = -I ../src/rmr/common/src/ -I ../src/rmr/common/include -I ../src/rmr/nng/include/ -I ../src/rmr/nng/src/ -I ../src/rmr/nanomsg/include/ -I ../src/rmr/nanomsg/src/ 
 
 #sa_tests = sa_tools_test.o
 
@@ -31,7 +32,7 @@ libs =  -L ../build/lib -lnng -lpthread -lm
 	$(CC) -g $< -c
 
 %:: %.c
-	$(CC) -I ../src/common/src/ -I ../src/common/include -I ../src/nng/include -I ../src/nanomsg/include  $(coverage_opts) -fPIC -g $< -o $@  $(libs)
+	$(CC)  $(ipaths) $(coverage_opts) -fPIC -g $< -o $@  $(libs)
 
 # catch all
 all:

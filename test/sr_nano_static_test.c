@@ -34,12 +34,16 @@
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>
+#include <pthread.h>
+#include <semaphore.h>
 
-#include "../src/common/include/rmr.h"
-#include "../src/common/include/rmr_agnostic.h"
+#include "rmr.h"
+#include "rmr_agnostic.h"
 
 /*
 	Generate a simple route table (for all but direct route table testing).
+	This table contains multiple tables inasmuch as a second update set of
+	records follows the initial set. 
 */
 static void gen_rt( uta_ctx_t* ctx ) {
 	int		fd;

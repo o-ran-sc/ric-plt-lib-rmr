@@ -47,6 +47,12 @@
 					RMR_SEED_RT -- path to the static routing table
 					RMR_RTG_SVC -- port to listen for RTG connections
 
+				Compile time options
+				if -DMTC is defined on the compile command, then RMr is initialised
+				with the multi-threaded receive thread rather than using the same
+				process receive function. All other functions in the receiver are
+				the same.
+
 	Date:		18 April 2019
 	Author:		E. Scott Daniels
 */
@@ -125,7 +131,12 @@ int main( int argc, char** argv ) {
 
 	fprintf( stderr, "<RCVR> listening on port: %s for a max of %d messages\n", listen_port, nmsgs );
 
+#ifdef MTC
+	mrc = rmr_init( listen_port, RMR_MAX_RCV_BYTES, RMRFL_MTCALL ); // start RMr in mt-receive mode
+
+#else
 	mrc = rmr_init( listen_port, RMR_MAX_RCV_BYTES, RMRFL_NONE );	// start your engines!
+#endif
 	if( mrc == NULL ) {
 		fprintf( stderr, "<RCVR> ABORT:  unable to initialise RMr\n" );
 		exit( 1 );
