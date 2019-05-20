@@ -34,9 +34,11 @@
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>
+#include <pthread.h>
+#include <semaphore.h>
 
-#include "../src/common/include/rmr.h"
-#include "../src/common/include/rmr_agnostic.h"
+#include "rmr.h"
+#include "rmr_agnostic.h"
 
 typedef struct entry_info {
 	int group;
@@ -276,16 +278,12 @@ static int rt_test( ) {
 
 	uta_fib( "no-suhch-file" );			// drive some error checking for coverage
 
-/*
-	if( ctx ) {
-		if( ctx->rtg_addr ) {
-			free( ctx->rtg_addr );
-		}
-		free( ctx );
-	}
-*/
 
-	state = uta_link2( "worm", NULL, NULL );
+	ep = (endpoint_t *) malloc( sizeof( *ep ) );
+	pthread_mutex_init( &ep->gate, NULL );
+	ep->name = strdup( "worm" );
+	ep->addr = NULL;
+	state = uta_link2( ep );
 	errors += fail_if_true( state, "link2 did not return false when given nil pointers" );
 
 	state = uta_epsock_rr( rt, 122, 0, NULL, NULL );

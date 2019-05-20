@@ -67,6 +67,46 @@ which must be allocated, possibly, prior to the application knowing the actual s
 a specific message. 
 
 &space
+&ital(Flags) allows for selection of some RMr options at the time of initialisation. 
+These are set by ORing &cw(RMRFL_) constants from the RMr header file. Currently the 
+following flags are supported:
+
+&half_space
+&beg_dlist(1i : &bold_font )
+&ditem(RMRFL_NONE) 
+	No flags are set.
+
+&half_space
+&ditem(RMRFL_NOTHREAD)
+	The route table collector thread is not to be started. This should only be used
+	by the route table generator application if it is based on RMr.
+
+&half_space
+&ditem(RMRFL_MTCALL)
+	Enable multi-threaded call support. 
+&end_dlist
+
+&h3(Multi-threaded Calling)
+The support for an application to issue a &ital(blocking call) by the &cw(rmr_call()) function
+was limited such that only user applications which were operating in a single thread
+could safely use the function.
+Further, timeouts were message count based and not time unit based. 
+Multi-threaded call support adds the ability for a user application with multiple threads
+to invoke a blocking call function with the guarentee that the correct response message 
+is delivered to the thread.  
+The additional support is implemented with the &ital( rmr_mt_call() ) and &ital( rmr_mt_rcv() )
+function calls. 
+&space
+
+Multi-threaded call support requires the user application to specifically enable it
+when RMr is initialised. 
+This is necessary because a second, dedicated, receiver thread  must be started, and 
+requires all messages to be examined and queued by this thread.
+The additional overhead is minimal, queuing information is all in the RMr message
+header, but as an additional process is necessary the user application must "opt in" 
+to this approach.
+
+&space
 &h2(ENVIRONMENT)
 As a part of the initialisation process &cw(rmr_init) will look into the available 
 environment variables to influence it's setup. 
@@ -117,6 +157,8 @@ rmr_alloc_msg(3),
 rmr_call(3),
 rmr_free_msg(3),
 rmr_get_rcvfd(3),
+rmr_mt_call(3),
+rmr_mt_rcv(3),
 rmr_payload_size(3),
 rmr_send_msg(3),
 rmr_rcv_msg(3),

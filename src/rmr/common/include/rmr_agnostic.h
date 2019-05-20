@@ -60,6 +60,8 @@ typedef struct uta_ctx  uta_ctx_t;
 									// internal flags, must be > than UFLAG_MASK
 //#define IFL_....
 
+#define CFL_MTC_ENABLED	0x01		// multi-threaded call is enabled
+
 									// msg buffer flags
 #define MFL_ZEROCOPY	0x01		// the message is an allocated zero copy message and can be sent.
 #define MFL_NOALLOC		0x02		// send should NOT allocate a new buffer before returning
@@ -68,6 +70,7 @@ typedef struct uta_ctx  uta_ctx_t;
 
 #define MAX_EP_GROUP	32			// max number of endpoints in a group
 #define MAX_RTG_MSG_SZ	2048		// max expected message size from route generator
+#define MAX_CALL_ID		255			// largest call ID that is supported
 
 //#define DEF_RTG_MSGID	""				// default to pick up all messages from rtg
 #define DEF_RTG_PORT	"tcp:4561"		// default port that we accept rtg connections on
@@ -83,6 +86,7 @@ typedef struct uta_ctx  uta_ctx_t;
 #define RMR_D1_LEN(h) 		(ntohl(((uta_mhdr_t *)h)->len2))
 #define RMR_D2_LEN(h) 		(ntohl(((uta_mhdr_t *)h)->len3))
 
+// CAUTION:  if using an offset with a header pointer, the pointer MUST be cast to void* before adding the offset!
 #define TRACE_OFFSET(h)		((ntohl(((uta_mhdr_t *)h)->len0)))
 #define DATA1_OFFSET(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1))
 #define DATA2_OFFSET(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2))
@@ -98,12 +102,17 @@ typedef struct uta_ctx  uta_ctx_t;
 #define SET_HDR_D1_LEN(h,l)	(((uta_mhdr_t *)h)->len2=htonl((int32_t)l))
 #define SET_HDR_D2_LEN(h,l)	(((uta_mhdr_t *)h)->len3=htonl((int32_t)l))
 
+							// index of things in the d1 data space
+#define D1_CALLID_IDX	0	// the call-id to match on return
+
+#define	NO_CALL_ID		0	// no call id associated with the message (normal queue)
 
 #define V1_PAYLOAD_OFFSET(h)	(sizeof(uta_v1mhdr_t))
 
 										// v2 header flags
 #define HFL_HAS_TRACE	0x01			// Trace data is populated
 #define HFL_SUBID		0x02			// subscription ID is populated
+#define HFL_CALL_MSG	0x04			// msg sent via blocking call
 
 /*
 	Message header; interpreted by the other side, but never seen by
@@ -211,6 +220,18 @@ typedef struct ring {
 	void**	data;				// the ring data (pointers to blobs of stuff)
 } ring_t;
 
+
+// --------- multi-threaded call things -----------------------------------------
+/*
+	A chute provides a return path for a received message that a thread has blocked
+	on.  The receive thread will set the mbuf pointer and tickler the barrier to
+	signal to the call thread that data is ready.
+*/
+typedef struct chute {
+	rmr_mbuf_t*	mbuf;						// pointer to message buffer received
+	sem_t	barrier;						// semaphore that the thread is waiting on
+	unsigned char	expect[RMR_MAX_XID];	// the expected transaction ID
+} chute_t;
 
 
 // -------------- common static prototypes --------------------------------------

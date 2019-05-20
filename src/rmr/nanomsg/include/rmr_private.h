@@ -42,6 +42,7 @@ struct endpoint {
 	char*	addr;			// address used for connection
 	int		nn_sock;		// the nano-msg socket to write to for this entry
 	int		open;			// true if we've established the connection
+	pthread_mutex_t gate;		// must be able to serialise some transport level functions on the ep
 };
 
 /*

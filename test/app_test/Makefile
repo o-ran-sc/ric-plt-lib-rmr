@@ -19,25 +19,32 @@
 # NOTE:  this makefile assumes that RMr has been built using the directory .build
 #		at the top most repo directory (e.g. ../../.build). It can be changed 
 #		if you need to by adding "build_path=<path>" to the make command line.
+#		To use this makefile to build on a system where RMr is already installed
+#		try:    make build_path=/usr/local/lib
+#
+#		By default we prefer the Korn shell (it's just better). If you really need
+#		to build with a dfferent shell add "SHELL=path" to the command line:
+#				make SHELL=/bin/bash
+#
 
 .EXPORT_ALL_VARIABLES:
 .ONESHELL:
 #.SHELLFLAGS = -e	# hosed on some flavours so keep it off
-SHELL = /bin/ksh
+SHELL ?= /bin/ksh
 
 build_path ?= ../../.build
-header_path := $(shell find ../../.build -name 'rmr.h' |head -1 | sed 's!/rmr/.*!!' )
+header_path := $(shell find $(build_path) -name 'rmr.h' |head -1 | sed 's!/rmr/.*!!' )
 
 C_INCLUDE_PATH := $(header_path)
 LD_LIBRARY_PATH=$(build_path):$(build_path)/lib
 LIBRARY_PATH = $(LD_LIBRARY_PATH)
 
 # These programmes are designed to test some basic application level functions
-# from the perspective of two communicating processes. 
+# from the perspective of two, or more, communicating processes. 
 
 
 .PHONY: all
-all: sender receiver sender_nano receiver_nano
+all: sender receiver sender_nano receiver_nano caller mt_receiver
 
 receiver_nano: receiver.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr -lnanomsg -lpthread -lm
@@ -45,13 +52,23 @@ receiver_nano: receiver.c
 receiver: receiver.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
+mt_receiver: receiver.c
+	gcc -I $${C_INCLUDE_PATH:-.} -DMTC $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+
 sender_nano: sender.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr -lnanomsg -lpthread -lm
 
 sender: sender.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
+caller: caller.c
+	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
-.PHONY: clean
+
+# clean removes intermediates; nuke removes everything that can be built
+.PHONY: clean nuke
 clean:
-	rm -f sender sender_nano receiver receiver_nano *.o
+	rm -f *.o
+
+nuke: clean
+	rm -f sender sender_nano receiver receiver_nano caller mt_receiver

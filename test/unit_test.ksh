@@ -320,7 +320,7 @@ else
 	fi
 fi
 
-export C_INCLUDE_PATH="../src/common/include:$C_INCLUDE_PATH"
+export C_INCLUDE_PATH="../src/rmr/common/include:$C_INCLUDE_PATH"
 
 module_cov_target=80
 builder="make -B %s"		# default to plain ole make

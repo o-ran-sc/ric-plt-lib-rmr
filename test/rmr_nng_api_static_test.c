@@ -57,9 +57,11 @@
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>
+#include <pthread.h>
+#include <semaphore.h>
 
-#include "../src/common/include/rmr.h"
-#include "../src/common/include/rmr_agnostic.h"
+#include "rmr.h"
+#include "rmr_agnostic.h"
 
 /*
 	Send a 'burst' of messages to drive some send retry failures to increase RMr coverage
@@ -82,6 +84,22 @@ static void send_n_msgs( void* ctx, int n ) {
 		errno = 999;
 		msg = rmr_send_msg( ctx, msg );
 	}
+}
+
+/*
+	Refresh or allocate a message with some default values
+*/
+static rmr_mbuf_t* fresh_msg( void* ctx, rmr_mbuf_t* msg ) {
+	if( ! msg )  {
+		msg = rmr_alloc_msg( ctx, 2048 );
+	}
+
+	msg->mtype = 0;
+	msg->sub_id = -1;
+	msg->state = 0;
+	msg->len = 100;
+
+	return msg;
 }
 
 static int rmr_api_test( ) {
@@ -112,6 +130,7 @@ static int rmr_api_test( ) {
 	if( (rmc2 = rmr_init( NULL, 1024, FL_NOTHREAD )) == NULL ) {			// drive default port selector code
 		errors += fail_if_nil( rmc, "rmr_init returned a nil pointer when driving for default port "  );
 	}
+
 
 	v = rmr_ready( rmc );		// unknown return; not checking at the moment
 
@@ -285,7 +304,7 @@ static int rmr_api_test( ) {
 	errors += fail_if( i >= 40, "torcv_msg never returned a timeout "  );
 
 
-	// ---- trace things that are not a part of the mbuf_api functions and thus must be tested here
+	// ---- trace things that are not a part of the mbuf_api functions and thus must be tested here -------
 	state = rmr_init_trace( NULL, 37 );						// coverage test nil context
 	errors += fail_not_equal( state, 0, "attempt to initialise trace with nil context returned non-zero state (a) "  );
 	errors += fail_if_equal( errno, 0, "attempt to initialise trace with nil context did not set errno as expected "  );
@@ -306,9 +325,109 @@ static int rmr_api_test( ) {
 	em_send_failures = 0;
 
 
+	((uta_ctx_t *)rmc)->shutdown = 1;
 	rmr_close( NULL );			// drive for coverage
 	rmr_close( rmc );			// no return to check; drive for coverage
 
+
+	// -- allocate a new context for mt-call and drive that stuff -----------------------------------------
+#ifdef EMULATE_NNG
+	msg = fresh_msg( rmc, msg );							// ensure we have one with known contents
+
+	msg->state = 0;
+	msg = rmr_mt_call( rmc, msg, 3, 10 );							// drive when not in mt setup
+	if( msg ) {
+		errors += fail_not_equal( msg->state, RMR_ERR_NOTSUPP, "rmr_mt_call did not set not supported error when not mt initialised" );
+	} else {
+		errors += fail_if_nil( msg, "rmr_mt_call returned nil pointer when not mt initialised" );
+	}
+	msg = fresh_msg( rmc, msg );
+
+	msg = rmr_mt_rcv( rmc, msg, 10 );								// gen not supported error if ctx not set for mt
+	if( msg ) {
+		errors += fail_not_equal( msg->state, RMR_ERR_NOTSUPP, "rmr_mt_rcv did not return not supported state when mt not initialised" );
+	} else {
+		errors += fail_if_nil( msg, "nil pointer from rmr_mt_rcv when mt not initialised\n" );
+	}
+	msg = fresh_msg( rmc, msg );
+
+	msg->state = 0;
+	if( msg ) {
+		msg = rmr_mt_call( rmc, msg, 1000, 10 );							// thread id out of range
+		errors += fail_if_equal( msg->state, 0, "rmr_mt_call did not set an error when given an invalid call-id" );
+	} else {
+		errors += fail_if_nil( msg, "rmr_mt_call returned a nil pointer when given an invalid call-id" );
+	}
+	msg = fresh_msg( rmc, msg );
+
+	state = init_mtcall( NULL );					// drive for coverage
+	errors += fail_not_equal( state, 0, "init_mtcall did not return false (a) when given a nil context pointer" );
+
+
+	if( (rmc = rmr_init( NULL, 1024, FL_NOTHREAD | RMRFL_MTCALL )) == NULL ) {			// drive multi-call setup code without rtc thread
+		errors += fail_if_nil( rmc, "rmr_init returned a nil pointer when driving for mt-call setup "  );
+	}
+
+	gen_rt( rmc );									// must attach a route table so sends succeed
+
+	fprintf( stderr, "<INFO> enabling mt messages\n" );
+	em_set_rcvdelay( 1 );							// force slow msg rate during mt testing
+	em_set_mtc_msgs( 1 );							// emulated nngrcv will now generate messages with call-id and call flag
+
+	msg->state = 0;
+	msg = rmr_mt_call( NULL, msg, 3, 10 );			// should timeout
+	if( msg ) {
+		errors += fail_if( msg->state == 0, "rmr_mt_call did not set message state when given message with nil context "  );
+	}
+	msg = fresh_msg( rmc, msg );
+
+	fprintf( stderr, "<INFO> invoking mt_call with timout == 2999\n" );
+	msg = rmr_mt_call( rmc, msg, 2, 2999 );			// long timeout to drive time building code, should receive
+	if( msg ) {
+		if( msg->state != RMR_OK ) {
+			fprintf( stderr, "<INFO> rmr_mt_call returned error in mbuf: %d\n", msg->state );
+		} else {
+			errors += fail_not_nil( msg, "rmr_mt_call did not return a nil pointer on read timeout" );
+		}
+	}
+	msg = fresh_msg( rmc, msg );
+
+	msg = rmr_mt_rcv( NULL, NULL, 10 );
+	errors += fail_not_nil( msg, "rmr_mt_rcv returned a non-nil message when given nil message and nil context" );
+
+	fprintf( stderr, "<INFO> invoking mt_rcv with timout == 2999\n" );
+	msg = fresh_msg( rmc, msg );
+	msg = rmr_mt_rcv( rmc, msg, 2999 );
+	if( !msg ) {
+		errors += fail_if_nil( msg, "rmr_mt_rcv returned a nil message when given valid message and timeout of 29999" );
+	}
+	msg = fresh_msg( rmc, msg );
+
+	msg = rmr_mt_rcv( rmc, msg, -1 );
+	if( !msg ) {
+		errors += fail_if_nil( msg, "rmr_mt_rcv returned a nil message when given valid message unlimited timeout" );
+	}
+	msg = fresh_msg( rmc, msg );
+
+	fprintf( stderr, "<INFO> waiting 20.0 seconds for a known call xaction to arrive (%ld)\n", time( NULL ) );
+	snprintf( msg->xaction, 17, "%015d", 5 );		// we'll reset receive counter before calling mt_call so this will arrive again
+	em_set_rcvcount( 0 );
+	msg = rmr_mt_call( rmc, msg, 2, 15000 );		// we need about 10s to get the message with the 'slow rate'
+	if( msg ) {
+		errors += fail_not_equal( msg->state, RMR_OK, "mt_call with known xaction id bad state (a)" );
+	} else {
+		errors += fail_if_nil( msg, "mt_call with known xaction id returned nil message" );
+	}
+	fprintf( stderr, "<INFO> time check: %ld\n", time( NULL ) );
+		
+
+	em_set_mtc_msgs( 0 );							// turn off 
+	em_set_rcvdelay( 0 );							// full speed receive rate
+	((uta_ctx_t *)rmc)->shutdown = 1;				// force the mt-reciver attached to the context to stop
+#endif
+
+
+	// --------------- phew, done ------------------------------------------------------------------------------
 
 	if( ! errors ) {
 		fprintf( stderr, "<INFO> all RMr API tests pass\n" );

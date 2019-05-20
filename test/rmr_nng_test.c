@@ -51,6 +51,8 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <sys/epoll.h>
+#include <pthread.h>
+#include <semaphore.h>
 
 #define DEBUG 1
 
@@ -64,14 +66,14 @@
 #include "test_nng_em.c"							// nng/nn emulation (before including things under test)
 
 
-#include "../src/common/include/rmr.h"					// things the users see
-#include "../src/common/include/rmr_symtab.h"
-#include "../src/common/include/rmr_agnostic.h"			// transport agnostic header
-#include "../src/nng/include/rmr_nng_private.h"			// transport specific
+#include "rmr.h"					// things the users see
+#include "rmr_symtab.h"
+#include "rmr_agnostic.h"			// transport agnostic header
+#include "rmr_nng_private.h"			// transport specific
 
-#include "../src/common/src/symtab.c"
-#include "../src/nng/src/rmr_nng.c"
-#include "../src/common/src/mbuf_api.c"
+#include "symtab.c"
+#include "rmr_nng.c"
+#include "mbuf_api.c"
 
 static void gen_rt( uta_ctx_t* ctx );		// defined in sr_nng_static_test, but used by a few others (eliminate order requirement below)
 

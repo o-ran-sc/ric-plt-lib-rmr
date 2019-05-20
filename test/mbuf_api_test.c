@@ -39,12 +39,14 @@
 #include <errno.h>
 #include <pthread.h>
 #include <ctype.h>
+#include <pthread.h>
+#include <semaphore.h>
 
 
-#include "../src/common/include/rmr.h"
-#include "../src/common/include/rmr_agnostic.h"
+#include "rmr.h"
+#include "rmr_agnostic.h"
 
-#include "../src/common/src/mbuf_api.c"			// module under test
+#include "mbuf_api.c"
 
 #include "test_support.c"						// our private library of test tools
 #include "mbuf_api_static_test.c"				// test functions

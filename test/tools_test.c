@@ -35,9 +35,11 @@
 #include <errno.h>
 #include <pthread.h>
 #include <ctype.h>
+#include <pthread.h>
+#include <semaphore.h>
 
-#include "../src/common/include/rmr.h"
-#include "../src/common/include/rmr_agnostic.h"
+#include "rmr.h"
+#include "rmr_agnostic.h"
 #include "test_support.c"		// our private library of test tools
 
 // ===== dummy context for tools testing so we don't have to pull in all of the nano/nng specific stuff =====
@@ -66,7 +68,7 @@ struct uta_ctx {
 };
 
 
-#include "../src/common/src/tools_static.c"
+#include "tools_static.c"
 
 
 int main( ) {

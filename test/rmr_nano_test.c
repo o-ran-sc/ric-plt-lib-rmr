@@ -54,39 +54,32 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <sys/epoll.h>
+#include <pthread.h>
+#include <semaphore.h>
 
 #define DEBUG 1
 
 #include <nanomsg/nn.h>
-//#include <nng/protocol/pubsub0/pub.h>
-//#include <nng/protocol/pubsub0/sub.h>
-//#include <nng/protocol/pipeline0/push.h>
-//#include <nng/protocol/pipeline0/pull.h>
 
 #undef EMULATE_NNG
 #include "test_nng_em.c"							// nng/nn emulation (before including things under test)
 
 
-#include "../src/common/include/rmr.h"					// things the users see
-#include "../src/common/include/rmr_symtab.h"
-#include "../src/common/include/rmr_agnostic.h"			// transport agnostic header
-#include "../src/nanomsg/include/rmr_private.h"			// transport specific
+#include "rmr.h"					// things the users see
+#include "rmr_symtab.h"
+#include "rmr_agnostic.h"			// transport agnostic header
+#include "rmr_private.h"			// transport specific
 
-#include "../src/common/src/symtab.c"
-#include "../src/nanomsg/src/rmr.c"
-#include "../src/common/src/mbuf_api.c"
-#include "../src/nanomsg/src/rtable_static.c"
+#include "symtab.c"
+#include "rmr.c"
+#include "mbuf_api.c"
+#include "rtable_static.c"
 
 static void gen_rt( uta_ctx_t* ctx );		// defined in sr_static_test, but used by a few others (eliminate order requirement below)
 
 											// specific test tools in this directory
 #include "test_support.c"					// things like fail_if()
 											// and finally....
-//#include "tools_static_test.c"				// local test functions pulled directly because of static nature of things
-//#include "symtab_static_test.c"
-//#include "ring_static_test.c"
-//#include "rt_static_test.c"
-//#include "wormhole_static_test.c"
 #include "mbuf_api_static_test.c"
 
 #include "sr_nano_static_test.c"

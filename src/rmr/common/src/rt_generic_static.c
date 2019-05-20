@@ -413,6 +413,10 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 			case 'u':												// update current table, not a total replacement
 				tokens[1] = clip( tokens[1] );
 				if( strcmp( tokens[1], "end" ) == 0 ) {				// wrap up the table we were building
+					if( ctx->new_rtable == NULL ) {					// update table not in progress
+						break;
+					}
+
 					if( ntoks >2 ) {
 						if( ctx->new_rtable->updates != atoi( tokens[2] ) ) {	// count they added didn't match what we received
 							fprintf( stderr, "[ERR] rmr_rtc: RT update had wrong number of records: received %d expected %s\n",
@@ -809,9 +813,10 @@ static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name ) {
 			return NULL;
 		}
 
-		ep->open = 0;					// not connected
+		ep->open = 0;								// not connected
 		ep->addr = uta_h2ip( ep_name );
 		ep->name = strdup( ep_name );
+		pthread_mutex_init( &ep->gate, NULL );		// init with default attrs
 
 		rmr_sym_put( rt->hash, ep_name, 1, ep );
 	}

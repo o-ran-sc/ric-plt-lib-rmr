@@ -28,7 +28,7 @@
 	Author: 	E. Scott Daniels
 */
 
-#include "../src/common/include/rmr_symtab.h"
+#include "rmr_symtab.h"
 //  -- parent must include if needed #include "../src/common/src/symtab.c"
 
 #include "test_support.c"
