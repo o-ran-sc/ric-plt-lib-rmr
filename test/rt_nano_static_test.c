@@ -34,9 +34,11 @@
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>
+#include <pthread.h>
+#include <semaphore.h>
 
-#include "../src/common/include/rmr.h"
-#include "../src/common/include/rmr_agnostic.h"
+#include "rmr.h"
+#include "rmr_agnostic.h"
 
 typedef struct entry_info {
 	int group;

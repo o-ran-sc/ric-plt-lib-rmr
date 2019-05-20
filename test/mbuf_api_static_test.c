@@ -34,9 +34,11 @@
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>
+#include <pthread.h>
+#include <semaphore.h>
 
-#include "../src/common/include/rmr.h"
-#include "../src/common/include/rmr_agnostic.h"
+#include "rmr.h"
+#include "rmr_agnostic.h"
 
 
 int mbuf_api_test( ) {

@@ -33,6 +33,8 @@
 #define RIC_UNDEFINED				-1
 
 // ---------------------------------------------------------
+#define RIC_SCTP_CONNECTION_FAILURE 1080
+
 #define RIC_SUB_REQ					12010	
 #define RIC_SUB_RESP				12011	
 #define RIC_SUB_FAILURE				12012	
@@ -56,6 +58,7 @@
 #define RIC_X2_SETUP_FAILURE		10062	
 #define RIC_X2_RESET				10070	
 #define	RIC_X2_RESET_RESP			10071
+
 
 #define RIC_ENDC_X2_SETUP_REQ		10360	
 #define RIC_ENDC_X2_SETUP_RESP		10361	
