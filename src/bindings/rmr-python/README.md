@@ -39,15 +39,13 @@ There are some higher order send functions, for example functions that send and 
 If rmr is *not* compiled on your system, see the below instructions for downloading and compiling rmr. This library expects that the rmr .so files are compiled and available.
 
 ## From PyPi
-(TODO: This is going to have to change to some LF PYPI or some public PYPI, soon.)
 
-    pip install --trusted-host nexus01.research.att.com --extra-index-url https://nexus01.research.att.com:8443/repository/solutioning01-mte2-pypi/simple rmr==version.you.want
+    pip install rmr==X.Y.Z
 
 ## From Source
-(TODO: this has to be moved to LF)
 
-    git clone git@gitlab.research.att.com:tommy/rmr-python.git
-    cd rmr-python
+    git clone "https://gerrit.o-ran-sc.org/r/ric-plt/lib/rmr"
+    cd rmr/src/bindings/rmr-python/
     pip install .
 
 # Examples
