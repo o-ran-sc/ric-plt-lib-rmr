@@ -102,4 +102,6 @@ int main( ) {
 	} else {
 		fprintf( stderr, "<OK>	 mbuf_api tests pass\n" );
 	}
+
+	return errors;
 }

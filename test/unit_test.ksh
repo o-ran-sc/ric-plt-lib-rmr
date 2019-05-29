@@ -305,17 +305,17 @@ function mk_xml {
 # -----------------------------------------------------------------------------------------------------------------
 
 # we assume that the project has been built in the ../[.]build directory
-if [[ -d ../build/lib ]]
+if [[ -d ../build ]]
 then
-	export LD_LIBRARY_PATH=../build/lib
+	export LD_LIBRARY_PATH=../build/lib:../build/lib64
 else
-	if [[ -d ../.build/lib ]]
+	if [[ -d ../.build ]]
 	then
-		export LD_LIBRARY_PATH=../.build/lib
+		export LD_LIBRARY_PATH=../.build/lib:../.build/lib64
 		export C_INCLUDE_PATH=../.build/include
 
 	else
-		echo "[WARN] cannot find ../[.]build/lib; things might not work"
+		echo "[WARN] cannot find build directory (tried ../build and ../.build); things might not work"
 		echo ""
 	fi
 fi
