@@ -165,7 +165,7 @@ typedef struct {						// old (inflexible) v1 header
 	Round robin group.
 */
 typedef struct {
-	int	ep_idx;				// next endpoint to send to
+	uint16_t	ep_idx;		// next endpoint to send to
 	int nused;				// number of endpoints in the list
 	int nendpts;			// number allocated
 	endpoint_t **epts;		// the list of endpoints that we RR over

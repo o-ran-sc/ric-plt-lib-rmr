@@ -91,13 +91,8 @@ static void* mt_receive( void* vctx ) {
 						queue_normal( ctx, mbuf );
 					} else {
 						chute = &ctx->chutes[call_id];
-						if( memcmp( mbuf->xaction, chute->expect, RMR_MAX_XID ) == 0 ) {		// match
-							chute->mbuf = mbuf;
-							sem_post( &chute->barrier );
-						} else {
-							rmr_free_msg( mbuf );
-							mbuf = NULL;
-						}
+						chute->mbuf = mbuf;
+						sem_post( &chute->barrier );				// the call function can vet xaction id in their own thread
 					}
 				}
 			}

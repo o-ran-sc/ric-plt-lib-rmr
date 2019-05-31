@@ -978,6 +978,14 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 		if( state < 0 && errno == EINTR ) {								// interrupted go back and wait; all other errors cause exit
 			errno = 0;
 		}
+
+		if( chute->mbuf != NULL ) {										// offload receiver thread and check xaction buffer here
+			if( memcmp( chute->expect, chute->mbuf->xaction, RMR_MAX_XID ) != 0 ) {
+				rmr_free_msg( chute->mbuf );
+				chute->mbuf = NULL;
+				errno = 0;
+			}
+		}
 	}
 
 	if( state < 0 ) {

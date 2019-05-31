@@ -54,15 +54,15 @@
 	user supplied pointer so that a success/fail code is returned directly.
 	Return value is 0 (false) on failure, 1 (true)  on success.
 
-	In order to support multi-threaded user applications we must hold a lock before 
-	we attempt to create a dialer and connect. NNG is thread safe, but we can 
+	In order to support multi-threaded user applications we must hold a lock before
+	we attempt to create a dialer and connect. NNG is thread safe, but we can
 	get things into a bad state if we allow a collision here.  The lock grab
 	only happens on the intial session setup.
 */
 //static int uta_link2( char* target, nng_socket* nn_sock, nng_dialer* dialer, pthread_mutex* gate ) {
 static int uta_link2( endpoint_t* ep ) {
-	char* 		target; 
-	nng_socket*	nn_sock; 
+	char* 		target;
+	nng_socket*	nn_sock;
 	nng_dialer*	dialer;
 	char		conn_info[NNG_MAXADDRLEN];	// string to give to nano to make the connection
 	char*		addr;
@@ -91,7 +91,7 @@ static int uta_link2( endpoint_t* ep ) {
 		pthread_mutex_unlock( &ep->gate );
 		return TRUE;
 	}
-	
+
 
 	if( nng_push0_open( nn_sock ) != 0 ) {			// and assign the mode
 		pthread_mutex_unlock( &ep->gate );
@@ -259,6 +259,13 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_s
 	We return the index+1 from the round robin table on success so that we can verify
 	during test that different entries are being seleted; we cannot depend on the nng
 	socket being different as we could with nano.
+
+	NOTE:	The round robin selection index increment might collide with other
+		threads if multiple threads are attempting to send to the same round
+		robin group; the consequences are small and avoid locking. The only side
+		effect is either sending two messages in a row to, or skipping, an endpoint.
+		Both of these, in the grand scheme of things, is minor compared to the
+		overhead of grabbing a lock on each call.
 */
 static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more, nng_socket* nn_sock ) {
 	rtable_ent_t* rte;			// matching rt entry
@@ -266,9 +273,10 @@ static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more,
 	int  state = FALSE;			// processing state
 	int dummy;
 	rrgroup_t* rrg;
+	int	idx;
 
 
-	if( ! more ) {				// eliminate cheks each time we need to user
+	if( ! more ) {				// eliminate cheks each time we need to use
 		more = &dummy;
 	}
 
@@ -316,12 +324,11 @@ static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more,
 			break;
 
 		default:										// need to pick one and adjust rr counts
-			ep = rrg->epts[rrg->ep_idx++];				// select next endpoint
+
+			idx = rrg->ep_idx++ % rrg->nused;			// see note above
+			ep = rrg->epts[idx];						// select next endpoint
 			//if( DEBUG ) fprintf( stderr, ">>>> _rr returning socket with multiple choices in group idx=%d \n", rrg->ep_idx );
-			if( rrg->ep_idx >= rrg->nused ) {
-				rrg->ep_idx = 0;
-			}
-			state = rrg->ep_idx+1;
+			state = idx + 1;							// unit test checks to see that we're cycling through, so must not just be TRUE
 			break;
 	}
 

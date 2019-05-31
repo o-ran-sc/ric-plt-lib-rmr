@@ -203,6 +203,13 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name ) {
 	with group 0. If more is set, the caller may increase the group number and
 	invoke this function again to make a selection against that group. If there
 	are no more groups, more is set to 0.
+
+	NOTE:	The round robin selection index increment might collide with other
+		threads if multiple threads are attempting to send to the same round
+		robin group; the consequences are small and avoid locking. The only side
+		effect is either sending two messages in a row to, or skipping, an endpoint.
+		Both of these, in the grand scheme of things, is minor compared to the
+		overhead of grabbing a lock on each call.
 */
 static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more ) {
 	rtable_ent_t* rte;			// matching rt entry
@@ -210,6 +217,7 @@ static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more 
 	int nn_sock = -2;
 	int dummy;
 	rrgroup_t* rrg;
+	int	idx;
 
 
 	if( ! more ) {				// eliminate checks each time we need to use
@@ -252,11 +260,9 @@ static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more 
 			break;
 
 		default:										// need to pick one and adjust rr counts
-			ep = rrg->epts[rrg->ep_idx];
-			nn_sock = rrg->epts[rrg->ep_idx++]->nn_sock;
-			if( rrg->ep_idx >= rrg->nused ) {
-				rrg->ep_idx = 0;
-			}
+			idx = rrg->ep_idx++ % rrg->nused;			// see note above
+			ep = rrg->epts[idx];
+			nn_sock = ep->nn_sock;
 			break;
 	}
 
