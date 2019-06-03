@@ -82,6 +82,7 @@ if( BUILD_DOC )
 		rmr_get_src.3
  		rmr_mt_call.3
 		rmr_mt_rcv.3
+		rmr_get_srcip.3
 	)
 
 	# empty list of roff/troff input files we generated

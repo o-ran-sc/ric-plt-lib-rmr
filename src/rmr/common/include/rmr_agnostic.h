@@ -44,14 +44,15 @@ typedef struct uta_ctx  uta_ctx_t;
 #define QUOTE_DEF(a) QUOTE(a)	// allow a #define value to be quoted (e.g. QUOTE(MAJOR_VERSION) )
 
 
-#define RMR_MSG_VER	2			// message version this code was designed to handle
+#define RMR_MSG_VER	3			// message version this code was designed to handle
 
-									// environment variable names we'll suss out
-#define ENV_BIND_IF "RMR_BIND_IF"	// the interface to bind to for both normal comma and RTG (0.0.0.0 if missing)
-#define ENV_RTG_PORT "RMR_RTG_SVC"	// the port we'll listen on for rtg connections
-#define ENV_SEED_RT	"RMR_SEED_RT"	// where we expect to find the name of the seed route table
-#define ENV_RTG_RAW "RMR_RTG_ISRAW"	// if > 0 we expect route table gen messages as raw (not sent from an RMr application)
+											// environment variable names we'll suss out
+#define ENV_BIND_IF "RMR_BIND_IF"			// the interface to bind to for both normal comma and RTG (0.0.0.0 if missing)
+#define ENV_RTG_PORT "RMR_RTG_SVC"			// the port we'll listen on for rtg connections
+#define ENV_SEED_RT	"RMR_SEED_RT"			// where we expect to find the name of the seed route table
+#define ENV_RTG_RAW "RMR_RTG_ISRAW"			// if > 0 we expect route table gen messages as raw (not sent from an RMr application)
 #define ENV_VERBOSE_FILE "RMR_VCTL_FILE"	// file where vlevel may be managed for some (non-time critical) functions
+#define ENV_NAME_ONLY "RMR_SRC_NAMEONLY"	// src in message is name only
 
 #define NO_FLAGS	0				// no flags to pass to a function
 
@@ -102,6 +103,8 @@ typedef struct uta_ctx  uta_ctx_t;
 #define SET_HDR_D1_LEN(h,l)	(((uta_mhdr_t *)h)->len2=htonl((int32_t)l))
 #define SET_HDR_D2_LEN(h,l)	(((uta_mhdr_t *)h)->len3=htonl((int32_t)l))
 
+#define HDR_VERSION(h)	htonl((((uta_mhdr_t *)h)->rmr_ver))
+
 							// index of things in the d1 data space
 #define D1_CALLID_IDX	0	// the call-id to match on return
 
@@ -147,6 +150,9 @@ typedef struct {
 	int32_t	len2;						// length of data 1 (d1)
 	int32_t	len3;						// length of data 2 (d2)
 	int32_t	sub_id;						// subscription id (-1 invalid)
+
+										// v3 extension
+	unsigned char srcip[RMR_MAX_SRC];	// ip address and port of the source
 } uta_mhdr_t;
 
 
@@ -155,7 +161,7 @@ typedef struct {						// old (inflexible) v1 header
 	int32_t	plen;						// payload length
 	int32_t rmr_ver;					// our internal message version number
 	unsigned char xid[RMR_MAX_XID];		// space for user transaction id or somesuch
-	unsigned char sid[RMR_MAX_SID];		// sender ID for return to sender needs
+	unsigned char sid[RMR_MAX_SID];		// misc sender info/data
 	unsigned char src[16];				// name of the sender (source) (old size was 16)
 	unsigned char meid[RMR_MAX_MEID];	// managed element id.
 	struct timespec	ts;					// timestamp ???
@@ -242,6 +248,7 @@ static int uta_tokenise( char* buf, char** tokens, int max, char sep );
 static char* uta_h2ip( char const* hname );
 static int uta_lookup_rtg( uta_ctx_t* ctx );
 static int uta_has_str( char const* buf, char const* str, char sep, int max );
+static char* get_default_ip( if_addrs_t* iplist );
 
 // --- message ring --------------------------
 static void* uta_mk_ring( int size );

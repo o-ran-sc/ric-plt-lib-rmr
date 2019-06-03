@@ -48,6 +48,7 @@
 
 #include "mbuf_api.c"
 
+#define MSG_VER 3
 #include "test_support.c"						// our private library of test tools
 #include "mbuf_api_static_test.c"				// test functions
 

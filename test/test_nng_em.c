@@ -50,12 +50,37 @@ static int rcv_delay = 0;			// forced delay before call to rcvmsg starts to work
 
 static int gates_ok = 0;
 static pthread_mutex_t rcv_gate;
+static int em_gen_long_hostname = 0;		// if set the emulated hostname generates a longer name (>40 char)
 
+
+// ----------- gethostname emulation ---------------------------------------
+#define gethostname  em_gethostname
+static int em_gethostname( char* buf, size_t len ) {
+	if( len < 1 ) {
+		errno = EINVAL;
+		return 1;
+	}
+
+	if( em_gen_long_hostname ) {
+		snprintf( buf, len, "hostname-which-is-long-a860430b890219-dfw82" );
+	} else {
+		snprintf( buf, len, "em-hostname" );
+	}
+
+	return 0;
+}
+
+static int em_set_long_hostname( int v ) {
+	em_gen_long_hostname = !!v;
+}
 
 // ----------- epoll emulation ---------------------------------------------
 
-// CAUTION: sys/epoll.h must be included before this define and function will properly compile.
+// CAUTION: sys/epoll.h must be included before these define and function will properly compile.
 #define epoll_wait em_wait
+#define epoll_ctl  em_ep_ctl
+#define epoll_create  em_ep_create
+
 /*
 	Every other call returns 1 ready; alternate calls return 0 ready.
 	Mostly for testing the timeout receive call. First call should return
@@ -67,6 +92,14 @@ static int em_wait( int fd, void* events, int n, int to ) {
 
 	ready = !ready;
 	return ready;
+}
+
+int em_ep_ctl( int epfd, int op, int fd, struct epoll_event *event ) {
+	return 0;
+}
+
+int em_ep_create( int size ) {
+	return 0;
 }
 
 
@@ -92,7 +125,7 @@ struct em_msg {
 	we don't add a payload even if setting a v1 type.
 */
 #define ALT_MSG_VER 1	// alternate every so often
-#define MSG_VER 2		// default version to insert
+#define MSG_VER 3		// default version to insert
 struct em_msg {
 	int32_t	mtype;						// message type  ("long" network integer)
 	int32_t	plen;						// payload length
@@ -110,6 +143,9 @@ struct em_msg {
 	int32_t len2;                       // length of data 1 (d1)
 	int32_t len3;                       // length of data 2 (d2)
 	int32_t	sub_id;						// subscription id (-1 invalid)
+
+										// V3 stuff
+	unsigned char srcip[64];				// sender ID for return to sender needs
 };
 
 
@@ -195,8 +231,8 @@ static int em_nng_recvmsg( nng_socket s, nng_msg ** m, int i ) {
 		d1_size = 4;
 	}
 
-	b = (void *) malloc( 2048 );
 	if( m != NULL ) {
+		b = (void *) malloc( 2048 );
 		memset( b, 0, 2048 );
 
 		*m = (nng_msg *) b;
@@ -231,10 +267,14 @@ static int em_nng_recvmsg( nng_socket s, nng_msg ** m, int i ) {
 		}
 		pthread_mutex_unlock( &rcv_gate );
 		snprintf( msg->xid, 32, "%015d", rcv_count );		// simple transaction id so we can test receive specific and ring stuff
-		snprintf( msg->src, 16, "localhost:4562" );		// set src id (unrealistic) so that rts() can be tested
+		snprintf( msg->src, 64, "localhost:4562" );		// set src id (unrealistic) so that rts() can be tested
+		snprintf( msg->srcip, 64, "89.2.19.19:4562" );		// set src ip for rts testing
+
+		//fprintf( stderr, ">>> simulated received message: %s %s p=%p len0=%d\n", msg->src, msg->srcip, msg, (int) ntohl( msg->len0 ) );
+	} else {
+		fprintf( stderr, "<WARN> em: simulated receive no msg pointer provided\n" );
 	}
 
-	//fprintf( stderr, ">>> simulated received message: %s\n", msg->xid );
 	return return_value;
 }
 
@@ -452,12 +492,17 @@ static int em_nn_recv (int s, void *m, size_t len, int flags ) {
 	static int count = 0;			// we'll simulate a message going in by dropping an rmr-ish msg with transaction id only
 	int trace_size = 0;
 	static int counter = 0;				// if timeout value is set; we return timeout (eagain) every 3 calls
+	int d1_size = 0;
 
 	if( em_timeout > 0 ) {
 		counter++;
 		if( counter % 3 == 0 ) {
 			return EAGAIN;
 		}
+	}
+
+	if( em_mtc_msgs ) {
+		d1_size = 4;
 	}
 
 	b = (void *) malloc( 2048 );
@@ -474,14 +519,17 @@ static int em_nn_recv (int s, void *m, size_t len, int flags ) {
 		msg->plen = htonl( 220 );
 		msg->len0 = htonl( sizeof( struct em_msg ) );
 		msg->len1 = htonl( trace_size );
+		msg->len2 = htonl( d1_size );
+		msg->len3 = htonl( 0 );
 		snprintf( msg->xid, 32, "%015d", count++ );		// simple transaction id so we can test receive specific and ring stuff
-		snprintf( msg->src, 16, "localhost:4562" );		// set src id (unrealistic) so that rts() can be tested
+		snprintf( msg->src, 64, "localhost:4562" );		// set src id (unrealistic) so that rts() can be tested
+		snprintf( msg->srcip, 64, "89.2.19.19:4562" );		// set src ip for rts testing
 		//fprintf( stderr, "<EM>   returning message len=%d\n\n", ntohl( msg->plen ) );
 	} else {
 		fprintf( stderr, "<EM>   message was nil\n\n" );
 	}
 
-	//fprintf( stderr, ">>> simulated received message: %s len=%d\n", msg->xid, msg->plen );
+	//fprintf( stderr, ">>> simulated received message: %s %s len=%d p=%p\n", msg->src, msg->srcip, ntohl( msg->plen ), m );
 	return 2048;
 }
 
