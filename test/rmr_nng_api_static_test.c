@@ -137,6 +137,11 @@ static int rmr_api_test( ) {
 	msg = rmr_alloc_msg( NULL,  1024 );									// should return nil pointer
 	errors += fail_not_nil( msg, "rmr_alloc_msg didn't return nil when given nil context "  );
 
+	
+	rmr_get_srcip( msg, wbuf );
+	errors += fail_if_equal( 0, strlen( wbuf ), "rmr_get_srcip did not did not return string with length (b) after alloc_msg" );
+	fprintf( stderr, "<INFO> ip: %s\n", wbuf );
+
 	msg = rmr_alloc_msg( rmc, 2048 );				// allocate larger than default size given on init
 	errors += fail_if_nil( msg, "rmr_alloc_msg returned nil msg pointer "  );
 

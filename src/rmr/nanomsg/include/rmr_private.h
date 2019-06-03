@@ -54,6 +54,7 @@ struct endpoint {
 */
 struct uta_ctx {
 	char*	my_name;			// dns name of this host to set in sender field of a message
+	char*	my_ip;				// default IP address
 	int		shutdown;			// threads should exit if this is set
 	int max_mlen;				// max message length payload+header
 	int	max_plen;				// max payload length

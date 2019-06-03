@@ -63,6 +63,7 @@ static int worm_test( ) {
 	}
 	memset( ctx, 0, sizeof( *ctx ) );
 	ctx->my_name = strdup( "tester" );
+	ctx->my_ip = strdup( "30.4.19.86:1111" );
 
 	gen_rt( ctx );
 

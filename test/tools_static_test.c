@@ -31,6 +31,38 @@
 	Date:		3 April 2019
 */
 
+/*
+	Returns an interface name that is valid in this environment (keeps us from
+	having to know/guess a name to test with.
+*/
+static char* get_ifname( ) {
+	if_addrs_t* l;
+	struct	ifaddrs *ifs;		// pointer to head
+	struct	ifaddrs *ele;		// pointer into the list
+	char*	rstr = NULL;		// return string
+
+
+	if( (l = (if_addrs_t *) malloc( sizeof( if_addrs_t ) )) == NULL ) {
+		return NULL;
+	}
+	memset( l, 0, sizeof( if_addrs_t ) );
+	l->addrs = (char **) malloc( sizeof( char* ) * 128 );
+	if( l->addrs == NULL ) {
+		free( l );
+		return NULL;
+	}
+
+	getifaddrs( &ifs );
+	for( ele = ifs; ele; ele = ele->ifa_next ) {
+		if( ele && strcmp( ele->ifa_name, "lo" ) ) {
+			rstr = strdup( ele->ifa_name );
+			break;
+		}
+	}
+
+	free( l );
+	return rstr;
+}
 
 static int tools_test( ) {
 	int i;
@@ -40,6 +72,7 @@ static int tools_test( ) {
 	char* buf = "2,Fred,Wilma,Barney,Betty,Dino,Pebbles,Bambam,Mr. Slate,Gazoo";
 	char*	dbuf;				// duplicated buf since C marks a const string is unumtable
 	char*	hname;
+	char*	ip;					// ip address string
 	uta_ctx_t ctx;				// context for uta_lookup test
 	void*	if_list;
 
@@ -149,6 +182,30 @@ static int tools_test( ) {
 
 	i = has_myip( "192.168.4.30:1235", if_list, ',', 128 );											// should find our ip when only in list
 	errors += fail_if_false( i, "has_myip did not find IP when only one in list" );
+
+	ip = get_default_ip( NULL );
+	errors += fail_not_nil( ip, "get_default_ip returned non-nil pointer when given nil information" );
+
+	ip = get_default_ip( if_list );
+	if( ip ) {
+	} else {
+		errors += fail_if_nil( ip, "get_defaul_ip returned nil pointer when valid pointer expected" );
+	}
+
+	ip = get_ifname();							// suss out a valid interface name (not lo)
+	if( ip ) {
+		setenv( "RMR_BIND_IF", ip, 1 );			// drive the case where we have a hard set interface; and set known interface in list
+		free( ip );
+		if_list = mk_ip_list( "1235" );
+		if( if_list ) {
+			ip = get_default_ip( if_list );
+			errors += fail_if_nil( ip, "get_default_ip did not return valid pointer when list created from interface name" );
+		} else {
+			errors += fail_if_nil( if_list, "mk_ip_list with a specific interface name returned a nil list" );
+		}
+	}
+
+// -------------------------------------------------------------------------------------------------
 
 	return !!errors;			// 1 or 0 regardless of count
 }

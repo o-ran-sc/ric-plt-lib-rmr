@@ -347,3 +347,33 @@ extern unsigned char* rmr_get_src( rmr_mbuf_t* msg, unsigned char* dest ) {
 
 	return dest;
 }
+
+/*
+	Returns the string with the IP address as reported by the sender. This is
+	the IP address that the sender has sussed off of one of the interfaces
+	and cannot be guarenteed to be the acutal IP address which was used to 
+	establish the connection.   The caller must provide a buffer of at least
+	64 bytes; the string will be nil terminated. A pointer to the user's buffer
+	is returned on success, nil on failure.
+*/
+extern unsigned char* rmr_get_srcip( rmr_mbuf_t* msg, unsigned char* dest ) {
+	uta_mhdr_t*	hdr = NULL;
+	char*	rstr = NULL;
+
+	errno = EINVAL;
+
+	if( dest != NULL && msg != NULL ) {
+		hdr = msg->header;
+		if( HDR_VERSION( msg->header ) > 2 ) {		// src ip was not present in hdr until ver 3
+			errno = 0;
+			strcpy( dest, hdr->srcip );
+			rstr = dest;
+		} else  {
+			errno = 0;
+			strcpy( dest, hdr->src );				// reutrn the name:port for old messages
+			rstr = dest;
+		}
+	}
+
+	return rstr;
+}

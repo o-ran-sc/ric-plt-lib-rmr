@@ -637,6 +637,26 @@ static void* init( char* uproto_port, int max_msg_size, int flags ) {
 		return NULL;
 	}
 
+	if( (tok = getenv( ENV_NAME_ONLY )) != NULL ) {
+		if( atoi( tok ) > 0 ) {
+			flags |= RMRFL_NAME_ONLY;					// don't allow IP addreess to go out in messages
+		}
+	}
+
+	if( flags & RMRFL_NAME_ONLY ) {
+		ctx->my_ip = strdup( ctx->my_name );				// user application or env var has specified that IP address is NOT sent out, use name
+		if( DEBUG ) fprintf( stderr, "[DBUG] name only mode is set; not sending IP address as source\n" );
+	} else {
+		ctx->ip_list = mk_ip_list( port );				// suss out all IP addresses we can find on the box, and bang on our port for RT comparisons
+		ctx->my_ip = get_default_ip( ctx->ip_list );	// and (guess) at what should be the default to put into messages as src
+		if( ctx->my_ip == NULL ) {
+			strcpy( ctx->my_ip, ctx->my_name );			// revert to name if we cant suss out ip address
+			fprintf( stderr, "[WARN] rmr_init: default ip address could not be sussed out, using name as source\n" );
+		} else {
+			if( DEBUG ) fprintf( stderr, "[DBUG] default ip address: %s\n", ctx->my_ip );
+		}
+	}
+
 	if( ! (flags & FL_NOTHREAD) ) {			// skip if internal context that does not need rout table thread
 		if( pthread_create( &ctx->rtc_th,  NULL, rtc, (void *) ctx ) ) { 		// kick the rt collector thread
 			fprintf( stderr, "[WARN] rmr_init: unable to start route table collector thread: %s", strerror( errno ) );

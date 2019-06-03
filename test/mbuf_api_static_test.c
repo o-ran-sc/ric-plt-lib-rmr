@@ -264,7 +264,20 @@ int mbuf_api_test( ) {
 	errors += fail_not_nil( buf, "rmr_get_src returned a pointer when given a nil dest buffer" );
 
 	buf = rmr_get_src( mbuf, src_buf );
-	errors += fail_not_equal( (int) buf, (int) src_buf, "rmr_get_src didn't return expexted buffer pointer" );
+	errors += fail_not_equalp( buf, src_buf, "rmr_get_src didn't return expexted buffer pointer" );
+
+	buf = rmr_get_srcip( NULL, NULL );
+	errors += fail_not_nil( buf, "get_srcip did not return nil when given nil pointers" );
+
+	buf = rmr_get_srcip( mbuf, NULL );
+	errors += fail_not_nil( buf, "get_srcip did not return nil when given nil destination" );
+
+	buf = rmr_get_srcip( mbuf, src_buf );
+	errors += fail_not_equalp( buf, src_buf, "rmr_get_srcip didn't return expexted buffer pointer" );
+
+	test_set_ver( mbuf, 2 );							// set older message version to ensure properly handled
+	buf = rmr_get_srcip( mbuf, src_buf );
+fprintf( stderr, ">>>>>>> buf=(%s)\n", buf );
 
 
 	return errors > 0;			// overall exit code bad if errors

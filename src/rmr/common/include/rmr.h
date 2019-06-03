@@ -46,6 +46,7 @@ extern "C" {
 #define RMRFL_NOTHREAD		0x01	// do not start an additional route collector thread
 #define RMRFL_MTCALL		0x02	// set up multi-threaded call support (rmr_init)
 #define RMRFL_AUTO_ALLOC	0x03	// send auto allocates a zerocopy buffer
+#define RMRFL_NAME_ONLY		0x04	// only the hostname:ip is provided as source information for rts() calls
 
 #define RMR_DEF_SIZE		0		// pass as size to have msg allocation use the default msg size
 
@@ -131,6 +132,7 @@ extern int rmr_bytes2xact( rmr_mbuf_t* mbuf, unsigned char const* src, int len )
 extern void rmr_free_msg( rmr_mbuf_t* mbuf );
 extern unsigned char*  rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest );
 extern unsigned char*  rmr_get_src( rmr_mbuf_t* mbuf, unsigned char* dest );
+extern unsigned char* rmr_get_srcip( rmr_mbuf_t* msg, unsigned char* dest );
 extern rmr_mbuf_t* rmr_realloc_msg( rmr_mbuf_t* mbuf, int new_tr_size );
 extern int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char const* str );
 extern void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str );

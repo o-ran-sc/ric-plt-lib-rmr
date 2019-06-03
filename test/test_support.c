@@ -138,11 +138,29 @@ static int fail_if_equal( int a, int b, char* what ) {
 	return a != b ? GOOD : BAD;			// user may override good/bad so do NOT return a==b directly!
 }
 
+static int fail_not_equalp( void* a, void* b, char* what ) {
+	if( a != b ) {
+		fprintf( stderr, "<FAIL> %s: pointers were not equal a=%p b=%p\n", what, a, b );
+	}
+	return a == b ? GOOD : BAD;			// user may override good/bad so do NOT return a==b directly!
+}
+
+static int fail_if_equalp( void* a, void* b, char* what ) {
+	if( a == b ) {
+		fprintf( stderr, "<FAIL> %s pointers were equal a=%p b=%p\n", what, a, b );
+	}
+	return a != b ? GOOD : BAD;			// user may override good/bad so do NOT return a==b directly!
+}
+
 
 #ifndef NO_DUMMY_RMR
 /*
 	Dummy message allocator for testing without sr_static functions
 */
+#ifndef MSG_VER
+#define MSG_VER 3
+#endif
+
 static rmr_mbuf_t* test_mk_msg( int len, int tr_len ) {
 	rmr_mbuf_t*	new_msg;
 	uta_mhdr_t* hdr;
@@ -157,6 +175,9 @@ static rmr_mbuf_t* test_mk_msg( int len, int tr_len ) {
 	hdr = (uta_mhdr_t*) new_msg->tp_buf;
 	SET_HDR_LEN( hdr );
 	SET_HDR_TR_LEN( hdr, tr_len );
+	hdr->rmr_ver = htonl( MSG_VER );
+	strcpy( hdr->src, "dummyhost:1111" );
+	strcpy( hdr->srcip, "30.4.19.86:1111" );
 
 	new_msg->header = new_msg->tp_buf;
 	new_msg->payload =  new_msg->header + PAYLOAD_OFFSET( hdr );
@@ -165,6 +186,18 @@ static rmr_mbuf_t* test_mk_msg( int len, int tr_len ) {
 
 	return new_msg;
 }
+
+static void test_set_ver( rmr_mbuf_t* msg, int ver ) {
+	uta_mhdr_t* hdr;
+
+	hdr = (uta_mhdr_t*) msg->tp_buf;
+	hdr->rmr_ver = htonl( ver );
+	strcpy( hdr->src, "dummyhost-v2:1111" );
+	strcpy( hdr->srcip, "30.4.19.86:2222" );
+
+	return;
+}
 #endif
+
 
 #endif
