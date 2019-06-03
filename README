@@ -91,3 +91,8 @@ It might be necessary to write a higher level test driver as some of the modules
 (e.g. route table) have threaded daemons which might not be easy to drive 
 completely or at all, and thus the code coverage for a passing test might need
 to be lower for this type of module.
+
+Containerized Build
+The Dockerfile defines an environment to build and test this library.  It uses
+a base image with the C toolchain.  The Dockerfile is NOT intended to create a
+distributable image.
