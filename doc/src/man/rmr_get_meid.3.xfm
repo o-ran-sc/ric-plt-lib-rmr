@@ -78,7 +78,7 @@ the following with the indicated meaning.
 &half_space
 &di(ENOMEM) A nil pointer was passed for &ital( dest, ) however it was not possible to allocate a 
 	buffer using malloc().
-&end_dilist
+&end_dlist
 
 
 

@@ -237,9 +237,12 @@ static int uta_has_str( char const* buf, char const* str, char sep, int max ) {
 	that could be in the route table.
 
 	If the environment variable which limits the binding of our listen port
-	to a single interface (ENV_BIND_IF) then ONLY that address is added to
-	the list so that we don't pick up entries from the rtable that are for other
+	to a single interface (ENV_BIND_IF) then ONLY that interface/address is added
+	to the list so that we don't pick up entries from the rtable that are for other
 	processes listening on different interfaces.
+
+	The ENV_BIN_IF environment variable may be either an IP address (v6 must be in 
+	square braces), or an interface name (e.g. eth0).
 */
 if_addrs_t*  mk_ip_list( char* port ) {
 	if_addrs_t* l;
@@ -249,7 +252,8 @@ if_addrs_t*  mk_ip_list( char* port ) {
 	char	wbuf[NI_MAXHOST+128];
 	char*	fmt;
 	char*	envp;				// at the environment var if there
-
+	char*	target_if = NULL;	// target interface supplied by ENV_BIND_IF
+	char*	tok;
 
 
 	if( (l = (if_addrs_t *) malloc( sizeof( if_addrs_t ) )) == NULL ) {
@@ -263,18 +267,23 @@ if_addrs_t*  mk_ip_list( char* port ) {
 	}
 
 	if( (envp = getenv( ENV_BIND_IF )) != NULL ) {
-		snprintf( wbuf, sizeof( wbuf ), "%s:%s", envp, port );		// smash port onto the addr as is
-		l->addrs[l->naddrs] = strdup( wbuf );
-		l->naddrs++;
-		if( DEBUG ) fprintf( stderr, "[INFO] rmr: using only specific bind interface when searching specific RT entries: %s\n", wbuf );
-		return l;
+		if( isdigit( *envp ) || *envp == '[' ) {					// ip address given and not device name
+			snprintf( wbuf, sizeof( wbuf ), "%s:%s", envp, port );		// smash port onto the addr as is
+			l->addrs[l->naddrs] = strdup( wbuf );
+			l->naddrs++;
+			if( DEBUG ) fprintf( stderr, "[INFO] rmr: using only specific bind interface when searching specific RT entries: %s\n", wbuf );
+			return l;
+		}
+
+		target_if = envp;		// device name given, suss it out below
 	}
 
 	getifaddrs( &ifs );
 	for( ele = ifs; ele; ele = ele->ifa_next ) {
-		*octs = 0;
+		memset( octs, 0, sizeof( octs ) );
+		if( ele && strcmp( ele->ifa_name, "lo" ) &&									// do NOT capture the loopback interface address
+			(target_if == NULL || strcmp( ele->ifa_name, target_if ) == 0 ) ) {		// no target, or matches ENV_BIND_IF target
 
-		if( ele && strcmp( ele->ifa_name, "lo" )  ) {
 			if( ele->ifa_addr->sa_family == AF_INET ) {
 				getnameinfo( ele->ifa_addr, sizeof( struct sockaddr_in ),  octs, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
 				fmt = "%s:%s";
@@ -286,7 +295,12 @@ if_addrs_t*  mk_ip_list( char* port ) {
 			}
 
 			if( *octs ) {
+				if( (tok = strchr( octs, '%' )) != NULL ) {			// for unknown reasons some ip6 addrs have %if-name appended; truncate
+					*tok = 0;
+				}
 				if( l->naddrs < 128 ) {
+					if( DEBUG ) fprintf( stderr, "[DBUG] capture address: %s: %s\n", ele->ifa_name, octs );
+
 					snprintf( wbuf, sizeof( wbuf ), fmt, octs, port );		// smash port onto the addr
 					l->addrs[l->naddrs] = strdup( wbuf );
 					l->naddrs++;
@@ -378,6 +392,23 @@ static int has_myip( char const* buf, if_addrs_t* list, char sep, int max ) {
 	free( dbuf );
 	free( tokens );
 	return rc;
+}
+
+/*
+	Given a list manager block, return the default IP address.
+	For now, that is just the first address on the list which
+	easily could be non-deterministic and change with each restart
+	of the application if a specific interface is not provided via
+	the environment variable (ENV_BIND_IF) and if there is more than
+	one device available on the container/physical host.
+*/
+static char* get_default_ip( if_addrs_t* iplist ) {
+
+	if( iplist != NULL  &&  iplist->naddrs > 0  &&  iplist->addrs != NULL ) {
+		return strdup( iplist->addrs[0] );
+	}
+
+	return NULL;
 }
 
 #endif

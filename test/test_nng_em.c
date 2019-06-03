@@ -92,7 +92,7 @@ struct em_msg {
 	we don't add a payload even if setting a v1 type.
 */
 #define ALT_MSG_VER 1	// alternate every so often
-#define MSG_VER 2		// default version to insert
+#define MSG_VER 3		// default version to insert
 struct em_msg {
 	int32_t	mtype;						// message type  ("long" network integer)
 	int32_t	plen;						// payload length
@@ -110,6 +110,9 @@ struct em_msg {
 	int32_t len2;                       // length of data 1 (d1)
 	int32_t len3;                       // length of data 2 (d2)
 	int32_t	sub_id;						// subscription id (-1 invalid)
+
+										// V3 stuff
+	unsigned char src_ip[64];				// sender ID for return to sender needs
 };
 
 
