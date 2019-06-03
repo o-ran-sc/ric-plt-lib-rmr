@@ -78,7 +78,7 @@ the following with the indicated meaning.
 &beg_dlist(.75i : ^&bold_font )
 &half_space
 &di(EINVAL) The message, or an internal portion of the message, was corrupted or the pointer was invalid.
-&end_dilist
+&end_dlist
 
 
 
@@ -90,6 +90,7 @@ rmr_bytes2meid(3),
 rmr_call(3),
 rmr_free_msg(3),
 rmr_get_rcvfd(3),
+rmr_get_srcip(3),
 rmr_payload_size(3),
 rmr_send_msg(3),
 rmr_rcv_msg(3),

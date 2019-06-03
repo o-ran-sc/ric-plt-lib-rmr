@@ -114,6 +114,10 @@ int main() {
 
 	fprintf( stderr, "<INFO> starting RMr API tests\n" );
 	errors += rmr_api_test();
+
+	fprintf( stderr, "<INFO> run RMr API tests with src name only env var set\n" );
+	setenv( "RMR_SRC_NAMEONLY", "1", 1 );
+	errors += rmr_api_test();
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
 	fprintf( stderr, "<INFO> starting wormhole tests\n" );
