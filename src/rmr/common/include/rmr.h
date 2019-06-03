@@ -36,16 +36,19 @@ extern "C" {
 
 
 #define RMR_MAX_XID			32		// space in header reserved for user xaction id
-#define RMR_MAX_SID			32		// spece in header reserved for sender id
 #define RMR_MAX_MEID		32		// spece in header reserved for managed element id
 #define RMR_MAX_SRC			64		// max length of hostname (which could be IPv6 addr with [...]:port so more than the 39 bytes of a plain addr
+#define RMR_MAX_SID			RMR_MAX_SRC		// spece in header reserved for sender id (hostname or IP address)
 #define RMR_MAX_RCV_BYTES	4096	// max bytes we support in a receive message
+
+#define RMR_MAX_V1SID		16		// version 1 sender id
 
 									// various flags for function calls
 #define RMRFL_NONE			0x00	// no flags
 #define RMRFL_NOTHREAD		0x01	// do not start an additional route collector thread
 #define RMRFL_MTCALL		0x02	// set up multi-threaded call support (rmr_init)
 #define RMRFL_AUTO_ALLOC	0x03	// send auto allocates a zerocopy buffer
+#define RMRFL_NAME_ONLY		0x04	// only the hostname:ip is provided as source information for rts() calls
 
 #define RMR_DEF_SIZE		0		// pass as size to have msg allocation use the default msg size
 
@@ -131,6 +134,7 @@ extern int rmr_bytes2xact( rmr_mbuf_t* mbuf, unsigned char const* src, int len )
 extern void rmr_free_msg( rmr_mbuf_t* mbuf );
 extern unsigned char*  rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest );
 extern unsigned char*  rmr_get_src( rmr_mbuf_t* mbuf, unsigned char* dest );
+extern unsigned char* rmr_get_srcip( rmr_mbuf_t* msg, unsigned char* dest );
 extern rmr_mbuf_t* rmr_realloc_msg( rmr_mbuf_t* mbuf, int new_tr_size );
 extern int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char const* str );
 extern void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str );

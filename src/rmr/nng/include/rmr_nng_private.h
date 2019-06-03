@@ -65,6 +65,7 @@ typedef struct epoll_stuff {
 */
 struct uta_ctx {
 	char*	my_name;			// dns name of this host to set in sender field of a message
+	char*	my_ip;				// the ip address we _think_ we are using sent in src_ip of the message for rts
 	int	shutdown;				// thread notification if we need to tell them to stop
 	int max_mlen;				// max message length payload+header
 	int	max_plen;				// max payload length

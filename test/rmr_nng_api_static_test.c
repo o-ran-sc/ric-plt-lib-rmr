@@ -116,6 +116,7 @@ static int rmr_api_test( ) {
 	v = rmr_ready( NULL );
 	errors += fail_if( v != 0, "rmr_ready returned true before initialisation "  );
 
+	em_set_long_hostname( 1 );
 	if( (rmc = rmr_init( "4560", 1024, FL_NOTHREAD )) == NULL ) {
 		fail_if_nil( rmc, "rmr_init returned a nil pointer "  );
 		return 1;
@@ -136,6 +137,11 @@ static int rmr_api_test( ) {
 
 	msg = rmr_alloc_msg( NULL,  1024 );									// should return nil pointer
 	errors += fail_not_nil( msg, "rmr_alloc_msg didn't return nil when given nil context "  );
+
+	
+	rmr_get_srcip( msg, wbuf );
+	errors += fail_if_equal( 0, strlen( wbuf ), "rmr_get_srcip did not did not return string with length (b) after alloc_msg" );
+	fprintf( stderr, "<INFO> ip: %s\n", wbuf );
 
 	msg = rmr_alloc_msg( rmc, 2048 );				// allocate larger than default size given on init
 	errors += fail_if_nil( msg, "rmr_alloc_msg returned nil msg pointer "  );
@@ -215,7 +221,6 @@ static int rmr_api_test( ) {
 		if( msg2->state != RMR_ERR_EMPTY ) {
 			errors += fail_not_equal( msg2->state, RMR_OK, "receive given nil message did not return msg with good state (not empty) "  );
 		}
-		//errors += fail_not_equal( msg2->state, RMR_OK, "receive given nil message did not return msg with good state "  );
 	}
 
 
@@ -233,12 +238,17 @@ static int rmr_api_test( ) {
 
 	msg->state = 0;
 	msg = rmr_rts_msg( NULL, msg );			// should set state in msg
-	errors += fail_if_equal( msg->state, 0, "rmr_rts_msg did not set state when given valid message but no context "  );
+	if( msg ) {
+		errors += fail_if_equal( msg->state, 0, "rmr_rts_msg did not set state when given valid message but no context "  );
+	} else {
+		errors += fail_if_nil( msg,  "rmr_rts_msg returned a nil msg when given a good one" );
+	}
 
 
 	msg = rmr_rts_msg( rmc, msg );			// return the buffer to the sender
 	errors += fail_if_nil( msg, "rmr_rts_msg did not return a message pointer "  );
-	errors += fail_if( errno != 0, "rmr_rts_msg did not reset errno "  );
+	errors += fail_not_equal( msg->state, 0, "rts_msg did not return a good state (a) when expected" );
+	errors += fail_not_equal( errno, 0, "rmr_rts_msg did not reset errno (a) expected (b)"  );
 
 
 
