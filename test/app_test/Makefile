@@ -55,6 +55,9 @@ receiver: receiver.c
 mt_receiver: receiver.c
 	gcc -I $${C_INCLUDE_PATH:-.} -DMTC $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
+lreceiver: lreceiver.c
+	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+
 sender_nano: sender.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr -lnanomsg -lpthread -lm
 
@@ -63,6 +66,10 @@ sender: sender.c
 
 caller: caller.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+
+lcaller: lcaller.c
+	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@  -lrmr_nng -lnng -lpthread -lm
+
 
 
 # clean removes intermediates; nuke removes everything that can be built

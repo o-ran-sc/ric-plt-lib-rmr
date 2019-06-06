@@ -270,17 +270,20 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 				rte = uta_add_rte( ctx->new_rtable, key, ngtoks );								// get/create entry for this key
 
 				for( grp = 0; grp < ngtoks; grp++ ) {
-					if( (ntoks = uta_tokenise( gtokens[grp], tokens, 64, ',' )) > 0 ) {
+					if( (ntoks = uta_rmip_tokenise( gtokens[grp], ctx->ip_list, tokens, 64, ',' )) > 0 ) {		// remove any referneces to our ip addrs
 						for( i = 0; i < ntoks; i++ ) {
-							if( DEBUG > 1  || (vlevel > 1)) fprintf( stderr, "[DBUG]    add endpoint  %s\n", ts_field );
-							uta_add_ep( ctx->new_rtable, rte, tokens[i], grp );
+							if( strcmp( tokens[i], ctx->my_name ) != 0 ) {					// don't add if it is us -- cannot send to ourself
+								if( DEBUG > 1  || (vlevel > 1)) fprintf( stderr, "[DBUG] add endpoint  ts=%s %s\n", ts_field, tokens[i] );
+								uta_add_ep( ctx->new_rtable, rte, tokens[i], grp );
+							}
 						}
 					}
 				}
 			}
 		} else {
-			if( DEBUG || (vlevel > 2) )
+			if( DEBUG || (vlevel > 2) ) {
 				fprintf( stderr, "entry not included, sender not matched: %s\n", tokens[1] );
+			}
 		}
 }
 

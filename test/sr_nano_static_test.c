@@ -60,8 +60,8 @@ static void gen_rt( uta_ctx_t* ctx ) {
 		"newrt|start\n"								// false start to drive detection
 		"xxx|badentry to drive default case"
 		"newrt|start\n"
-	    "rte|0|localhost:4560,localhost:4562\n"					// these are legitimate entries for our testing
-	    "rte|1|localhost:4562;localhost:4561,localhost:4569\n"
+	    "rte|0|localhost:4560,localhost:4562,dummy-test:1111\n"					// these are legitimate entries for our testing
+	    "rte|1|localhost:4562;localhost:4561,localhost:4569,10.7.9.86:4560\n"
 	    "rte|2|localhost:4562| 10\n"								// new subid at end
 	    "mse|4|10|localhost:4561\n"									// new msg/subid specifier rec
 	    "mse|4|localhost:4561\n"									// new mse entry with less than needed fields
@@ -183,7 +183,7 @@ static int sr_nano_test() {
 	ctx->mring = NULL;		//uta_mk_ring( 128 );
 	ctx->max_plen = RMR_MAX_RCV_BYTES + sizeof( uta_mhdr_t );
 	ctx->max_mlen = ctx->max_plen + sizeof( uta_mhdr_t );
-	ctx->my_name = strdup( "dummy-test" );
+	ctx->my_name = strdup( "dummy-test:1111" );
 	ctx->my_ip = strdup( "30.4.19.86:1111" );
 	uta_lookup_rtg( ctx );
 
