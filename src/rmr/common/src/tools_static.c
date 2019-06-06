@@ -22,6 +22,7 @@
 	Mnemonic:	tools_static.c
 	Abstract:	A small set of very simple tools to support Uta == RMR.
 					uta_tokenise -- simple string tokeniser
+					uta_rmip_tokenise -- tokenise and remove ip addresses from the list
 					uta_h2ip	-- look up host name and return an ip address
 					uta_lookup_rtg	-- looks in env for rtg host:port
 					uta_has_str	-- searches buffer of tokens for a string
@@ -50,6 +51,11 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
+// --- some protos needed for better organisation --------
+int is_this_myip( if_addrs_t* l, char* addr );
+
+
+// ----------------------------------------------------------------------------------
 
 /*
 	Simple tokeniser. Split a null terminated string into tokens recording the
@@ -75,6 +81,43 @@ static int uta_tokenise( char* buf, char** tokens, int max, char sep ) {
 	}
 
 	return n;
+}
+
+/*
+	Tokenise and remove matches.
+	Given a buffer of 'sep' separated tokens, and a list of things,
+	return up to max tokens with any tokens that matched things in
+	the list. Toks is the user supplied array of char* which we will
+	fill in (up to max) with pointers to tokens from buf.  This 
+	damages buf, so the caller must dup the string if it must be 
+	preserved for later, original, use.  The pointers returned in 
+	toks will reference portions of bufs.
+
+	Returns the number of tokens referenced by toks.
+*/
+static int uta_rmip_tokenise( char* buf, if_addrs_t* iplist, char** toks, int max, char sep ) {
+	int 	ntoks = 0;			// total toks in the original buffer
+	int		pcount = 0;			// count after prune
+	char**	all_toks;
+	int i;
+	int j;
+
+	
+	all_toks = malloc( sizeof( char * ) * max );					// refernce to all tokens; we'll prune
+	pcount = ntoks = uta_tokenise( buf, all_toks, max, sep );		// split them up
+	j = 0;
+	if( ntoks > 0 ) {
+		for( i = 0; i < ntoks; i++ ) {
+			if( is_this_myip( iplist, all_toks[i] ) ) {
+				pcount--;									// ours, prune
+			} else {
+				toks[j++] = all_toks[i];					// not one of ours, keep it
+			}
+		}
+	}
+
+	free( all_toks );
+	return pcount;
 }
 
 /*
@@ -330,8 +373,12 @@ int is_this_myip( if_addrs_t* l, char* addr ) {
 		return 0;
 	}
 
+	if( addr == NULL ) {
+		return 0;
+	}
+
 	for( i = 0; i < l->naddrs; i++ ) {
-		if( strcmp( addr, l->addrs[i] ) == 0 ) {
+		if( l->addrs[i] != NULL  &&  strcmp( addr, l->addrs[i] ) == 0 ) {
 			return 1;
 		}
 	}
