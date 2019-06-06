@@ -245,6 +245,7 @@ typedef struct chute {
 //---- tools ----------------------------------
 static int has_myip( char const* buf, if_addrs_t* list, char sep, int max );
 static int uta_tokenise( char* buf, char** tokens, int max, char sep );
+static int uta_rmip_tokenise( char* buf, if_addrs_t* iplist, char** toks, int max, char sep );
 static char* uta_h2ip( char const* hname );
 static int uta_lookup_rtg( uta_ctx_t* ctx );
 static int uta_has_str( char const* buf, char const* str, char sep, int max );

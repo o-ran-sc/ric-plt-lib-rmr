@@ -225,7 +225,7 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_s
 	if( ! ep->open )  {										// not open -- connect now
 		if( DEBUG ) fprintf( stderr, "[DBUG] get ep by name for %s session not started... starting\n", ep_name );
 		if( ep->addr == NULL ) {					// name didn't resolve before, try again
-			ep->addr = uta_h2ip( ep->name );
+			ep->addr = strdup( ep->name );			// use the name directly; if not IP then transport will do dns lookup
 		}
 		if( uta_link2( ep ) ) {											// find entry in table and create link
 			state = TRUE;
@@ -335,7 +335,7 @@ static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more,
 	if( state ) {										// end point selected, open if not, get socket either way
 		if( ! ep->open ) {								// not connected
 			if( ep->addr == NULL ) {					// name didn't resolve before, try again
-				ep->addr = uta_h2ip( ep->name );
+				ep->addr = strdup( ep->name );			// use the name directly; if not IP then transport will do dns lookup
 			}
 
 			if( uta_link2( ep ) ) {											// find entry in table and create link
