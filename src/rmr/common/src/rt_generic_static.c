@@ -153,6 +153,38 @@ static char* clip( char* buf ) {
 	return buf;
 }
 
+/*
+	This accepts a pointer to a nil terminated string, and ensures that there is a
+	newline as the last character. If there is not, a new buffer is allocated and
+	the newline is added.  If a new buffer is allocated, the buffer passed in is
+	freed.  The function returns a pointer which the caller should use, and must
+	free.  In the event of an error, a nil pointer is returned.
+*/
+static char* ensure_nlterm( char* buf ) {
+	char*	nb = NULL;
+	int		len = 1;
+	
+
+	nb = buf;
+	if( buf == NULL || (len = strlen( buf )) < 2 ) {
+		if( (nb = (char *) malloc( sizeof( char ) * 2 )) != NULL ) {
+			*nb = '\n';
+			*(nb+1) = 0;
+		}
+	} else {
+		if( buf[len-1] != '\n' ) {
+			fprintf( stderr, "[WARN] rmr buf_check: input buffer was not newline terminated (file missing final \\n?)\n" );
+			if( (nb = (char *) malloc( sizeof( char ) * (len + 2) )) != NULL ) {
+				memcpy( nb, buf, len );
+				*(nb+len) = '\n';			// insert \n and nil into the two extra bytes we allocated
+				*(nb+len+1) = 0;
+				free( buf );
+			}	
+		}
+	}
+
+	return nb;
+}
 
 /*
 	Given a message type create a route table entry and add to the hash keyed on the
@@ -489,7 +521,7 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 		return;
 	}
 
-	if( (fbuf = uta_fib( fname ) ) == NULL ) {			// read file into a single buffer (nil terminated string)
+	if( (fbuf = ensure_nlterm( uta_fib( fname ) ) ) == NULL ) {			// read file into a single buffer (nil terminated string)
 		fprintf( stderr, "[WRN] rmr read_static: seed route table could not be opened: %s: %s\n", fname, strerror( errno ) );
 		return;
 	}
@@ -507,7 +539,7 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 			*eor = 0;
 		} else {
 			fprintf( stderr, "[WARN] rmr read_static: seed route table had malformed records (missing newline): %s\n", fname );
-			fprintf( stderr, "[WARN] rmr read_static: seed route table not used%s\n", fname );
+			fprintf( stderr, "[WARN] rmr read_static: seed route table not used: %s\n", fname );
 			free( fbuf );
 			return;
 		}

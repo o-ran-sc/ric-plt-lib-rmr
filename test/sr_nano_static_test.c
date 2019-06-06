@@ -82,6 +82,75 @@ static void gen_rt( uta_ctx_t* ctx ) {
 	unlink( "utesting.rt" );
 }
 
+/*
+	Generates a legitimate table but with a missing newline on the last record.
+*/
+static void gen_mlnl_rt( uta_ctx_t* ctx ) {
+	int		fd;
+	char* 	rt_stuff;		// strings for the route table
+
+	rt_stuff =
+		"newrt|start\n"
+	    "rte|0|localhost:4560,localhost:4562\n"					// these are legitimate entries for our testing
+	    "rte|1|localhost:4562;localhost:4561,localhost:4569\n"
+	    "rte|2|localhost:4562| 10\n"								// new subid at end
+	    "mse|4|10|localhost:4561\n"									// new msg/subid specifier rec
+	    "mse|4|localhost:4561\n"									// new mse entry with less than needed fields
+		"   rte|   5   |localhost:4563    #garbage comment\n"		// tests white space cleanup
+	    "rte|6|localhost:4562\n"
+		"newrt|end";												// should not affect the loader
+
+	fd = open( "utesting.rt", O_WRONLY | O_CREAT, 0600 );
+	if( fd < 0 ) {
+		fprintf( stderr, "<BUGGERED> unable to open file for testing route table gen\n" );
+		return;
+	}
+
+	setenv( "RMR_SEED_RT", "utesting.rt", 1 );
+	write( fd, rt_stuff, strlen( rt_stuff ) );
+	close( fd );
+	read_static_rt( ctx, 0 );
+	unlink( "utesting.rt" );
+}
+
+/*
+	Generate an empty route table to test edge case.
+*/
+static void gen_empty_rt( uta_ctx_t* ctx ) {
+	int		fd;
+
+	fd = open( "utesting.rt", O_WRONLY | O_CREAT | O_TRUNC, 0600 );
+	if( fd < 0 ) {
+		fprintf( stderr, "<BUGGERED> unable to open file for testing route table gen\n" );
+		return;
+	}
+
+	setenv( "RMR_SEED_RT", "utesting.rt", 1 );
+	//write( fd, "", 0 );
+	close( fd );
+	read_static_rt( ctx, 0 );
+	unlink( "utesting.rt" );
+}
+
+/*
+	Generate an single byte route table to drive an edge handling case.
+*/
+static void gen_sb_rt( uta_ctx_t* ctx ) {
+	int		fd;
+
+	fd = open( "utesting.rt", O_WRONLY | O_CREAT | O_TRUNC, 0600 );
+	if( fd < 0 ) {
+		fprintf( stderr, "<BUGGERED> unable to open file for testing route table gen\n" );
+		return;
+	}
+
+	setenv( "RMR_SEED_RT", "utesting.rt", 1 );
+	write( fd, " ", 1 );
+	close( fd );
+	read_static_rt( ctx, 0 );
+	unlink( "utesting.rt" );
+}
+
 
 /*
 	Drive the send and receive functions.  We also drive as much of the route
@@ -118,8 +187,23 @@ static int sr_nano_test() {
 	ctx->my_ip = strdup( "30.4.19.86:1111" );
 	uta_lookup_rtg( ctx );
 
+	ctx->rtable = NULL;
+	gen_sb_rt( ctx );							// generate and read a file with a sinle byte to test edge case
+	errors += fail_not_nil( ctx->rtable, "read single byte route table produced a table" );
+
+	ctx->rtable = NULL;
+	gen_empty_rt( ctx );						// generate and read an empty rt file to test edge case
+	errors += fail_not_nil( ctx->rtable, "read empty route table file produced a table" );
+
+	ctx->rtable = NULL;
+	gen_mlnl_rt( ctx );						// ensure that a file with missing last new line does not trip us up
+	errors += fail_if_nil( ctx->rtable, "read  route table file with missing last newline did not produce a table" );
+	
+	ctx->rtable = NULL;
 	gen_rt( ctx );								// forces a static load with some known info since we don't start the rtc()
+	errors += fail_if_nil( ctx->rtable, "read  multi test route table file did not produce a table" );
 	gen_rt( ctx );								// force a second load to test cloning
+	errors += fail_if_nil( ctx->rtable, "read  multi test route table file to test clone did not produce a table" );
 
 	p = rt_ensure_ep( NULL, "foo" );				// drive for coverage
 	errors += fail_not_nil( p,  "rt_ensure_ep did not return nil when given nil route table" );
