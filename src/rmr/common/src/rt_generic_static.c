@@ -489,22 +489,33 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 		return;
 	}
 
-	if( (fbuf = uta_fib( fname ) ) == NULL ) {			// read file into a single buffer
-		fprintf( stderr, "[WRN] seed route table could not be opened: %s: %s\n", fname, strerror( errno ) );
+	if( (fbuf = uta_fib( fname ) ) == NULL ) {			// read file into a single buffer (nil terminated string)
+		fprintf( stderr, "[WRN] rmr read_static: seed route table could not be opened: %s: %s\n", fname, strerror( errno ) );
 		return;
 	}
 
-	if( DEBUG ) fprintf( stderr, "[INFO] seed route table successfully opened: %s\n", fname );
+	if( DEBUG ) fprintf( stderr, "[DBUG] rmr: seed route table successfully opened: %s\n", fname );
+	for( eor = fbuf; *eor; eor++ ) {					// fix broken systems that use \r or \r\n to terminate records
+		if( *eor == '\r' ) {
+			*eor = '\n';								// will look like a blank line which is ok
+		}
+	}
+
 	for( rec = fbuf; rec && *rec; rec = eor+1 ) {
 		rcount++;
 		if( (eor = strchr( rec, '\n' )) != NULL ) {
 			*eor = 0;
+		} else {
+			fprintf( stderr, "[WARN] rmr read_static: seed route table had malformed records (missing newline): %s\n", fname );
+			fprintf( stderr, "[WARN] rmr read_static: seed route table not used%s\n", fname );
+			free( fbuf );
+			return;
 		}
 
 		parse_rt_rec( ctx, rec, vlevel );
 	}
 
-	if( DEBUG ) fprintf( stderr, "[INFO] seed route table successfully parsed: %d records\n", rcount );
+	if( DEBUG ) fprintf( stderr, "[DBUG] rmr:  seed route table successfully parsed: %d records\n", rcount );
 	free( fbuf );
 }
 

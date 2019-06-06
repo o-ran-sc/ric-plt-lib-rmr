@@ -50,6 +50,7 @@ static void gen_rt( uta_ctx_t* ctx ) {
 	char* 	rt_stuff;		// strings for the route table
 
 	rt_stuff =
+		"\r"										// ensure we are not screwed by broken OSes that insist on using \r
 		"newrt|end\n"								// end of table check before start of table found
 		"# comment to drive full comment test\n"
 		"\n"										// handle blank lines
