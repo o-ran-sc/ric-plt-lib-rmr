@@ -84,7 +84,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 	if( msg == NULL ) {
 		msg = (rmr_mbuf_t *) malloc( sizeof *msg );
 		if( msg == NULL ) {
-			fprintf( stderr, "[CRIT] rmr_alloc_zc: cannot get memory for message\n" );
+			fprintf( stderr, "[CRI] rmr_alloc_zc: cannot get memory for message\n" );
 			exit( 1 );
 		}
 	} else {
@@ -94,7 +94,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 	memset( msg, 0, sizeof( *msg ) );
 
 	if( (msg->header = (uta_mhdr_t *) nn_allocmsg( mlen, 0 )) == NULL ) {				// this will be released on send, so DO NOT free
-		fprintf( stderr, "[CRIT] rmr_alloc_zc: cannot get memory for zero copy buffer: %d\n", errno );
+		fprintf( stderr, "[CRI] rmr_alloc_zc: cannot get memory for zero copy buffer: %d\n", errno );
 		exit( 1 );
 	}
 
@@ -137,14 +137,14 @@ static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  ) {
 
 	nm = (rmr_mbuf_t *) malloc( sizeof *nm );
 	if( nm == NULL ) {
-		fprintf( stderr, "[CRIT] rmr_clone: cannot get memory for message buffer\n" );
+		fprintf( stderr, "[CRI] rmr_clone: cannot get memory for message buffer\n" );
 		exit( 1 );
 	}
 	memset( nm, 0, sizeof( *nm ) );
 
 	mlen = old_msg->alloc_len;							// length allocated before
 	if( (nm->header = (uta_mhdr_t *) nn_allocmsg( mlen, 0 )) == NULL ) {				// this will be released on send, so DO NOT free
-		fprintf( stderr, "[CRIT] rmr_clone: cannot get memory for zero copy buffer: %d\n", errno );
+		fprintf( stderr, "[CRI] rmr_clone: cannot get memory for zero copy buffer: %d\n", errno );
 		exit( 1 );
 	}
 
@@ -185,7 +185,7 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 	mlen = old_msg->alloc_len + (tr_len - tr_old_len);							// new length with trace adjustment
 	if( DEBUG ) fprintf( stderr, "tr_realloc old size=%d new size=%d new tr_len=%d\n", (int) old_msg->alloc_len, (int) mlen, (int) tr_len );
 	if( (nm->header = (uta_mhdr_t *) nn_allocmsg( mlen, 0 )) == NULL ) {				// this will be released on send, so DO NOT free
-		fprintf( stderr, "[CRIT] rmr_realloc: cannot get memory for zero copy buffer: %d\n", errno );
+		fprintf( stderr, "[CRI] rmr_realloc: cannot get memory for zero copy buffer: %d\n", errno );
 		exit( 1 );
 	}
 

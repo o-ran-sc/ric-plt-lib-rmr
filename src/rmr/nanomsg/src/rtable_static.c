@@ -58,13 +58,13 @@ static int uta_link2( char* target ) {
 
 	nn_sock = nn_socket( AF_SP, NN_PUSH );		// the socket we'll use to connect to the target
 	if( nn_sock < 0 ) {
-		fprintf( stderr, "[WARN] rmr: link2: unable to create socket for link to target: %s: %d\n\n\n", target, errno );
+		fprintf( stderr, "[WRN] rmr: link2: unable to create socket for link to target: %s: %d\n\n\n", target, errno );
 		return -1;
 	}
 
 	snprintf( conn_info, sizeof( conn_info ), "tcp://%s", target );
 	if( nn_connect( nn_sock, conn_info ) < 0 ) {							// connect failed
-		fprintf( stderr, "[WARN] rmr: link2: unable to create link to target: %s: %d\n\n\n", target, errno );
+		fprintf( stderr, "[WRN] rmr: link2: unable to create link to target: %s: %d\n\n\n", target, errno );
 		nn_close( nn_sock );
 		return -1;
 	}
@@ -102,24 +102,24 @@ static endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 	rrgroup_t* rrg;				// pointer at group to update
 
 	if( ! rte || ! rt ) {
-		fprintf( stderr, "[WARN] rmr_add_ep didn't get a valid rt and/or rte pointer\n" );
+		fprintf( stderr, "[WRN] rmr_add_ep didn't get a valid rt and/or rte pointer\n" );
 		return NULL;
 	}
 
 	if( rte->nrrgroups <= group ) {
-		fprintf( stderr, "[WARN] rmr_add_ep group out of range: %d (max == %d)\n", group, rte->nrrgroups );
+		fprintf( stderr, "[WRN] rmr_add_ep group out of range: %d (max == %d)\n", group, rte->nrrgroups );
 		return NULL;
 	}
 
 	if( (rrg = rte->rrgroups[group]) == NULL ) {
 		if( (rrg = (rrgroup_t *) malloc( sizeof( *rrg ) )) == NULL ) {
-			fprintf( stderr, "[WARN] rmr_add_ep: malloc failed for round robin group: group=%d\n", group );
+			fprintf( stderr, "[WRN] rmr_add_ep: malloc failed for round robin group: group=%d\n", group );
 			return NULL;
 		}
 		memset( rrg, 0, sizeof( *rrg ) );
 
 		if( (rrg->epts = (endpoint_t **) malloc( sizeof( endpoint_t ) * MAX_EP_GROUP )) == NULL ) {
-			fprintf( stderr, "[WARN] rmr_add_ep: malloc failed for group endpoint array: group=%d\n", group );
+			fprintf( stderr, "[WRN] rmr_add_ep: malloc failed for group endpoint array: group=%d\n", group );
 			return NULL;
 		}
 		memset( rrg->epts, 0, sizeof( endpoint_t ) * MAX_EP_GROUP );
@@ -133,7 +133,7 @@ static endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 
 	if( (ep = uta_get_ep( rt, ep_name )) == NULL ) { 					// not there yet, make
 		if( (ep = (endpoint_t *) malloc( sizeof( *ep ) )) == NULL ) {
-			fprintf( stderr, "uta: [WARN] malloc failed for endpoint creation: %s\n", ep_name );
+			fprintf( stderr, "uta: [WRN] malloc failed for endpoint creation: %s\n", ep_name );
 			return NULL;
 		}
 
@@ -148,7 +148,7 @@ static endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 	if( rrg != NULL ) {
 		if( rrg->nused >= rrg->nendpts ) {
 			// future: reallocate
-			fprintf( stderr, "[WARN] endpoint array for mtype/group %d/%d is full!\n", rte->mtype, group );
+			fprintf( stderr, "[WRN] endpoint array for mtype/group %d/%d is full!\n", rte->mtype, group );
 			return NULL;
 		}
 

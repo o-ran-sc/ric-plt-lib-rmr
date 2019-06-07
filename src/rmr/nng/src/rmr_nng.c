@@ -664,7 +664,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	} else {
 		ctx->my_ip = get_default_ip( ctx->ip_list );	// and (guess) at what should be the default to put into messages as src
 		if( ctx->my_ip == NULL ) {
-			fprintf( stderr, "[WARN] rmr_init: default ip address could not be sussed out, using name\n" );
+			fprintf( stderr, "[WRN] rmr_init: default ip address could not be sussed out, using name\n" );
 			strcpy( ctx->my_ip, ctx->my_name );			// if we cannot suss it out, use the name rather than a nil pointer
 		}
 	}
@@ -679,7 +679,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	//       rather than using this generic listen() call.
 	snprintf( bind_info, sizeof( bind_info ), "%s://%s:%s", proto, interface, port );
 	if( (state = nng_listen( ctx->nn_sock, bind_info, NULL, NO_FLAGS )) != 0 ) {
-		fprintf( stderr, "[CRIT] rmr_init: unable to start nng listener for %s: %s\n", bind_info, nng_strerror( state ) );
+		fprintf( stderr, "[CRI] rmr_init: unable to start nng listener for %s: %s\n", bind_info, nng_strerror( state ) );
 		nng_close( ctx->nn_sock );
 		free_ctx( ctx );
 		return NULL;
@@ -687,14 +687,14 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 
 	if( !(flags & FL_NOTHREAD) ) {										// skip if internal function that doesnt need an rtc
 		if( pthread_create( &ctx->rtc_th,  NULL, rtc, (void *) ctx ) ) { 	// kick the rt collector thread
-			fprintf( stderr, "[WARN] rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
+			fprintf( stderr, "[WRN] rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
 		}
 	}
 
 	if( (flags & RMRFL_MTCALL) && ! (ctx->flags & CFL_MTC_ENABLED) ) {	// mt call support is on, must start the listener thread if not running
 		ctx->flags |= CFL_MTC_ENABLED;
 		if( pthread_create( &ctx->mtc_th,  NULL, mt_receive, (void *) ctx ) ) { 	// kick the receiver
-			fprintf( stderr, "[WARN] rmr_init: unable to start multi-threaded receiver: %s", strerror( errno ) );
+			fprintf( stderr, "[WRN] rmr_init: unable to start multi-threaded receiver: %s", strerror( errno ) );
 		}
 		
 	}

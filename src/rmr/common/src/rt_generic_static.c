@@ -173,7 +173,7 @@ static char* ensure_nlterm( char* buf ) {
 		}
 	} else {
 		if( buf[len-1] != '\n' ) {
-			fprintf( stderr, "[WARN] rmr buf_check: input buffer was not newline terminated (file missing final \\n?)\n" );
+			fprintf( stderr, "[WRN] rmr buf_check: input buffer was not newline terminated (file missing final \\n?)\n" );
 			if( (nb = (char *) malloc( sizeof( char ) * (len + 2) )) != NULL ) {
 				memcpy( nb, buf, len );
 				*(nb+len) = '\n';			// insert \n and nil into the two extra bytes we allocated
@@ -541,8 +541,8 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 		if( (eor = strchr( rec, '\n' )) != NULL ) {
 			*eor = 0;
 		} else {
-			fprintf( stderr, "[WARN] rmr read_static: seed route table had malformed records (missing newline): %s\n", fname );
-			fprintf( stderr, "[WARN] rmr read_static: seed route table not used: %s\n", fname );
+			fprintf( stderr, "[WRN] rmr read_static: seed route table had malformed records (missing newline): %s\n", fname );
+			fprintf( stderr, "[WRN] rmr read_static: seed route table not used: %s\n", fname );
 			free( fbuf );
 			return;
 		}
@@ -847,14 +847,14 @@ static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name ) {
 	endpoint_t*	ep;
 
 	if( !rt || !ep_name || ! *ep_name ) {
-		fprintf( stderr, "[WARN] rmr: rt_ensure:  internal mishap, something undefined rt=%p ep_name=%p\n", rt, ep_name );
+		fprintf( stderr, "[WRN] rmr: rt_ensure:  internal mishap, something undefined rt=%p ep_name=%p\n", rt, ep_name );
 		errno = EINVAL;
 		return NULL;
 	}
 
 	if( (ep = uta_get_ep( rt, ep_name )) == NULL ) { 					// not there yet, make
 		if( (ep = (endpoint_t *) malloc( sizeof( *ep ) )) == NULL ) {
-			fprintf( stderr, "[WARN] rmr: rt_ensure:  malloc failed for endpoint creation: %s\n", ep_name );
+			fprintf( stderr, "[WRN] rmr: rt_ensure:  malloc failed for endpoint creation: %s\n", ep_name );
 			errno = ENOMEM;
 			return NULL;
 		}

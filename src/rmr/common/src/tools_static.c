@@ -150,7 +150,7 @@ static char* uta_h2ip( char const* hname ) {
 
 	hent = gethostbyname( dname );
 	if( hent == NULL || hent->h_addr_list == NULL ) {
-		//fprintf( stderr, "[WARN] h2ip: dns lookup failed for: %s\n", dname );
+		//fprintf( stderr, "[WRN] h2ip: dns lookup failed for: %s\n", dname );
 		free( dname );
 		return NULL;
 	}

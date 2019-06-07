@@ -598,7 +598,7 @@ static void* init( char* uproto_port, int max_msg_size, int flags ) {
 		if( max_msg_size <= ctx->max_plen ) {						// user defined len can be smaller
 			ctx->max_plen = max_msg_size;
 		} else {
-			fprintf( stderr, "[WARN] rmr_init: attempt to set max payload len > than allowed maximum; capped at %d bytes\n", ctx->max_plen );
+			fprintf( stderr, "[WRN] rmr_init: attempt to set max payload len > than allowed maximum; capped at %d bytes\n", ctx->max_plen );
 		}
 	}
 
@@ -608,7 +608,7 @@ static void* init( char* uproto_port, int max_msg_size, int flags ) {
 
 	ctx->nn_sock = nn_socket( AF_SP, NN_PULL );		// our 'listen' socket should allow multiple senders to connect
 	if( ctx->nn_sock < 0 ) {
-		fprintf( stderr, "[CRIT] rmr_init: unable to initialise nanomsg listen socket: %d\n", errno );
+		fprintf( stderr, "[CRI] rmr_init: unable to initialise nanomsg listen socket: %d\n", errno );
 		free_ctx( ctx );
 		return NULL;
 	}
@@ -625,7 +625,7 @@ static void* init( char* uproto_port, int max_msg_size, int flags ) {
 	}
 
 	if( (gethostname( wbuf, sizeof( wbuf ) )) < 0 ) {
-		fprintf( stderr, "[CRIT] rmr_init: cannot determine localhost name: %s\n", strerror( errno ) );
+		fprintf( stderr, "[CRI] rmr_init: cannot determine localhost name: %s\n", strerror( errno ) );
 		return NULL;
 	}
 	if( (tok = strchr( wbuf, '.' )) != NULL ) {
@@ -633,7 +633,7 @@ static void* init( char* uproto_port, int max_msg_size, int flags ) {
 	}
 	ctx->my_name = (char *) malloc( sizeof( char ) * RMR_MAX_SRC );
 	if( snprintf( ctx->my_name, RMR_MAX_SRC, "%s:%s", wbuf, port ) >= RMR_MAX_SRC ) {			// our registered name is host:port
-		fprintf( stderr, "[CRIT] rmr_init: hostname + port must be less than %d characters; %s:%s is not\n", RMR_MAX_SRC, wbuf, port );
+		fprintf( stderr, "[CRI] rmr_init: hostname + port must be less than %d characters; %s:%s is not\n", RMR_MAX_SRC, wbuf, port );
 		return NULL;
 	}
 
@@ -642,7 +642,7 @@ static void* init( char* uproto_port, int max_msg_size, int flags ) {
 	}
 	snprintf( bind_info, sizeof( bind_info ), "%s://%s:%s", proto, interface, port );
 	if( nn_bind( ctx->nn_sock, bind_info ) < 0) {			// bind and automatically accept client sessions
-		fprintf( stderr, "[CRIT] rmr_init: unable to bind nanomsg listen socket for %s: %s\n", bind_info, strerror( errno ) );
+		fprintf( stderr, "[CRI] rmr_init: unable to bind nanomsg listen socket for %s: %s\n", bind_info, strerror( errno ) );
 		nn_close( ctx->nn_sock );
 		free_ctx( ctx );
 		return NULL;
@@ -662,7 +662,7 @@ static void* init( char* uproto_port, int max_msg_size, int flags ) {
 		ctx->my_ip = get_default_ip( ctx->ip_list );	// and (guess) at what should be the default to put into messages as src
 		if( ctx->my_ip == NULL ) {
 			strcpy( ctx->my_ip, ctx->my_name );			// revert to name if we cant suss out ip address
-			fprintf( stderr, "[WARN] rmr_init: default ip address could not be sussed out, using name as source\n" );
+			fprintf( stderr, "[WRN] rmr_init: default ip address could not be sussed out, using name as source\n" );
 		} else {
 			if( DEBUG ) fprintf( stderr, "[DBUG] default ip address: %s\n", ctx->my_ip );
 		}
@@ -670,7 +670,7 @@ static void* init( char* uproto_port, int max_msg_size, int flags ) {
 
 	if( ! (flags & FL_NOTHREAD) ) {			// skip if internal context that does not need rout table thread
 		if( pthread_create( &ctx->rtc_th,  NULL, rtc, (void *) ctx ) ) { 		// kick the rt collector thread
-			fprintf( stderr, "[WARN] rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
+			fprintf( stderr, "[WRN] rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
 		}
 	}
 
