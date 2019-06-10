@@ -49,7 +49,7 @@
 &ex_start
 #include <rmr/rmr.h>
 
-void* rmr_open( void* vctx, char* target )
+void* rmr_wh_open( void* vctx, char* target )
 &ex_end
 
 &uindent
@@ -100,7 +100,7 @@ error message of a system call is propagated up, and thus this list might be inc
    rmr_whid_t wh;
 
    rmc = rmr_init( "43086", 4096, 0 ); // init context
-   wh = rmr_open( rmc, "localhost:6123" );
+   wh = rmr_wh_open( rmc, "localhost:6123" );
    if( !RMR_WH_CONNECTED( wh ) ) { 
 	 fprintf( stderr, "unable to connect wormhole: %s\n",
              strerror( errno ) );
