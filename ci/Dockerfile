@@ -22,7 +22,7 @@ FROM buildpack-deps:stretch
 RUN apt-get update && apt-get -q -y install cmake ksh
 ADD . /tmp
 # tests require directory named ".build"
-RUN cd /tmp && mkdir .build && cd .build && cmake .. && make install
+RUN cd /tmp && mkdir .build && cd .build && cmake .. && make install && make package
 # tests require a Linux host, fail in a Linux VM on mac/win
 RUN cd /tmp/test && ksh unit_test.ksh -v
 RUN cd /tmp/test/app_test && ksh run_all.ksh
