@@ -34,6 +34,7 @@
 
 // ---------------------------------------------------------
 #define RIC_SCTP_CONNECTION_FAILURE 1080
+#define RIC_SCTP_CLEAR_ALL			1090
 
 #define RIC_SUB_REQ					12010	
 #define RIC_SUB_RESP				12011	
