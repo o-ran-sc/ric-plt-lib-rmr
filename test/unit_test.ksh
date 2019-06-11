@@ -320,6 +320,8 @@ else
 	fi
 fi
 
+export LIBRARY_PATH=$LD_LIBRARY_PATH
+
 export C_INCLUDE_PATH="../src/rmr/common/include:$C_INCLUDE_PATH"
 
 module_cov_target=80
