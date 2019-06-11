@@ -1,4 +1,3 @@
-
 #
 #==================================================================================
 #	Copyright (c) 2019 Nokia 
@@ -23,7 +22,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "1" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "0" )
-set( patch_level "32" )
+set( patch_level "33" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_lib "lib" )
@@ -82,6 +81,11 @@ add_definitions(
 	-DMAJOR_VER=${major_version}
 	-DMINOR_VER=${minor_version}
 	-DPATCH_VER=${patch_level}${spoiled_str}
+)
+
+# create a file with the deb name so that jenkins can extract it
+execute_process( 
+	COMMAND bash -c "echo ${CMAKE_CURRENT_BINARY_DIR}/rmr_${major_version}.${minor_version}.${patch_level}.deb  >/tmp/rmr_deb_path"
 )
 
 
