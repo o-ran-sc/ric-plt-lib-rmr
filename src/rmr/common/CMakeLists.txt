@@ -30,10 +30,12 @@ target_include_directories (common_objects PUBLIC
 	$<INSTALL_INTERFACE:include>
 	PRIVATE src)
 
-# we have to force headers to install
-install( FILES 
-	include/rmr.h
-	include/rmr_symtab.h
-	include/RIC_message_types.h
-	DESTINATION ${install_root}/${install_inc}
-)	
+# we have to force headers to install, and only if we are generating a development package
+if( DEV_PKG )
+	install( FILES 
+		include/rmr.h
+		include/rmr_symtab.h
+		include/RIC_message_types.h
+		DESTINATION ${install_root}/${install_inc}
+	)	
+endif()
