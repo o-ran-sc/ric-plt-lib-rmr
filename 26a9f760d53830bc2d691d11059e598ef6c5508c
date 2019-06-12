@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "befd57d8_07887c2f",
+        "filename": "BUILD",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-06-12T19:10:17Z",
+      "side": 1,
+      "message": "you might want to try avoiding trailing whitespace",
+      "range": {
+        "startLine": 52,
+        "startChar": 51,
+        "endLine": 52,
+        "endChar": 52
+      },
+      "revId": "26a9f760d53830bc2d691d11059e598ef6c5508c",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "edf240c5_492a49c0",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 2
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-06-12T19:10:17Z",
+      "side": 1,
+      "message": "maybe remove instead of commenting out?",
+      "range": {
+        "startLine": 299,
+        "startChar": 1,
+        "endLine": 299,
+        "endChar": 135
+      },
+      "revId": "26a9f760d53830bc2d691d11059e598ef6c5508c",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5b2ee372_1709b5d3",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 2
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-06-12T19:10:17Z",
+      "side": 1,
+      "message": "maybe remove instead of commenting out?",
+      "range": {
+        "startLine": 317,
+        "startChar": 1,
+        "endLine": 318,
+        "endChar": 70
+      },
+      "revId": "26a9f760d53830bc2d691d11059e598ef6c5508c",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
