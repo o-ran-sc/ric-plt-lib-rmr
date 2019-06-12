@@ -1,6 +1,6 @@
 #
 #==================================================================================
-#       Copyright (c) 2019 Nokia 
+#       Copyright (c) 2019 Nokia
 #       Copyright (c) 2018-2019 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,9 +43,18 @@ To build RMr, the usual CMake steps are followed:
 This will create a .deb (provided the system supports this) in
 the build directory.  It's that simple.
 
-Continuous integration build 
+Continuous integration build
 Use the Dockerfile in the ci/ subdirectory. This installs all
 the required tools and creates an image in the local registry.
+
+To support the distribution of package(s) created during the
+build by the CI process, the fully qualified path of each generated
+package will be placed into a well known YAML file:
+/tmp/build_output.yml.   This file is created during CMake
+configuration and lists the package name(s) for packages which
+can be generated given the current environment. Currently
+Debian (.deb), and RPM packages are supported (the Ubuntu
+alien package must be installed in order to generate RPMs).
 
 
 Alternatives
@@ -70,7 +79,7 @@ NOT built as the required tool has yet to be incorporated into
 the build process and generally is not available on most systems.
 
 
-Compiling and Linking
+Compiling and Linking User Applications
 Should the Rmr and NNG/Nano libraries be installed in a directory
 outside of the normal system spots (e.g. not in /usr/local)
 it might be necessary to define the specific directory for
@@ -118,3 +127,5 @@ and will trigger the generation of the man pages in both postscript
 and troff format.  The troff pages are placed into the deb and
 the postscript pages are left in the build directory for the
 developer to convert to PDF, or otherwise use.
+
+
