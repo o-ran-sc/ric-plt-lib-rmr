@@ -19,10 +19,10 @@
 # Adds cmake for RMR
 
 FROM buildpack-deps:stretch
-RUN apt-get update && apt-get -q -y install cmake ksh
+RUN apt-get update && apt-get -q -y install cmake ksh alien
 ADD . /tmp
-# tests require directory named ".build"
-RUN cd /tmp && mkdir .build && cd .build && cmake .. && make install && make package
+# tests require directory named ".build" and dev_pkg to place header files in .build
+RUN cd /tmp && mkdir .build && cd .build && cmake .. -DDEV_PKG=1 && make install && make package
 # tests require a Linux host, fail in a Linux VM on mac/win
 RUN cd /tmp/test && ksh unit_test.ksh -v
 RUN cd /tmp/test/app_test && ksh run_all.ksh
