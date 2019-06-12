@@ -1,6 +1,6 @@
 #
 #==================================================================================
-#	Copyright (c) 2019 Nokia 
+#	Copyright (c) 2019 Nokia
 #	Copyright (c) 2018-2019 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "1" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "0" )
-set( patch_level "33" )
+set( patch_level "34" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_lib "lib" )
@@ -47,23 +47,23 @@ endif()
 # ---------------- extract some things from git ------------------------------
 
 # commit id for the version string
-execute_process( 
-	COMMAND bash -c "git rev-parse --short HEAD|awk '{printf\"%s\", $0}'" 
+execute_process(
+	COMMAND bash -c "git rev-parse --short HEAD|awk '{printf\"%s\", $0}'"
 	OUTPUT_VARIABLE git_id
 )
 
 # version information for library names and version string
-execute_process( 
+execute_process(
 	COMMAND bash -c "git describe --tags --abbrev=0 HEAD 2>/dev/null | awk -v tag=0.0.4095 ' { tag=$1 } END{ print  tag suffix }'|sed 's/\\./;/g' "
 	OUTPUT_VARIABLE mmp_version_str
 	ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 # extra indicator to show that the build was based on modified file(s) and not the true commit
-# (no hope of reproducing the exact library for debugging). Used only for the internal version 
+# (no hope of reproducing the exact library for debugging). Used only for the internal version
 # string.
-execute_process( 
-	COMMAND bash -c "git diff --shortstat|awk -v fmt=%s -v r=-rotten '{ s=r } END { printf( fmt, s ) }'" 
+execute_process(
+	COMMAND bash -c "git diff --shortstat|awk -v fmt=%s -v r=-rotten '{ s=r } END { printf( fmt, s ) }'"
 	OUTPUT_VARIABLE spoiled_str
 )
 
@@ -73,21 +73,50 @@ execute_process(
 #list( GET mmp_version 1 minor_version )
 #list( GET mmp_version 2 patch_level )
 
-message( "+++ building ${major_version}.${minor_version}.${patch_level}${spoiled_str}" )
 
 # define constants used in the version string
-add_definitions( 
-	-DGIT_ID=${git_id} 
+add_definitions(
+	-DGIT_ID=${git_id}
 	-DMAJOR_VER=${major_version}
 	-DMINOR_VER=${minor_version}
 	-DPATCH_VER=${patch_level}${spoiled_str}
 )
 
-# create a file with the deb name so that jenkins can extract it
-execute_process( 
-	COMMAND bash -c "echo ${CMAKE_CURRENT_BINARY_DIR}/rmr_${major_version}.${minor_version}.${patch_level}.deb  >/tmp/rmr_deb_path"
+# ---------------- suss out pkg gen tools so we don't fail generating packages that the system cannot support --------------
+
+
+set( pkg_label "${CMAKE_PROJECT_NAME}-${major_version}.${minor_version}.${patch_level}.${CMAKE_SYSTEM_PROCESSOR}" )
+message( "+++ building ${pkg_label}${spoiled_str}" )
+set( out_yml /tmp/build_output.yml )					# we will record package names (we record only untainted names)
+find_program( rpm NAMES rpmbuild )						# rpm package gen requires this to be installed
+
+set( gen_rpm 0 )
+if( "${rpm}" MATCHES "rpm-NOTFOUND" )			       # cannot build rpm
+	set( pkg_list "DEB" )
+	message( "### make package will generate only deb package; cannot find support to generate rpm packages" )
+else()
+	set( pkg_list "DEB;RPM" )
+	set( gen_rpm 1 )
+	message( "+++ make package will generate both deb and rpm packages" )
+endif()
+
+execute_process(
+	COMMAND bash -c "printf '# RMr build generated list of package paths\n---\n' >${out_yml}"
 )
 
+execute_process(
+	COMMAND bash -c " echo deb: ${CMAKE_CURRENT_BINARY_DIR}/${pkg_label}.deb  >>${out_yml}"
+)
+
+if( gen_rpm )
+	execute_process(
+		COMMAND bash -c " echo rpm: ${CMAKE_CURRENT_BINARY_DIR}/${pkg_label}.rpm  >>${out_yml}"
+	)
+endif()
+
+execute_process(
+	COMMAND bash -c "printf '...\n' >>${out_yml}"
+)
 
 # ---------------- setup nano/nng things ---------------------------------------
 if( NOT SKIP_EXTERNALS )
@@ -186,16 +215,16 @@ add_library( rmr_shared SHARED "$<TARGET_OBJECTS:nano_objects>;$<TARGET_OBJECTS:
 add_library( rmr_static STATIC "$<TARGET_OBJECTS:nano_objects>;$<TARGET_OBJECTS:common_objects>" )
 
 # both libraries to be named with librmr prefix and given version numbers with sym links
-set_target_properties( rmr_shared 
-	PROPERTIES 
-		OUTPUT_NAME "rmr" 
-		SOVERSION ${major_version} 
+set_target_properties( rmr_shared
+	PROPERTIES
+		OUTPUT_NAME "rmr"
+		SOVERSION ${major_version}
 		VERSION ${major_version}.${minor_version}.${patch_level} )
 
-set_target_properties( rmr_static 
-	PROPERTIES 
-		OUTPUT_NAME "rmr" 
-		SOVERSION ${major_version} 
+set_target_properties( rmr_static
+	PROPERTIES
+		OUTPUT_NAME "rmr"
+		SOVERSION ${major_version}
 		VERSION ${major_version}.${minor_version}.${patch_level} )
 
 
@@ -215,16 +244,16 @@ endif()
 
 
 # both libraries to be named with librmr_nng prefix and given version numbers with sym links
-set_target_properties( rmr_nng_shared 
-	PROPERTIES 
-		OUTPUT_NAME "rmr_nng" 
-		SOVERSION ${major_version} 
+set_target_properties( rmr_nng_shared
+	PROPERTIES
+		OUTPUT_NAME "rmr_nng"
+		SOVERSION ${major_version}
 		VERSION ${major_version}.${minor_version}.${patch_level} )
 
-set_target_properties( rmr_nng_static 
-	PROPERTIES 
-		OUTPUT_NAME "rmr_nng" 
-		SOVERSION ${major_version} 
+set_target_properties( rmr_nng_static
+	PROPERTIES
+		OUTPUT_NAME "rmr_nng"
+		SOVERSION ${major_version}
 		VERSION ${major_version}.${minor_version}.${patch_level} )
 
 #
@@ -267,12 +296,13 @@ if( need_ext )
 endif()
 
 
+	#set( CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${major_version}.${minor_version}.${CPACK_PACKAGE_VERSION_PATCH}${spoiled_str}" )
 IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 	include( InstallRequiredSystemLibraries )
 
 	set( CPACK_set_DESTDIR "on" )
 	set( CPACK_PACKAGING_INSTALL_PREFIX "${install_root}" )
-	set( CPACK_GENERATOR "DEB" )
+	set( CPACK_GENERATOR "${pkg_list}" )
 
 	set( CPACK_PACKAGE_DESCRIPTION "Thin library for RIC xAPP messaging routed based on message type." )
 	set( CPACK_PACKAGE_DESCRIPTION_SUMMARY "RIC message routing library" )
@@ -281,15 +311,16 @@ IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 	set( CPACK_PACKAGE_VERSION_MAJOR "${major_version}" )
 	set( CPACK_PACKAGE_VERSION_MINOR "${minor_version}" )
 	set( CPACK_PACKAGE_VERSION_PATCH "${patch_level}" )
-	set( CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${major_version}.${minor_version}.${CPACK_PACKAGE_VERSION_PATCH}${spoiled_str}" )
-	set( CPACK_SOURCE_PACKAGE_FILE_NAME "vric${CMAKE_PROJECT_NAME}_${major_version}.${minor_version}.${CPACK_PACKAGE_VERSION_PATCH}" )
+	set( CPACK_PACKAGE_FILE_NAME "${pkg_label}${spoiled_str}" )
 
 	# we build and ship the libraries, so there is NO dependency
 	#set( CPACK_DEBIAN_PACKAGE_DEPENDS "nanomsg ( >= 1.1.4 ), nng ( >= 1.1.1 )" )
+	#set( CPACK_RPM_PACKAGE_REQUIERS "nanomsg  >= 1.1.4, nng  >= 1.1.1" )
 
 	set( CPACK_DEBIAN_PACKAGE_PRIORITY "optional" )
 	set( CPACK_DEBIAN_PACKAGE_SECTION "ric" )
 	set( CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR} )
+	set( CPACK_RPM_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR} )
 
 	# this seems ingnored if included
 	#set( CPACK_COMPONENTS_ALL Libraries ApplicationData )
