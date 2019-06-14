@@ -193,8 +193,6 @@ else()
 	set( need_ext 0 )
 endif()
 
-unset( SKIP_EXTERNALS  CACHE )	# prevent these from being applied next build unless specifically set on comd line
-unset( PACK_EXTERNALS  CACHE )
 
 
 # this gets us round a chicken/egg problem. include files don't exist until make is run
@@ -297,7 +295,7 @@ unset( DEV_PKG  CACHE )			# prevent from being a hiddent setting if user redoes 
 # (sure would be nice if FILEs allowed for globbing; sadlyy it does not.)
 #
 if( PACK_EXTERNALS )
-	message( "including nano and nng libraries in the deb" )
+	message( "+++ including nano and nng libraries in the deb" )
 	install( FILES
 		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnanomsg${nano_so_suffix}
 		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnanomsg${nano_so_suffix_m}
@@ -309,6 +307,9 @@ if( PACK_EXTERNALS )
 		DESTINATION ${install_lib}
 	)
 endif()
+
+unset( SKIP_EXTERNALS  CACHE )	# prevent these from being applied next build unless specifically set on comd line
+unset( PACK_EXTERNALS  CACHE )
 
 IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 	include( InstallRequiredSystemLibraries )
