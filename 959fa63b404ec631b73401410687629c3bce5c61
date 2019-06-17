@@ -1,0 +1,159 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "761e3762_84aeb335",
+        "filename": "BUILD",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-06-17T20:57:36Z",
+      "side": 1,
+      "message": "builds",
+      "range": {
+        "startLine": 49,
+        "startChar": 25,
+        "endLine": 49,
+        "endChar": 31
+      },
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "425756f9_339ad37d",
+        "filename": "BUILD",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-06-17T20:57:36Z",
+      "side": 1,
+      "message": "pls kill trailing WS",
+      "range": {
+        "startLine": 50,
+        "startChar": 63,
+        "endLine": 50,
+        "endChar": 64
+      },
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1a23eb40_858c632a",
+        "filename": "BUILD",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-06-17T20:57:36Z",
+      "side": 1,
+      "message": "program",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 8
+      },
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4438f2ca_f1a6190a",
+        "filename": "BUILD",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-06-17T20:57:36Z",
+      "side": 1,
+      "message": "right here it would be really nice to show an example YAML file with this content",
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ba38647_a45970f6",
+        "filename": "ci/Dockerfile",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-06-17T20:57:36Z",
+      "side": 1,
+      "message": "ksh and alien",
+      "range": {
+        "startLine": 19,
+        "startChar": 13,
+        "endLine": 19,
+        "endChar": 16
+      },
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f31eb74_42669e10",
+        "filename": "ci/ci_build.ksh",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-06-17T20:57:36Z",
+      "side": 1,
+      "message": "we tend to (not a hard and fast rule) omit all authorship credit in files.  Please consider.",
+      "range": {
+        "startLine": 42,
+        "startChar": 2,
+        "endLine": 43,
+        "endChar": 21
+      },
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "19b57fd6_877c2a4e",
+        "filename": "doc/CMakeLists.txt",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-06-17T20:57:36Z",
+      "side": 1,
+      "message": "Wait what!?  I don\u0027t see how I could possibly merge this.  What is xvm ?",
+      "range": {
+        "startLine": 43,
+        "startChar": 25,
+        "endLine": 43,
+        "endChar": 66
+      },
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
