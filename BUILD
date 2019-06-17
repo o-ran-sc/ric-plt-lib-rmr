@@ -40,21 +40,21 @@ To build RMr, the usual CMake steps are followed:
 	cmake .. [options]
 	make package
 
+
 This will create a .deb (provided the system supports this) in
 the build directory.  It's that simple.
 
-Continuous integration build
+Continuous Integration Build
 Use the Dockerfile in the ci/ subdirectory. This installs all
-the required tools and creates an image in the local registry.
+the required tools, then biulds RMr and executes the unit and
+programm tests. If tests pass, then  an image is created in the 
+local registry with both run-time and development packages.
 
 To support the distribution of package(s) created during the
-build by the CI process, the fully qualified path of each generated
-package will be placed into a well known YAML file:
-/tmp/build_output.yml.   This file is created during CMake
-configuration and lists the package name(s) for packages which
-can be generated given the current environment. Currently
-Debian (.deb), and RPM packages are supported (the Ubuntu
-alien package must be installed in order to generate RPMs).
+build by the CI process,  a YAML file is left in the /tmp
+directory (build_packages.yml) which contains a list of the
+packages available from the image.  Currently, both .deb and
+.rpm packages are generated.
 
 
 Alternatives
