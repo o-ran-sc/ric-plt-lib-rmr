@@ -14,15 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# CI to verify the RMR library
+# CI to verify the RMR library and build run-time and dev packages
 # Inherits C toolchain from buildpack-deps:stretch
-# Adds cmake for RMR
+# Adds cmake ksh and alien for RMR
 
 FROM buildpack-deps:stretch
 RUN apt-get update && apt-get -q -y install cmake ksh alien
 ADD . /tmp
-# tests require directory named ".build" and dev_pkg to place header files in .build
-RUN cd /tmp && mkdir .build && cd .build && cmake .. -DDEV_PKG=1 && make install && make package
-# tests require a Linux host, fail in a Linux VM on mac/win
-RUN cd /tmp/test && ksh unit_test.ksh -v
-RUN cd /tmp/test/app_test && ksh run_all.ksh
+WORKDIR /tmp
+
+# build RMr, run unit tests, and generate packages
+RUN ksh ci/ci_build.ksh
+

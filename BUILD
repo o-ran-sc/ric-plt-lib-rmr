@@ -40,21 +40,38 @@ To build RMr, the usual CMake steps are followed:
 	cmake .. [options]
 	make package
 
+
 This will create a .deb (provided the system supports this) in
 the build directory.  It's that simple.
 
-Continuous integration build
+Continuous Integration Build
 Use the Dockerfile in the ci/ subdirectory. This installs all
-the required tools and creates an image in the local registry.
+the required tools, then builds RMr and executes the unit and
+programm tests. If tests pass, then  an image is created in the
+local registry with both run-time and development packages.
 
 To support the distribution of package(s) created during the
-build by the CI process, the fully qualified path of each generated
-package will be placed into a well known YAML file:
-/tmp/build_output.yml.   This file is created during CMake
-configuration and lists the package name(s) for packages which
-can be generated given the current environment. Currently
-Debian (.deb), and RPM packages are supported (the Ubuntu
-alien package must be installed in order to generate RPMs).
+build by the CI process,  a YAML file is left in the /tmp
+directory (build_packages.yml) which contains a list of the
+packages available from the image.  Currently, both .deb and
+.rpm packages are generated.
+
+The following is a sample YAML file generated during this process:
+
+   # package types which might be listed below
+   ---
+   pkg_types:
+     - deb
+     - rpm
+   packages:
+     - development:
+       deb: /tmp/rmr-dev_1.0.34_x86_64.deb
+       rpm: /tmp/rmr-dev-1.0.34-x86_64.rpm
+     - runtime:
+       deb: /tmp/rmr_1.0.34_x86_64.deb
+       rpm: /tmp/rmr-1.0.34-x86_64.rpm
+   ...
+
 
 
 Alternatives
@@ -100,7 +117,7 @@ a different spot (e.g. in $HOME/usr):
 
 Libraries
 RMr supports both NNG and Nanomsg as underlying transport. They
-are separate beasts, and while an NNG based programme can
+are separate beasts, and while an NNG based program can
 communicate with a Nanomsg based programme, their APIs are NOT
 compatible.  For this reason, and others, RMr generates two
 libraries and requires that the underlying transport be selected

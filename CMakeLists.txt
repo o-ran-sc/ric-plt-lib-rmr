@@ -79,7 +79,7 @@ add_definitions(
 	-DGIT_ID=${git_id}
 	-DMAJOR_VER=${major_version}
 	-DMINOR_VER=${minor_version}
-	-DPATCH_VER=${patch_level}${spoiled_str}
+	-DPATCH_VER=${patch_level}
 )
 
 # ---------------- suss out pkg gen tools so we don't fail generating packages that the system cannot support --------------
@@ -87,9 +87,14 @@ add_definitions(
 
 if( DEV_PKG )
 	set( dev_tag "-dev" )
+	set( pkg_name "rmr-dev" )
+else()
+	set( pkg_name "rmr" )
 endif()
-set( pkg_label "${CMAKE_PROJECT_NAME}-${major_version}.${minor_version}.${patch_level}.${CMAKE_SYSTEM_PROCESSOR}${dev_tag}" )
-message( "+++ building ${pkg_label}${spoiled_str}" )
+set( rpm_pkg_label "${CMAKE_PROJECT_NAME}${dev_tag}${spoiled_str}-${major_version}.${minor_version}.${patch_level}-${CMAKE_SYSTEM_PROCESSOR}" )
+set( deb_pkg_label "${CMAKE_PROJECT_NAME}${dev_tag}${spoiled_str}_${major_version}.${minor_version}.${patch_level}_${CMAKE_SYSTEM_PROCESSOR}" )
+message( "+++ building ${deb_pkg_label}" )
+message( "+++ building ${rpm_pkg_label}" )
 set( out_yml /tmp/build_output.yml )					# we will record package names (we record only untainted names)
 find_program( rpm NAMES rpmbuild )						# rpm package gen requires this to be installed
 
@@ -108,12 +113,12 @@ execute_process(
 )
 
 execute_process(
-	COMMAND bash -c " echo deb: ${CMAKE_CURRENT_BINARY_DIR}/${pkg_label}.deb  >>${out_yml}"
+	COMMAND bash -c " echo deb: ${CMAKE_CURRENT_BINARY_DIR}/${deb_pkg_label}.deb  >>${out_yml}"
 )
 
 if( gen_rpm )
 	execute_process(
-		COMMAND bash -c " echo rpm: ${CMAKE_CURRENT_BINARY_DIR}/${pkg_label}.rpm  >>${out_yml}"
+		COMMAND bash -c " echo rpm: ${CMAKE_CURRENT_BINARY_DIR}/${rpm_pkg_label}.rpm  >>${out_yml}"
 	)
 endif()
 
@@ -314,6 +319,7 @@ unset( PACK_EXTERNALS  CACHE )
 IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 	include( InstallRequiredSystemLibraries )
 
+	set( CPACK_PACKAGE_NAME ${pkg_name} )
 	set( CPACK_set_DESTDIR "on" )
 	set( CPACK_PACKAGING_INSTALL_PREFIX "${install_root}" )
 	set( CPACK_GENERATOR "${pkg_list}" )
@@ -325,7 +331,8 @@ IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 	set( CPACK_PACKAGE_VERSION_MAJOR "${major_version}" )
 	set( CPACK_PACKAGE_VERSION_MINOR "${minor_version}" )
 	set( CPACK_PACKAGE_VERSION_PATCH "${patch_level}" )
-	set( CPACK_PACKAGE_FILE_NAME "${pkg_label}${spoiled_str}" )
+	set( CPACK_DEBIAN_FILE_NAME "${deb_pkg_label}.deb" )
+	set( CPACK_RPM_FILE_NAME "${rpm_pkg_label}.rpm" )
 
 	# we build and ship the libraries, so there is NO dependency
 
