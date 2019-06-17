@@ -1,7 +1,7 @@
 
 #
 #==================================================================================
-#	Copyright (c) 2019 Nokia 
+#	Copyright (c) 2019 Nokia
 #	Copyright (c) 2018-2019 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +39,7 @@ if( BUILD_DOC )
 
 		if( NOT EXISTS ${tfm} )					# not yet built here, pull and build
 			# pull and build {X}fm tools needed to generate manpages
-			execute_process( 
+			execute_process(
 				COMMAND "bash" "-c" "git clone https://github.com/ScottDaniels/xfm.git && cd xfm && mkdir .build && cd .build && cmake .. && make"
 				WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}
 			)
@@ -47,7 +47,7 @@ if( BUILD_DOC )
 		else()
 			message( "+++ found xfm in the build environment" )
 		endif()
-	
+
 	endif()
 
 	# base filenames (with .xfm are input)
@@ -85,23 +85,22 @@ if( BUILD_DOC )
 		rmr_get_srcip.3
 	)
 
-	# empty list of roff/troff input files we generated
+	# initialise lists of files we generated
 	set( man3_files )
 	set( man7_files )
 
-	# mk is so much easier than this -- grumble
 	# for each source, build a specific command that runs tfm to generate the
-	# troff output. Sed is needed to remove the leading blank that tfm likes
-	# to insert even if indention is 0.
+	# troff output as a gzipped file. Sed is needed to remove the leading blank
+	# that tfm likes to insert even if indention is 0.
 	#
 	foreach( nm IN LISTS man_names )
 	  set( out ${CMAKE_BINARY_DIR}/${nm} )
 	  set( in ${CMAKE_SOURCE_DIR}/doc/src/man/${nm}.xfm )
 
-	  add_custom_command( 
-			OUTPUT ${out}
+	  add_custom_command(
+			OUTPUT ${out}.gz
 			DEPENDS ${in}
-			COMMAND bash -c "export LIB=${CMAKE_SOURCE_DIR}/doc/src; ${tfm} ${in} stdout | sed 's/^ //' >${out}; ${pfm} ${in} ${out}.ps"
+			COMMAND bash -c "export LIB=${CMAKE_SOURCE_DIR}/doc/src; ${tfm} ${in} stdout | sed 's/^ //' | gzip >${out}.gz; ${pfm} ${in} ${out}.ps"
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			COMMENT "Building manpage ${out}"
 			VERBATIM
@@ -114,7 +113,7 @@ if( BUILD_DOC )
 	endforeach()
 
 	# we must force these to install
-	# find all of the man pages in build and add them to the deb
+	# find all of the man pages in build and add them to the package
 	#
 	install( FILES ${man3_files} DESTINATION ${install_man}/man3/ )
 	install( FILES ${man7_files} DESTINATION ${install_man}/man7/ )
