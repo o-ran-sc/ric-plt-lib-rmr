@@ -1,0 +1,36 @@
+#
+#==================================================================================
+#       Copyright (c) 2019 Nokia 
+#       Copyright (c) 2018-2019 AT&T Intellectual Property.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#==================================================================================
+#
+
+The rtm_sim is an extremely simple application which reads a configuration
+file, builds one or more route tables, and sends the table(s) to the 
+indicated applications.  The applications are assumed to be RMr based
+applications which are listening either on a well known port (4561) for
+table updates, or on a port which is indicated in the config file. 
+
+The sim is _not_ intended to be a complete replacement for any route 
+table mangager, but simply allows the ability to:
+	
+	1) ensure that the RMr based application can receive real-time
+	   table updates (thus is configured correctly with the needed
+	   port properly exposed via the container environment if
+	   applicable).
+
+	2) allow the generation of one or more route tables from a central
+	   point during testing without having to run a more complicated
+	   route manager for basic testing.
