@@ -87,6 +87,9 @@ add_definitions(
 
 if( DEV_PKG )
 	set( dev_tag "-dev" )
+	set( pkg_name "rmr-dev" )
+else()
+	set( pkg_name "rmr" )
 endif()
 set( pkg_label "${CMAKE_PROJECT_NAME}-${major_version}.${minor_version}.${patch_level}.${CMAKE_SYSTEM_PROCESSOR}${dev_tag}" )
 message( "+++ building ${pkg_label}${spoiled_str}" )
@@ -314,6 +317,7 @@ unset( PACK_EXTERNALS  CACHE )
 IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 	include( InstallRequiredSystemLibraries )
 
+	set( CPACK_PACKAGE_NAME ${pkg_name} )
 	set( CPACK_set_DESTDIR "on" )
 	set( CPACK_PACKAGING_INSTALL_PREFIX "${install_root}" )
 	set( CPACK_GENERATOR "${pkg_list}" )
