@@ -58,18 +58,12 @@ packages available from the image.  Currently, both .deb and
 
 The following is a sample YAML file generated during this process:
 
-   # package types which might be listed below
    ---
-   pkg_types:
-     - deb
-     - rpm
-   packages:
-     - development:
-       deb: /tmp/rmr-dev_1.0.34_x86_64.deb
-       rpm: /tmp/rmr-dev-1.0.34-x86_64.rpm
-     - runtime:
-       deb: /tmp/rmr_1.0.34_x86_64.deb
-       rpm: /tmp/rmr-1.0.34-x86_64.rpm
+   files:
+     - /tmp/rmr-dev_1.0.34_x86_64.deb
+     - /tmp/rmr-dev-1.0.34-x86_64.rpm
+     - /tmp/rmr_1.0.34_x86_64.deb
+     - /tmp/rmr-1.0.34-x86_64.rpm
    ...
 
 

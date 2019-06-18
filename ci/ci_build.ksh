@@ -45,14 +45,12 @@
 # stash a set of packages for a particular flavour ($1)
 #
 function stash_pkgs {
-	echo "  - $1:" >>$yaml_file      # add package flavour (dev, runtime, etc)
-
 	for pkg in deb rpm
 	do
 		ls .build/*.$pkg 2>/dev/null | while read f
 		do
 			cp $f $target_dir/${f##*/}
-			echo "    $pkg: $target_dir/${f##*/}" >>$yaml_file
+			echo "  - $target_dir/${f##*/}" >>$yaml_file
 		done
 
 	done
@@ -109,16 +107,7 @@ mkdir -p .build
 	ksh run_all.ksh					# application based tests if units pass
 )
 
-# initialise the yaml file
-cat <<-endKat >$yaml_file
----
-# package types which might be listed below
-pkg_types:
-  - deb
-  - rpm
-
-packages:
-endKat
+printf "---\nfiles:\n" >$yaml_file 	# initialise the yaml file
 
 stash_pkgs development      # testing good, stash dev packages built above
 
