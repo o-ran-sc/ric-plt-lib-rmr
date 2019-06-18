@@ -17,12 +17,21 @@
 #==================================================================================
 #
 
+# This CMake definition supports several -D command line options:
+#
+#	-DDEV_PKG=1			Development package configuration
+#	-DBUILD_DOC=1		Man pages generated
+#	-DPRESERVE_PTYPE=1	Do not change the processor type when naming packages
+#	-DPACK_EXTERNALS=1	Include external libraries used to build in the run-time package
+#	-DSKIP_EXTERNALS=1	Do not use Nano/NNG submodules when building; uee installed packages
+#	-DMAN_PREFIX=<path>	Supply a path where man pages are installed (default: /usr/share/man)
+
 project( rmr LANGUAGES C )
 cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "1" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "0" )
-set( patch_level "34" )
+set( patch_level "35" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_lib "lib" )
@@ -84,17 +93,30 @@ add_definitions(
 
 # ---------------- suss out pkg gen tools so we don't fail generating packages that the system cannot support --------------
 
+# deb packages use underbars, and package manager(s) seem to flip the *_64 processor type
+# to the old (non-standard) amd64 string, so we do it here for consistency. Set -DPRESERVE_PTYPE=1 
+# to prevent the flip.
+#
+if( ${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" )
+	if( NOT PRESERVE_PTYPE )
+		set( sys_name "amd64" )
+	else()
+		set( sys_name ${CMAKE_SYSTEM_PROCESSOR} )
+	endif()
+else()
+	set( sys_name ${CMAKE_SYSTEM_PROCESSOR} )
+endif()
 
 if( DEV_PKG )
-	set( dev_tag "-dev" )
 	set( pkg_name "rmr-dev" )
 else()
 	set( pkg_name "rmr" )
 endif()
-set( rpm_pkg_label "${CMAKE_PROJECT_NAME}${dev_tag}${spoiled_str}-${major_version}.${minor_version}.${patch_level}-${CMAKE_SYSTEM_PROCESSOR}" )
-set( deb_pkg_label "${CMAKE_PROJECT_NAME}${dev_tag}${spoiled_str}_${major_version}.${minor_version}.${patch_level}_${CMAKE_SYSTEM_PROCESSOR}" )
-message( "+++ building ${deb_pkg_label}" )
-message( "+++ building ${rpm_pkg_label}" )
+set( pkg_label "${pkg_name}${spoiled_str}-${major_version}.${minor_version}.${patch_level}-${sys_name}" )
+set( rpm_pkg_label "${pkg_name}${spoiled_str}-${major_version}.${minor_version}.${patch_level}-${sys_name}" )
+set( deb_pkg_label "${pkg_name}${spoiled_str}_${major_version}.${minor_version}.${patch_level}_${sys_name}" )
+message( "+++ building ${deb_pkg_label}.deb" )
+message( "+++ building ${rpm_pkg_label}.rpm" )
 set( out_yml /tmp/build_output.yml )					# we will record package names (we record only untainted names)
 find_program( rpm NAMES rpmbuild )						# rpm package gen requires this to be installed
 
@@ -275,14 +297,12 @@ if( APPLE  )
 	target_link_libraries( rmr_nng_shared ${CMAKE_CURRENT_BINARY_DIR}/lib/libnng${nng_so_suffix} )
 endif()
 
-# Define directories where package should drop things when installed
-# In CMake speak archive == *.a  library == *.so, so both are needed
-# Headers from the common directory are forced to install by the local CM file in common. At
-# the moment, there are no header files specific to either nano or nng, so to the public
-# header directive is moot, but needed if some day there is one.
+# Define what should be installed, and where they should go. For dev package we install
+# only the RMr headers, man pages and archive (.a) files.  The run-time package gets just
+# the library (.so) files and nothing more.
 #
 if( DEV_PKG )
-	set( target_list "rmr_nng_shared;rmr_nng_static;rmr_shared;rmr_static" )
+	set( target_list "rmr_nng_static;rmr_static" )
 else()
 	set( target_list "rmr_nng_shared;rmr_shared" )
 endif()
@@ -331,6 +351,7 @@ IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 	set( CPACK_PACKAGE_VERSION_MAJOR "${major_version}" )
 	set( CPACK_PACKAGE_VERSION_MINOR "${minor_version}" )
 	set( CPACK_PACKAGE_VERSION_PATCH "${patch_level}" )
+	set( CPACK_PACKAGE "${pkg_label}" )						# generic name for old versions of cpack
 	set( CPACK_DEBIAN_FILE_NAME "${deb_pkg_label}.deb" )
 	set( CPACK_RPM_FILE_NAME "${rpm_pkg_label}.rpm" )
 
