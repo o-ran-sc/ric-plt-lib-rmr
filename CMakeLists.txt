@@ -22,7 +22,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "1" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "0" )
-set( patch_level "34" )
+set( patch_level "35" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_lib "lib" )
@@ -91,6 +91,7 @@ if( DEV_PKG )
 else()
 	set( pkg_name "rmr" )
 endif()
+set( pkg_label "${CMAKE_PROJECT_NAME}${dev_tag}${spoiled_str}-${major_version}.${minor_version}.${patch_level}-${CMAKE_SYSTEM_PROCESSOR}" )
 set( rpm_pkg_label "${CMAKE_PROJECT_NAME}${dev_tag}${spoiled_str}-${major_version}.${minor_version}.${patch_level}-${CMAKE_SYSTEM_PROCESSOR}" )
 set( deb_pkg_label "${CMAKE_PROJECT_NAME}${dev_tag}${spoiled_str}_${major_version}.${minor_version}.${patch_level}_${CMAKE_SYSTEM_PROCESSOR}" )
 message( "+++ building ${deb_pkg_label}" )
@@ -275,14 +276,12 @@ if( APPLE  )
 	target_link_libraries( rmr_nng_shared ${CMAKE_CURRENT_BINARY_DIR}/lib/libnng${nng_so_suffix} )
 endif()
 
-# Define directories where package should drop things when installed
-# In CMake speak archive == *.a  library == *.so, so both are needed
-# Headers from the common directory are forced to install by the local CM file in common. At
-# the moment, there are no header files specific to either nano or nng, so to the public
-# header directive is moot, but needed if some day there is one.
+# Define what should be installed, and where they should go. For dev package we install
+# only the RMr headers, man pages and archive (.a) files.  The run-time package gets just
+# the library (.so) files and nothing more.
 #
 if( DEV_PKG )
-	set( target_list "rmr_nng_shared;rmr_nng_static;rmr_shared;rmr_static" )
+	set( target_list "rmr_nng_static;rmr_static" )
 else()
 	set( target_list "rmr_nng_shared;rmr_shared" )
 endif()
@@ -331,6 +330,8 @@ IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 	set( CPACK_PACKAGE_VERSION_MAJOR "${major_version}" )
 	set( CPACK_PACKAGE_VERSION_MINOR "${minor_version}" )
 	set( CPACK_PACKAGE_VERSION_PATCH "${patch_level}" )
+
+	set( CPACK_PACKAGE "${pkg_label}" )				# generic name for old versions of cpack
 	set( CPACK_DEBIAN_FILE_NAME "${deb_pkg_label}.deb" )
 	set( CPACK_RPM_FILE_NAME "${rpm_pkg_label}.rpm" )
 
