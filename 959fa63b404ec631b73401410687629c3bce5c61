@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "620d3a03_e884c465",
+        "filename": "BUILD",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-06-18T12:46:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "761e3762_84aeb335",
+      "range": {
+        "startLine": 49,
+        "startChar": 25,
+        "endLine": 49,
+        "endChar": 31
+      },
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "425756f9_339ad37d",
         "filename": "BUILD",
         "patchSetId": 4
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "fafe0d88_93e87b44",
+        "filename": "BUILD",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-06-18T12:46:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a23eb40_858c632a",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 8
+      },
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4438f2ca_f1a6190a",
         "filename": "BUILD",
         "patchSetId": 4
@@ -85,6 +133,24 @@
       "revId": "959fa63b404ec631b73401410687629c3bce5c61",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3f62062_a61c8037",
+        "filename": "BUILD",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-06-18T12:46:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4438f2ca_f1a6190a",
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -108,6 +174,30 @@
       "revId": "959fa63b404ec631b73401410687629c3bce5c61",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10d132be_348cea0d",
+        "filename": "ci/Dockerfile",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-06-18T12:46:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5ba38647_a45970f6",
+      "range": {
+        "startLine": 19,
+        "startChar": 13,
+        "endLine": 19,
+        "endChar": 16
+      },
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -169,6 +259,30 @@
       "side": 1,
       "message": "Your license at https://github.com/ScottDaniels/xfm/blob/master/LICENSE looks reasonable but IANAL.  If you\u0027re willing to assert either the Apache 2.0 or MIT license instead, that will make the eventual license scans a lot easier.",
       "parentUuid": "19b57fd6_877c2a4e",
+      "range": {
+        "startLine": 43,
+        "startChar": 25,
+        "endLine": 43,
+        "endChar": 66
+      },
+      "revId": "959fa63b404ec631b73401410687629c3bce5c61",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f355bf6_3f20e7bb",
+        "filename": "doc/CMakeLists.txt",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-06-18T12:46:45Z",
+      "side": 1,
+      "message": "It\u0027s a BSD 2-clause license: https://en.wikipedia.org/wiki/BSD_licenses  \n\nXfm code is NOT being merged, nor is it being distributed with RMr.  It is a tool that is being built to format the man pages, so from that perspective I don\u0027t see how the license matters as we are not distributing either the code or binary;  our use here exactly the same as how we are cloning/building NNG and Nanomsg to build RMr (especially now that we are not distributing nano/nng in our packages).",
+      "parentUuid": "d0c087f1_a369ed4b",
       "range": {
         "startLine": 43,
         "startChar": 25,
