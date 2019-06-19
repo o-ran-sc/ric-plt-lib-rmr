@@ -31,7 +31,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "1" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "0" )
-set( patch_level "35" )
+set( patch_level "36" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_lib "lib" )
@@ -346,7 +346,9 @@ unset( PACK_EXTERNALS  CACHE )
 IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 	include( InstallRequiredSystemLibraries )
 
-	set( CPACK_PACKAGE_NAME ${pkg_name} )
+	set( CPACK_DEBIAN_PACKAGE_NAME ${deb_pkg_name} )
+	set( CPACK_RPM_PACKAGE_NAME ${rpm_pkg_name} )
+
 	set( CPACK_set_DESTDIR "on" )
 	set( CPACK_PACKAGING_INSTALL_PREFIX "${install_root}" )
 	set( CPACK_GENERATOR "${pkg_list}" )
