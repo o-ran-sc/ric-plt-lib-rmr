@@ -44,6 +44,28 @@ To build RMr, the usual CMake steps are followed:
 This will create a .deb (provided the system supports this) in
 the build directory.  It's that simple.
 
+The following flags may be given on the 'cmake' command line
+(options) which are outside of "normal" CMake flags and affect
+the configuration:
+
+  -DBUILD_DOC=1         Man pages generated
+  -DDEV_PKG=1			Development package configuration
+  -DMAN_PREFIX=<path>	Supply a path where man pages are installed (default: /usr/share/man)
+  -DPACK_EXTERNALS=1	Include external libraries used to build in the run-time package
+  -DPRESERVE_PTYPE=1	Do not change the processor type when naming deb packages
+  -DSKIP_EXTERNALS=1	Do not use Nano/NNG submodules when building; uee installed packages
+
+
+Packages
+The build can be configured to generate either a run-time or
+development package. The run-time generation is the default and
+the -DDEV_PKG=1 option must be given to generate the development
+package.  The run-time package contains only the shared library
+files (*.so), and the development package contains the headers,
+man pages (if the man option is set) and archive (.a) files.
+Resulting package names are illustrated in the CI section below.
+
+
 Continuous Integration Build
 Use the Dockerfile in the ci/ subdirectory. This installs all
 the required tools, then builds RMr and executes the unit and
