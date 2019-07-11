@@ -47,6 +47,7 @@ int mbuf_api_test( ) {
 	int state;
 	int errors = 0;
 	char*	buf;
+	void*	ptr;
 	rmr_mbuf_t*	mbuf;
 	unsigned char src_buf[256];
 
@@ -218,6 +219,24 @@ int mbuf_api_test( ) {
 
 	state = rmr_get_trlen( NULL );								// coverage test on nil check
 	errors += fail_not_equal( state, 0, "get trace length with nil msg didn't return expected 0 status" );
+
+	ptr = rmr_trace_ref( NULL, NULL );
+	errors += fail_not_nil( ptr, "trace ref returned non-nil pointer when given nil message" );
+
+	mbuf = test_mk_msg( 2048, 0 );		// initially no trace size to force realloc
+	ptr = rmr_trace_ref( mbuf, NULL );
+	errors += fail_not_nil( ptr, "trace ref returned non-nil pointer when given a message without trace data" );
+
+	i = 100;								// ensure that i is reset when there is no trace data
+	ptr = rmr_trace_ref( mbuf, &i );
+	errors += fail_not_nil( ptr, "trace ref returned non-nil pointer when given a message without trace data" );
+	errors += fail_not_equal( i, 0, "trace ref returned non zero size (a) when no trace info in message" );
+
+	i = 100;
+	mbuf = test_mk_msg( 2048, 113 );		// alloc with a trace data area
+	ptr = rmr_trace_ref( mbuf, &i );
+	errors += fail_if_nil( ptr, "trace ref returned nil pointer when given a message with trace data" );
+	errors += fail_not_equal( i, 113, "trace ref returned bad size (a), expected (b)" );
 
 
 	src_buf[0] = 0;

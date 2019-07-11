@@ -93,7 +93,8 @@ rmr_str2meid(3),
 rmr_str2xact(3),
 rmr_wh_open(3),
 rmr_wh_send_msg(3),
-rmr_set_trace(3)
+rmr_set_trace(3),
+rmr_trace_ref(3)
 .ju on
 
 
