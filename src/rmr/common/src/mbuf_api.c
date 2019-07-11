@@ -280,6 +280,41 @@ extern int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size )
 
 
 /*
+	Returns a pointer (reference) to the trace data in the message. If sizeptr
+	is supplied, then the trace data size is assigned to the referenced
+	integer so that the caller doesn't need to make a second call to get the
+	value.
+
+	CAUTION:  user programmes should avoid writing to the referenced trace
+			area (use rmr_set_trace() to avoid possible data overruns. This
+			function is a convenience, and it is expected that users will
+			use the trace data as read-only so as a copy is not necessary.
+*/
+extern void* rmr_trace_ref( rmr_mbuf_t* msg, int* sizeptr ) {
+	uta_mhdr_t*	hdr = NULL;
+	int size = 0;
+
+	if( sizeptr != NULL ) {
+		*sizeptr = 0;					// ensure reset if we bail
+	}
+
+	if( msg == NULL ) {
+		return NULL;
+	}
+
+	hdr = msg->header;
+	if( (size = RMR_TR_LEN( hdr )) <= 0 ) {
+		return NULL;
+	}
+
+	if( sizeptr != NULL ) {
+		*sizeptr = size;
+	}
+
+	return (void *) TRACE_ADDR( hdr );
+}
+
+/*
 	Copies the trace bytes from the message header into the buffer provided by
 	the user. If the trace data in the header is less than size, then only
 	that number of bytes are copied, else exactly size bytes are copied. The
@@ -351,7 +386,7 @@ extern unsigned char* rmr_get_src( rmr_mbuf_t* msg, unsigned char* dest ) {
 /*
 	Returns the string with the IP address as reported by the sender. This is
 	the IP address that the sender has sussed off of one of the interfaces
-	and cannot be guarenteed to be the acutal IP address which was used to 
+	and cannot be guarenteed to be the acutal IP address which was used to
 	establish the connection.   The caller must provide a buffer of at least
 	64 bytes; the string will be nil terminated. A pointer to the user's buffer
 	is returned on success, nil on failure.

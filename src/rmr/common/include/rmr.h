@@ -138,6 +138,7 @@ extern int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char const* str );
 extern void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str );
 extern void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str );
 extern int rmr_str2xact( rmr_mbuf_t* mbuf, unsigned char const* str );
+extern void* rmr_trace_ref( rmr_mbuf_t* msg, int* sizeptr );
 
 extern int rmr_get_trlen( rmr_mbuf_t* msg );
 extern int rmr_get_trace( rmr_mbuf_t* msg, unsigned char* dest, int size );

@@ -18,10 +18,10 @@
 .fi
 
 .if false
-	Mnemonic	rmr_get_trace.3.xfm
-	Abstract	The manual page for the rmr_get_trace function.
+	Mnemonic	rmr_trace_ref.3.xfm
+	Abstract	The manual page for the rmr_trace_ref function.
 	Author		E. Scott Daniels
-	Date		19 April 2019
+	Date		11 July 2019
 .fi
 
 .** if formatting with tfm, the roff.im will cause roff output to be generated
@@ -42,28 +42,27 @@
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_get_trace
+	rmr_trace_ref
 
 &h2(SYNOPSIS)
 &indent
 &ex_start
 #include <rmr/rmr.h>
 
-int rmr_get_trace( rmr_mbuf_t* mbuf, unsigned char* dest, int size )
+int rmr_trace_ref( rmr_mbuf_t* mbuf, int* sizeptr )
 &ex_end
 
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_get_trace) function will copy the trace information from the message into the user's
-allocated memory referenced by &cw(dest.) 
-The &cw(size) parameter is assumed to be the maximum number of bytes which can be copied (size
-of the destination buffer).
+The &cw(rmr_trace_ref) function return a pointer to the trace area in the message, and optionally
+populate the user programme supplied size integer with the trace area size, if &ital(sizeptr) is
+not nil.
 
 &h2(RETURN VALUE)
-On success, the number of bytes actually copied is returned. 
-If the return value is 0, no bytes copied, then the reason could be that the message pointer
-was nil, or the size parameter was <= 0.
+On success, a void pointer to the trace area of the message is returned.  
+A nil pointer is returned if the message has no trace data area allocated, or if the message
+itself is invalid.
 
 
 &h2(SEE ALSO )
@@ -93,8 +92,7 @@ rmr_str2meid(3),
 rmr_str2xact(3),
 rmr_wh_open(3),
 rmr_wh_send_msg(3),
-rmr_set_trace(3),
-rmr_trace_ref(3)
+rmr_set_trace(3)
 .ju on
 
 

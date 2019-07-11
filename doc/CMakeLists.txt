@@ -83,6 +83,7 @@ if( BUILD_DOC )
  		rmr_mt_call.3
 		rmr_mt_rcv.3
 		rmr_get_srcip.3
+		rmr_trace_ref.3
 	)
 
 	# initialise lists of files we generated
