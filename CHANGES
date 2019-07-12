@@ -1,8 +1,12 @@
 
 Change Summaries
 
+2019 July 12; Version 1.0.38
+	Added new message types to RIC_message_types.h.
+
 2019 July 11; Version 1.0.37
 
 	librmr and librmr_nng 
 		- Add message buffer API function rmr_trace_ref()
 		  (see rmr_trace_ref.3 manual page in dev package).
+

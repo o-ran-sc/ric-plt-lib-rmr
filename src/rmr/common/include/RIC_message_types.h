@@ -85,6 +85,9 @@
 
 #define DC_ADM_INT_CONTROL			20000	
 #define DC_ADM_INT_CONTROL_ACK		20001	
+#define DC_ADM_GET_POLICY			20002
+#define DC_ADM_GET_POLICY_ACK		20003
+
 
 
 // ---- these are old (release 0) definitions and should not be used ------
