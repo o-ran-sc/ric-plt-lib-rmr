@@ -514,7 +514,7 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock
 	int state;
 	uta_mhdr_t*	hdr;
 	int nng_flags = NNG_FLAG_NONBLOCK;		// if we need to set any nng flags (zc buffer) add it to this
-	int spin_retries = 1000;				// if eagain/timeout we'll spin this many times before giving up the CPU
+	int spin_retries = 1000;				// if eagain/timeout we'll spin, at max, this many times before giving up the CPU
 	int	tr_len;								// trace len in sending message so we alloc new message with same trace size
 
 	// future: ensure that application did not overrun the XID buffer; last byte must be 0
@@ -539,7 +539,9 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock
 				if( retries > 0 && (state == NNG_EAGAIN || state == NNG_ETIMEDOUT) ) {
 					if( --spin_retries <= 0 ) {			// don't give up the processor if we don't have to
 						retries--;
-						usleep( 1 );					// sigh, give up the cpu and hope it's just 1 miscrosec
+						if( retries > 0 ) {					// only if we'll loop through again
+							usleep( 1 );					// sigh, give up the cpu and hope it's just 1 miscrosec
+						}
 						spin_retries = 1000;
 					}
 				} else {

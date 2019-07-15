@@ -1,6 +1,9 @@
 
 Change Summaries
 
+2019 July 15; Version 1.0.39
+	Prevent unnecessary usleep in retry loop.
+
 2019 July 12; Version 1.0.38
 	Added new message types to RIC_message_types.h.
 

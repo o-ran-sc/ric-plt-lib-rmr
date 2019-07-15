@@ -524,17 +524,15 @@ extern rmr_mbuf_t* rmr_rcv_specific( void* vctx, rmr_mbuf_t* msg, char* expect, 
 	return NULL;
 }
 
-//  CAUTION:  these are not supported as they must be set differently (between create and open) in NNG.
-//				until those details are worked out, these generate a warning.
 /*
-	Set send timeout. The value time is assumed to be microseconds.  The timeout is the
-	rough maximum amount of time that RMr will block on a send attempt when the underlying
+	Set send timeout. The value time is assumed to be milliseconds.  The timeout is the
+	_rough_ maximum amount of time that RMr will block on a send attempt when the underlying
 	mechnism indicates eagain or etimeedout.  All other error conditions are reported
 	without this delay. Setting a timeout of 0 causes no retries to be attempted in
-	RMr code. Setting a timeout of 1 causes RMr to spin up to 10K retries before returning,
-	but without issuing a sleep.  If timeout is > 1, then RMr will issue a sleep (1us)
-	after every 10K send attempts until the time value is reached. Retries are abandoned
-	if NNG returns anything other than NNG_AGAIN or NNG_TIMEDOUT.
+	RMr code. Setting a timeout of 1 causes RMr to spin up to 1K retries before returning,
+	but _without_ issuing a sleep.  If timeout is > 1, then RMr will issue a sleep (1us)
+	after every 1K send attempts until the "time" value is reached. Retries are abandoned
+	if NNG returns anything other than NNG_EAGAIN or NNG_ETIMEDOUT.
 
 	The default, if this function is not used, is 1; meaning that RMr will retry, but will
 	not enter a sleep.  In all cases the caller should check the status in the message returned
@@ -559,6 +557,8 @@ extern int rmr_set_stimeout( void* vctx, int time ) {
 
 /*
 	Set receive timeout -- not supported in nng implementation
+
+	CAUTION:  this is not supported as they must be set differently (between create and open) in NNG.
 */
 extern int rmr_set_rtimeout( void* vctx, int time ) {
 	fprintf( stderr, "[WRN] Current implementation of RMR ontop of NNG does not support setting a receive timeout\n" );
