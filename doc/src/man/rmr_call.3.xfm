@@ -84,6 +84,9 @@ no message was received to process.
 Currently the threshold is fixed at 20 messages, though in future versions of the library
 this might be extended to be a parameter which the user application may set.
 
+.** pull in common retry text
+.im &{lib}/man/retry.im 
+
 &h2(RETURN VALUE)
 The &cw(rmr_call) function returns a pointer to a message buffer with the state set to reflect
 the overall state of call processing (see Errors below). 
@@ -175,6 +178,7 @@ rmr_rts_msg(3),
 rmr_ready(3),
 rmr_fib(3),
 rmr_has_str(3),
+rmr_set_stimeout(3),
 rmr_tokenise(3),
 rmr_mk_ring(3),
 rmr_ring_free(3)

@@ -23,6 +23,8 @@
 #	-DBUILD_DOC=1		Man pages generated
 #	-DPRESERVE_PTYPE=1	Do not change the processor type when naming deb packages
 #	-DPACK_EXTERNALS=1	Include external libraries used to build in the run-time package
+#						(This makes some stand-alone unit testing of bindings possible, it
+#						is not meant to be used for production package generation.)
 #	-DSKIP_EXTERNALS=1	Do not use Nano/NNG submodules when building; uee installed packages
 #	-DMAN_PREFIX=<path>	Supply a path where man pages are installed (default: /usr/share/man)
 
@@ -31,7 +33,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "1" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "0" )
-set( patch_level "39" )
+set( patch_level "40" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_lib "lib" )
@@ -220,6 +222,9 @@ if( NOT SKIP_EXTERNALS )
 	message( "+++ installing nano/nng with: ${nano_major}.${nano_minor} | ${nng_major}.${nng_minor}" )
 else()
 	if( PACK_EXTERNALS )
+		# This makes some stand-alone unit testing possible for bindings and transport layer testing;
+		# it is not meant for production packages.
+		#
 		unset( SKIP_EXTERNALS  CACHE )	# must remove so as not to trap user into a never ending failure
 		unset( PACK_EXTERNALS  CACHE )
 		message( FATAL_ERROR "ERROR: PACK_EXTERNALS can be set only if SKIP_EXTERNALS is unset (=0, or not supplied on command line)" )

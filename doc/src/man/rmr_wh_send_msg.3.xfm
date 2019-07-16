@@ -59,13 +59,15 @@ Unlike &ital(rmr_send_msg,) this function attempts to send the message directly
 to a process at the other end of a wormhole which was created with &ital(rmr_wh-open().)
 When sending message via wormholes, the normal RMr routing based on message type is
 ignored, and the caller may leave the message type unspecified in the message buffer
-(unless it is needed by the reeciving process).
+(unless it is needed by the receiving process).
 
 .sp
 The message buffer (msg) used to send is the same format as used for regular RMr 
 send and reply to sender operations, thus any buffer allocated by these means, or
 calls to &ital(rmr_rcv_msg()) can be passed to this function.
 
+.** pull in common retry text
+.im &{lib}/man/retry.im 
 
 &h2(RETURN VALUE)
 On success, a new message buffer, with an empty payload, is returned for the application
@@ -195,6 +197,7 @@ rmr_has_str(3),
 rmr_tokenise(3),
 rmr_mk_ring(3),
 rmr_ring_free(3),
+rmr_set_stimeout(3),
 rmr_wh_open(3),
 rmr_wh_close(3)
 .ju on

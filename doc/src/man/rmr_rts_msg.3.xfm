@@ -59,6 +59,9 @@ message type and routing table.
 Other than this small difference, the behaviour is exactly the same as
 &cw(rmr_send_msg.)
 
+.** pull in common retry text
+.im &{lib}/man/retry.im 
+
 &h2(RETURN VALUE)
 On success, a new message buffer, with an empty payload, is returned for the application
 to use for the next send.
@@ -141,6 +144,7 @@ rmr_rcv_specific(3),
 rmr_ready(3),
 rmr_fib(3),
 rmr_has_str(3),
+rmr_set_stimeout(3),
 rmr_tokenise(3),
 rmr_mk_ring(3),
 rmr_ring_free(3)

@@ -84,6 +84,7 @@ if( BUILD_DOC )
 		rmr_mt_rcv.3
 		rmr_get_srcip.3
 		rmr_trace_ref.3
+		rmr_set_stimeout.3
 	)
 
 	# initialise lists of files we generated
@@ -92,7 +93,9 @@ if( BUILD_DOC )
 
 	# for each source, build a specific command that runs tfm to generate the
 	# troff output as a gzipped file. Sed is needed to remove the leading blank
-	# that tfm likes to insert even if indention is 0.
+	# that tfm likes to insert even if indention is 0. We also generate postscript
+	# and rts output which are left in the build directory for the developer to 
+	# use as needed.
 	#
 	foreach( nm IN LISTS man_names )
 	  set( out ${CMAKE_BINARY_DIR}/${nm} )
@@ -101,7 +104,10 @@ if( BUILD_DOC )
 	  add_custom_command(
 			OUTPUT ${out}.gz
 			DEPENDS ${in}
-			COMMAND bash -c "export LIB=${CMAKE_SOURCE_DIR}/doc/src; ${tfm} ${in} stdout | sed 's/^ //' | gzip >${out}.gz; ${pfm} ${in} ${out}.ps"
+			COMMAND bash -c "export OUTPUT_RST=0; export LIB=${CMAKE_SOURCE_DIR}/doc/src; \
+				${tfm} ${in} stdout | sed 's/^ //' | gzip >${out}.gz; \
+				export OUTPUT_RST=1; ${tfm} ${in} ${out}.rst; \
+				${pfm} ${in} ${out}.ps"
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			COMMENT "Building manpage ${out}"
 			VERBATIM

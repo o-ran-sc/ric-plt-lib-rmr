@@ -75,7 +75,7 @@ If the ID value is not in the proper range, the attempt to make the call will fa
 &space
 Messages which are received while waiting for the response are queued on a &ital(normal)
 receive queue and will be delivered to the user application with the next invocation 
-of &itaL( rmr_mt_rcv() ) or &ital( rmr_rvv_msg().) 
+of &ital( rmr_mt_rcv() ) or &ital( rmr_rvv_msg().) 
 by RMR, and are returned to the user application when &cw(rmr_rcv_msg) is 
 invoked.
 These messages are returned in th order received, one per call to &cw(rmr_rcv_msg.)
@@ -83,7 +83,7 @@ These messages are returned in th order received, one per call to &cw(rmr_rcv_ms
 &space
 NOTE: Currently the multi-threaded functions are supported only when the NNG 
 transport mechanism is being used. It will not be possible to link a programme
-using the nanomsg version of the library when references to this function are
+using the Nanomsg version of the library when references to this function are
 present.
 
 &h3(The Transaction ID)
@@ -98,6 +98,8 @@ the return buffer has the matching transaction ID. This can be done transparentl
 the application uses the &ital( rmr_rts_msg() ) function and does not adjust the 
 transaction ID.
 
+.** pull in common retry text
+.im &{lib}/man/retry.im 
 
 &h2(RETURN VALUE)
 The &cw(rmr_mt_call) function returns a pointer to a message buffer with the state set to reflect
@@ -211,6 +213,7 @@ rmr_rts_msg(3),
 rmr_ready(3),
 rmr_fib(3),
 rmr_has_str(3),
+rmr_set_stimeout(3),
 rmr_tokenise(3),
 rmr_mk_ring(3),
 rmr_ring_free(3)

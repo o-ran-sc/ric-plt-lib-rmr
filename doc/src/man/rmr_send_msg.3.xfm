@@ -65,6 +65,10 @@ responsible for building the routing table used by the RMR library, and not the
 responsibility of the library.)
 
 
+.** pull in common retry text
+.im &{lib}/man/retry.im 
+
+
 &h2(RETURN VALUE)
 On success, a new message buffer, with an empty payload, is returned for the application
 to use for the next send.
@@ -72,9 +76,10 @@ The state in this buffer will reflect the overall send operation state and shoul
 &cw(RMR_OK.)
 
 &space
-If the state in the returned buffer is anything other than &cw(UT_OK,) the user application 
-may need to attempt a retransmission of the message, or take other action depending on the
-setting of &cw(errno) as described below. 
+When the message cannot be successfully sent this function will return the unsent (original) 
+message buffer with the state set to indicate the reason for failure.  
+The value of &ital( errno ) may also be set to reflect a more detailed failure reason if it
+is known.
 
 &space
 In the event of extreme failure, a NULL pointer is returned. In this case the value of 
@@ -87,6 +92,11 @@ buffer.
 
 &space
 &beg_dlist(.75i : ^&bold_font )
+&di(RMR_RETRY) 	The message could not be sent, but the underlying transport mechanism
+	indicates that the failure is temporary. If the send operation is tried again
+	it might be successful.
+&di(RMR_SEND_FAILED) The send operation was not successful and the underlying transport
+	mechanism indicates a permanent (hard) failure; retrying the send is not possible.
 &di(RMR_ERR_BADARG) The message buffer pointer did not refer to a valid message.
 &di(RMR_ERR_NOHDR)  The header in the message buffer was not valid or corrupted.
 &di(RMR_ERR_NOENDPT)  The message type in the message buffer did not map to a known endpoint.

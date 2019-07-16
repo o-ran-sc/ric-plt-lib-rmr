@@ -53,8 +53,8 @@ If rmr is *not* compiled on your system, see the below instructions for download
 See the `examples` directory.
 
 # Compiling rmr (if not already done on your system)
-(Note, you may or may not need sudo in your final command, depending on permissions to `/usr/local`. I need it)
+(Note, you may or may not need sudo in your final command, depending on permissions to `/usr/local`. The pack externals option to CMake is needed only if the NNG libary is not already installed on the system, and you do not wish to manually install it.)
 
     git clone https://gerrit.oran-osc.org/r/ric-plt/lib/rmr
     cd rmr
-    mkdir .build; cd .build; cmake ..; sudo make install
+    mkdir .build; cd .build; cmake .. -DPACK_EXTERNALS=1; sudo make install
