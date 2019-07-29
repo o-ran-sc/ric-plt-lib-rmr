@@ -94,8 +94,8 @@ if( BUILD_DOC )
 	# for each source, build a specific command that runs tfm to generate the
 	# troff output as a gzipped file. Sed is needed to remove the leading blank
 	# that tfm likes to insert even if indention is 0. We also generate postscript
-	# and rts output which are left in the build directory for the developer to 
-	# use as needed.
+	# markdown, plain ascii and rts output which are left in the build directory 
+	# for the developer to use as needed.
 	#
 	foreach( nm IN LISTS man_names )
 	  set( out ${CMAKE_BINARY_DIR}/${nm} )
@@ -104,10 +104,17 @@ if( BUILD_DOC )
 	  add_custom_command(
 			OUTPUT ${out}.gz
 			DEPENDS ${in}
-			COMMAND bash -c "export OUTPUT_RST=0; export LIB=${CMAKE_SOURCE_DIR}/doc/src; \
-				${tfm} ${in} stdout | sed 's/^ //' | gzip >${out}.gz; \
-				export OUTPUT_RST=1; ${tfm} ${in} ${out}.rst; \
-				${pfm} ${in} ${out}.ps"
+			COMMAND bash -c "export LIB=${CMAKE_SOURCE_DIR}/doc/src; \
+				export OUTPUT_TYPE=troff; \
+					${tfm} ${in} stdout | sed 's/^ //' | gzip >${out}.gz; \
+				export OUTPUT_TYPE=rst; \
+					${tfm} ${in} ${out}.rst; \
+				export OUTPUT_TYPE=txt; \
+				  ${tfm} ${in} ${out}.txt; \
+				export OUTPUT_TYPE=markdown; \
+					${tfm} ${in} stdout | sed 's/^ //' >${out}.md; \
+				export OUTPUT_TYPE=postscript; \
+					${pfm} ${in} ${out}.ps"
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			COMMENT "Building manpage ${out}"
 			VERBATIM
