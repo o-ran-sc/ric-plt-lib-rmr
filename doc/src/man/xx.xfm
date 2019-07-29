@@ -17,46 +17,47 @@
 ==================================================================================
 .fi
 .if false
-	Mnemonic	rmr_wh_send_msg_man.xfm
-	Abstract	The manual page for the rmr_wh_send_msg function.
+	Mnemonic	rmr_send_msg_man.xfm
+	Abstract	The manual page for the rmr_send_msg function.
 	Author		E. Scott Daniels
 	Date		28 January 2019
 .fi
 
+
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_wh_send_msg
+	rmr_send_msg
 
 &h2(SYNOPSIS )
 &indent
 &ex_start
 #include <rmr/rmr.h>
 
-rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t id, rmr_mbuf_t* msg );
+rmr_mbuf_t* rmr_send_msg( void* vctx, rmr_mbuf_t* msg );
 &ex_end
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_wh_send_msg) function accepts a message buffer from the user application 
-and attempts to send it using the wormhole ID provided (id).
-Unlike &ital(rmr_send_msg,) this function attempts to send the message directly
-to a process at the other end of a wormhole which was created with &ital(rmr_wh-open().)
-When sending message via wormholes, the normal RMr routing based on message type is
-ignored, and the caller may leave the message type unspecified in the message buffer
-(unless it is needed by the receiving process).
+The &cw(rmr_send_msg) function accepts a message buffer from the user application 
+and attempts to send it.
+The destination of the message is selected based on the message type specified
+in the message buffer, and the matching information in the routing tables
+which are currently in use by the RMR library. 
+This may actually result in the sending of the message to multiple destinations
+which could degrade expected overall performance of the user application. 
+(Limiting excessive sending of messages is the responsibility of the application(s)
+responsible for building the routing table used by the RMR library, and not the 
+responsibility of the library.)
 
-.sp
-The message buffer (msg) used to send is the same format as used for regular RMr 
-send and reply to sender operations, thus any buffer allocated by these means, or
-calls to &ital(rmr_rcv_msg()) can be passed to this function.
 
 .** pull in common retry text
 .im &{lib}/man/retry.im 
+
 
 &h2(RETURN VALUE)
 On success, a new message buffer, with an empty payload, is returned for the application
@@ -65,9 +66,10 @@ The state in this buffer will reflect the overall send operation state and shoul
 &cw(RMR_OK.)
 
 &space
-If the state in the returned buffer is anything other than &cw(RMR_OK,) the user application 
-may need to attempt a retransmission of the message, or take other action depending on the
-setting of &cw(errno) as described below. 
+When the message cannot be successfully sent this function will return the unsent (original) 
+message buffer with the state set to indicate the reason for failure.  
+The value of &ital( errno ) may also be set to reflect a more detailed failure reason if it
+is known.
 
 &space
 In the event of extreme failure, a NULL pointer is returned. In this case the value of 
@@ -80,10 +82,14 @@ buffer.
 
 &space
 &beg_dlist(.75i : ^&bold_font )
-&di(RMR_ERR_WHID) The wormhole ID passed in was not associated with an open wormhole, or was out of range for a valid ID.
-&di(RMR_ERR_NOWHOPEN) No wormholes exist, further attempt to validate the ID are skipped.
+&di(RMR_RETRY) 	The message could not be sent, but the underlying transport mechanism
+	indicates that the failure is temporary. If the send operation is tried again
+	it might be successful.
+&di(RMR_SEND_FAILED) The send operation was not successful and the underlying transport
+	mechanism indicates a permanent (hard) failure; retrying the send is not possible.
 &di(RMR_ERR_BADARG) The message buffer pointer did not refer to a valid message.
 &di(RMR_ERR_NOHDR)  The header in the message buffer was not valid or corrupted.
+&di(RMR_ERR_NOENDPT)  The message type in the message buffer did not map to a known endpoint.
 &end_dlist
 
 &space
@@ -126,47 +132,36 @@ The following values may be assigned to &cw(errno) on failure.
 &end_dlist
 
 &h2(EXAMPLE)
-The following is a simple example of how the a wormhole is created (rmr_wh_open) and then
-how &cw(rmr_wh_send_msg) function is used to send messages.
-Some error checking is omitted for clarity.
+The following is a simple example of how the &cw(rmr_send_msg) function is called.
+In this example, the send message buffer is saved between calls and reused
+eliminating alloc/free cycles.
 
 &space
 &ex_start
+   static rmr_mbuf_t*  send_msg = NULL;        // message to send; reused on each call
+   msg_t*  send_pm;                            // payload for send
+   msg_t*  pm;                                 // our message format in the received payload
+  
+   if( send_msg  == NULL ) {
+      send_msg = rmr_alloc_msg( mr, MAX_SIZE );	// new buffer to send
+   }
+  
+   // reference payload and fill in message type
+   pm = (msg_t*) send_msg->payload;
+   send_msg->mtype = MT_ANSWER;		
 
-#include <rmr/rmr.h>	// system headers omitted for clarity
-
-int main() {
-   rmr_whid_t whid = -1;   // wormhole id for sending
-   void* mrc;      //msg router context
-        int i;
-   rmr_mbuf_t*  sbuf;      // send buffer
-   int     count = 0;
-
-   mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
-   if( mrc == NULL ) {
-      fprintf( stderr, "[FAIL] unable to initialise RMr environment\n" );
-      exit( 1 );
+   msg->len = generate_data( pm );		// something that fills the payload in
+   msg = rmr_send_msg( mr, send_msg );
+   if( ! msg ) {
+      return ERROR;
+   } else {
+      if( msg->state != RMR_OK ) {
+      // check for eagain, and resend if needed
+      // else return error
+      }
    }
 
-   while( ! rmr_ready( mrc ) ) {		// wait for routing table info
-      sleep( 1 );
-   }
-
-   sbuf = rmr_alloc_msg( mrc, 2048 );
-
-   while( 1 ) {
-     if( whid < 0 ) {
-       whid = rmr_wh_open( mrc, "localhost:6123" );  // open fails if endpoint refuses conn
-   	   if( RMR_WH_CONNECTED( wh ) ) { 
-           snprintf( sbuf->payload, 1024, "periodic update from sender: %d", count++ );
-           sbuf->len =  strlen( sbuf->payload );
-           sbuf = rmr_wh_send_msg( mrc, whid, sbuf );
-		}
-	 }
-
-	 sleep( 5 );
-   }
-}
+   return OK;
 &ex_end
 
 
@@ -181,14 +176,10 @@ rmr_rcv_msg(3),
 rmr_rcv_specific(3),
 rmr_rts_msg(3),
 rmr_ready(3),
-rmr_fib(3),
-rmr_has_str(3),
-rmr_tokenise(3),
 rmr_mk_ring(3),
 rmr_ring_free(3),
-rmr_set_stimeout(3),
-rmr_wh_open(3),
-rmr_wh_close(3)
+rmr_torcv_rcv(3),
+rmr_wh_send_msg(3)
 .ju on
 
 
