@@ -70,6 +70,8 @@ caller: caller.c
 lcaller: lcaller.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@  -lrmr_nng -lnng -lpthread -lm
 
+lsender: lsender.c
+	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@  -lrmr_nng -lnng -lpthread -lm
 
 
 # clean removes intermediates; nuke removes everything that can be built
