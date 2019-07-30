@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "8320ff1e_c91f1825",
+        "filename": "ci/ci_build.ksh",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-30T19:59:34Z",
+      "side": 1,
+      "message": "Reworked.  Package files are placed into /tmp/exportd and listed only in the yml file.  The publish script expects to find them in the exportd directory.",
+      "parentUuid": "c9cfc894_5d6de460",
+      "range": {
+        "startLine": 56,
+        "startChar": 3,
+        "endLine": 56,
+        "endChar": 42
+      },
+      "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a7733130_89963775",
         "filename": "ci/publish.ksh",
         "patchSetId": 2
@@ -168,6 +192,30 @@
     },
     {
       "key": {
+        "uuid": "57ca4ba8_17de5b7b",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-30T19:59:34Z",
+      "side": 1,
+      "message": "Ok, problem seems to be that the default shell in that build isn\u0027t really bash.\n\nAdded a #! for bash and it runs directly from the docker command without issues.",
+      "parentUuid": "1f39a866_1bc04157",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "eb7e0760_49e3855e",
         "filename": "ci/publish.ksh",
         "patchSetId": 2
@@ -215,6 +263,30 @@
     },
     {
       "key": {
+        "uuid": "59992acb_a522313c",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-30T19:59:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "43e4aee2_9675f7ce",
+      "range": {
+        "startLine": 33,
+        "startChar": 20,
+        "endLine": 33,
+        "endChar": 22
+      },
+      "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a8023418_1095e871",
         "filename": "ci/publish.ksh",
         "patchSetId": 2
@@ -250,6 +322,30 @@
       "side": 1,
       "message": "Ack.... old unix guys are not used to being chatty :)",
       "parentUuid": "a8023418_1095e871",
+      "range": {
+        "startLine": 50,
+        "startChar": 1,
+        "endLine": 50,
+        "endChar": 2
+      },
+      "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7d7e4bb_a2695d92",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-30T19:59:34Z",
+      "side": 1,
+      "message": "Not so much to be verbose on any more, but it does log the activity.  Copies all files from the exportd directory.",
+      "parentUuid": "4d54c5b6_00872855",
       "range": {
         "startLine": 50,
         "startChar": 1,
