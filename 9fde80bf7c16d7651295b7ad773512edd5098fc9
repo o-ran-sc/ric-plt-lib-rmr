@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "1f39a866_1bc04157",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-30T18:15:19Z",
+      "side": 1,
+      "message": "Bash isn\u0027t complaining for me, but that\u0027s a direct run; cobbling together the container to see what is different.",
+      "parentUuid": "a94ddc4a_55812a1e",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "eb7e0760_49e3855e",
         "filename": "ci/publish.ksh",
         "patchSetId": 2
@@ -96,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "43e4aee2_9675f7ce",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-30T18:15:19Z",
+      "side": 1,
+      "message": "Yes, yet the test file I have on my system has an \u0027a\u0027 in the file name and it worked.  Odd.",
+      "parentUuid": "eb7e0760_49e3855e",
+      "range": {
+        "startLine": 33,
+        "startChar": 20,
+        "endLine": 33,
+        "endChar": 22
+      },
+      "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a8023418_1095e871",
         "filename": "ci/publish.ksh",
         "patchSetId": 2
@@ -107,6 +155,30 @@
       "writtenOn": "2019-07-30T18:08:14Z",
       "side": 1,
       "message": "Please be verbose about every copy, it\u0027s nice to see in the output the work that was done",
+      "range": {
+        "startLine": 50,
+        "startChar": 1,
+        "endLine": 50,
+        "endChar": 2
+      },
+      "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d54c5b6_00872855",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-30T18:15:19Z",
+      "side": 1,
+      "message": "Ack.... old unix guys are not used to being chatty :)",
+      "parentUuid": "a8023418_1095e871",
       "range": {
         "startLine": 50,
         "startChar": 1,
