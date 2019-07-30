@@ -46,6 +46,29 @@
       "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb7e0760_49e3855e",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-07-30T18:03:55Z",
+      "side": 1,
+      "message": "missing \"a\" ?",
+      "range": {
+        "startLine": 33,
+        "startChar": 20,
+        "endLine": 33,
+        "endChar": 22
+      },
+      "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
