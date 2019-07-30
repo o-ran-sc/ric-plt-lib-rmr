@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0b84202f_b4492b39",
+        "filename": "ci/Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-30T17:38:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c0a2fc6a_6d031b26",
+      "range": {
+        "startLine": 38,
+        "startChar": 14,
+        "endLine": 38,
+        "endChar": 18
+      },
+      "revId": "bbc1f72cedc2d05a675285a4cffe4cf3fd8ef7ca",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9a76886_059615b2",
         "filename": "ci/publish.ksh",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "bbc1f72cedc2d05a675285a4cffe4cf3fd8ef7ca",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69e89390_28f68efb",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-30T17:38:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9a76886_059615b2",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 6
+      },
+      "revId": "bbc1f72cedc2d05a675285a4cffe4cf3fd8ef7ca",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
