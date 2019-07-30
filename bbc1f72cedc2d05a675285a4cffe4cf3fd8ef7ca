@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c0a2fc6a_6d031b26",
+        "filename": "ci/Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-07-30T17:05:44Z",
+      "side": 1,
+      "message": "I recommend omitting the /tmp prefix.  The image has \"ci\" and everything else bcos you copied it in above, should work just like the RUN command above works.",
+      "range": {
+        "startLine": 38,
+        "startChar": 14,
+        "endLine": 38,
+        "endChar": 18
+      },
+      "revId": "bbc1f72cedc2d05a675285a4cffe4cf3fd8ef7ca",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9a76886_059615b2",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-07-30T17:05:44Z",
+      "side": 1,
+      "message": "It\u0027s very helpful for debugging builds to echo the shell script name at the outset.",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 6
+      },
+      "revId": "bbc1f72cedc2d05a675285a4cffe4cf3fd8ef7ca",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
