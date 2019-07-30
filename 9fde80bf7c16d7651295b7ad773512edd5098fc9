@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "eb19ffec_5c073f65",
+        "filename": "ci/ci_build.ksh",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-30T18:26:10Z",
+      "side": 1,
+      "message": "Target in this script is /tmp, so publish doesn\u0027t want to copy all of /tmp contents to /data.  Stash could save them in a single purpose directory, and then as you say publish could just copy from there. I was trying not to alter ci_build more than I had to; less to go wrong.",
+      "parentUuid": "ece60d75_e46759e7",
+      "range": {
+        "startLine": 56,
+        "startChar": 3,
+        "endLine": 56,
+        "endChar": 42
+      },
+      "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a7733130_89963775",
         "filename": "ci/publish.ksh",
         "patchSetId": 2
