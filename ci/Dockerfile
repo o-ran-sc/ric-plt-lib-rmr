@@ -23,6 +23,17 @@ RUN apt-get update && apt-get -q -y install cmake ksh alien
 ADD . /tmp
 WORKDIR /tmp
 
-# build RMr, run unit tests, and generate packages
+# build RMr, run unit tests, and generate packages and package lists
 RUN ksh ci/ci_build.ksh
+
+# Executing the container "as a binary" will cause the CI publish
+# script to execute.  This will take the simple package list generated
+# by the ci_build script and copy the list of packages to the target
+# directory.  The target directory is /data by default, but can be
+# overridden from the docker run command line. In either case, the 
+# assumption is that the target directory is mounted as a volume, and
+# that the user 'nobody' has write permissions.
+#
+USER nobody
+ENTRYPOINT [ "/tmp/ci/publish.ksh" ]
 
