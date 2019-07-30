@@ -93,6 +93,29 @@
       "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a8023418_1095e871",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-07-30T18:08:14Z",
+      "side": 1,
+      "message": "Please be verbose about every copy, it\u0027s nice to see in the output the work that was done",
+      "range": {
+        "startLine": 50,
+        "startChar": 1,
+        "endLine": 50,
+        "endChar": 2
+      },
+      "revId": "9fde80bf7c16d7651295b7ad773512edd5098fc9",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
