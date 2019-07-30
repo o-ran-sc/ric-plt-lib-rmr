@@ -42,15 +42,19 @@
 #	Date:		14 June 2019
 # --------------------------------------------------------------------------------
 
-# stash a set of packages for a particular flavour ($1)
+# stash a set of packages for a particular flavour ($1). Records what was kept
+# in a yaml file for an external process to grab, and in a simple publication
+# list for our internal publish script to gobble up.
 #
 function stash_pkgs {
+	mkdir -p $target_dir/exported
+
 	for pkg in deb rpm
 	do
 		ls .build/*.$pkg 2>/dev/null | while read f
 		do
-			cp $f $target_dir/${f##*/}
-			echo "  - $target_dir/${f##*/}" >>$yaml_file
+			cp $f $target_dir/exported/${f##*/}
+			echo "  - $target_dir/exported/${f##*/}" >>$yaml_file
 		done
 
 	done
@@ -70,6 +74,7 @@ do
 		*)	echo "$1 is not recognised"
 			echo ""
 			echo "usage: $0 [-t target-dir]"
+			echo "   target dir defaults to /tmp and is where packages and lists are placed."
 			exit 1
 			;;
 	esac
@@ -79,8 +84,11 @@ done
 
 if [[ ! -d $target_dir ]]
 then
-	echo "[FAIL] cannot find directory: $target_dir"
-	exit 1
+	if ! -mkdir -p $target_dir
+	then
+		echo "[FAIL] cannot find or create target directory: $target_dir"
+		exit 1
+	fi
 fi
 
 if [[ ! -d ./ci ]]							# verify we are in the root of the RMr repo filesystem, abort if not
