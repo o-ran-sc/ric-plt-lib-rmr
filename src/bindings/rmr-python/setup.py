@@ -18,7 +18,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="rmr",
-    version="0.10.1",
+    version="0.10.2",
     packages=find_packages(),
     author="Tommy Carpenter",
     description="Python wrapper for RIC RMR",
