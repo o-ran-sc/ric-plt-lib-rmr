@@ -45,6 +45,75 @@
       "revId": "924891edb2371ed4fa1577fddebb98030dd90f34",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c84a31bd_74426d0f",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-07-31T12:25:42Z",
+      "side": 1,
+      "message": "/export ?",
+      "range": {
+        "startLine": 25,
+        "startChar": 32,
+        "endLine": 25,
+        "endChar": 36
+      },
+      "revId": "924891edb2371ed4fa1577fddebb98030dd90f34",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8aace7fa_deac08bb",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-07-31T12:25:42Z",
+      "side": 1,
+      "message": "In email I thought you proposed using /export, and I was fine with that; did I miss something?",
+      "range": {
+        "startLine": 35,
+        "startChar": 13,
+        "endLine": 35,
+        "endChar": 17
+      },
+      "revId": "924891edb2371ed4fa1577fddebb98030dd90f34",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3fee9dd8_0a42cc7e",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-07-31T12:25:42Z",
+      "side": 1,
+      "message": "please add -v here",
+      "range": {
+        "startLine": 58,
+        "startChar": 7,
+        "endLine": 58,
+        "endChar": 9
+      },
+      "revId": "924891edb2371ed4fa1577fddebb98030dd90f34",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
