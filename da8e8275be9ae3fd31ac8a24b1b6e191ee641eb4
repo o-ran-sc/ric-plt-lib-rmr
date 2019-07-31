@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "96ec22fa_afc754e8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-31T13:42:22Z",
+      "side": 1,
+      "message": "I haven\u0027t figured this out, but I suspect that when I amend a commit the script that I\u0027m using to set it all up is asking it to be signed and because the gerrit goo adds the change id below the signed off text, it gets a second one.    I just need to tweak my script to not ask for signature if it\u0027s amending.",
+      "parentUuid": "ecfb905b_8e4bd9ba",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 1
+      },
+      "revId": "da8e8275be9ae3fd31ac8a24b1b6e191ee641eb4",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a6dbe521_b61d2f31",
         "filename": "ci/Dockerfile",
         "patchSetId": 5
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "c3f09cce_618a1831",
+        "filename": "ci/Dockerfile",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-31T13:42:22Z",
+      "side": 1,
+      "message": "It is not, but I prickle a bit running as root, and thus dropping files into the external world as such.   I\u0027ll remove with the assumption that if the user invoking the container doesn\u0027t like the fact that it defaults to root they can change it on the run command line.   Fix coming; marking resolved.",
+      "parentUuid": "a6dbe521_b61d2f31",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 2
+      },
+      "revId": "da8e8275be9ae3fd31ac8a24b1b6e191ee641eb4",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "45409f1e_c57c8c43",
         "filename": "ci/publish.ksh",
         "patchSetId": 5
@@ -68,6 +116,30 @@
       "revId": "da8e8275be9ae3fd31ac8a24b1b6e191ee641eb4",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f3cf0279_eddffc30",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-31T13:42:22Z",
+      "side": 1,
+      "message": "Which is why everybody should just shift to ksh -- better anyway :) \n\nI\u0027ll change; actually meant to do that yesterday, but forgot.",
+      "parentUuid": "45409f1e_c57c8c43",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "da8e8275be9ae3fd31ac8a24b1b6e191ee641eb4",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
