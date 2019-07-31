@@ -56,6 +56,24 @@
       "revId": "36e4e3c85b6cf216255445d7dc524e212391687e",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f4b8301_9061a8a2",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-07-31T14:03:09Z",
+      "side": 1,
+      "message": "What name do you want? I can do it and upload",
+      "parentUuid": "c85bd34d_1b97315d",
+      "revId": "36e4e3c85b6cf216255445d7dc524e212391687e",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
