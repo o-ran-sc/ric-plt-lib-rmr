@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.2] - 7/31/2019
+    * Include license here per Jira RICPLT-1855
+
 ## [0.10.0] - 5/15/2019
     * Fix a bug in rmr mock that prevented it for being used for rmr_rcv (was only usable for rmr_torcv)
     * Add more unit tests, esp for message summary
