@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "a6172d45_1aa5e269",
+        "filename": "ci/Dockerfile",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-07-31T13:56:40Z",
+      "side": 1,
+      "message": "Thanks for removing the USER directive.  I prefer this be left up to the invoking process.  Nobody HAS to run the image as root, docker run supports using \"nobody\" or whatever.",
+      "revId": "36e4e3c85b6cf216255445d7dc524e212391687e",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c85bd34d_1b97315d",
         "filename": "ci/publish.ksh",
         "patchSetId": 6
@@ -13,6 +30,29 @@
       "writtenOn": "2019-07-31T13:55:33Z",
       "side": 1,
       "message": "git mv moves the file, but I can\u0027t seem to amend the commit with the new file. Trying once more, but may have to rename this in a separate effort.",
+      "revId": "36e4e3c85b6cf216255445d7dc524e212391687e",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e297f2d8_4466a76e",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-07-31T13:56:40Z",
+      "side": 1,
+      "message": "so, ahh, ummm, despite your comment I still see a file suffix .ksh here?",
+      "range": {
+        "startLine": 1,
+        "startChar": 15,
+        "endLine": 1,
+        "endChar": 19
+      },
       "revId": "36e4e3c85b6cf216255445d7dc524e212391687e",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
