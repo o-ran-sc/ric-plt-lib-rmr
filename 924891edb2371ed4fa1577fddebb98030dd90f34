@@ -94,6 +94,30 @@
     },
     {
       "key": {
+        "uuid": "73364796_0dc2f684",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-31T12:40:47Z",
+      "side": 1,
+      "message": "I did, but I was thinking internally.  I\u0027ve no issue changing it here too. Patch set soon.",
+      "parentUuid": "8aace7fa_deac08bb",
+      "range": {
+        "startLine": 35,
+        "startChar": 13,
+        "endLine": 35,
+        "endChar": 17
+      },
+      "revId": "924891edb2371ed4fa1577fddebb98030dd90f34",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3fee9dd8_0a42cc7e",
         "filename": "ci/publish.ksh",
         "patchSetId": 3
@@ -114,6 +138,30 @@
       "revId": "924891edb2371ed4fa1577fddebb98030dd90f34",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2eccd12e_e237af9e",
+        "filename": "ci/publish.ksh",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-07-31T12:40:47Z",
+      "side": 1,
+      "message": "Humm... my push failed this morning and I didn\u0027t catch that.  This will go with the data/export changes.",
+      "parentUuid": "3fee9dd8_0a42cc7e",
+      "range": {
+        "startLine": 58,
+        "startChar": 7,
+        "endLine": 58,
+        "endChar": 9
+      },
+      "revId": "924891edb2371ed4fa1577fddebb98030dd90f34",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
