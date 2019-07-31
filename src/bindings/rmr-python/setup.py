@@ -14,14 +14,28 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 # ==================================================================================
+from os.path import dirname, abspath, join as path_join
 from setuptools import setup, find_packages
+
+SETUP_DIR = abspath(dirname(__file__))
+
+
+def _long_descr():
+    """Yields the content of documentation files for the long description"""
+    doc_path = path_join(SETUP_DIR, "README.md")
+    with open(doc_path) as f:
+        return f.read()
+
 
 setup(
     name="rmr",
-    version="0.10.2",
+    version="0.10.3",
     packages=find_packages(),
     author="Tommy Carpenter",
     description="Python wrapper for RIC RMR",
     url="https://gerrit.o-ran-sc.org/r/admin/repos/ric-plt/lib/rmr",
+    license="Apache 2.0",
+    data_files=[("", ["LICENSE.txt"])],
     install_requires=[],
+    long_description=_long_descr(),
 )

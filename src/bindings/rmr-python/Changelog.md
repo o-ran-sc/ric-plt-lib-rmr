@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.3] - 7/31/2019
+    * (Correctly) Include license here per Jira RICPLT-1855
+
 ## [0.10.2] - 7/31/2019
     * Include license here per Jira RICPLT-1855
 
