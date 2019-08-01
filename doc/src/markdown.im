@@ -103,6 +103,9 @@
 .dv li .li
 .dv end_list .el
 
+.dv center_start
+.dv center_end
+
 .dv line .sp 1  ------
 
 .** leading indention is significant to markdown, so turn it off
