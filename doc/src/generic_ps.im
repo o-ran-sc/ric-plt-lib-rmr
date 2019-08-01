@@ -30,8 +30,8 @@
 	.st &text_size
 	.sf &text_font
 	.dh 1 f=&bold_font p=12 e=no s=2,1 m=.5i i=0i
-	.dh 2 f=&bold_font p=12 s=1,.5 m=.5i i=0i
-	.dh 3 f=&bold_font p=12 s=1,0 m=.5i i=0i
+	.dh 2 f=&bold_font p=10 s=1,.5 m=.5i i=0i
+	.dh 3 f=&bold_font p=10 s=1,0 m=.5i i=0i
 
 	.dv comment .** ignore
 	
@@ -44,9 +44,13 @@
 	
 	.dv nf .nf
 	.dv fo .fo
+
+	.dv center_start .bc start
+	.dv center_end .bc end
 	
 	.dv line_len .ll $1
 	.dv space .sp 1
+	.dv mult_space .sp $1
 	.dv half_space .sp .5
 	.dv beg_list .bl $1
 	.dv end_list .el
@@ -73,3 +77,6 @@
 	
 	.dv indent .ll -0.5i .in +0.25i
 	.dv uindent .in -0.25i .ll +0.5i
+
+	.dv super .sm ^[ .sm ^&{ss_num}]
+	.dv note .dv ss_num ^[ ?%.0f ^&ss_num 1 + ] ^: .sm .tf superscript /2 ^&{ss_num} ^:
