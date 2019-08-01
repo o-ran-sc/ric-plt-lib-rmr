@@ -39,9 +39,9 @@
 .dv h3 .h3 $1
 .dv h4 .h4 $1
 
-.dh 1 s=2,1 i=.25i
-.dh 2 s=1,1 i=.25i
-.dh 3 s=1,0 i=.25i
+.dh 1 s=2,1 i=.25i m=.25i
+.dh 2 s=1,1 i=.25i m=.25i
+.dh 3 s=1,0 i=.25i m=.25i
 .hn off
 
 .dv fig .fi t=figure
@@ -59,12 +59,19 @@
 
 .dv line_len .ll $1
 .dv space .sp 1
+.dv mult_space .sp $1
 .dv half_space .sp 1
-.dv beg_list .sp 1 .dv lic $1 ^:
-.dv end_list .sp 1
+.dv beg_list .bl $1
+.dv end_list .el
+.dv li .li
+.dv item .li
 
 .dv beg_dlist .sp 1 .bd $1
 .dv end_dlist .ed
+
+.dv center .ce $1 ^:
+.dv center_start .bc start
+.dv center_end	.bc end
 
 .** for now we allow only a single layer of defitems
 .dv di .di $1 ^:
