@@ -1,0 +1,10 @@
+
+&h1(Appendix &code_appendix -- Code Examples)
+The following snippet of code illustrate some of the basic operation of the RMR
+library. 
+Please refer to the examples and test directories in the RMR repository for
+complete RMR based programmes.
+
+.im code_send.im
+.im code_rcv.im
+.im code_sr.im

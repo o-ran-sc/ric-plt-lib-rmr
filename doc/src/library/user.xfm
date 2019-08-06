@@ -1,0 +1,214 @@
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+.if false
+	Mnemonic:	user.xfm
+	Abstract:	This is the main module for the base RMR user documentation.
+	Date:		30 July 2019
+	Author:		E. Scott Daniels
+.fi
+
+.** setup will do the right thing with the index configuration
+.dv index_snare_file index_snatch.im
+.im ./setup.im
+
+.** func is a bit odd; if punct needs to be added, it must be supplied as the second
+.** parm because we add () to the first. E.g. &func(foo_bar:.) will add a parm
+.**
+.dv func .ix force ${1} ^:  ^&cw(${1}()$2 )
+
+.dv mtsid message type and subscription ID
+.dv Mtsid Message type and subscription ID
+.dv mt message type
+.dv Mt Message type
+.dv mts message types
+
+.dv textfont Helvetica
+.dv textsize 10p
+.hn off
+
+
+.gv e XFM_PASS pass
+.if &pass 2 =
+	.** two pass mode -- pull in variables captured during pass 1 for forward references
+	.im p1var_setup.ca
+.fi
+
+.** vars picked up by front_junk as it's a generic module
+.dv doc_title RIC Message Router -- RMR
+.dv doc_subtitle User's Manual
+
+.if pfm
+	.** add licence,  a title page, and talbe of contents
+	.im front_junk.im 
+.ei
+	.** for text based things, nothing more than license
+	.im license.im
+.fi
+
+.if pfm
+	.pn on noline center f=%d 0
+.fi
+
+&mult_space( 5 )
+.st 18
+&center_start
+.sf &bold_font
+&doc_title
+.br
+.st 12
+&doc_subtitle
+&center_end
+.sf &textfont
+&mult_space( 2 )
+.st &textsize
+
+&h1(Overview)
+The RIC Message Router (a.k.a. RMR) is a thin library which provides a latency sensitive application with the ability
+to send and receive messages with other RMR based applications.
+The library provides the following major features:
+
+&half_space
+&indent
+&beg_list( &lic1 )
+	&li Routing and endpoint selection is based on &ital(message type.)
+	&half_space
+
+	&li Application is insulated from the underlying transport mechanism and/or protocols.
+	&half_space
+
+	&li Message distribution (round robin or fanout) is selectable by message type.
+	&half_space
+
+	&li Route management updates are received and processed asynchronously and without overt
+		application involvement.
+&end_list
+&uindent
+
+&space
+&h2(Purpose)
+RMR's main purpose is to provide an application with the ability to send and receive messages to/from other
+peer applications with minimal effort on the application's part.
+To achieve this, RMR manages manages all endpoint information, connections, and routing information necessary
+to establish and maintain communication.
+From the application's point of view, all that is required to send a message is to allocate (via RMR) a message
+buffer, add the payload data, and set the message type.
+To receive a message, the application needs only to invoke the receive function; when a message
+arrives a message buffer will be returned as the function result.
+
+
+&h2(Message Routing)
+Applications are required to place a message type into a message before sending, and may optionally add a
+subscription ID when appropriate.
+The combination of message type, and subscription ID are refered to as the &ital(message key,)
+and is used to match an entry in a routing table which provides the possible endpoints expecting
+to receive messages with the matching key.
+
+&h3(Round Robin Delivery)
+An endpoint from RMR's perspective is an application to which RMR may establish a connection, and expect to
+send messages with one or more defined message keys.
+Each entry in the route table consists of one or more endpoint groups, called round robin groups.
+When a message matches a specific entry, the entry's  groups are used to select the destination of the message.
+A message is sent once to each group, with messages being &ital(balanced) across the endpoints of a group
+via round robin selection.
+Care should be taken when defining multiple groups for a message type as there is extra overhead required
+and thus the overall message latency is somewhat reduced.
+
+&h3(Routing Table Updates)
+Route table information is made available  to RMR a static file (loaded once), or by updates sent from a
+separate route manager application.
+If a static table is provided, it is loaded during RMR initialisation and will remain in use until
+an external process connects and delivers a route table update (often referred to as a dynamic update).
+Dynamic updates are listened for in a separate process thread and applied automatically; the application does not
+need to allow for, or trigger, updates.
+
+&h2(Latency And Throughput)
+While providing insulation from the underlying message transport mechanics, RMR must also do so in such a
+manner that message latency and throughput are not impacted.
+In general, the RMR induced overhead, incurred due to the process of selecting an endpoint for each message,
+is minimal and should not impact the overall latency or throughput of the application.
+This impact has been measured with test applications running on the same physical host and the average
+latency through RMR for a message was on the order of 0.02 milliseconds.
+
+&space
+As an application's throughput increases, it becomes easy for the application to overrun the underlying
+transport mechanism (e.g. NNG), consume all available TCP transmit buffers, or otherwise find itself
+in a situation where a send might not immediately complete.
+RMR offers different &ital(modes) which allow the application to manage these states based on the
+overall needs of the application.
+These modes are discussed in the &ital(Configuration) section of this document.
+
+
+.** snarf in the major sections (to avoid one huge source document and maybe to promote reuse)
+.im general_use.im
+.im advanced_use.im
+.im failures.im
+.im config.im
+
+
+.if tfm
+	.** show all column/foot notes
+	.cn showend
+	&mult_space( 3 )
+.fi
+
+
+
+.dv qr_appendix A
+.pa
+.im api_qref.im
+
+.dv mbuf_appendix B
+.pa
+.im mbuf.im
+
+.dv gloss_appendix C
+.pa
+.im glossary.im
+
+.dv code_appendix D
+.pa
+.im code_appendix.im
+
+.** if pfm and index was setup, include it now
+.if index_here
+	.st 8p
+	&index_here
+	.st &textsize
+.fi
+.pa
+
+.** capture all interesting variables to be used as forward references during pass 2
+.ca expand start p1var_setup.ca
+	.** pass 1 variable settings -- do NOT commit to repo
+
+	.dv qr_appendix &qr_appendix
+	.dv mbuf_appendix &mbuf_appendix
+	.dv gloss_appendix &gloss_appendix
+	.dv code_appendix &code_appendix
+.ca end
+
+.qu
+glossary:
+context
+endpoint
+mt/sid
+NNG
+push back
+route table

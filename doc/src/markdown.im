@@ -37,8 +37,6 @@
 .hn off
 
 
-.** super sccript number for start_note macro
-.dv ss_num 1
 
 .**  these macros are common for prfm/tfm, markdown will override some
 .dv indent .ll -.5i .in +.25i
@@ -55,15 +53,22 @@
 .** ex_end macro calls _must_ be placed in col 0 to cause an exit from no-format mode.
 .dv ex_end .fo on .sf ^&textfont .st ^&textsize .in -.25i .ll +.25i .sp .1
 
+.dv proto_start .sp 1 .cc .5i .st 9 .sf Courier-bold .nf
+.dv proto_end .fo on .sf ^&text_font .st ^&text_size .sp .3
+
+
 .dv h1 .sp .1 .h1 $1
 .dv h2 .sp .1 .h2 $1
 .dv h3 .sp .1 .h3 $1
 .dv di .di $1 ^:
 
+.** super sccript number for start_note macro
+.dv ss_num 1
 .dv super .sm ^[ .sm ^&{ss_num}]
 .dv note .dv ss_num ^[ ^&ss_num 1 + ] ^: .sm ^[ .sm ^&{ss_num}]
+.dv atbot atclose
 
-.dv start_note .cn start atend Times-roman 8p .5i
+.dv start_note .cn start atclose Times-roman 8p .5i
 .dv end_note .cn end
 .dv bold $1
 .dv cw $1
@@ -75,6 +80,7 @@
 .dv line_len .ll $1
 .dv space .sp 1
 .dv half_space .sp 1
+.dv mult_space .sp $1
 
 .** -----------------------------------------------
 .** not used, but might be needed if doc expanded
@@ -115,7 +121,8 @@
 .dv smindent
 .dv smuindent .sp 2
 .dv bold ** .sm $1 .sm **
-.dv ital _ .sm $1 .sm _
+.dv ital _${1}_
+.** .dv ital _ .sm $1 .sm _
 .dv h1 .sp 2 # $1 .br
 .dv h2 .sp 1 ## $1 .br
 .dv h3 .sp 1 ### $1 .br

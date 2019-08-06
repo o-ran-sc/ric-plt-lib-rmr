@@ -48,19 +48,28 @@
 	.dv center_start .bc start
 	.dv center_end .bc end
 	
-	.dv line_len .ll $1
+	.dv line_len .ll $1 .dv cn_line_len $1 ^:
 	.dv space .sp 1
 	.dv mult_space .sp $1
 	.dv half_space .sp .5
+
 	.dv beg_list .bl $1
 	.dv end_list .el
+	.dv lic1 n
+	.dv lic2 m
+	.dv lic3 l
+
 	.dv beg_dlist .bd $1 $2
 	.dv end_dlist .ed
-	.dv ditem .di $1 ^:
-	.dv di .di $1 ^:
-	.dv li .li
+	.dv ditem .cc 2 .di $1 ^:
+	.dv di .cc 2 .di $1 ^:
+	.dv li .cc 2 .li
+	.dv item .cc 2 .li
 	
-	.dv ex_start .st ^&ex_size .sf ^&cw_font .nf
+	.dv proto_start .sp 1 .cc .5i .st 9 .sf Courier-bold .nf
+	.dv proto_end .fo on .sf ^&text_font .st ^&text_size .sp .3
+
+	.dv ex_start .sp .5 .st ^&ex_size .sf ^&cw_font .nf
 	.dv ex_end .fo on .sf ^&text_font .st ^&text_size .sp 1
 	
 	.** fonts and font macros
@@ -69,14 +78,18 @@
 	.dv cw .tf ^&cw_font ^&text_size $1 ^:
 	.dv set_font_prop .sf ^&text_font
 	
-	.cd 1 6.5i
+	.cd 1 6.0i
 	.ll 6i
 	.pn off
 	.ju on
 	.in .5i
+	.dv cn_indent .5i
+	.dv cn_line_len 6i
 	
 	.dv indent .ll -0.5i .in +0.25i
 	.dv uindent .in -0.25i .ll +0.5i
 
 	.dv super .sm ^[ .sm ^&{ss_num}]
+	.dv ss_num 1
 	.dv note .dv ss_num ^[ ?%.0f ^&ss_num 1 + ] ^: .sm .tf superscript /2 ^&{ss_num} ^:
+	.dv atbot atbot

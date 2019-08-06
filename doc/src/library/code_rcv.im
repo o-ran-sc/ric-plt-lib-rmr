@@ -1,0 +1,33 @@
+
+.** example sender code
+
+&h2(Receiver Sample)
+The receiver code is even more simple than the sender code as it does not
+need to wait for a route table to arrive (only senders need to do that), nor
+does it need to allocate an initial buffer.
+The example assumes that the sender is transmitting a zero terminated string
+as the payload.
+
+&space
+
+&indent
+&ex_start
+rmr_mbuf_t* rbuf = NULL;
+void* mrc = rmr_init( listen_port, MAX_BUF_SZ, RMRFL_NOFLAGS );
+
+while( TRUE ) {
+    rbuf = rmr_rcv_msg( mrc, rbuf );    // reuse buffer on all but first loop
+    if( rbuf == NULL || rbuf->state != RMR_OK ) {
+        break;
+    }
+
+    fprintf( stdout, "mtype=%d sid=%d pay=%s\n",
+        rbuf->mtype, rbuf->sub_id, rbuf->payload );
+    sleep( delay_sec );
+}
+
+fprintf( stderr, "receive error\n" );
+rmr_close( mrc );
+
+&ex_end
+&uindent
