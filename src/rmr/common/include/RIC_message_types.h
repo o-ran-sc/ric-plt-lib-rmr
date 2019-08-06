@@ -32,9 +32,14 @@
 
 #define RIC_UNDEFINED				-1
 
+// ---- RESERVED -------------------------------------------
+// all message types 0 - 99 are reserved for RMR
 // ---------------------------------------------------------
+
 #define RIC_SCTP_CONNECTION_FAILURE 1080
 #define RIC_SCTP_CLEAR_ALL			1090
+
+#define	E2_TERM_INIT				1100
 
 #define RIC_SUB_REQ					12010	
 #define RIC_SUB_RESP				12011	
