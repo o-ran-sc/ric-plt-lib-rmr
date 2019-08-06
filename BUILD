@@ -18,9 +18,9 @@
 #
 
 
-Building RMr
+Building RMR
 
-The RIC Message Router (RMr) is built with CMake, and requires
+The RIC Message Router (RMR) is built with CMake, and requires
 a modern gcc compiler and make to be installed on the build
 system. Typically, installing the following list of packages
 in a container (Ubuntu) is all that is needed to craft a
@@ -34,7 +34,7 @@ interactively. Bash is assumed necessary for CMake.
 
 
 Build process
-To build RMr, the usual CMake steps are followed:
+To build RMR, the usual CMake steps are followed:
 	mkdir build
 	cd build
 	cmake .. [options]
@@ -50,6 +50,7 @@ the configuration:
 
   -DBUILD_DOC=1         Man pages generated
   -DDEV_PKG=1			Development package configuration
+  -DIGNORE_LIBDIR		Ignore the system preferred library directory and install in /usr/local/lib
   -DMAN_PREFIX=<path>	Supply a path where man pages are installed (default: /usr/share/man)
   -DPACK_EXTERNALS=1	Include external libraries used to build in the run-time package
   -DPRESERVE_PTYPE=1	Do not change the processor type when naming deb packages
@@ -68,7 +69,7 @@ Resulting package names are illustrated in the CI section below.
 
 Continuous Integration Build
 Use the Dockerfile in the ci/ subdirectory. This installs all
-the required tools, then builds RMr and executes the unit and
+the required tools, then builds RMR and executes the unit and
 programm tests. If tests pass, then  an image is created in the
 local registry with both run-time and development packages.
 
@@ -132,19 +133,19 @@ a different spot (e.g. in $HOME/usr):
 
 
 Libraries
-RMr supports both NNG and Nanomsg as underlying transport. They
-are separate beasts, and while an NNG based program can
-communicate with a Nanomsg based programme, their APIs are NOT
-compatible.  For this reason, and others, RMr generates two
-libraries and requires that the underlying transport be selected
-at link time rather than run time.  The RMr API for both underlying
-mechanisms is the same, so generating a NNG and Nanomsg version
-of a programme should require no extra work; other than adding
-a second link statement and giving it a different name.
+RMR supports only NNG as the underlying transport. Nanomsg
+support was dropped in starting with version 1.0.45 as Nanomsg
+has reached end of life. The package generation and install
+will produce a single RMR library:  librmr_nng.  RMR is designed
+to support different underlying transport mechanisms, which
+might require separate libraries, and thus the library name is
+given a suffix of _nng to reflect the transport mechanism
+in use.
 
-Nanomsg is on its way out with respect to community support. RMr
-will continue to support Nanomsg for a short period of time, but
-new programmes should NOT use Nanomsg.
+Regardless of transport mechanism supported by an RMR library,
+the RMR API will be identical, os it's possible for an appliction
+to shift mechanisms simply by referencing a differnt library (should
+multiple RMR libraries become available).
 
 
 Manual Pages
