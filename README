@@ -1,6 +1,6 @@
 #
 #==================================================================================
-#       Copyright (c) 2019 Nokia 
+#       Copyright (c) 2019 Nokia
 #       Copyright (c) 2018-2019 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,14 +21,14 @@
 Source for the RIC Messaging Library -- RMR.
 
 C does not provide the concept of package names,  yet we have
-a desire not to maintain all of the static code in a single large 
+a desire not to maintain all of the static code in a single large
 file, we use the following convention:
 
 	<name>.c --		C code which builds separately and generates an object
 					that is ultimately added to the archive.
 
 	<name>_static.c - File containing nothing but static functions (a.k.a package
-					only functions). These files should be included by other *.c 
+					only functions). These files should be included by other *.c
 					files and should not generate object.
 
 	<name>.h		Header file that user applications are expected to include
@@ -39,48 +39,54 @@ file, we use the following convention:
 
 	<name>_private.h Header file meant only to be included by the package.
 
-Further, as this code is used to generate both a Nanomsg and NNG based version, 
-there are some modules which are specific to the underlying transport being
-used.  The original code was based on Nanomsg, thus any changes resulting from 
-the port to NNG, are in files with the same name plus _nng (e.g. rtable_static.c
-is the original module, and rrable_nng_static.c is the NNG version).
-					
+Further, as this code is used to generate libraries which make use of different
+transport mechanisms, there are some modules which are specific to the
+underlying transport being used.  The original code supported both Nanomsg and
+NNG, however Nanomsg has been phased out (starting with 1.0.45).  File naming
+convention for modules which are transport specific originally included a
+suffix (e.g. _nng), however as the directory structure was reorganised, and
+transport specific directories, plus a common directory, have been created,
+the need for the suffix has been eliminated (existing files were not changed).
+
 
 External Names
 All externally facing function names and constants will start with rmr_ or
-RMR_ repsectively (RIC Message Router).    For the time being, there is a 
+RMR_ repsectively (RIC Message Router).    For the time being, there is a
 set of mappings from the old uta_* names to rmr_* names. The user code must
 define UTA_COMPAT to have these ensbled.
 
 Internal Names
-Internal (static) functions have no mandiated convention. There are some 
+Internal (static) functions have no mandiated convention. There are some
 names which are prefixed with uta_.  These are left over from the original
-prototype libray which had the name Uta.  The uta_ prefixes were mostly on 
+prototype libray which had the name Uta.  The uta_ prefixes were mostly on
 functions which were iniitally external, but were pulled back for this release.
 
 
 
 Requirements
-To build the RMR libraries, both Nanomsg and NNG must be installed, and if not
-installed in the standard places (e.g. /usr/local/include and /usr/local/lib),
-then the proper references must be made in C_INCLUDE_PATH, and LD_LIBRARY_PATH.
+To build the RMR libraries, NNG must be installed, or the external references
+in the source tree must be used to pull and build the NNG library. It might
+be necessary to alter the values of C_INCLUDE_PATH,  LD_LIBRARY_PATH, or
+LIBRARY_PATH to reflect the instalation location when the installed version
+ot NNG is being used.
 
 To install see the instructions on their html sites:
 	https://github.com/nanomsg/nng
-	https://nanomsg.org/download.html
 
+The default CMake build will not require NNG to be installed, and this is the
+easiest way to build.
 
 Unit Testing
-The script ../test/unit_test.ksh should be used for running unit tests. With no 
-parameters it will attempt to build any file in this directory which has the 
-name *_test.c.  Build is attempted with either mk or make and enables the 
+The script ../test/unit_test.ksh should be used for running unit tests. With no
+parameters it will attempt to build any file in this directory which has the
+name *_test.c.  Build is attempted with either mk or make and enables the
 necessary compiler flags to support coverage output (gcov).  Once built, the
-test programme is executed and if the return code is success (0), the 
+test programme is executed and if the return code is success (0), the
 coverage data is interpreted.
 
-The test programmes may make use of ../test/tools.c which provide simple 
+The test programmes may make use of ../test/tools.c which provide simple
 validation check functions.  These programmes shouild also directly include
-the module(s) under test.  This ensures that they are not linked, and are 
+the module(s) under test.  This ensures that they are not linked, and are
 compiled with the proper coverage flags. In addition, it allows modules that
 are not under test to be linked from the archive and (most importantly) not
 reported on from a coverage perspective. In cases where two modules depend on
@@ -88,7 +94,7 @@ each other, and are static functions, they will need to be tested from a single
 unit test programme (see the rt_tool test programme).
 
 It might be necessary to write a higher level test driver as some of the modules
-(e.g. route table) have threaded daemons which might not be easy to drive 
+(e.g. route table) have threaded daemons which might not be easy to drive
 completely or at all, and thus the code coverage for a passing test might need
 to be lower for this type of module.
 
