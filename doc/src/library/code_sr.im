@@ -1,0 +1,75 @@
+
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+.** example sender code
+
+&h2(Receive and Send Sample)
+The following code snippet receives messages and responds to the sender
+if the message type is odd.
+The code illustrates how the received message may be used to return
+a message to the source.
+Variable type definitions are omitted for clarity and should be obvious.
+
+&space
+It should also be noted that
+things like the message type which id returned to the sender (99) is
+a random value that these applications would have agreed on in advance
+and is &bold(not) an RMR definition.
+
+&space
+
+&indent
+&ex_start
+mrc = rmr_init( listen_port, MAX_BUF_SZ, RMRFL_NOFLAGS );
+rmr_set_stimeout( mrc, 1 );        // allow RMR to retry failed sends for ~1ms
+
+while( ! rmr_ready( mrc ) ) {        // we send, therefore we need a route table
+    sleep( 1 );
+}
+
+mbuf = NULL;                        // ensure our buffer pointer is nil for 1st call
+
+while( TRUE ) {
+    mbuf = rmr_rcv_msg( mrc, mbuf );        // wait for message
+
+    if( mbuf == NULL || mbuf->state != RMR_OK ) {
+        break;
+    }
+
+    if( mbuf->mtype % 2 ) {                // respond to odd message types
+        plen = rmr_payload_size( mbuf );        // max size
+
+                                                // reset necessary fields in msg
+        mbuf->mtype = 99;                       // response type
+        mbuf->sub_id = RMR_VOID_SUBID;          // we turn subid off
+        mbuf->len = snprintf( mbuf->payload, plen, "pong: %s", get_info() );
+
+        mbuf = rmr_rts_msg( mrc, mbuf );        // return to sender
+        if( mbuf == NULL || mbuf->state != RMR_OK ) {
+            fprintf( stderr, "return to sender failed\n" );
+        }
+    }
+}
+
+fprintf( stderr, "abort: receive failure\n" );
+rmr_close( mrc );
+
+&ex_end
+&uindent

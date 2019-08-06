@@ -67,6 +67,9 @@
 .dv ex_start ^^.IP .br ^^.nf .br ^^.ft CW .br .nf
 .dv ex_end .fo on .br ^^.ft P .br ^^.fi .br ^&space
 
+.dv proto_start .sp 1 .cc .5i .st 9 .sf Courier-bold .nf
+.dv proto_end .fo on .sf ^&text_font .st ^&text_size .sp .3
+
 .** fonts and font macros
 .dv ital \fI$1\fR
 .dv bold \fB$1\fR

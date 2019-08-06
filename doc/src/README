@@ -1,0 +1,25 @@
+
+Directories within this directory contains collections of documents
+such as the manual pages and main RMR user guide.   Three are some 
+imbed files at this level which make setup to generate document 
+output in different flavours (e.g. postscript and troff) possible.
+
+For the most part, document output is genreated during the build
+process and left at the top level build directory.  Manual pages
+are the noted exception as the troff output is placed into the 
+development pacage files and will be installed with the RMR library
+(archive) such that the standard UNIX man command will generate
+the needed documentation that develoers expect.
+
+
+Directory overview:
+	library - Documentation on the RMR libraray itself. User manual
+			and internal doc.
+
+	binding - Any documentation needed for the language wrappers
+			or bindings.
+
+	man - Manual page source.
+
+	tools - Some useful things that migth make building and/or 
+			maintaining documents easier.

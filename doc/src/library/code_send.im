@@ -1,0 +1,54 @@
+
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+.** example sender code
+
+&h2(Sender Sample)
+The following code segment shows how a message buffer can be allocated,
+populated, and sent.
+The snippet also illustrates how the result from the &func(rmr_send_msg)
+function is used to send the next message.
+It does not illustrate error and/or retry handling.
+&space
+
+&indent
+&ex_start
+mrc = rmr_init( listen_port, MAX_BUF_SZ, RMRFL_NOFLAGS );
+rmr_set_stimeout( mrc, rmr_retries );
+
+while( ! rmr_ready( mrc ) ) {
+    sleep( 1 );
+}
+
+sbuf = rmr_alloc_msg( mrc, 256 );   // 1st send buffer
+
+while( TRUE ) {
+    sbuf->len = gen_status( (status_msg *) sbuf->payload );
+    sbuf->mtype = STATUS_MSG;
+    sbuf->sub_id = RMR_VOID_SUBID;     // subscription not used
+    sbuf = rmr_send_msg( mrc, sbuf );
+
+    sleep( delay_sec );
+}
+
+rmr_close( mrc );
+
+&ex_end
+&uindent

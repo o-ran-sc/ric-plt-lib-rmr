@@ -1,0 +1,122 @@
+
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+
+.dv term ^&half_space ^&di($1)
+.ix pause
+
+&h1(Appendix  &gloss_appendix -- Glossary)
+
+Many terms in networking can be interpreted with multiple meanings, and several terms used
+in this document are RMR specific.
+The following definitions are the meanings of terms used within this document and should
+help the reader to understand the intent of meaning.
+
+&beg_dlist( &1.0i Helvetica-bold )
+&term(application) A programme which uses RMR to send and/or receive messages to/from another RMR based application.
+
+&term(Critical error)	An error that RMR has encountered which will prevent further successful processing by
+			RMR. Critical errors usually indicate that the application should abort.
+
+&term(Endpoint) An RMR based application that is defined as being capable of receiving one or more types of messages
+			(as defined by a &ital(message key.) .sm )
+
+&term(Environment variable) A key/value pair which is set externally to the application, but which is available
+			to the application (and referenced libraries) through the &cw(getenv) system call. Environment variables
+			are the main method of communicating information such as port numbers to RMR.
+
+&term(Error) An abnormal condition that RMR has encountered, but will not affect the overall processing by RMR,
+			but may impact certain aspects such as the ability to communicate with a specific endpoint. 
+			Errors generally indicate that something, usually external to RMR, must be addressed.
+
+&term(Host name) The name of the host as returned by the &cw(gethostbyname) system call. In a containerised 
+			environment this might be the container or service name depending on how the container is started.
+			From RMR's point of view, a host name can be used to resolve an &ital(endpoint) definition in 
+			a &ital(route table.)
+
+&term(IP)	Internet protocol. A low level transmission protocol which governs the transmission of datagrams
+			across network boundaries.
+
+&term(Listen socket) A &ital(TCP) socket used to await incoming connection requests. Listen sockets are defined
+			by an interface and port number combination where the port number is unique for the interface.
+
+&term(Message) A series of bytes transmitted from the application to another RMR based application. A message
+			is comprised of RMR specific data (a header), and application data (a payload).
+
+&term(Message buffer) A data structure used to describe a message which is to be sent or has been received.
+			The message buffer includes the payload length, message type, message source, and other information.
+
+&term(Messgae type) A signed integer (0-32000) which identifies the type of message being transmitted, and is 
+			one of the two components of a &ital(routing key.) See &ital(Subscription ID.)
+
+&term(Payload) The portion of a message which holds the user data to be transmitted to the remote &ital(endpoint.)
+			The payload contents are completely application defined.
+
+&term(RMR context) A set of information which defines the current state of the underlying transport connections that
+			RMR is managing. The application will be give a context reference (pointer) that is supplied to most
+			RMR functions as the first parameter.
+
+&term(Round robin) The method of selecting an &ital(endpoint) from a list such that all &ital(endpoints) are selected
+			before starting at the head of the list.
+
+&term(Route table) A series of "rules" which define the possible &ital(endpoints) for each &ital(message key.)
+
+&term(Route table manager) An application responsible for building a &ital(route table) and then distributing it to
+			all applicable RMR based applications.
+
+&term(Routing) The process of selecting an &ital(endpoint) which will be the recipient of a message.
+
+&term(Routing key) A combination of &ital(message type) and &ital(subscription ID) which RMR uses to select the 
+			destination &ital(endpoint) when sending a message.
+
+&term(Source) The sender of a message. 
+
+
+&term(Subscription ID) A signed integer value (0-32000) which identifies the subscription characteristic of a message.
+			It is used in conjunction with the &ital(message type) to determine the &ital(routing key.)
+
+&term(Target) The &ital(endpoint) selected to receive a message.
+
+&term(TCP)	Transmission Control Protocol. A connection based internet protocol which provides for
+			lossless packet transportation, usually over IP.
+
+&term(Thread)	Also called a &ital(process thread, or pthread.)  This is a lightweight process which executes in concurrently with
+			the application and shares the same address space. 
+			RMR uses threads to manage asynchronous functions such as route table updates.
+
+&Term(Trace information)  An optional portion of the message buffer that the application may populate with data
+			that allows for tracing the progress of the transaction or application activity across components.
+			RMR makes no use of this data.
+
+&term(Transaction ID) A fixed number of bytes in the &ital(message buffer) which the application may populate with 
+			information related to the transaction. RMR makes use of the transaction ID for matching response messages
+			with the &c(rmr_call) function is used to send a message.
+
+&term(Transient failure) An error state that is believed to be short lived and that the operation, if retried by the 
+			application, might be successful. C programmers will recognise this as &cw(EAGAIN.)
+			
+&term(Warning) A warning occurs when RMR has encountered something that it believes isn't correct, but has a defined
+			work round.  
+
+&term(Wormhole) A direct connection managed by RMR between the user application and a remote, RMR based, application.
+&end_dlist
+
+.ix resume
+

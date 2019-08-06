@@ -1,0 +1,150 @@
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+.if false
+	Mnemonic:	index_snarf.im
+	Abstract:	Define all terms/synonyms whch {X}fm will yank and reference when
+				it builds the index (pfm only).
+	Date:		31 July 2019
+	Author:		E. Scott Daniels
+.fi
+
+
+.if pfm
+.** ensure that index collection is going
+.ix resume
+
+.ix snare context
+.ix synonym context ctx
+
+.ix snare endpoint
+
+.ix snare `message type`
+.ix synonym `message type` MT/SID
+.ix synonym `message type` `message type,`
+
+.ix snare nanomsg
+.ix synonym nanomsg Nanomsg
+.ix snare NNG
+.ix snare payload
+
+.ix snare `round robin`
+.ix synonym `round robin` round-robin
+.ix snare `route table`
+
+.ix snare `subscription ID`
+.ix synonym `subscription ID` `subscription ID,`
+.ix synonym `subscription ID` `subID`
+
+.ix snare `transaction ID`
+.ix snare `trace data`
+
+.ix snare boo
+
+.** ----  functions --------
+.ix snare rmr_call
+.ix snare rmr_init
+.ix snare rmr_get_ip
+.ix snare rmr_get_src
+.ix snare rmr_ready
+.ix snare rmr_rcv_msg
+.ix snare rmr_rts_msg
+.ix snare rmr_send_msg
+.ix snare rmr_init_trace
+.ix snare rmr_wh_open
+.ix snare rmr_wh_close
+.ix snare rmr_wh_send_msg
+
+.** ----- environment variables -----
+.ix snare RMR_BIND_IF
+.ix snare RMR_RTG_SVC
+.ix snare RMR_SEED_RT
+.ix snare RMR_RTG_ISRAW
+.ix snare RMR_VCTL_FILE
+.ix snare RMR_SRC_NAMEONLY
+
+.** ----- errors -------------------
+.if false
+.ix snare RMR_OK
+.ix snare RMR_ERR_BADARG
+.ix snare RMR_ERR_NOENDPT
+.ix snare RMR_ERR_EMPTY
+.ix snare RMR_ERR_NOHDR
+.ix snare RMR_ERR_SENDFAILED
+.ix snare RMR_ERR_CALLFAILED
+.ix snare RMR_ERR_NOWHOPEN
+.ix snare RMR_ERR_WHID
+.ix snare RMR_ERR_OVERFLOW
+.ix snare RMR_ERR_RETRY
+.ix snare RMR_ERR_RCVFAILED
+.ix snare RMR_ERR_TIMEOUT
+.ix snare RMR_ERR_UNSET
+.ix snare RMR_ERR_TRUNC
+.ix snare RMR_ERR_NOTSUPP
+.fi
+
+.ix snare OK
+.ix synonym OK RMR_OK
+.ix snare BADARG
+.ix synonym BADARG RMR_ERR_BADARG
+.ix snare NOENDPT
+.ix synonym NOENDPT RMR_ERR_NOENDPT
+.ix snare EMPTY
+.ix synonym EMPTY RMR_ERR_EMPTY
+.ix snare NOHDR
+.ix synonym NOHDR RMR_ERR_NOHDR
+.ix snare SENDFAILED
+.ix synonym SENDFAILED RMR_ERR_SENDFAILED
+.ix snare CALLFAILED
+.ix synonym CALLFAILED RMR_ERR_CALLFAILED
+.ix snare NOWHOPEN
+.ix synonym NOWHOPEN RMR_ERR_NOWHOPEN
+.ix snare WHID
+.ix synonym WHID RMR_ERR_WHID
+.ix snare OVERFLOW
+.ix synonym OVERFLOW RMR_ERR_OVERFLOW
+.ix snare RETRY
+.ix synonym RETRY RMR_ERR_RETRY
+.ix snare RCVFAILED
+.ix synonym RCVFAILED RMR_ERR_RCVFAILED
+.ix snare TIMEOUT
+.ix synonym TIMEOUT RMR_ERR_TIMEOUT
+.ix snare UNSET
+.ix synonym UNSET RMR_ERR_UNSET
+.ix snare TRUNC
+.ix synonym TRUNC RMR_ERR_TRUNC
+.ix snare NOTSUPP
+.ix synonym NOTSUPP RMR_ERR_NOTSUPP
+
+
+
+.** ------------ groups ------------------------------------------------
+.** order listed on the group is order displayed in the index under the group heading.
+.** labels with no references in the doc are omitted, so safe to add all values
+
+.ix group Functions rmr_call rmr_get_ip rmr_get_src rmr_init rmr_init_trace rmr_rcv_msg rmr_ready rmr_rts_msg rmr_send_msg rmr_wh_close rmr_wh_open rmr_wh_send_msg
+
+.ix group `Env Variables` RMR_BIND_IF RMR_RTG_SVC RMR_RTG_ISRAW RMR_SEED_RT RMR_SRC_NAMEONLY RMR_VCTL_FILE
+
+.ix group `Errors (RMR_ERR_*)` OK BADARG CALLFAILED EMPTY NOENDPT NOHDR NOTSUPP NOWHOPEN OVERFLOW SENDFAILED RETRY RCVFAILED TIMEOUT TRUNC UNSET WHID
+
+.** .ix group Tables `end table` `start table` `table cell` `table row` `table header`
+.fi
+
+

@@ -1,0 +1,54 @@
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+.if false
+	Title page, toc and license for page oriented output
+.fi
+
+.sp 20
+.st 24
+.bc start
+&doc_title
+.br
+&doc_subtitle
+.bc end
+.st &textsize
+
+.sp 25
+Original: 30 July 2019 .br
+.gv Date
+Revised: &_date
+.pa
+
+
+.im license.im
+.pa
+
+.if &pass 1 =
+	.tc on
+.ei
+	.tc off
+	.pn on noline center roman 0
+
+	.im user.toc	.** initial page eject inside
+	.pa
+.fi
+
+.** ensure this is restored after toc spits
+.cd 1 6.0i
