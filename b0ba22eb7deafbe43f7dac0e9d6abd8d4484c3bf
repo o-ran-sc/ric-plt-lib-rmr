@@ -1,0 +1,326 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d3dfbec_e4ca85d8",
+        "filename": "BUILD",
+        "patchSetId": 7
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "extra \"in\"",
+      "range": {
+        "startLine": 137,
+        "startChar": 20,
+        "endLine": 137,
+        "endChar": 22
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2712268_6ff4a406",
+        "filename": "BUILD",
+        "patchSetId": 7
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "applicAtion",
+      "range": {
+        "startLine": 146,
+        "startChar": 58,
+        "endLine": 146,
+        "endChar": 68
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af562a21_00d00377",
+        "filename": "BUILD",
+        "patchSetId": 7
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "differEnt",
+      "range": {
+        "startLine": 147,
+        "startChar": 44,
+        "endLine": 147,
+        "endChar": 52
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d50ba2b_c8e97336",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "uh, but the other file says you\u0027ve kept the suffix, so IDK",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 76
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1638b077_e7709f29",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "mandated (no \"i\")",
+      "range": {
+        "startLine": 59,
+        "startChar": 36,
+        "endLine": 59,
+        "endChar": 45
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f140672f_978183d9",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "Extra \"i\" again",
+      "range": {
+        "startLine": 62,
+        "startChar": 21,
+        "endLine": 62,
+        "endChar": 30
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff09f0b3_2a1aca3a",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "Are those submodules still present in the repo?",
+      "range": {
+        "startLine": 68,
+        "startChar": 2,
+        "endLine": 68,
+        "endChar": 19
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e07558be_9488b760",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "instalLation",
+      "range": {
+        "startLine": 70,
+        "startChar": 28,
+        "endLine": 70,
+        "endChar": 39
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3e13a925_ced8872e",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "of",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 2
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d87d3ce2_994b6e5e",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "\u0027e\u0027 ..  what, are you British today?",
+      "range": {
+        "startLine": 84,
+        "startChar": 13,
+        "endLine": 84,
+        "endChar": 14
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ef9c3f01_251bb47b",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "Ditto",
+      "range": {
+        "startLine": 87,
+        "startChar": 17,
+        "endLine": 87,
+        "endChar": 18
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d16ce8c2_0509d15f",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "Ditto",
+      "range": {
+        "startLine": 88,
+        "startChar": 43,
+        "endLine": 88,
+        "endChar": 44
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "24c38e30_c6d86d7f",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "Another extra \"i\"",
+      "range": {
+        "startLine": 88,
+        "startChar": 50,
+        "endLine": 88,
+        "endChar": 51
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b083a1e_973c5a34",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-08-06T19:06:28Z",
+      "side": 1,
+      "message": "Ditto",
+      "range": {
+        "startLine": 94,
+        "startChar": 50,
+        "endLine": 94,
+        "endChar": 51
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
