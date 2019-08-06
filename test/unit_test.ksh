@@ -333,6 +333,7 @@ show_output=0				# show output from each test execution (-S)
 quiet=0
 gen_xml=0
 replace_flags=1				# replace ##### in gcov for discounted lines
+run_nano_tests=0
 
 while [[ $1 == "-"* ]]
 do
@@ -340,6 +341,7 @@ do
 		-C)	builder="$2"; shift;;		# custom build command
 		-G)	builder="gmake %s";;
 		-M)	builder="mk -a %s";;		# use plan-9 mk (better, but sadly not widly used)
+		-N)	run_nano_tests=1;;
 
 		-c)	module_cov_target=$2; shift;;
 		-f)	force_discounting=1;
@@ -389,10 +391,17 @@ then
 	flist=""
 	for tfile in *_test.c
 	do
+set -x
 		if [[ $tfile != *"static_test.c" ]]
 		then
+			if(( ! run_nano_tests )) && [[ $tfile == *"nano"* ]]
+			then
+				continue
+			fi
+			
 			flist="${flist}$tfile "
 		fi
+set +x
 	done
 else
 	flist="$@"
@@ -429,6 +438,11 @@ do
 	add_ignored_func test_nng_em.c		# the nng/nano emulated things
 	for f in *_static_test.c			# all static modules here
 	do
+		if(( ! run_nano_tests )) && [[ $f == *"nano"* ]]
+		then
+			continue
+		fi
+
 		add_ignored_func $f
 	done
 
