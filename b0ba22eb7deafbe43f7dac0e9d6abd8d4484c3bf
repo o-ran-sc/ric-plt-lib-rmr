@@ -163,6 +163,30 @@
     },
     {
       "key": {
+        "uuid": "e2fb3630_5c687577",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-08-06T20:10:00Z",
+      "side": 1,
+      "message": "They are for now. Nano will be removed when I remove the code completely.  This change is the first step to remove the libraries from building. NNG remains so that we can build on our specific version.",
+      "parentUuid": "ff09f0b3_2a1aca3a",
+      "range": {
+        "startLine": 68,
+        "startChar": 2,
+        "endLine": 68,
+        "endChar": 19
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e07558be_9488b760",
         "filename": "README",
         "patchSetId": 7
@@ -232,6 +256,30 @@
     },
     {
       "key": {
+        "uuid": "7f1cc762_3f20f00c",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-08-06T20:10:00Z",
+      "side": 1,
+      "message": "For years our project standards have been International English, not American.  It\u0027s very hard to break habits like programme, serialise and the like.  IMHO, correct spelling if I can find it in the OED :)",
+      "parentUuid": "d87d3ce2_994b6e5e",
+      "range": {
+        "startLine": 84,
+        "startChar": 13,
+        "endLine": 84,
+        "endChar": 14
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ef9c3f01_251bb47b",
         "filename": "README",
         "patchSetId": 7
@@ -243,6 +291,30 @@
       "writtenOn": "2019-08-06T19:06:28Z",
       "side": 1,
       "message": "Ditto",
+      "range": {
+        "startLine": 87,
+        "startChar": 17,
+        "endLine": 87,
+        "endChar": 18
+      },
+      "revId": "b0ba22eb7deafbe43f7dac0e9d6abd8d4484c3bf",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c32dfc15_ba3a5214",
+        "filename": "README",
+        "patchSetId": 7
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-08-06T20:10:00Z",
+      "side": 1,
+      "message": "Ditto to :)",
+      "parentUuid": "ef9c3f01_251bb47b",
       "range": {
         "startLine": 87,
         "startChar": 17,
