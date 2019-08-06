@@ -2,6 +2,9 @@
 API change summaries and fixes to the code. Doc correctsions 
 and/or changes are not mentioned here; see the commit messages.
 
+2019 August 6; version 1.0.44
+	Added a new message type constant.
+
 2019 July 15; Version 1.0.39
 	Prevent unnecessary usleep in retry loop.
 
