@@ -1,19 +1,33 @@
 
-API change summaries and fixes to the code. Doc correctsions 
+API and build change  and fixe summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
-2019 August 6; version 1.0.44
+2019 August 6; version 1.0.45 (build changes)
+	Support for the Nanomsg transport library has been dropped.
+		The library librmr.* will no longer be included in packages.
+
+	Packages will install RMR libraries into the system preferred
+		target directory. On some systems this is /usr/local/lib
+		and on others it is /usr/local/lib64.  The diretory is
+		determined by the sytem on which the package is built and
+		NOT by the system installing the package, so it's possible
+		that the RMR libraries end up in a strange location if the
+		.deb or .rpm file was generated on a Linux flavour that
+		has a different preference than the one where the package
+		is installed.
+
+2019 August 6; version 1.0.44 (API change)
 	Added a new message type constant.
 
-2019 July 15; Version 1.0.39
+2019 July 15; Version 1.0.39 (bug fix)
 	Prevent unnecessary usleep in retry loop.
 
-2019 July 12; Version 1.0.38
+2019 July 12; Version 1.0.38 (API change)
 	Added new message types to RIC_message_types.h.
 
 2019 July 11; Version 1.0.37
 
-	librmr and librmr_nng 
+	librmr and librmr_nng
 		- Add message buffer API function rmr_trace_ref()
 		  (see rmr_trace_ref.3 manual page in dev package).
 
