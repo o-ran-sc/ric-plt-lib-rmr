@@ -54,7 +54,7 @@ the configuration:
   -DMAN_PREFIX=<path>	Supply a path where man pages are installed (default: /usr/share/man)
   -DPACK_EXTERNALS=1	Include external libraries used to build in the run-time package
   -DPRESERVE_PTYPE=1	Do not change the processor type when naming deb packages
-  -DSKIP_EXTERNALS=1	Do not use Nano/NNG submodules when building; uee installed packages
+  -DSKIP_EXTERNALS=1	Do not use Nano/NNG submodules when building; use installed packages
 
 
 Packages
@@ -70,7 +70,7 @@ Resulting package names are illustrated in the CI section below.
 Continuous Integration Build
 Use the Dockerfile in the ci/ subdirectory. This installs all
 the required tools, then builds RMR and executes the unit and
-programm tests. If tests pass, then  an image is created in the
+program tests. If tests pass, then  an image is created in the
 local registry with both run-time and development packages.
 
 To support the distribution of package(s) created during the
@@ -121,7 +121,7 @@ libraries (.e.g -L) on the command line, or via environment
 variables (e.g.. C_INCLUDE_PATH, LD_LIBRARY_PATH, LIBRARY_PATH).
 It may also be necessary to have the library directory defined
 in the environment at run time.  It is difficult to know what
-each system needs, but the following linker ooptions  work when
+each system needs, but the following linker options  work when
 libraries are installed in the system spots:
 
 	-lrmr_nng -lnng -lpthread
@@ -134,7 +134,7 @@ a different spot (e.g. in $HOME/usr):
 
 Libraries
 RMR supports only NNG as the underlying transport. Nanomsg
-support was dropped in starting with version 1.0.45 as Nanomsg
+support was dropped starting with version 1.0.45 as Nanomsg
 has reached end of life. The package generation and install
 will produce a single RMR library:  librmr_nng.  RMR is designed
 to support different underlying transport mechanisms, which
@@ -143,8 +143,8 @@ given a suffix of _nng to reflect the transport mechanism
 in use.
 
 Regardless of transport mechanism supported by an RMR library,
-the RMR API will be identical, thus it is possible for an appliction
-to shift mechanisms simply by referencing a differnt library (should
+the RMR API will be identical, thus it is possible for an application
+to shift mechanisms simply by referencing a different library (should
 multiple RMR libraries become available).
 
 

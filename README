@@ -51,15 +51,15 @@ the need for the suffix has been eliminated (existing files were not changed).
 
 External Names
 All externally facing function names and constants will start with rmr_ or
-RMR_ repsectively (RIC Message Router).    For the time being, there is a
+RMR_ respectively (RIC Message Router).    For the time being, there is a
 set of mappings from the old uta_* names to rmr_* names. The user code must
-define UTA_COMPAT to have these ensbled.
+define UTA_COMPAT to have these enabled.
 
 Internal Names
-Internal (static) functions have no mandiated convention. There are some
+Internal (static) functions have no mandated convention. There are some
 names which are prefixed with uta_.  These are left over from the original
-prototype libray which had the name Uta.  The uta_ prefixes were mostly on
-functions which were iniitally external, but were pulled back for this release.
+prototype library which had the name Uta.  The uta_ prefixes were mostly on
+functions which were initially external, but were pulled back for this release.
 
 
 
@@ -67,8 +67,8 @@ Requirements
 To build the RMR libraries, NNG must be installed, or the external references
 in the source tree must be used to pull and build the NNG library. It might
 be necessary to alter the values of C_INCLUDE_PATH,  LD_LIBRARY_PATH, or
-LIBRARY_PATH to reflect the instalation location when the installed version
-ot NNG is being used.
+LIBRARY_PATH to reflect the installation location when the installed version
+of NNG is being used.
 
 To install see the instructions on their html sites:
 	https://github.com/nanomsg/nng
@@ -81,17 +81,17 @@ The script ../test/unit_test.ksh should be used for running unit tests. With no
 parameters it will attempt to build any file in this directory which has the
 name *_test.c.  Build is attempted with either mk or make and enables the
 necessary compiler flags to support coverage output (gcov).  Once built, the
-test programme is executed and if the return code is success (0), the
+test program is executed and if the return code is success (0), the
 coverage data is interpreted.
 
-The test programmes may make use of ../test/tools.c which provide simple
-validation check functions.  These programmes shouild also directly include
+The test programs may make use of ../test/tools.c which provide simple
+validation check functions.  These programs should also directly include
 the module(s) under test.  This ensures that they are not linked, and are
 compiled with the proper coverage flags. In addition, it allows modules that
 are not under test to be linked from the archive and (most importantly) not
 reported on from a coverage perspective. In cases where two modules depend on
 each other, and are static functions, they will need to be tested from a single
-unit test programme (see the rt_tool test programme).
+unit test program (see the rt_tool test program).
 
 It might be necessary to write a higher level test driver as some of the modules
 (e.g. route table) have threaded daemons which might not be easy to drive
