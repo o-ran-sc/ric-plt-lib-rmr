@@ -21,11 +21,14 @@
 #
 #	-DDEV_PKG=1			Development package configuration
 #	-DBUILD_DOC=1		Man pages generated
+#	-DIGNORE_LIBDIR=1	Installation of rmr libries is into /usr/local/lib and ignores
+#						value in CMAKE_INSTALL_LIBDIR.
+#						system preferred (typically /usr/local/lib64).
 #	-DPRESERVE_PTYPE=1	Do not change the processor type when naming deb packages
 #	-DPACK_EXTERNALS=1	Include external libraries used to build in the run-time package
 #						(This makes some stand-alone unit testing of bindings possible, it
 #						is not meant to be used for production package generation.)
-#	-DSKIP_EXTERNALS=1	Do not use Nano/NNG submodules when building; uee installed packages
+#	-DSKIP_EXTERNALS=1	Do not use NNG submodule when building; uee installed packages
 #	-DMAN_PREFIX=<path>	Supply a path where man pages are installed (default: /usr/share/man)
 
 project( rmr LANGUAGES C )
@@ -33,10 +36,9 @@ cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "1" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "0" )
-set( patch_level "44" )
+set( patch_level "45" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
-set( install_lib "lib" )
 set( install_inc "include/rmr" )
 if( MAN_PREFIX )
 	set( install_man ${MAN_PREFIX} )			# is there a cmake var for this -- can't find one
@@ -48,12 +50,20 @@ endif()
 # locations on all platforms.
 include( GNUInstallDirs )
 
-# nano/nng install using LIBDIR as established by the gnu include; it varies from system
-# to system, and we don't trust that it is always set, so we default to lib.
+# nng installs using LIBDIR as established by the gnu include; it varies from system
+# to system, and we don't trust that it is always set, so we default to lib if it is missing.
 #
 if( NOT CMAKE_INSTALL_LIBDIR )
 	set( CMAKE_INSTALL_LIBDIR "lib" )
 endif()
+
+if( IGNORE_LIBDIR )					# if set, then force to lib otherwise use "system preference"
+	set( install_lib "lib" )
+else()
+	set( install_lib "${CMAKE_INSTALL_LIBDIR}" )
+endif()
+unset(IGNORE_LIBDIR CACHE )					# we don't want this to persist
+message( "+++ RMR library install target directory: ${install_lib}" )
 
 # ---------------- extract some things from git ------------------------------
 
@@ -69,6 +79,7 @@ execute_process(
 	OUTPUT_VARIABLE mmp_version_str
 	ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+message( "+++ mmp version from tag: '${mmp_version_str}'" )
 
 # extra indicator to show that the build was based on modified file(s) and not the true commit
 # (no hope of reproducing the exact library for debugging). Used only for the internal version
@@ -96,7 +107,7 @@ add_definitions(
 # ---------------- suss out pkg gen tools so we don't fail generating packages that the system cannot support --------------
 
 # deb packages use underbars, and package manager(s) seem to flip the *_64 processor type
-# to the old (non-standard) amd64 string, so we do it here for consistency. Set -DPRESERVE_PTYPE=1 
+# to the old (non-standard) amd64 string, so we do it here for consistency. Set -DPRESERVE_PTYPE=1
 # to prevent the flip. RPM packages will always be given the system generated processor type string.
 #
 if( ${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" )
@@ -124,9 +135,8 @@ set( pkg_label "rmr${spoiled_str}-${major_version}.${minor_version}.${patch_leve
 set( rpm_pkg_label "${rpm_pkg_name}${spoiled_str}-${major_version}.${minor_version}.${patch_level}-${rpm_sys_name}" )
 set( deb_pkg_label "${deb_pkg_name}${spoiled_str}_${major_version}.${minor_version}.${patch_level}_${deb_sys_name}" )
 message( "+++ pkg name: ${deb_pkg_label}.deb" )
-message( "+++ pkg name: ${rpm_pkg_label}.rpm" )
 
-set( out_yml /tmp/build_output.yml )					# we will record package names (we record only untainted names)
+#set( out_yml /tmp/build_output.yml )					# we will record package names (we record only untainted names)
 find_program( rpm NAMES rpmbuild )						# rpm package gen requires this to be installed
 
 set( gen_rpm 0 )
@@ -134,28 +144,11 @@ if( "${rpm}" MATCHES "rpm-NOTFOUND" )			       # cannot build rpm
 	set( pkg_list "DEB" )
 	message( "### make package will generate only deb package; cannot find support to generate rpm packages" )
 else()
+	message( "+++ pkg name: ${rpm_pkg_label}.rpm" )		# debugging if we think we can gen rpm too
 	set( pkg_list "DEB;RPM" )
 	set( gen_rpm 1 )
 	message( "+++ make package will generate both deb and rpm packages" )
 endif()
-
-execute_process(
-	COMMAND bash -c "printf '# RMr build generated list of package paths\n---\n' >${out_yml}"
-)
-
-execute_process(
-	COMMAND bash -c " echo deb: ${CMAKE_CURRENT_BINARY_DIR}/${deb_pkg_label}.deb  >>${out_yml}"
-)
-
-if( gen_rpm )
-	execute_process(
-		COMMAND bash -c " echo rpm: ${CMAKE_CURRENT_BINARY_DIR}/${rpm_pkg_label}.rpm  >>${out_yml}"
-	)
-endif()
-
-execute_process(
-	COMMAND bash -c "printf '...\n' >>${out_yml}"
-)
 
 # ---------------- setup nano/nng things ---------------------------------------
 if( NOT SKIP_EXTERNALS )
@@ -164,9 +157,6 @@ if( NOT SKIP_EXTERNALS )
             WORKING_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
-    execute_process( COMMAND  git submodule update --init -- ext/nanomsg
-            WORKING_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}
-    )
     if( NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ext/nng/CMakeLists.txt )
         message( FATAL_ERROR "cannot find nng in our git source as a submodule: Giving up" )	# this will abort which seems wrong, but tdam.
     endif()
@@ -182,44 +172,25 @@ if( NOT SKIP_EXTERNALS )
 		TEST_COMMAND ""
 		STEP_TARGETS build
 	)
-	ExternalProject_Add(
-		nanomsg
-		SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/nanomsg"
-		BUILD_COMMAND "make"
-		UPDATE_COMMAND ""
-		CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}"
-		TEST_COMMAND ""
-		STEP_TARGETS build
-	)
 
 	# it seems impossible to install everything that lands in {bin}/lib, so we need to
 	# hard code (shudder) some things. Even worse, we have to make exceptions for
 	# builds on apple (osx) since their naming convention wandered off the path.
 	set( nng_major 1 )
 	set( nng_minor 1.0 )
-	set( nano_major 5 )
-	set( nano_minor 1.0 )
 	set( so ${CMAKE_SHARED_LIBRARY_SUFFIX} )	# cmake variables are impossibly long :(
 	if( NOT APPLE ) 				# probably breaks in windows, but idc
 		set( nng_so_suffix ${so} )
 		set( nng_so_suffix_m ${so}.${nng_major} )
 		set( nng_so_suffix_mm ${so}.${nng_major}.${nng_minor} )
-
-		set( nano_so_suffix ${so} )
-		set( nano_so_suffix_m ${so}.${nano_major} )
-		set( nano_so_suffix_mm ${so}.${nano_major}.${nano_minor} )
 	else()
 		# of course apple puts versions before the suffix :(
 		set( nng_so_suffix ${so} )									# so has a lead dot, so NOT needed
 		set( nng_so_suffix_m ".${nng_major}${so}" )					# these need leading dots
 		set( nng_so_suffix_mm ".${nng_major}.${nng_minor}${so}" )
-
-		set( nano_so_suffix ${so} )
-		set( nano_so_suffix_m ".${nano_major}${so}" )
-		set( nano_so_suffix_mm ".${nano_major}.${nano_minor}${so}" )
 	endif()
 
-	message( "+++ installing nano/nng with: ${nano_major}.${nano_minor} | ${nng_major}.${nng_minor}" )
+	message( "+++ building with nng: ${nng_major}.${nng_minor}" )
 else()
 	if( PACK_EXTERNALS )
 		# This makes some stand-alone unit testing possible for bindings and transport layer testing;
@@ -249,22 +220,13 @@ set( CMAKE_CXX_FLAGS "-g -Wall " )
 
 # Include modules
 add_subdirectory( src/rmr/common )
-add_subdirectory( src/rmr/nanomsg )
 add_subdirectory( src/rmr/nng )
 add_subdirectory( doc )				# this will auto skip if {X}fm is not available
 
 
 # shared and static libraries are built from the same object files.
-# Nanomsg based library (librmr ) while nng based is librmr_nng.
-# library is built by pulling object files from either the nano or nng  and common subdirs
+# librmr_nng is a combination of common and nng specific rmr functions.
 #
-add_library( rmr_shared SHARED "$<TARGET_OBJECTS:nano_objects>;$<TARGET_OBJECTS:common_objects>" )
-
-set_target_properties( rmr_shared
-	PROPERTIES
-		OUTPUT_NAME "rmr"
-		SOVERSION ${major_version}
-		VERSION ${major_version}.${minor_version}.${patch_level} )
 
 add_library( rmr_nng_shared SHARED "$<TARGET_OBJECTS:nng_objects>;$<TARGET_OBJECTS:common_objects>" )
 set_target_properties( rmr_nng_shared
@@ -281,23 +243,13 @@ if( DEV_PKG )
 		OUTPUT_NAME "rmr_nng"
 		SOVERSION ${major_version}
 		VERSION ${major_version}.${minor_version}.${patch_level} )
-
-	add_library( rmr_static STATIC "$<TARGET_OBJECTS:nano_objects>;$<TARGET_OBJECTS:common_objects>" )
-
-	set_target_properties( rmr_static
-		PROPERTIES
-		OUTPUT_NAME "rmr"
-		SOVERSION ${major_version}
-		VERSION ${major_version}.${minor_version}.${patch_level} )
 endif()
 
 # if externals need to be built, then we must force them to be built first by depending on them
 if( need_ext )
 	if( DEV_PKG )
-		add_dependencies( rmr_static;rmr_shared nanomsg )
 		add_dependencies( rmr_nng_shared;rmr_nng_static ext_nng )
 	else()
-		add_dependencies( rmr_shared nanomsg )
 		add_dependencies( rmr_nng_shared ext_nng )
 	endif()
 endif()
@@ -305,7 +257,6 @@ endif()
 #
 if( APPLE  )
 	message( "### apple hack: forcing hard coded library paths for nng/nano dynamic libraries" )
-	target_link_libraries( rmr_shared ${CMAKE_CURRENT_BINARY_DIR}/lib/libnanomsg${nano_so_suffix} )
 	target_link_libraries( rmr_nng_shared ${CMAKE_CURRENT_BINARY_DIR}/lib/libnng${nng_so_suffix} )
 endif()
 
@@ -314,9 +265,9 @@ endif()
 # the library (.so) files and nothing more.
 #
 if( DEV_PKG )
-	set( target_list "rmr_nng_static;rmr_static" )
+	set( target_list "rmr_nng_static" )
 else()
-	set( target_list "rmr_nng_shared;rmr_shared" )
+	set( target_list "rmr_nng_shared" )
 endif()
 
 install( TARGETS ${target_list} EXPORT LibraryConfig
@@ -326,7 +277,7 @@ install( TARGETS ${target_list} EXPORT LibraryConfig
 )
 
 
-unset( DEV_PKG  CACHE )			# prevent from being a hiddent setting if user redoes things
+unset( DEV_PKG  CACHE )			# prevent from being a hidden setting if user redoes things
 
 # install any nano/nng libraries in to the deb as well, but ONLY if asked for on the 'cmake ..' command
 # (sure would be nice if FILEs allowed for globbing; sadlyy it does not.)
@@ -334,9 +285,6 @@ unset( DEV_PKG  CACHE )			# prevent from being a hiddent setting if user redoes 
 if( PACK_EXTERNALS )
 	message( "+++ including nano and nng libraries in the deb" )
 	install( FILES
-		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnanomsg${nano_so_suffix}
-		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnanomsg${nano_so_suffix_m}
-		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnanomsg${nano_so_suffix_mm}
 		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnng${nng_so_suffix}
 		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnng${nng_so_suffix_m}
 		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/libnng${nng_so_suffix_mm}
@@ -369,7 +317,7 @@ IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 	set( CPACK_DEBIAN_FILE_NAME "${deb_pkg_label}.deb" )
 	set( CPACK_RPM_FILE_NAME "${rpm_pkg_label}.rpm" )
 
-	# we build and ship the libraries, so there is NO dependency
+	# there is not an NNG package, so we cannot define a dependency
 
 	set( CPACK_DEBIAN_PACKAGE_PRIORITY "optional" )
 	set( CPACK_DEBIAN_PACKAGE_SECTION "ric" )
