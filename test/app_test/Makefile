@@ -44,7 +44,7 @@ LIBRARY_PATH = $(LD_LIBRARY_PATH)
 
 
 .PHONY: all
-all: sender receiver sender_nano receiver_nano caller mt_receiver
+all: sender receiver caller mt_receiver
 
 receiver_nano: receiver.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr -lnanomsg -lpthread -lm
