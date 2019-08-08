@@ -1,0 +1,7 @@
+Verified+1: ORAN Jobbuilder <releng+oran-jobbuilder@linuxfoundation.org>
+Code-Review+2: Tommy Carpenter <tommy@research.att.com>
+Submitted-by: Tommy Carpenter <tommy@research.att.com>
+Submitted-at: Thu, 08 Aug 2019 16:58:03 +0000
+Reviewed-on: https://gerrit.o-ran-sc.org/r/c/ric-plt/lib/rmr/+/666
+Project: ric-plt/lib/rmr
+Branch: refs/heads/master
