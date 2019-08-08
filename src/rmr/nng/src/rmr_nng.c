@@ -254,6 +254,7 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 		errno = EINVAL;												// if msg is null, this is their clue
 		if( msg != NULL ) {
 			msg->state = RMR_ERR_BADARG;
+			msg->tp_state = errno;
 		}
 		return msg;
 	}
@@ -262,6 +263,7 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 	if( msg->header == NULL ) {
 		fprintf( stderr, "[ERR] rmr_send_msg: message had no header\n" );
 		msg->state = RMR_ERR_NOHDR;
+		msg->tp_state = errno;
 		return msg;
 	}
 
@@ -345,6 +347,7 @@ extern rmr_mbuf_t* rmr_call( void* vctx, rmr_mbuf_t* msg ) {
 		if( msg->state != RMR_ERR_RETRY ) {
 			msg->state = RMR_ERR_CALLFAILED;		// errno not available to all wrappers; don't stomp if marked retry
 		}
+		msg->tp_state = errno;
 		return msg;
 	}
 
@@ -365,10 +368,11 @@ extern rmr_mbuf_t* rmr_rcv_msg( void* vctx, rmr_mbuf_t* old_msg ) {
 	rmr_mbuf_t*	qm;				// message that was queued on the ring
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
+		errno = EINVAL;
 		if( old_msg != NULL ) {
 			old_msg->state = RMR_ERR_BADARG;
+			old_msg->tp_state = errno;
 		}
-		errno = EINVAL;
 		return old_msg;
 	}
 	errno = 0;
@@ -402,10 +406,11 @@ extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to ) {
 	rmr_mbuf_t* msg;
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
+		errno = EINVAL;
 		if( old_msg != NULL ) {
 			old_msg->state = RMR_ERR_BADARG;
+			old_msg->tp_state = errno;
 		}
-		errno = EINVAL;
 		return old_msg;
 	}
 
@@ -457,6 +462,7 @@ extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to ) {
 	nready = epoll_wait( eps->ep_fd, eps->events, 1, ms_to );     // block until something or timedout
 	if( nready <= 0 ) {						// we only wait on ours, so we assume ready means it's ours
 		msg->state = RMR_ERR_TIMEOUT;
+		msg->tp_state = errno;
 	} else {
 		return rcv_msg( ctx, msg );								// receive it and return it
 	}
@@ -480,10 +486,11 @@ extern rmr_mbuf_t* rmr_rcv_specific( void* vctx, rmr_mbuf_t* msg, char* expect, 
 	int	exp_len = 0;			// length of expected ID
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
+		errno = EINVAL;
 		if( msg != NULL ) {
 			msg->state = RMR_ERR_BADARG;
+			msg->tp_state = errno;
 		}
-		errno = EINVAL;
 		return msg;
 	}
 
@@ -827,6 +834,7 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 		errno = EINVAL;
 		if( mbuf ) {
 			mbuf->state = RMR_ERR_BADARG;
+			mbuf->tp_state = errno;
 		}
 		return mbuf;
 	}
@@ -835,6 +843,7 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 		errno = EINVAL;
 		if( mbuf != NULL ) {
 			mbuf->state = RMR_ERR_NOTSUPP;
+			mbuf->tp_state = errno;
 		}
 		return mbuf;
 	}
@@ -897,6 +906,9 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 		}
 	}
 
+	if( mbuf ) {
+		mbuf->tp_state = errno;
+	}
 	return mbuf;
 }
 
@@ -928,9 +940,10 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 	long	nano_sec;			// max wait xlated to nano seconds
 	int		state;
 	
+	errno = EINVAL;
 	if( (ctx = (uta_ctx_t *) vctx) == NULL || mbuf == NULL ) {
-		errno = EINVAL;
 		if( mbuf ) {
+			mbuf->tp_state = errno;
 			mbuf->state = RMR_ERR_BADARG;
 		}
 		return mbuf;
@@ -938,11 +951,13 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 
 	if( ! (ctx->flags & CFL_MTC_ENABLED) ) {
 		mbuf->state = RMR_ERR_NOTSUPP;
+		mbuf->tp_state = errno;
 		return mbuf;
 	}
 
 	if( call_id > MAX_CALL_ID || call_id < 2 ) {					// 0 and 1 are reserved; user app cannot supply them
 		mbuf->state = RMR_ERR_BADARG;
+		mbuf->tp_state = errno;
 		return mbuf;
 	}
 
@@ -984,6 +999,7 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 	mbuf = mtosend_msg( ctx, mbuf, 0 );						// use internal function so as not to strip call-id; should be nil on success!
 	if( mbuf ) {
 		if( mbuf->state != RMR_OK ) {
+			mbuf->tp_state = errno;
 			return mbuf;									// timeout or unable to connect or no endpoint are most likely issues
 		}
 	}

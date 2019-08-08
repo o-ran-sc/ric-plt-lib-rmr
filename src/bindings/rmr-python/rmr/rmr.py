@@ -18,7 +18,7 @@ import uuid
 import json
 from ctypes import RTLD_GLOBAL, Structure, c_int, POINTER, c_char, c_char_p, c_void_p, memmove, cast
 from ctypes import CDLL
-from ctypes import create_string_buffer, pythonapi
+from ctypes import create_string_buffer
 
 # https://docs.python.org/3.7/library/ctypes.html
 # https://stackoverflow.com/questions/2327344/ctypes-loading-a-c-shared-library-that-has-dependencies/30845750#30845750
@@ -89,13 +89,6 @@ def _state_to_status(stateno):
     return sdict.get(stateno, "UNKNOWN STATE")
 
 
-def _errno():
-    """Suss out the C error number value which might be useful in understanding
-    an underlying reason when RMr returns a failure.
-    """
-    return c_int.in_dll(pythonapi, "errno").value
-
-
 ##############
 # PUBLIC API
 ##############
@@ -116,6 +109,7 @@ class rmr_mbuf_t(Structure):
        unsigned char* payload;    // transported data
        unsigned char* xaction;    // pointer to fixed length transaction id bytes
        int sub_id;                // subscription id
+       int      tp_state;         // transport state (a.k.a errno)
                                   // these things are off limits to the user application
        void*   tp_buf;            // underlying transport allocated pointer (e.g. nng message)
        void*   header;            // internal message header (whole buffer: header+payload)
@@ -142,6 +136,7 @@ class rmr_mbuf_t(Structure):
         ),  # according to th following the python bytes are already unsinged https://bytes.com/topic/python/answers/695078-ctypes-unsigned-char
         ("xaction", POINTER(c_char)),
         ("sub_id", c_int),
+        ("tp_state", c_int),
     ]
 
 
@@ -292,7 +287,7 @@ def message_summary(ptr_to_rmr_buf_t):
         "payload max size": rmr_payload_size(ptr_to_rmr_buf_t),
         "meid": meid,
         "message source": get_src(ptr_to_rmr_buf_t),
-        "errno": _errno(),
+        "message errno": ptr_to_rmr_buf_t.contents.tp_state,
     }
 
 

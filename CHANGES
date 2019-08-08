@@ -2,6 +2,16 @@
 API and build change  and fixe summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2019 August 8; version 1.1.0 (API change)
+	This change should be backward compatable/non-breaking
+	A new field has been added to the message buffer (rmr_mbuf_t).
+	This field (tp_state) is used to communicate the errno value
+	that the transport mechanism might set during send and/or
+	receive operations.  C programmes should continue to use
+	errno directly, but in some environments wrappers may not be
+	able to access errno and this provides the value to them. 
+	See the rmr_alloc_msg manual page for more details.
+	
 2019 August 6; version 1.0.45 (build changes)
 	Support for the Nanomsg transport library has been dropped.
 		The library librmr.* will no longer be included in packages.
