@@ -184,12 +184,14 @@ static int rmr_api_test( ) {
 	msg->len = 100;
 	msg->mtype = 1;
 	msg->state = 999;
+	msg->tp_state = 999;
 	errno = 999;
 	msg = rmr_send_msg( rmc, msg );
 	errors += fail_if_nil( msg, "send_msg_ did not return a message on send "  );
 	if( msg ) {
 		errors += fail_not_equal( msg->state, RMR_ERR_NOENDPT, "send_msg did not return no endpoints before rtable added "  );
 		errors += fail_if( errno == 0, "send_msg did not set errno "  );
+		errors += fail_if( msg->tp_state == 999, "send_msg did not set tp_state (1)" );
 	}
 
 	gen_rt( rmc );		// --- after this point there is a dummy route table so send and rts calls should be ok
@@ -197,6 +199,7 @@ static int rmr_api_test( ) {
 	msg->len = 100;
 	msg->mtype = 1;
 	msg->state = 999;
+	msg->tp_state = 999;
 	errno = 999;
 	msg = rmr_send_msg( rmc, msg );
 	errors += fail_if_nil( msg, "send_msg_ did not return a message on send "  );
@@ -205,6 +208,7 @@ static int rmr_api_test( ) {
 		errors += fail_if( errno != 0, "send_msg set errno for send that should work "  );
 		v = rmr_payload_size( msg );
 		errors += fail_if( v != 2048, "send_msg did not allocate new buffer with correct size "  );
+		errors += fail_if( msg->tp_state == 999, "send_msg did not set tp_state (2)" );
 	}
 
 	rmr_set_stimeout( NULL, 0 );

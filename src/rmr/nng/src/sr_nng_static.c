@@ -402,6 +402,9 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 	reuse.  They have their reasons I guess.  Thus, we will free
 	the old transport buffer if user passes the message in; at least
 	our mbuf will be reused.
+
+	When msg->state is not ok, this function must set tp_state in the message as some API 
+	fucntions return the message directly and do not propigate errno into the message.
 */
 static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
 	int state;
@@ -428,11 +431,14 @@ static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
 
 	msg->state = nng_recvmsg( ctx->nn_sock, (nng_msg **) &msg->tp_buf, NO_FLAGS );			// blocks hard until received
 	if( (msg->state = xlate_nng_state( msg->state, RMR_ERR_RCVFAILED )) != RMR_OK ) {
+		msg->tp_state = errno;
 		return msg;
 	}
 
+	msg->tp_state = 0;
 	if( msg->tp_buf == NULL ) {		// if state is good this _should_ not be nil, but parninoia says check anyway
 		msg->state = RMR_ERR_EMPTY;
+		msg->tp_state = 0;
 		return msg;
 	}
 
@@ -446,6 +452,7 @@ static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
 				msg->mtype, msg->state, msg->len,  msg->payload - (unsigned char *) msg->header );
 	} else {
 		msg->state = RMR_ERR_EMPTY;
+		msg->tp_state = 0;
 		msg->len = 0;
 		msg->alloc_len = rsize;
 		msg->payload = NULL;
@@ -509,6 +516,9 @@ static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
 
 	Called by rmr_send_msg() and rmr_rts_msg(), etc. and thus we assume that all pointer
 	validation has been done prior.
+
+	When msg->state is not ok, this function must set tp_state in the message as some API 
+	fucntions return the message directly and do not propigate errno into the message.
 */
 static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock, int retries ) {
 	int state;
@@ -560,6 +570,7 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock
 		// future: this should not happen as all buffers we deal with are zc buffers; might make sense to remove the test and else
 		msg->state = RMR_ERR_SENDFAILED;
 		errno = ENOTSUP;
+		msg->tp_state = errno;
 		return msg;
 		/*
 		NOT SUPPORTED
@@ -607,6 +618,10 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock
 	message type is used.  If the initial lookup, with a subid, fails, then a
 	second lookup using just the mtype is tried.
 
+	When msg->state is not OK, this function must set tp_state in the message as 
+	some API fucntions return the message directly and do not propigate errno into 
+	the message.
+
 	CAUTION: this is a non-blocking send.  If the message cannot be sent, then
 		it will return with an error and errno set to eagain. If the send is
 		a limited fanout, then the returned status is the status of the last
@@ -629,6 +644,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 		if( msg != NULL ) {
 			msg->state = RMR_ERR_BADARG;
 			errno = EINVAL;											// must ensure it's not eagain
+			msg->tp_state = errno;
 		}
 		return msg;
 	}
@@ -638,6 +654,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 		fprintf( stderr, "rmr_send_msg: ERROR: message had no header\n" );
 		msg->state = RMR_ERR_NOHDR;
 		errno = EBADMSG;											// must ensure it's not eagain
+		msg->tp_state = errno;
 		return msg;
 	}
 
@@ -667,6 +684,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 
 			msg->state = RMR_ERR_NOENDPT;
 			errno = ENXIO;											// must ensure it's not eagain
+			msg->tp_state = errno;
 			return msg;												// caller can resend (maybe) or free
 		}
 

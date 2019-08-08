@@ -29,9 +29,9 @@ def _long_descr():
 
 setup(
     name="rmr",
-    version="0.10.3",
+    version="0.10.4",
     packages=find_packages(),
-    author="Tommy Carpenter",
+    author="Tommy Carpenter, E. Scott Daniels",
     description="Python wrapper for RIC RMR",
     url="https://gerrit.o-ran-sc.org/r/admin/repos/ric-plt/lib/rmr",
     license="Apache 2.0",

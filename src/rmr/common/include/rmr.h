@@ -78,6 +78,14 @@ extern "C" {
 
 	(All fields are exposed such that if a wrapper needs to dup the storage as it passes
 	into or out of their environment they dup it all, not just what we choose to expose.)
+
+	NOTE:
+	State is the RMR state of processing on the message. The transport state (tp_state)
+	will be set to mirror the value of errno for wrappers unable to access errno directly,
+	but will only be set if state is not RMR_OK. Even then, the value may be suspect as
+	the underlying transport mechanism may not set errno. It is strongly recommended that
+	user applications use tp_state only for dianostic purposes to convey additional information
+	in a log message.
 */
 typedef struct {
 	int	state;					// state of processing
@@ -86,6 +94,7 @@ typedef struct {
 	unsigned char* payload;		// transported data
 	unsigned char* xaction;		// pointer to fixed length transaction id bytes
 	int sub_id;					// subscription id
+	int		tp_state;			// transport state (errno) valid only if state != RMR_OK, and even then may not be valid
 
 								// these things are off limits to the user application
 	void*	tp_buf;				// underlying transport allocated pointer (e.g. nng message)
