@@ -16,6 +16,23 @@
       "revId": "54098f653ce4977668cc3ea9c0ce546a08ef577c",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a493cd3d_8d860e82",
+        "filename": "src/bindings/rmr-python/setup.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-08-08T15:20:24Z",
+      "side": 0,
+      "message": "feel free to append your name here \u003d)",
+      "revId": "54098f653ce4977668cc3ea9c0ce546a08ef577c",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
