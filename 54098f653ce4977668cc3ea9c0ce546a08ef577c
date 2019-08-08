@@ -33,6 +33,23 @@
       "revId": "54098f653ce4977668cc3ea9c0ce546a08ef577c",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "77ceb9e3_0e6c265e",
+        "filename": "src/bindings/rmr-python/tox.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-08-08T15:21:16Z",
+      "side": 0,
+      "message": "When you make the Changelog.md change, I would add a statement about this; i.e., that different systems may require lib64 as opposed to lib.",
+      "revId": "54098f653ce4977668cc3ea9c0ce546a08ef577c",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
