@@ -29,4 +29,9 @@ receiver: receiver.c
 sender: sender.c
 	gcc $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
+health_check: health_check.c
+	gcc $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+
+msg_echo: msg_echo.c
+	gcc $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 

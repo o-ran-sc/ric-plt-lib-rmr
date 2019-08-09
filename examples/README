@@ -4,3 +4,28 @@ various aspects of how a user programme can use RMr to send
 and/or receive messages.  These programmes are fairly simple
 in nature, and in most cases error checking is not performed
 to keep the code simple.  
+
+
+Health Check
+	This is an example of how a health check process might
+	be implemented. It sends 1 or more messages to an RMR
+	application and waits for the response. The latency of
+	each round trip (mu-seconds) is written to the tty.
+	
+
+Message echoer
+	This is a simple process which returns the received message
+	back to the sender, optionally changing the message type
+	while leaving all other parts of the message unchanged.
+	This is a good verification for applications like the
+	health checker.
+
+Receiver
+	This is a simple receiver process which returns messages to
+	the sender when a specific type is sent.  Messages are checked
+	for accuracy when run with the example sender.
+
+Sender
+	A small sender which puts in information that lets the receiver
+	confirm that the message was received correctly (simple checksum
+	on portions of the payload and RMR header data.
