@@ -22,14 +22,14 @@ SETUP_DIR = abspath(dirname(__file__))
 
 def _long_descr():
     """Yields the content of documentation files for the long description"""
-    doc_path = path_join(SETUP_DIR, "README.rst")
+    doc_path = path_join(SETUP_DIR, "docs/source/index.rst")
     with open(doc_path) as f:
         return f.read()
 
 
 setup(
     name="rmr",
-    version="0.10.5",
+    version="0.10.6",
     packages=find_packages(),
     author="Tommy Carpenter, E. Scott Daniels",
     description="Python wrapper for RIC RMR",
