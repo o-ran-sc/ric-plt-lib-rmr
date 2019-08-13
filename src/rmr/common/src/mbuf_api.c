@@ -189,6 +189,39 @@ extern int rmr_str2xact( rmr_mbuf_t* mbuf, unsigned char const* str ) {
 }
 
 /*
+	Extracts the transaction bytes from the header and places into a
+	user supplied buffer (dest). The buffer must be at least RMR_MAX_XID
+	bytes in length as this function will copy the entire field (even if
+	the sender saved a shorter "string." If the user supplies a nil poniter
+	as the destination, a buffer is allocated; the caller must free when
+	finished.  The buffer will be exactly RMR_MAX_XID bytes long.
+
+	The return value is a pointer to the buffer that was filled (to
+	the dest buffer provided, or the buffer we allocated). If there is an
+	error, a nil pointer is returned, and errno should suggest the root
+	cause of the issue (invalid message or no memory).
+*/
+extern unsigned char*  rmr_get_xact( rmr_mbuf_t* mbuf, unsigned char* dest ) {
+	errno = 0;
+
+	if( mbuf == NULL || mbuf->xaction == NULL ) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if( ! dest ) {
+		if( (dest = (unsigned char *) malloc( sizeof( unsigned char ) * RMR_MAX_XID )) == NULL ) {
+			errno = ENOMEM;
+			return NULL;
+		}
+	}
+
+	memcpy( dest, mbuf->xaction, RMR_MAX_XID );
+
+	return dest;
+}
+
+/*
 	Extracts the meid (managed equipment) from the header and copies the bytes
 	to the user supplied area. If the user supplied pointer is nil, then
 	a buffer will be allocated and it is the user's responsibilty to free.
@@ -199,6 +232,8 @@ extern int rmr_str2xact( rmr_mbuf_t* mbuf, unsigned char const* str ) {
 */
 extern unsigned char*  rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest ) {
 	uta_mhdr_t* hdr;
+
+	errno = 0;
 
 	if( mbuf == NULL || mbuf->header == NULL ) {
 		errno = EINVAL;
@@ -213,7 +248,7 @@ extern unsigned char*  rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest ) {
 	}
 
 	hdr = (uta_mhdr_t *) mbuf->header;
-	memcpy( dest, hdr->meid, RMR_MAX_XID );
+	memcpy( dest, hdr->meid, RMR_MAX_MEID );
 
 	return dest;
 }

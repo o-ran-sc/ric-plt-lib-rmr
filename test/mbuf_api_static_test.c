@@ -49,18 +49,30 @@ int mbuf_api_test( ) {
 	char*	buf;
 	void*	ptr;
 	rmr_mbuf_t*	mbuf;
+	uta_mhdr_t*	hdr;
 	unsigned char src_buf[256];
+	unsigned char dest_buf[256];
 
+
+	// --- dummy up a message buffer --------------------------------------------------------
 	mbuf = (rmr_mbuf_t *) malloc( sizeof( *mbuf ) );
 	if( mbuf == NULL ) {
 		fprintf( stderr, "[FAIL] tester cannot allocate memory: mbuf\n" );
 		exit( 1 );
 	}
+	memset( mbuf, 0, sizeof( *mbuf ) );
 
-	mbuf->payload = (void *) malloc( sizeof( char ) * 1024 );		// add a dummy payload
-	mbuf->tp_buf = mbuf->payload;
-	mbuf->header = mbuf->payload;
+	mbuf->tp_buf = (void *) malloc( sizeof( char ) * 1024 );		// add a dummy header/payload
+	memset( mbuf->tp_buf, 0, sizeof( char ) * 1024 );
+
+	mbuf->header = mbuf->tp_buf;
 	mbuf->alloc_len = 1024;
+	mbuf->payload = PAYLOAD_ADDR( mbuf->header );
+	hdr = (rmr_mbuf_t *) mbuf->header;
+	mbuf->xaction = hdr->xid;
+
+
+
 
 	// --- test payload field  access functions ---------------------------------------------------
 	memset( src_buf, 0, sizeof( src_buf ) );
@@ -147,6 +159,8 @@ int mbuf_api_test( ) {
 
 
 	// --- test transaction field  access functions ---------------------------------------------------
+	snprintf( src_buf, sizeof( src_buf ), "xaction-test##################." );		// full 32 bytes
+
 	errno = 0;
 	i = rmr_bytes2xact( NULL, src_buf, RMR_MAX_XID );
 	errors += fail_if( errno == 0, "(errno) attempt to copy bytes to xact with nil message" );
@@ -167,7 +181,32 @@ int mbuf_api_test( ) {
 	errors += fail_if( errno != 0, "copy bytes to xact; expected errno to be ok" );
 	errors += fail_if( i != RMR_MAX_XID, "copy bytes to xact; expected return value to be max xact len" );
 
-
+	errno = 0;
+	ptr = rmr_get_xact( NULL, NULL );
+	errors += fail_if( errno == 0, "get xaction with nil msg did not set errno" );
+	errors += fail_not_nil( ptr, "get xaction with nil msg did not return a nil pointer" );
+	
+	errno = 999;
+	ptr = rmr_get_xact( mbuf, NULL );
+	errors += fail_if( errno == 999, "get xaction with valid msg and nil dest didn't clear errno" );
+	errors += fail_not_equal( errno, 0, "get xaction with valid msg and nil dest set errno (a)" );
+	errors += fail_if_nil( ptr, "get xaction with valid msg  and nil dest did not return a valid pointer" );
+	if( ptr ) {
+		i = strcmp( ptr, src_buf );
+		errors += fail_not_equal( i, 0, "get xaction did not fetch expected string cmp return (a) was not 0" );
+		free( ptr );
+	}
+	
+	errno = 999;
+	ptr = rmr_get_xact( mbuf, dest_buf );
+	errors += fail_if( errno == 999, "get xaction with valid msg and nil dest didn't clear errno" );
+	errors += fail_not_equal( errno, 0, "get xaction with valid msg and nil dest set errno (a)" );
+	errors += fail_if_nil( ptr, "get xaction with valid msg  and valid dest did not return a valid pointer" );
+	errors += fail_if( ptr != dest_buf, "get xaction did not return pointer to dest string" );
+	if( ptr == dest_buf ) {
+		i = strcmp( ptr, src_buf );
+		errors += fail_not_equal( i, 0, "get xaction into dest string did not fetch expected string cmp return (a) was not 0" );
+	}
 
 	errno = 0;
 	snprintf( src_buf, sizeof( src_buf ), "xact-fits" );

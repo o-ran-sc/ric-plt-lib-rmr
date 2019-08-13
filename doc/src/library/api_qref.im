@@ -282,6 +282,8 @@ The bytes from the &cw(meid) field of the message buffer are copied to the &ital
 provided by the application. 
 The full field of &cw(RMR_MAX_MEID) bytes are copied; the caller must ensure that &ital(dest)
 is large enough.
+If the destination buffer pointer passed in is a nil pointer, the function will allocate a buffer
+and return a pointer, which the caller is expected to free, to the buffer.
 
 &proto_start
 unsigned char*  rmr_get_src( rmr_mbuf_t* mbuf, unsigned char* dest );
@@ -313,6 +315,16 @@ int rmr_get_trace( rmr_mbuf_t* msg, unsigned char* dest, int size );
 The bytes from the trace data, up to &tial(size) bytes, is copied from the message buffer
 to the &ital(dest) buffer provided by the caller.
 The return value is the number of bytes actually copied.
+
+&proto_start
+unsigned char*  rmr_get_xact( rmr_mbuf_t* mbuf, unsigned char* dest );
+&proto_end
+The bytes from the &ital(transaction) field in the message buffer are copied to the &ital(dest) buffer
+provided by the application. 
+The full field of &cw(RMR_MAX_MEID) bytes are copied; the caller must ensure that &ital(dest)
+is large enough.
+If the destination buffer pointer passed in is a nil pointer, the function will allocate a buffer
+and return a pointer, which the caller is expected to free, to the buffer.
 
 &proto_start
 int rmr_payload_size( rmr_mbuf_t* msg );

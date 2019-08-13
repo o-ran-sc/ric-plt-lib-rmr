@@ -1,4 +1,3 @@
-
 .if false
 ==================================================================================
 	Copyright (c) 2019 Nokia 
@@ -19,10 +18,10 @@
 .fi
 
 .if false
-	Mnemonic	rmr_str2xact.xfm
-	Abstract	The manual page for the rmr_str2xact function.
+	Mnemonic	rmr_get_xact.xfm
+	Abstract	The manual page for the rmr_get_xact function.
 	Author		E. Scott Daniels
-	Date		8 March 2019
+	Date		13 August 2019
 .fi
 
 .gv e LIB lib
@@ -32,54 +31,55 @@
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_str2xact
+	rmr_get_xact
 
 &h2(SYNOPSIS)
 &indent
 &ex_start
 #include <rmr/rmr.h>
 
-int rmr_str2xact( rmr_mbuf_t* mbuf, unsigned char* src, int len )
+char* rmr_get_xact( rmr_mbuf_t* mbuf, unsigned char* dest )
 &ex_end
 
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_str2xact) function will copy the string pointed to by src to the 
-transaction ID (xaction) field in the given message.  
-The field is a fixed length, gated by the constant &cw(RMR_MAX_XID) and if string length is larger
-than this value, then &bold(nothing) will be copied. (Note, this differs slightly from the
-behaviour of the &cw( lrmr_bytes2xact() ) function.)
+The &cw(rmr_get_xact) function will copy the transaction field from the message
+into the &ital(dest) buffer provided by the user.  
+The buffer referenced by &ital( dest ) is assumed to be at least &cw(RMR_MAX_XID) bytes in length.
+If &ital( dest ) is NULL, then a buffer is allocated (the calling application is expected
+to free when the buffer is no longer needed).
 
-&beg_dlist(.75i : ^&bold_font )
 &h2(RETURN VALUE)
-On success, the value RMR_OK is returned. 
-If the string cannot be copied to the message, the return value will be one of the 
-errors listed below.
+On success, a pointer to the extracted string is returned. 
+If &ital( dest ) was supplied, then this is just a pointer to the caller's buffer.
+If &ital( dest ) was NULL, this is a pointer to the allocated buffer.
+If an error occurs, a nil pointer is returned and errno is set as described below.
 
 &h2(ERRORS)
-If the return value is not RMR_OK, then it will be set to one of the values below.
+If an error occurs, the value of the global variable &cw( errno ) will be set to one of 
+the following with the indicated meaning.
+
+&beg_dlist(.75i : ^&bold_font )
+&half_space
+&di(EINVAL) The message, or an internal portion of the message, was corrupted or the pointer was invalid.
 
 &half_space
-&di(RMR_ERR_BADARG) The message, or an internal portion of the message, was corrupted or the pointer was invalid.
-
-&half_space
-&di(RMR_ERR_OVERFLOW) The length passed in was larger than the maximum length of the field; only a portion of
-	the source bytes were copied.
+&di(ENOMEM) A nil pointer was passed for &ital( dest, ) however it was not possible to allocate a 
+	buffer using malloc().
 &end_dlist
 
-&h2(EXAMPLE)
 
 
 &h2(SEE ALSO )
+.ju off
 rmr_alloc_msg(3),
-rmr_bytes2meid(3),
 rmr_bytes2xact(3),
+rmr_bytes2meid(3),
 rmr_call(3),
 rmr_free_msg(3),
-rmr_get_meid(3),
 rmr_get_rcvfd(3),
-rmr_get_xact(3),
+rmr_get_meid(3),
 rmr_payload_size(3),
 rmr_send_msg(3),
 rmr_rcv_msg(3),
@@ -92,7 +92,11 @@ rmr_tokenise(3),
 rmr_mk_ring(3),
 rmr_ring_free(3),
 rmr_str2meid(3),
+rmr_str2xact(3),
 rmr_wh_open(3),
 rmr_wh_send_msg(3)
+.ju on
+
+
 .qu
 
