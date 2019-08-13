@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.5] - 8/13/2019
+    * Make the PYPI page for rmr look nicer.
+
 ## [0.10.4] - 8/08/2019
     * Fix underlying problem getting errno from some environments; now references new RMR message field to get errno value.
 	* Add /usr/local/lib64 to tox environment variable to support systems where libraries natually install in lib64 rather than lib.
