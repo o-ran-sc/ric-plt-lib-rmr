@@ -1,0 +1,7 @@
+Verified+1: ORAN Jobbuilder <releng+oran-jobbuilder@linuxfoundation.org>
+Code-Review+2: Scott Daniels <daniels@research.att.com>
+Submitted-by: Scott Daniels <daniels@research.att.com>
+Submitted-at: Tue, 13 Aug 2019 15:10:02 +0000
+Reviewed-on: https://gerrit.o-ran-sc.org/r/c/ric-plt/lib/rmr/+/696
+Project: ric-plt/lib/rmr
+Branch: refs/heads/master
