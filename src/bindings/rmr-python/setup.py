@@ -22,18 +22,29 @@ SETUP_DIR = abspath(dirname(__file__))
 
 def _long_descr():
     """Yields the content of documentation files for the long description"""
-    doc_path = path_join(SETUP_DIR, "README.md")
+    doc_path = path_join(SETUP_DIR, "README.rst")
     with open(doc_path) as f:
         return f.read()
 
 
 setup(
     name="rmr",
-    version="0.10.4",
+    version="0.10.5",
     packages=find_packages(),
     author="Tommy Carpenter, E. Scott Daniels",
     description="Python wrapper for RIC RMR",
     url="https://gerrit.o-ran-sc.org/r/admin/repos/ric-plt/lib/rmr",
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Telecommunications Industry",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: POSIX :: Linux",
+        "Topic :: Communications",
+    ],
+    python_requires=">=3.7",
+    keywords="RIC rmr",
     license="Apache 2.0",
     data_files=[("", ["LICENSE.txt"])],
     install_requires=[],
