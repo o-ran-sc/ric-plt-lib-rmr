@@ -83,7 +83,17 @@ def _get_mapping_dict(cache={}):
 
 def _state_to_status(stateno):
     """
-    convery a msg state to status
+    Convert a msg state to status
+
+    Parameters
+    ----------
+    stateno: int
+        the state of the rmr message buffer
+
+    Returns
+    -------
+    string
+        the cooresponding message state
     """
     sdict = _get_mapping_dict()
     return sdict.get(stateno, "UNKNOWN STATE")
