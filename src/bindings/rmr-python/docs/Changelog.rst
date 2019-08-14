@@ -7,6 +7,15 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+[0.10.7] - 8/14/2019
+--------------------
+
+::
+   * Finish sphinx documentation
+   * Make public functions that wrap ctype declarions, allowing for docstrings
+   * Fix a bug where rmr_set_stimeout was pointing to the wrong function
+
+
 [0.10.6] - 8/13/2019
 --------------------
 
