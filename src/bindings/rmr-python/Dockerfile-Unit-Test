@@ -14,23 +14,19 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 # ==================================================================================
-[tox]
-envlist = py37,flake8
+FROM python:3.7-alpine
 
-[testenv]
-deps=
-    pytest
-    coverage
-    pytest-cov
-setenv = LD_LIBRARY_PATH = /usr/local/lib/:/usr/local/lib64
-commands=pytest --verbose --cov {envsitepackagesdir}/rmr  --cov-report term-missing
+# copy NNG and rmr out of the  CI builder nng
+COPY --from=nexus3.o-ran-sc.org:10004/bldr-alpine3:3-a3.9 /usr/local/lib64/libnng.so /usr/local/lib64/libnng.so
+COPY --from=nexus3.o-ran-sc.org:10004/bldr-alpine3:3-a3.9 /usr/local/lib64/librmr_nng.so /usr/local/lib64/librmr_nng.so
 
-[testenv:flake8]
-basepython = python3.7
-skip_install = true
-deps = flake8
-commands = flake8 setup.py rmr
-# tests
+COPY rmr/ /tmp/rmr
+COPY tests/ /tmp/tests
+COPY setup.py tox.ini LICENSE.txt /tmp/
+WORKDIR /tmp
 
-[flake8]
-ignore = E501
+# Upgrade pip, install tox
+RUN pip install --upgrade pip && pip install tox
+
+# Run the unit tests
+RUN tox

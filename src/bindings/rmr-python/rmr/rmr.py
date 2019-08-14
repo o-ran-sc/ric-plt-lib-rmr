@@ -29,6 +29,9 @@ _ = CDLL("libnng.so", mode=RTLD_GLOBAL)
 rmr_c_lib = CDLL("librmr_nng.so", mode=RTLD_GLOBAL)
 
 
+# Internal Helpers (not a part of public api)
+
+
 _rmr_const = rmr_c_lib.rmr_get_consts
 _rmr_const.argtypes = []
 _rmr_const.restype = c_char_p
@@ -51,22 +54,22 @@ def _get_mapping_dict(cache={}):
     """
     Get or build the state mapping dict
 
-    #define RMR_OK              0       // state is good
-    #define RMR_ERR_BADARG      1       // argument passd to function was unusable
-    #define RMR_ERR_NOENDPT     2       // send/call could not find an endpoint based on msg type
-    #define RMR_ERR_EMPTY       3       // msg received had no payload; attempt to send an empty message
-    #define RMR_ERR_NOHDR       4       // message didn't contain a valid header
-    #define RMR_ERR_SENDFAILED  5       // send failed; errno has nano reason
-    #define RMR_ERR_CALLFAILED  6       // unable to send call() message
-    #define RMR_ERR_NOWHOPEN    7       // no wormholes are open
-    #define RMR_ERR_WHID        8       // wormhole id was invalid
-    #define RMR_ERR_OVERFLOW    9       // operation would have busted through a buffer/field size
-    #define RMR_ERR_RETRY       10      // request (send/call/rts) failed, but caller should retry (EAGAIN for wrappers)
-    #define RMR_ERR_RCVFAILED   11      // receive failed (hard error)
-    #define RMR_ERR_TIMEOUT     12      // message processing call timed out
-    #define RMR_ERR_UNSET       13      // the message hasn't been populated with a transport buffer
-    #define RMR_ERR_TRUNC       14      // received message likely truncated
-    #define RMR_ERR_INITFAILED  15      // initialisation of something (probably message) failed
+    RMR_OK              0   state is good
+    RMR_ERR_BADARG      1   argument passd to function was unusable
+    RMR_ERR_NOENDPT     2   send/call could not find an endpoint based on msg type
+    RMR_ERR_EMPTY       3   msg received had no payload; attempt to send an empty message
+    RMR_ERR_NOHDR       4   message didn't contain a valid header
+    RMR_ERR_SENDFAILED  5   send failed; errno has nano reason
+    RMR_ERR_CALLFAILED  6   unable to send call() message
+    RMR_ERR_NOWHOPEN    7   no wormholes are open
+    RMR_ERR_WHID        8   wormhole id was invalid
+    RMR_ERR_OVERFLOW    9   operation would have busted through a buffer/field size
+    RMR_ERR_RETRY       10  request (send/call/rts) failed, but caller should retry (EAGAIN for wrappers)
+    RMR_ERR_RCVFAILED   11  receive failed (hard error)
+    RMR_ERR_TIMEOUT     12  message processing call timed out
+    RMR_ERR_UNSET       13  the message hasn't been populated with a transport buffer
+    RMR_ERR_TRUNC       14  received message likely truncated
+    RMR_ERR_INITFAILED  15  initialisation of something (probably message) failed
 
     """
     if cache:
@@ -85,15 +88,6 @@ def _state_to_status(stateno):
     """
     Convert a msg state to status
 
-    Parameters
-    ----------
-    stateno: int
-        the state of the rmr message buffer
-
-    Returns
-    -------
-    string
-        the cooresponding message state
     """
     sdict = _get_mapping_dict()
     return sdict.get(stateno, "UNKNOWN STATE")
@@ -102,6 +96,7 @@ def _state_to_status(stateno):
 ##############
 # PUBLIC API
 ##############
+
 
 # These constants are directly usable by importers of this library
 # TODO: Are there others that will be useful?
@@ -112,28 +107,29 @@ class rmr_mbuf_t(Structure):
     """
     Reimplementation of rmr_mbuf_t which is in an unaccessible header file (src/common/include/rmr.h)
 
-    typedef struct {
-       int     state;             // state of processing
-       int     mtype;             // message type
-       int     len;               // length of data in the payload (send or received)
-       unsigned char* payload;    // transported data
-       unsigned char* xaction;    // pointer to fixed length transaction id bytes
-       int sub_id;                // subscription id
-       int      tp_state;         // transport state (a.k.a errno)
-                                  // these things are off limits to the user application
-       void*   tp_buf;            // underlying transport allocated pointer (e.g. nng message)
-       void*   header;            // internal message header (whole buffer: header+payload)
-       unsigned char* id;         // if we need an ID in the message separate from the xaction id
-       int flags;                 // various MFL_ (private) flags as needed
-       int alloc_len;             // the length of the allocated space (hdr+payload)
-    } rmr_mbuf_t;
+    | typedef struct {
+    |    int     state;          // state of processing
+    |    int     mtype;          // message type
+    |    int     len;            // length of data in the payload (send or received)
+    |    unsigned char* payload; // transported data
+    |    unsigned char* xaction; // pointer to fixed length transaction id bytes
+    |    int sub_id;             // subscription id
+    |    int      tp_state;      // transport state (a.k.a errno)
+    |
+    | these things are off limits to the user application
+    |
+    |    void*   tp_buf;         // underlying transport allocated pointer (e.g. nng message)
+    |    void*   header;         // internal message header (whole buffer: header+payload)
+    |    unsigned char* id;      // if we need an ID in the message separate from the xaction id
+    |    int flags;              // various MFL (private) flags as needed
+    |    int alloc_len;          // the length of the allocated space (hdr+payload)
+    | } rmr_mbuf_t;
 
     We do not include the fields we are not supposed to mess with
 
-     RE PAYLOADs type below, see the documentation for c_char_p:
+    RE PAYLOADs type below, see the documentation for c_char_p:
        class ctypes.c_char_p
            Represents the C char * datatype when it points to a zero-terminated string. For a general character pointer that may also point to binary data, POINTER(c_char) must be used. The constructor accepts an integer address, or a bytes object.
-
     """
 
     _fields_ = [
@@ -153,188 +149,343 @@ class rmr_mbuf_t(Structure):
 # argtypes and restype are important: https://stackoverflow.com/questions/24377845/ctype-why-specify-argtypes
 
 
-# extern void* rmr_init(char* uproto_port, int max_msg_size, int flags)
-rmr_init = rmr_c_lib.rmr_init
-rmr_init.argtypes = [c_char_p, c_int, c_int]
-rmr_init.restype = c_void_p
+_rmr_init = rmr_c_lib.rmr_init
+_rmr_init.argtypes = [c_char_p, c_int, c_int]
+_rmr_init.restype = c_void_p
 
 
-# extern void rmr_close(void* vctx)
-rmr_close = rmr_c_lib.rmr_close
-rmr_close.argtypes = [c_void_p]
-# I don't think there's a restype needed here. THe return is simply "return" in the c lib
+def rmr_init(uproto_port, max_msg_size, flags):
+    """
+    Refer to rmr C documentation for rmr_init
+    extern void* rmr_init(char* uproto_port, int max_msg_size, int flags)
+    """
+    return _rmr_init(uproto_port, max_msg_size, flags)
 
-# extern int rmr_ready(void* vctx)
-rmr_ready = rmr_c_lib.rmr_ready
-rmr_ready.argtypes = [c_void_p]
-rmr_ready.restype = c_int
 
-# extern int rmr_set_stimeout(void* vctx, int time)
-# RE "int time", from the C docs:
-#        Set send timeout. The value time is assumed to be microseconds.  The timeout is the
-#        rough maximum amount of time that RMr will block on a send attempt when the underlying
-#        mechnism indicates eagain or etimeedout.  All other error conditions are reported
-#        without this delay. Setting a timeout of 0 causes no retries to be attempted in
-#        RMr code. Setting a timeout of 1 causes RMr to spin up to 10K retries before returning,
-#        but without issuing a sleep.  If timeout is > 1, then RMr will issue a sleep (1us)
-#        after every 10K send attempts until the time value is reached. Retries are abandoned
-#        if NNG returns anything other than NNG_AGAIN or NNG_TIMEDOUT.
-#
-#        The default, if this function is not used, is 1; meaning that RMr will retry, but will
-#        not enter a sleep.  In all cases the caller should check the status in the message returned
-#        after a send call.
-rmr_set_stimeout = rmr_c_lib.rmr_set_rtimeout
-rmr_set_stimeout.argtypes = [c_void_p, c_int]
-rmr_set_stimeout.restype = c_int
+_rmr_close = rmr_c_lib.rmr_close
+_rmr_close.argtypes = [c_void_p]
 
-# extern rmr_mbuf_t* rmr_alloc_msg(void* vctx, int size)
-rmr_alloc_msg = rmr_c_lib.rmr_alloc_msg
-rmr_alloc_msg.argtypes = [c_void_p, c_int]
-rmr_alloc_msg.restype = POINTER(rmr_mbuf_t)
 
-# extern int rmr_payload_size(rmr_mbuf_t* msg)
-rmr_payload_size = rmr_c_lib.rmr_payload_size
-rmr_payload_size.argtypes = [POINTER(rmr_mbuf_t)]
-rmr_payload_size.restype = c_int
+def rmr_close(vctx):
+    """
+    Refer to rmr C documentation for rmr_close
+    extern void rmr_close(void* vctx)
+    """
+    return _rmr_close(vctx)
+
+
+_rmr_ready = rmr_c_lib.rmr_ready
+_rmr_ready.argtypes = [c_void_p]
+_rmr_ready.restype = c_int
+
+
+def rmr_ready(vctx):
+    """
+    Refer to rmr C documentation for rmr_ready
+    extern int rmr_ready(void* vctx)
+    """
+    return _rmr_ready(vctx)
+
+
+_rmr_set_stimeout = rmr_c_lib.rmr_set_stimeout
+_rmr_set_stimeout.argtypes = [c_void_p, c_int]
+_rmr_set_stimeout.restype = c_int
+
+
+def rmr_set_stimeout(vctx, time):
+    """
+    Refer to the rmr C documentation for rmr_set_stimeout
+    extern int rmr_set_stimeout(void* vctx, int time)
+    """
+    return _rmr_set_stimeout(vctx, time)
+
+
+_rmr_alloc_msg = rmr_c_lib.rmr_alloc_msg
+_rmr_alloc_msg.argtypes = [c_void_p, c_int]
+_rmr_alloc_msg.restype = POINTER(rmr_mbuf_t)
+
+
+def rmr_alloc_msg(vctx, size):
+    """
+    Refer to the rmr C documentation for rmr_alloc_msg
+    extern rmr_mbuf_t* rmr_alloc_msg(void* vctx, int size)
+    """
+    return rmr_alloc_msg(vctx, size)
+
+
+_rmr_payload_size = rmr_c_lib.rmr_payload_size
+_rmr_payload_size.argtypes = [POINTER(rmr_mbuf_t)]
+_rmr_payload_size.restype = c_int
+
+
+def rmr_payload_size(ptr_mbuf):
+    """
+    Refer to the rmr C documentation for rmr_payload_size
+    extern int rmr_payload_size(rmr_mbuf_t* msg)
+    """
+    return _rmr_payload_size(ptr_mbuf)
 
 
 """
 The following functions all seem to have the same interface
 """
 
-# extern rmr_mbuf_t* rmr_send_msg(void* vctx, rmr_mbuf_t* msg)
-rmr_send_msg = rmr_c_lib.rmr_send_msg
-rmr_send_msg.argtypes = [c_void_p, POINTER(rmr_mbuf_t)]
-rmr_send_msg.restype = POINTER(rmr_mbuf_t)
+_rmr_send_msg = rmr_c_lib.rmr_send_msg
+_rmr_send_msg.argtypes = [c_void_p, POINTER(rmr_mbuf_t)]
+_rmr_send_msg.restype = POINTER(rmr_mbuf_t)
 
-# extern rmr_mbuf_t* rmr_rcv_msg(void* vctx, rmr_mbuf_t* old_msg)
+
+def rmr_send_msg(vctx, ptr_mbuf):
+    """
+    Refer to the rmr C documentation for rmr_send_msg
+    extern rmr_mbuf_t* rmr_send_msg(void* vctx, rmr_mbuf_t* msg)
+    """
+    return _rmr_send_msg(vctx, ptr_mbuf)
+
+
 # TODO: the old message (Send param) is actually optional, but I don't know how to specify that in Ctypes.
-rmr_rcv_msg = rmr_c_lib.rmr_rcv_msg
-rmr_rcv_msg.argtypes = [c_void_p, POINTER(rmr_mbuf_t)]
-rmr_rcv_msg.restype = POINTER(rmr_mbuf_t)
-
-# extern rmr_mbuf_t* rmr_torcv_msg(void* vctx, rmr_mbuf_t* old_msg, int ms_to)
-# the version of receive for nng that has a timeout (give up after X ms)
-rmr_torcv_msg = rmr_c_lib.rmr_torcv_msg
-rmr_torcv_msg.argtypes = [c_void_p, POINTER(rmr_mbuf_t), c_int]
-rmr_torcv_msg.restype = POINTER(rmr_mbuf_t)
-
-# extern rmr_mbuf_t*  rmr_rts_msg(void* vctx, rmr_mbuf_t* msg)
-rmr_rts_msg = rmr_c_lib.rmr_rts_msg
-rmr_rts_msg.argtypes = [c_void_p, POINTER(rmr_mbuf_t)]
-rmr_rts_msg.restype = POINTER(rmr_mbuf_t)
-
-# extern rmr_mbuf_t* rmr_call(void* vctx, rmr_mbuf_t* msg)
-rmr_call = rmr_c_lib.rmr_call
-rmr_call.argtypes = [c_void_p, POINTER(rmr_mbuf_t)]
-rmr_call.restype = POINTER(rmr_mbuf_t)
+_rmr_rcv_msg = rmr_c_lib.rmr_rcv_msg
+_rmr_rcv_msg.argtypes = [c_void_p, POINTER(rmr_mbuf_t)]
+_rmr_rcv_msg.restype = POINTER(rmr_mbuf_t)
 
 
-# Header field interface
+def rmr_rcv_msg(vctx, ptr_mbuf):
+    """
+    Refer to the rmr C documentation for rmr_rcv_msg
+    extern rmr_mbuf_t* rmr_rcv_msg(void* vctx, rmr_mbuf_t* old_msg)
+    """
+    return _rmr_rcv_msg(vctx, ptr_mbuf)
 
-# extern int rmr_bytes2meid(rmr_mbuf_t* mbuf, unsigned char const* src, int len);
-rmr_bytes2meid = rmr_c_lib.rmr_bytes2meid
-rmr_bytes2meid.argtypes = [POINTER(rmr_mbuf_t), c_char_p, c_int]
-rmr_bytes2meid.restype = c_int
+
+_rmr_torcv_msg = rmr_c_lib.rmr_torcv_msg
+_rmr_torcv_msg.argtypes = [c_void_p, POINTER(rmr_mbuf_t), c_int]
+_rmr_torcv_msg.restype = POINTER(rmr_mbuf_t)
+
+
+def rmr_torcv_msg(vctx, ptr_mbuf, ms_to):
+    """
+    Refer to the rmr C documentation for rmr_torcv_msg
+    extern rmr_mbuf_t* rmr_torcv_msg(void* vctx, rmr_mbuf_t* old_msg, int ms_to)
+    """
+    return _rmr_torcv_msg(vctx, ptr_mbuf, ms_to)
+
+
+_rmr_rts_msg = rmr_c_lib.rmr_rts_msg
+_rmr_rts_msg.argtypes = [c_void_p, POINTER(rmr_mbuf_t)]
+_rmr_rts_msg.restype = POINTER(rmr_mbuf_t)
+
+
+def rmr_rts_msg(vctx, ptr_mbuf):
+    """
+    Refer to the rmr C documentation for rmr_rts_msg
+    extern rmr_mbuf_t*  rmr_rts_msg(void* vctx, rmr_mbuf_t* msg)
+    """
+    return _rmr_rts_msg(vctx, ptr_mbuf)
+
+
+_rmr_call = rmr_c_lib.rmr_call
+_rmr_call.argtypes = [c_void_p, POINTER(rmr_mbuf_t)]
+_rmr_call.restype = POINTER(rmr_mbuf_t)
+
+
+def rmr_call(vctx, ptr_mbuf):
+    """
+    Refer to the rmr C documentation for rmr_call
+    extern rmr_mbuf_t* rmr_call(void* vctx, rmr_mbuf_t* msg)
+    """
+    return _rmr_call(vctx, ptr_mbuf)
 
 
 # CAUTION:  Some of the C functions expect a mutable buffer to copy the bytes into;
 #           if there is a get_* function below, use it to set up and return the
 #           buffer properly.
 
-# extern unsigned char*  rmr_get_meid(rmr_mbuf_t* mbuf, unsigned char* dest);
-rmr_get_meid = rmr_c_lib.rmr_get_meid
-rmr_get_meid.argtypes = [POINTER(rmr_mbuf_t), c_char_p]
-rmr_get_meid.restype = c_char_p
 
-# extern unsigned char*  rmr_get_src(rmr_mbuf_t* mbuf, unsigned char* dest);
-rmr_get_src = rmr_c_lib.rmr_get_src
-rmr_get_src.argtypes = [POINTER(rmr_mbuf_t), c_char_p]
-rmr_get_src.restype = c_char_p
+_rmr_bytes2meid = rmr_c_lib.rmr_bytes2meid
+_rmr_bytes2meid.argtypes = [POINTER(rmr_mbuf_t), c_char_p, c_int]
+_rmr_bytes2meid.restype = c_int
 
 
-# GET Methods
-
-
-def get_payload(ptr_to_rmr_buf_t):
+def rmr_bytes2meid(ptr_mbuf, src, length):
     """
-    given a rmr_buf_t*, get it's binary payload as a bytes object
-    this magical function came from the answer here: https://stackoverflow.com/questions/55103298/python-ctypes-read-pointerc-char-in-python
+    Refer to the rmr C documentation for rmr_bytes2meid
+    extern int rmr_bytes2meid(rmr_mbuf_t* mbuf, unsigned char const* src, int len);
     """
-    sz = ptr_to_rmr_buf_t.contents.len
+    return _rmr_bytes2meid(ptr_mbuf, src, length)
+
+
+_rmr_get_meid = rmr_c_lib.rmr_get_meid
+_rmr_get_meid.argtypes = [POINTER(rmr_mbuf_t), c_char_p]
+_rmr_get_meid.restype = c_char_p
+
+
+def rmr_get_meid(ptr_mbuf, dest):
+    """
+    Refer to the rmr C documentation for rmr_get_meid
+    extern unsigned char*  rmr_get_meid(rmr_mbuf_t* mbuf, unsigned char* dest);
+    """
+    return _rmr_get_meid(ptr_mbuf, dest)
+
+
+_rmr_get_src = rmr_c_lib.rmr_get_src
+_rmr_get_src.argtypes = [POINTER(rmr_mbuf_t), c_char_p]
+_rmr_get_src.restype = c_char_p
+
+
+def rmr_get_src(ptr_mbuf, dest):
+    """
+    Refer to the rmr C documentation for rmr_get_src
+    extern unsigned char*  rmr_get_src(rmr_mbuf_t* mbuf, unsigned char* dest);
+    """
+    return _rmr_get_src(ptr_mbuf, dest)
+
+
+# Methods that exist ONLY in rmr-python, and are not wrapped methods
+# In hindsight, I wish i put these in a seperate module, but leaving this here to prevent api breakage.
+
+
+def get_payload(ptr_mbuf):
+    """
+    Given a rmr_buf_t*, get it's binary payload as a bytes object
+
+    Parameters
+    ----------
+    ptr_mbuf: ctypes c_void_p
+        Pointer to an rmr message buffer
+
+    Returns
+    -------
+    bytes:
+        the message payload
+    """
+    # Logic came from the answer here: https://stackoverflow.com/questions/55103298/python-ctypes-read-pointerc-char-in-python
+    sz = ptr_mbuf.contents.len
     CharArr = c_char * sz
-    return CharArr(*ptr_to_rmr_buf_t.contents.payload[:sz]).raw
+    return CharArr(*ptr_mbuf.contents.payload[:sz]).raw
 
 
-def get_xaction(ptr_to_rmr_buf_t):
+def get_xaction(ptr_mbuf):
     """
     given a rmr_buf_t*, get it's transaction id
+
+    Parameters
+    ----------
+    ptr_mbuf: ctypes c_void_p
+        Pointer to an rmr message buffer
+
+    Returns
+    -------
+    bytes:
+        the transaction id
     """
-    val = cast(ptr_to_rmr_buf_t.contents.xaction, c_char_p).value
+    val = cast(ptr_mbuf.contents.xaction, c_char_p).value
     sz = _get_constants().get("RMR_MAX_XID", 0)
     return val[:sz]
 
 
-def message_summary(ptr_to_rmr_buf_t):
+def message_summary(ptr_mbuf):
     """
-    Used for debugging mostly: returns a dict that contains the fields of a message
+    Returns a dict that contains the fields of a message
+
+    Parameters
+    ----------
+    ptr_mbuf: ctypes c_void_p
+        Pointer to an rmr message buffer
+
+    Returns
+    -------
+    dict:
+        dict message summary
     """
-    if ptr_to_rmr_buf_t.contents.len > RMR_MAX_RCV_BYTES:
+    if ptr_mbuf.contents.len > RMR_MAX_RCV_BYTES:
         return "Malformed message: message length is greater than the maximum possible"
 
-    meid = get_meid(ptr_to_rmr_buf_t)
+    meid = get_meid(ptr_mbuf)
     if meid == "\000" * _get_constants().get("RMR_MAX_MEID", 32):  # special case all nils
         meid = None
 
     return {
-        "payload": get_payload(ptr_to_rmr_buf_t),
-        "payload length": ptr_to_rmr_buf_t.contents.len,
-        "message type": ptr_to_rmr_buf_t.contents.mtype,
-        "subscription id": ptr_to_rmr_buf_t.contents.sub_id,
-        "transaction id": get_xaction(ptr_to_rmr_buf_t),
-        "message state": ptr_to_rmr_buf_t.contents.state,
-        "message status": _state_to_status(ptr_to_rmr_buf_t.contents.state),
-        "payload max size": rmr_payload_size(ptr_to_rmr_buf_t),
+        "payload": get_payload(ptr_mbuf),
+        "payload length": ptr_mbuf.contents.len,
+        "message type": ptr_mbuf.contents.mtype,
+        "subscription id": ptr_mbuf.contents.sub_id,
+        "transaction id": get_xaction(ptr_mbuf),
+        "message state": ptr_mbuf.contents.state,
+        "message status": _state_to_status(ptr_mbuf.contents.state),
+        "payload max size": rmr_payload_size(ptr_mbuf),
         "meid": meid,
-        "message source": get_src(ptr_to_rmr_buf_t),
-        "errno": ptr_to_rmr_buf_t.contents.tp_state,
+        "message source": get_src(ptr_mbuf),
+        "errno": ptr_mbuf.contents.tp_state,
     }
 
 
-def set_payload_and_length(byte_str, ptr_to_rmr_buf_t):
+def set_payload_and_length(byte_str, ptr_mbuf):
     """
-    use memmove to set the rmr_buf_t payload and content length
+    | Set an rmr payload and content length
+    | In place method, no return
+
+    Parameters
+    ----------
+    byte_str: bytes
+        the bytes to set the payload to
+    ptr_mbuf: ctypes c_void_p
+        Pointer to an rmr message buffer
     """
-    memmove(ptr_to_rmr_buf_t.contents.payload, byte_str, len(byte_str))
-    ptr_to_rmr_buf_t.contents.len = len(byte_str)
+    memmove(ptr_mbuf.contents.payload, byte_str, len(byte_str))
+    ptr_mbuf.contents.len = len(byte_str)
 
 
-def generate_and_set_transaction_id(ptr_to_rmr_buf_t):
+def generate_and_set_transaction_id(ptr_mbuf):
     """
-    use memmove to set the rmr_buf_t xaction
+    | Generate a UUID and Set an rmr transaction id to it
+    | In place method, no return
+
+    Parameters
+    ----------
+    ptr_mbuf: ctypes c_void_p
+        Pointer to an rmr message buffer
     """
     uu_id = uuid.uuid1().hex.encode("utf-8")
     sz = _get_constants().get("RMR_MAX_XID", 0)
-    memmove(ptr_to_rmr_buf_t.contents.xaction, uu_id, sz)
+    memmove(ptr_mbuf.contents.xaction, uu_id, sz)
 
 
-def get_meid(mbuf):
+def get_meid(ptr_mbuf):
     """
-    Suss out the managed equipment ID (meid) from the message header.
-    This is a 32 byte field and RMr returns all 32 bytes which if the
-    sender did not set will be garbage.
+    | Get the managed equipment ID (meid) from the message header.
+    | This is a 32 byte field and RMr returns all 32 bytes which if the sender did not set will be garbage.
+
+    Parameters
+    ----------
+    ptr_mbuf: ctypes c_void_p
+        Pointer to an rmr message buffer
+
+    Returns
+    -------
+    string:
+        meid
     """
     sz = _get_constants().get("RMR_MAX_MEID", 64)  # size for buffer to fill
     buf = create_string_buffer(sz)
-    rmr_get_meid(mbuf, buf)
+    rmr_get_meid(ptr_mbuf, buf)
     return buf.raw.decode()
 
 
-def get_src(mbuf):
+def get_src(ptr_mbuf):
     """
-    Suss out the message source information (likely host:port).
+    Get the message source (likely host:port)
+
+    Parameters
+    ----------
+    ptr_mbuf: ctypes c_void_p
+        Pointer to an rmr message buffer
+
+    Returns
+    -------
+    string:
+        meid
     """
     sz = _get_constants().get("RMR_MAX_SRC", 64)  # size to fill
     buf = create_string_buffer(sz)
-    rmr_get_src(mbuf, buf)
+    rmr_get_src(ptr_mbuf, buf)
     return buf.value.decode()
