@@ -40,11 +40,18 @@ are not yet implemented in this library (do we need them?):
 
 Unit Testing
 ============
+You can unit test outside of docker, or in docker. Unit testing outside of docker currently requires rmr to be installed.
 
 ::
 
    tox
    open htmlcov/index.html
+
+Or, use the provided Dockerfile (building is enough):
+
+::
+
+    docker build -t rmrunittestt:latest -f Dockerfile-Unit-Test   .
 
 Installation
 ============
