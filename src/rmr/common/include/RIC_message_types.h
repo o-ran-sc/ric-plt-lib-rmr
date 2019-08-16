@@ -18,6 +18,10 @@
 */
 
 
+==================================================================================
+
+
+==================================================================================
 
 
 /* Header  file defining  message types
@@ -36,14 +40,57 @@
 // all message types 0 - 99 are reserved for RMR
 // ---------------------------------------------------------
 
+// --- please keep additions in numerical order ------
+
 #define RIC_SCTP_CONNECTION_FAILURE 1080
 #define RIC_SCTP_CLEAR_ALL			1090
 
 #define	E2_TERM_INIT				1100
 
+#define RIC_ENB_LOAD_INFORMATION	10020	
+
+#define RIC_ERROR_INDICATION		10030	
+
+#define RIC_UE_CONTEXT_RELEASE		10050
+
+#define RIC_X2_SETUP_REQ			10060	
+#define RIC_X2_SETUP_RESP			10061	
+#define RIC_X2_SETUP_FAILURE		10062	
+#define RIC_X2_RESET				10070	
+#define	RIC_X2_RESET_RESP			10071
+
+#define RIC_ENB_CONF_UPDATE			10080	
+#define RIC_ENB_CONF_UPDATE_ACK		10081	
+#define RIC_ENB_CONF_UPDATE_FAILURE	10082	
+
+#define RIC_RES_STATUS_REQ			10090	
+#define RIC_RES_STATUS_RESP			10091	
+#define RIC_RES_STATUS_FAILURE		10092	
+
+#define RIC_RESOURCE_STATUS_UPDATE	10100	
+
+#define RIC_SGNB_ADDITION_REQ		10270
+#define RIC_SGNB_ADDITION_ACK		10271
+#define RIC_SGNB_ADDITION_REJECT	10272
+#define RIC_SGNB_RECONF_COMPLETE	10280 
+
+#define RIC_RRC_TRANSFER			10350
+
+#define RIC_ENDC_X2_SETUP_REQ		10360	
+#define RIC_ENDC_X2_SETUP_RESP		10361	
+#define RIC_ENDC_X2_SETUP_FAILURE	10362	
+
+#define RIC_ENDC_CONF_UPDATE		10370	
+#define RIC_ENDC_CONF_UPDATE_ACK	10371	
+#define RIC_ENDC_CONF_UPDATE_FAILURE	10372	
+
+#define RIC_GNB_STATUS_INDICATION	10450	
+
+
 #define RIC_SUB_REQ					12010	
 #define RIC_SUB_RESP				12011	
 #define RIC_SUB_FAILURE				12012	
+
 #define RIC_SUB_DEL_REQ				12020	
 #define RIC_SUB_DEL_RESP			12021	
 #define RIC_SUB_DEL_FAILURE			12022	
@@ -57,36 +104,8 @@
 #define RIC_CONTROL_FAILURE			12042	
 
 #define RIC_INDICATION				12050	
+
 #define RIC_SERVICE_QUERY			12060		
-
-#define RIC_X2_SETUP_REQ			10060	
-#define RIC_X2_SETUP_RESP			10061	
-#define RIC_X2_SETUP_FAILURE		10062	
-#define RIC_X2_RESET				10070	
-#define	RIC_X2_RESET_RESP			10071
-
-
-#define RIC_ENDC_X2_SETUP_REQ		10360	
-#define RIC_ENDC_X2_SETUP_RESP		10361	
-#define RIC_ENDC_X2_SETUP_FAILURE	10362	
-#define RIC_ENDC_CONF_UPDATE		10370	
-#define RIC_ENDC_CONF_UPDATE_ACK	10371	
-#define RIC_ENDC_CONF_UPDATE_FAILURE	10372	
-
-#define RIC_RES_STATUS_REQ			10090	
-#define RIC_RES_STATUS_RESP			10091	
-#define RIC_RES_STATUS_FAILURE		10092	
-
-#define RIC_ENB_CONF_UPDATE			10080	
-#define RIC_ENB_CONF_UPDATE_ACK		10081	
-#define RIC_ENB_CONF_UPDATE_FAILURE	10082	
-#define RIC_ENB_LOAD_INFORMATION	10020	
-
-#define RIC_GNB_STATUS_INDICATION	10450	
-
-#define RIC_RESOURCE_STATUS_UPDATE	10100	
-
-#define RIC_ERROR_INDICATION		10030	
 
 #define DC_ADM_INT_CONTROL			20000	
 #define DC_ADM_INT_CONTROL_ACK		20001	
