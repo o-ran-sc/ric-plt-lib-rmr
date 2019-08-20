@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+[0.10.8] - 8/20/2019
+--------------------
+
+::
+   * Fix invocation of _rmr_alloc function
+
+
 [0.10.7] - 8/14/2019
 --------------------
 

@@ -210,7 +210,7 @@ def rmr_alloc_msg(vctx, size):
     Refer to the rmr C documentation for rmr_alloc_msg
     extern rmr_mbuf_t* rmr_alloc_msg(void* vctx, int size)
     """
-    return rmr_alloc_msg(vctx, size)
+    return _rmr_alloc_msg(vctx, size)
 
 
 _rmr_payload_size = rmr_c_lib.rmr_payload_size
