@@ -7,6 +7,15 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+[0.11.0] - 8/21/2019
+--------------------
+
+::
+   * Overhaul unit tests to remove mocking from the rmr tests, which gives much greater confidence in changing the code. More is still needed however, specifically test sends and test receives.
+   * Adds an alias rmr_set_meid to rmr_bytes2meid for naming consistency.
+   * Found a possible inconsistency/bug that requires further investigation later; setting meid takes bytes, but getting it returns a string.
+
+
 [0.10.8] - 8/20/2019
 --------------------
 
