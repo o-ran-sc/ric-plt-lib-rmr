@@ -34,7 +34,7 @@ def rcv_mock_generator(msg_payload, msg_type, msg_state, jsonb, timeout=0):
         sbuf.contents.payload = payload
         sbuf.contents.len = len(payload)
         sbuf.contents.state = msg_state
-        if msg_state != 0:                # set something in transport state if 'error'
+        if msg_state != 0:  # set something in transport state if 'error'
             sbuf.contents.tp_state = 99
         else:
             sbuf.contents.tp_state = 0
@@ -52,7 +52,7 @@ def send_mock_generator(msg_state):
 
     def f(_unused, sbuf):
         sbuf.contents.state = msg_state
-        if msg_state != 0:                # set something in transport state if 'error'
+        if msg_state != 0:  # set something in transport state if 'error'
             sbuf.contents.tp_state = 99
         else:
             sbuf.contents.tp_state = 0

@@ -32,7 +32,7 @@ def _long_descr():
 
 setup(
     name="rmr",
-    version="0.10.8",
+    version="0.11.0",
     packages=find_packages(),
     author="Tommy Carpenter, E. Scott Daniels",
     description="Python wrapper for RIC RMR",

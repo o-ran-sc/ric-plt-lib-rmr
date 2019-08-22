@@ -309,6 +309,10 @@ def rmr_bytes2meid(ptr_mbuf, src, length):
     return _rmr_bytes2meid(ptr_mbuf, src, length)
 
 
+# this is an alias to rmr_bytes2meid using familiar set/get terminoloigy
+rmr_set_meid = rmr_bytes2meid
+
+
 # CAUTION:  Some of the C functions expect a mutable buffer to copy the bytes into;
 #           if there is a get_* function below, use it to set up and return the
 #           buffer properly.

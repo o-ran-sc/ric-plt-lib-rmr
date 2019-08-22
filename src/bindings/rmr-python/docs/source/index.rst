@@ -40,18 +40,23 @@ are not yet implemented in this library (do we need them?):
 
 Unit Testing
 ============
-You can unit test outside of docker, or in docker. Unit testing outside of docker currently requires rmr to be installed.
+You can unit test in docker or outside of docker.
+The preferred method (by far) is to use Docker, because it encapsulates rmr, as well as ensuring that ports that rmr opens do not conflict with the host machine
+
+::
+
+    docker build -t rmrunittestt:latest -f Dockerfile-Unit-Test   .
+
+A coverage report will be shown in stdout.
+
+It is possible to run tox locally provided that rmr is intalled, and you are prepared to have the test open ports (4562) as ``rmr_init`` must succeed for the tests to proceed.
 
 ::
 
    tox
    open htmlcov/index.html
 
-Or, use the provided Dockerfile (building is enough):
-
-::
-
-    docker build -t rmrunittestt:latest -f Dockerfile-Unit-Test   .
+The added benefit of the local option is that the coverage report can be viewed in html, which I find easier to read than the term coverage reort the docker build will print.
 
 Installation
 ============
