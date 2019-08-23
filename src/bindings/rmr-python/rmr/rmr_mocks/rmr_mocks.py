@@ -126,5 +126,5 @@ def patch_rmr(monkeypatch):
     monkeypatch.setattr("rmr.rmr.generate_and_set_transaction_id", fake_generate_and_set_transaction_id)
     monkeypatch.setattr("rmr.rmr.get_payload", fake_get_payload)
     monkeypatch.setattr("rmr.rmr.get_src", fake_get_src)
-    monkeypatch.setattr("rmr.rmr.get_meid", fake_get_meid)
+    monkeypatch.setattr("rmr.rmr.rmr_get_meid", fake_get_meid)
     monkeypatch.setattr("rmr.rmr.rmr_payload_size", fake_rmr_payload_size)

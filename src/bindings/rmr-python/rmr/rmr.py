@@ -312,23 +312,36 @@ def rmr_bytes2meid(ptr_mbuf, src, length):
 # this is an alias to rmr_bytes2meid using familiar set/get terminoloigy
 rmr_set_meid = rmr_bytes2meid
 
-
 # CAUTION:  Some of the C functions expect a mutable buffer to copy the bytes into;
 #           if there is a get_* function below, use it to set up and return the
 #           buffer properly.
 
-
+# extern unsigned char*  rmr_get_meid(rmr_mbuf_t* mbuf, unsigned char* dest);
+# we don't provide direct access to this function (unless it is asked for) because it is not really useful to provide your own buffer.
+# Rather, rmr_get_meid does this for you, and just returns the string.
 _rmr_get_meid = rmr_c_lib.rmr_get_meid
 _rmr_get_meid.argtypes = [POINTER(rmr_mbuf_t), c_char_p]
 _rmr_get_meid.restype = c_char_p
 
 
-def rmr_get_meid(ptr_mbuf, dest):
+def rmr_get_meid(ptr_mbuf):
     """
-    Refer to the rmr C documentation for rmr_get_meid
-    extern unsigned char*  rmr_get_meid(rmr_mbuf_t* mbuf, unsigned char* dest);
+    Get the managed equipment ID (meid) from the message header.
+
+    Parameters
+    ----------
+    ptr_mbuf: ctypes c_void_p
+        Pointer to an rmr message buffer
+
+    Returns
+    -------
+    string:
+        meid
     """
-    return _rmr_get_meid(ptr_mbuf, dest)
+    sz = _get_constants().get("RMR_MAX_MEID", 64)  # size for buffer to fill
+    buf = create_string_buffer(sz)
+    _rmr_get_meid(ptr_mbuf, buf)
+    return buf.value.decode()  # decode turns into a string
 
 
 _rmr_get_src = rmr_c_lib.rmr_get_src
@@ -404,10 +417,6 @@ def message_summary(ptr_mbuf):
     if ptr_mbuf.contents.len > RMR_MAX_RCV_BYTES:
         return "Malformed message: message length is greater than the maximum possible"
 
-    meid = get_meid(ptr_mbuf)
-    if meid == "\000" * _get_constants().get("RMR_MAX_MEID", 32):  # special case all nils
-        meid = None
-
     return {
         "payload": get_payload(ptr_mbuf),
         "payload length": ptr_mbuf.contents.len,
@@ -417,7 +426,7 @@ def message_summary(ptr_mbuf):
         "message state": ptr_mbuf.contents.state,
         "message status": _state_to_status(ptr_mbuf.contents.state),
         "payload max size": rmr_payload_size(ptr_mbuf),
-        "meid": meid,
+        "meid": rmr_get_meid(ptr_mbuf),
         "message source": get_src(ptr_mbuf),
         "errno": ptr_mbuf.contents.tp_state,
     }
@@ -452,27 +461,6 @@ def generate_and_set_transaction_id(ptr_mbuf):
     uu_id = uuid.uuid1().hex.encode("utf-8")
     sz = _get_constants().get("RMR_MAX_XID", 0)
     memmove(ptr_mbuf.contents.xaction, uu_id, sz)
-
-
-def get_meid(ptr_mbuf):
-    """
-    | Get the managed equipment ID (meid) from the message header.
-    | This is a 32 byte field and RMr returns all 32 bytes which if the sender did not set will be garbage.
-
-    Parameters
-    ----------
-    ptr_mbuf: ctypes c_void_p
-        Pointer to an rmr message buffer
-
-    Returns
-    -------
-    string:
-        meid
-    """
-    sz = _get_constants().get("RMR_MAX_MEID", 64)  # size for buffer to fill
-    buf = create_string_buffer(sz)
-    rmr_get_meid(ptr_mbuf, buf)
-    return buf.raw.decode()
 
 
 def get_src(ptr_mbuf):
