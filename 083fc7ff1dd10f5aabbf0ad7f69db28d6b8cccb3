@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf753795_49a86722",
+        "filename": "src/bindings/rmr-python/docs/Changelog.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-08-23T18:35:15Z",
+      "side": 1,
+      "message": "ay --\u003e may  (only because CL will point it out if I dont)",
+      "revId": "083fc7ff1dd10f5aabbf0ad7f69db28d6b8cccb3",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "941e6fee_6a454d67",
+        "filename": "src/bindings/rmr-python/rmr/rmr.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-08-23T18:35:15Z",
+      "side": 1,
+      "message": "Returns src, not meid.",
+      "revId": "083fc7ff1dd10f5aabbf0ad7f69db28d6b8cccb3",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
