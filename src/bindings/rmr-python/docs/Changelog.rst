@@ -7,6 +7,15 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+[0.12.0] - 8/23/2019
+--------------------
+
+::
+   * Add final unit tests for rmr.py; unit test coverage for rmr python is about 95%. The remaining functions are dangerous to unit test directly, e.g., rcv which may block forever
+   * Fix a bug where meid was being intepreted as bytes (but then cast into a string); the correct interpretation is a string, so now it will truncate after a null byte.
+   * Removes access to the raw function rmr_get_meid(ptr, dest) in favor of just rmr_get_meid(ptr). Also get_meid is now rmr_get_meid since it wasn't consistent with the naming.
+
+
 [0.11.0] - 8/21/2019
 --------------------
 
