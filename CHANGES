@@ -2,6 +2,9 @@
 API and build change  and fixe summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2019 August 26; version 1.4.0 
+	New messages types were added.
+
 2019 August 13; version 1.2.0 (API change, non-breaking)
 	The function rmr_get_xact() was added to proide a convenient
 	way to extract the transaction field from a message.
