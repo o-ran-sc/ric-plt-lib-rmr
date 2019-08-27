@@ -96,46 +96,46 @@ static void gen_rt( uta_ctx_t* ctx );		// defined in sr_nng_static_test, but use
 int main() {
 	int errors = 0;
 
-	fprintf( stderr, "<INFO> starting tool tests\n" );
+	fprintf( stderr, "\n<INFO> starting tool tests\n" );
 	errors += tools_test();
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
-	fprintf( stderr, "<INFO> starting ring tests (%d)\n", errors );
+	fprintf( stderr, "\n<INFO> starting ring tests (%d)\n", errors );
 	errors += ring_test();
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
-	fprintf( stderr, "<INFO> starting symtab tests\n" );
+	fprintf( stderr, "\n<INFO> starting symtab tests\n" );
 	errors += symtab_test( );
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
-	fprintf( stderr, "<INFO> starting rtable tests\n" );
+	fprintf( stderr, "\n<INFO> starting rtable tests\n" );
 	errors += rt_test();				// route table tests
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
-	fprintf( stderr, "<INFO> starting RMr API tests\n" );
+	fprintf( stderr, "\n<INFO> starting RMr API tests\n" );
 	errors += rmr_api_test();
 
-	fprintf( stderr, "<INFO> run RMr API tests with src name only env var set\n" );
+	fprintf( stderr, "\n<INFO> run RMr API tests with src name only env var set\n" );
 	setenv( "RMR_SRC_NAMEONLY", "1", 1 );
 	errors += rmr_api_test();
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
-	fprintf( stderr, "<INFO> starting wormhole tests\n" );
+	fprintf( stderr, "\n<INFO> starting wormhole tests\n" );
 	errors += worm_test();				// test wormhole funcitons
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
-	fprintf( stderr, "<INFO> starting send/receive tests\n" );
+	fprintf( stderr, "\n<INFO> starting send/receive tests\n" );
 	errors += sr_nng_test();				// test the send/receive static functions
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
-	fprintf( stderr, "<INFO> starting mbuf api tests\n" );
+	fprintf( stderr, "\n<INFO> starting mbuf api tests\n" );
 	errors +=  mbuf_api_test( );
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
 	if( errors == 0 ) {
-		fprintf( stderr, "<PASS> all tests were OK\n" );
+		fprintf( stderr, "<PASS> all tests were OK\n\n" );
 	} else {
-		fprintf( stderr, "<FAIL> %d modules reported errors\n", errors );
+		fprintf( stderr, "<FAIL> %d modules reported errors\n\n", errors );
 	}
 
 	return !!errors;

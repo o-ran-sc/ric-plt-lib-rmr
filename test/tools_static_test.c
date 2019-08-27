@@ -107,12 +107,15 @@ static int tools_test( ) {
 	hname = uta_h2ip( "192.168.1.2" );
 	errors += fail_not_equal( strcmp( hname, "192.168.1.2" ), 0, "h2ip did not return IP address when given address" );
 	errors += fail_if_nil( hname, "h2ip did not return a pointer" );
+	free( hname );
 
 	hname = uta_h2ip( "yahoo.com" );
 	errors += fail_if_nil( hname, "h2ip did not return a pointer" );
+	free( hname );
 
 	hname = uta_h2ip( "yahoo.com:1234" );							// should ignore the port
 	errors += fail_if_nil( hname, "h2ip did not return a pointer" );
+	free( hname );
 
 	// ------------ rtg lookup test -------------------------------------------------------------
 	ctx.rtg_port = 0;
@@ -188,6 +191,7 @@ static int tools_test( ) {
 
 	ip = get_default_ip( if_list );
 	if( ip ) {
+		free( ip );
 	} else {
 		errors += fail_if_nil( ip, "get_defaul_ip returned nil pointer when valid pointer expected" );
 	}
@@ -203,6 +207,8 @@ static int tools_test( ) {
 		} else {
 			errors += fail_if_nil( if_list, "mk_ip_list with a specific interface name returned a nil list" );
 		}
+
+		free( ip );
 	}
 
 // -------------------------------------------------------------------------------------------------

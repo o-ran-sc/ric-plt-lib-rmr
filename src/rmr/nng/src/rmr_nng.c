@@ -677,6 +677,11 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	}
 	if( DEBUG ) fprintf( stderr, "[DBUG] default ip address: %s\n", ctx->my_ip );
 
+	if( (tok = getenv( ENV_WARNINGS )) != NULL ) {
+		if( *tok == '1' ) {
+			ctx->flags |= CTXFL_WARN;					// turn on some warnings (not all, just ones that shouldn't impact performance)
+		}
+	}
 
 
 	if( (interface = getenv( ENV_BIND_IF )) == NULL ) {
@@ -877,6 +882,7 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 	}
 
 	errno = 0;
+	state = 0;
 	while( chute->mbuf == NULL && ! errno ) {
 		if( seconds ) {
 			state = sem_timedwait( &chute->barrier, &ts );				// wait for msg or timeout
@@ -1004,6 +1010,7 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 		}
 	}
 
+	state = 0;
 	errno = 0;
 	while( chute->mbuf == NULL && ! errno ) {
 		if( seconds ) {

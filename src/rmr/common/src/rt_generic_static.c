@@ -178,8 +178,9 @@ static char* ensure_nlterm( char* buf ) {
 				memcpy( nb, buf, len );
 				*(nb+len) = '\n';			// insert \n and nil into the two extra bytes we allocated
 				*(nb+len+1) = 0;
-				free( buf );
 			}	
+
+			free( buf );
 		}
 	}
 
@@ -200,7 +201,7 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups
 	}
 
 	if( (rte = (rtable_ent_t *) malloc( sizeof( *rte ) )) == NULL ) {
-		fprintf( stderr, "rmr_add_rte: malloc failed for entry\n" );
+		fprintf( stderr, "[ERR] rmr_add_rte: malloc failed for entry\n" );
 		return NULL;
 	}
 	memset( rte, 0, sizeof( *rte ) );
@@ -225,7 +226,7 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups
 
 	rmr_sym_map( rt->hash, key, rte );							// add to hash using numeric mtype as key
 
-	if( DEBUG ) fprintf( stderr, "[DBUG] route table entry created: k=%lx groups=%d\n", key, nrrgroups );
+	if( DEBUG ) fprintf( stderr, "[DBUG] route table entry created: k=%llx groups=%d\n", (long long) key, nrrgroups );
 	return rte;
 }
 

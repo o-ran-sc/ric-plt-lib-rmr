@@ -320,10 +320,10 @@ static int em_nng_sub0_open(nng_socket * s ) {
 	return return_value;
 }
 static int em_nng_recv(nng_socket s, void * v, size_t * t, int i ) {
-
 	return return_value;
 }
 static int em_nng_send( nng_socket s, void* m, int l, int f ) {
+	free( m );					// we must ditch the message as nng does (or reuses)
 	return return_value;
 }
 
@@ -365,13 +365,11 @@ static int em_nng_msg_alloc( nng_msg** mp, size_t l ) {
 */
 static void em_nng_free( void* p, size_t l ) {
 	if( p ) {
-		//fprintf( stderr, ">>>>> not freed: %p\n", p );
 		free( p );
 	}
 }
 static void em_nng_msg_free( void* p ) {
 	if( p ) {
-		//fprintf( stderr, ">>>>> not freed: %p\n", p );
 		free( p );
 	}
 }
@@ -542,6 +540,7 @@ static int em_nn_recvmsg (int s, struct nn_msghdr *msghdr, int flags ) {
 }
 
 static void em_nn_freemsg( void* ptr ) {
+	free( ptr );
 	return;
 }
 

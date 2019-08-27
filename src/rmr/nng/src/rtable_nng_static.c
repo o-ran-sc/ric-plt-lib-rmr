@@ -244,7 +244,7 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_s
 /*
 	Make a round robin selection within a round robin group for a route table
 	entry. Returns the nanomsg socket if there is a rte for the message
-	type, and group is defined. Socket is returned via pointer in the parm
+	key, and group is defined. Socket is returned via pointer in the parm
 	list (nn_sock).
 
 	The group is the group number to select from.
@@ -267,8 +267,8 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_s
 		Both of these, in the grand scheme of things, is minor compared to the
 		overhead of grabbing a lock on each call.
 */
-static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more, nng_socket* nn_sock ) {
-	rtable_ent_t* rte;			// matching rt entry
+static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, nng_socket* nn_sock ) {
+	//rtable_ent_t* rte;			// matching rt entry
 	endpoint_t*	ep;				// seected end point
 	int  state = FALSE;			// processing state
 	int dummy;
@@ -286,25 +286,19 @@ static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more,
 		return FALSE;
 	}
 
-	if( rt == NULL ) {
+	if( rte == NULL ) {
 		*more = 0;
-		return FALSE;
-	}
-
-	if( (rte = rmr_sym_pull( rt->hash, key )) == NULL ) {
-		*more = 0;
-		//if( DEBUG ) fprintf( stderr, ">>>> rte not found for type = %lu\n", key );
 		return FALSE;
 	}
 
 	if( group < 0 || group >= rte->nrrgroups ) {
-		//if( DEBUG ) fprintf( stderr, ">>>> group out of range: key=%lu group=%d max=%d\n", key, group, rte->nrrgroups );
+		//if( DEBUG ) fprintf( stderr, ">>>> group out of range: group=%d max=%d\n", group, rte->nrrgroups );
 		*more = 0;
 		return FALSE;
 	}
 
 	if( (rrg = rte->rrgroups[group]) == NULL ) {
-		//if( DEBUG ) fprintf( stderr, ">>>> rrg not found for type key=%lu\n", key );
+		//if( DEBUG ) fprintf( stderr, ">>>> rrg not found for group \n", group );
 		*more = 0; 					// groups are inserted contig, so nothing should be after a nil pointer
 		return FALSE;
 	}
@@ -316,8 +310,7 @@ static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more,
 			//if( DEBUG ) fprintf( stderr, ">>>> nothing allocated for the rrg\n" );
 			return FALSE;
 
-		case 1:				// exactly one, no rr to deal with and more is not possible even if fanout > 1
-			//*nn_sock = rrg->epts[0]->nn_sock;
+		case 1:				// exactly one, no rr to deal with
 			ep = rrg->epts[0];
 			//if( DEBUG ) fprintf( stderr, ">>>> _rr returning socket with one choice in group \n" );
 			state = TRUE;
@@ -351,6 +344,32 @@ static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more,
 	}
 
 	return state;
+}
+
+/*
+	Finds the rtable entry which matches the key. Returns a nil pointer if
+	no entry is found. If try_alternate is set, then we will attempt 
+	to find the entry with a key based only on the message type.
+*/
+static inline rtable_ent_t*  uta_get_rte( route_table_t *rt, int sid, int mtype, int try_alt ) {
+	uint64_t key;			// key is sub id and mtype banged together
+	rtable_ent_t* rte;		// the entry we found
+
+	if( rt == NULL || rt->hash == NULL ) {
+		return NULL;
+	}
+
+	key = build_rt_key( sid, mtype );											// first try with a 'full' key
+	if( ((rte = rmr_sym_pull( rt->hash, key )) != NULL)  ||  ! try_alt ) {		// found or not allowed to try the alternate, return what we have
+		return rte;
+	}
+
+	if( sid != UNSET_SUBID ) {								// not found, and allowed to try alternate; and the sub_id was set
+		key = build_rt_key( UNSET_SUBID, mtype );			// rebuild key
+		rte = rmr_sym_pull( rt->hash, key );				// see what we get with this
+	}
+
+	return rte;
 }
 
 #endif

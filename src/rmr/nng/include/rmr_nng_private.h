@@ -108,7 +108,9 @@ static void free_ctx( uta_ctx_t* ctx );
 static int uta_link2( endpoint_t* ep );
 static int rt_link2_ep( endpoint_t* ep );
 static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_sock );
-static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more, nng_socket* nn_sock );
+//RBF static int uta_epsock_rr( route_table_t *rt, uint64_t key, int group, int* more, nng_socket* nn_sock );
+static int uta_epsock_rr( rtable_ent_t* rte, int group, int* more, nng_socket* nn_sock );
+static rtable_ent_t* uta_get_rte( route_table_t *rt, int sid, int mtype, int try_alt );
 static inline int xlate_nng_state( int state, int def_state );
 
 
