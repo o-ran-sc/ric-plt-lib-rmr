@@ -231,7 +231,10 @@ static int rt_test( ) {
 		}
 	}
 
-	uta_fib( "no-suhch-file" );			// drive some error checking for coverage
+	buf = uta_fib( "no-suhch-file" );			// drive some error checking for coverage
+	if( buf ) {
+		free( buf );
+	}
 
 	rt = uta_rt_init( );										// get us a route table
 	state = uta_link2( NULL );

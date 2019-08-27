@@ -321,7 +321,10 @@ extern void *rmr_sym_get( void *vtable, const char *name, unsigned int class )
 	int hv;                 // hash value of key
 	uint64_t nkey;			// numeric key if class 0
 
-	table = (Sym_tab *) vtable;
+	if( (table = (Sym_tab *) vtable) == NULL ) {
+		return NULL;
+	}
+
 	sym_tab = table->symlist;
 
 	if( class ) {

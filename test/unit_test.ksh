@@ -335,6 +335,8 @@ gen_xml=0
 replace_flags=1				# replace ##### in gcov for discounted lines
 run_nano_tests=0
 
+export RMR_WARNING=1		# turn on warnings
+
 while [[ $1 == "-"* ]]
 do
 	case $1 in

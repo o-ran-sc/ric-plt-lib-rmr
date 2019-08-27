@@ -219,6 +219,5 @@ static int sr_nng_test() {
 	rtc( NULL );				// coverage test with nil pointer
 	rtc( ctx );
 
-
 	return !!errors;
 }

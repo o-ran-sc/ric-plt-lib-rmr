@@ -53,6 +53,7 @@ typedef struct uta_ctx  uta_ctx_t;
 #define ENV_RTG_RAW "RMR_RTG_ISRAW"			// if > 0 we expect route table gen messages as raw (not sent from an RMr application)
 #define ENV_VERBOSE_FILE "RMR_VCTL_FILE"	// file where vlevel may be managed for some (non-time critical) functions
 #define ENV_NAME_ONLY "RMR_SRC_NAMEONLY"	// src in message is name only
+#define ENV_WARNINGS	"RMR_WARNINGS"		// if == 1 then we write some, non-performance impacting, warnings
 
 #define NO_FLAGS	0				// no flags to pass to a function
 
@@ -62,6 +63,9 @@ typedef struct uta_ctx  uta_ctx_t;
 //#define IFL_....
 
 #define CFL_MTC_ENABLED	0x01		// multi-threaded call is enabled
+
+									// context flags
+#define CTXFL_WARN		0x01		// ok to warn on stderr for some things that shouldn't happen
 
 									// msg buffer flags
 #define MFL_ZEROCOPY	0x01		// the message is an allocated zero copy message and can be sent.

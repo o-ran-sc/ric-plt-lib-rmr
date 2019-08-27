@@ -152,10 +152,18 @@ int mbuf_api_test( ) {
 	c = rmr_get_meid( mbuf, NULL );			// should allocate and return c
 	errors += fail_if( c == NULL, "get meid with nil dest pointer (did not allocate a buffer)" );
 	errors += fail_if( strcmp( c, "test-meid" ) != 0, "did not get expected meid from mbuffer" );
+	if( c ) {
+		free( c );
+		c = NULL;
+	}
 
 	c = rmr_get_meid( mbuf, c );
 	errors += fail_if( c == NULL, "get meid with a dest pointer returned no pointer" );
 	errors += fail_if( strcmp( c, "test-meid" ) != 0, "did not get expected meid from mbuffer" );
+	if( c ) {
+		free( c );
+		c = NULL;
+	}
 
 
 	// --- test transaction field  access functions ---------------------------------------------------
@@ -195,6 +203,7 @@ int mbuf_api_test( ) {
 		i = strcmp( ptr, src_buf );
 		errors += fail_not_equal( i, 0, "get xaction did not fetch expected string cmp return (a) was not 0" );
 		free( ptr );
+		ptr = NULL;
 	}
 	
 	errno = 999;
@@ -231,6 +240,7 @@ int mbuf_api_test( ) {
 	errors += fail_if( i == RMR_OK, "(rv) attempt to copy string to xact with large source buffer" );
 
 
+	rmr_free_msg( mbuf );
 
 	// ------------ trace data tests ----------------------------------------------------------------
 	// CAUTION: to support standalone mbuf api tests, the underlying buffer reallocation functions are NOT used

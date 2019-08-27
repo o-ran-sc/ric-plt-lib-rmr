@@ -1,4 +1,4 @@
-// : vi ts=4 sw=4 noet :
+ // : vi ts=4 sw=4 noet 2
 /*
 ==================================================================================
 	Copyright (c) 2019 Nokia
@@ -629,15 +629,15 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock
 
 */
 static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
+	rtable_ent_t*	rte;			// the route table entry which matches the message key
 	nng_socket	nn_sock;			// endpoint socket for send
 	uta_ctx_t*	ctx;
 	int			group;				// selected group to get socket for
 	int			send_again;			// true if the message must be sent again
 	rmr_mbuf_t*	clone_m;			// cloned message for an nth send
 	int		 	sock_ok;			// got a valid socket from round robin select
-	uint64_t	 key;				// mtype or sub-id/mtype sym table key
-	int			altk_ok = 0;		// set true if we can lookup on alternate key if mt/sid lookup fails
 	char*		d1;
+	int			ok_sends = 0;		// track number of ok sends
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL || msg == NULL ) {		// bad stuff, bail fast
 		errno = EINVAL;												// if msg is null, this is their clue
@@ -662,49 +662,76 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 		max_to = ctx->send_retries;		// convert to retries
 	}
 
+	if( (rte = uta_get_rte( ctx->rtable, msg->sub_id, msg->mtype, TRUE )) == NULL ) {		// find the entry which matches subid/type allow fallback to type only key
+		if( ctx->flags & CTXFL_WARN ) {
+			fprintf( stderr, "[WARN] no endpoint for mtype=%d sub_id=%d\n", msg->mtype, msg->sub_id );
+		}
+		msg->state = RMR_ERR_NOENDPT;
+		errno = ENXIO;										// must ensure it's not eagain
+		msg->tp_state = errno;
+		return msg;											// caller can resend (maybe) or free
+	}
+
 	send_again = 1;											// force loop entry
 	group = 0;												// always start with group 0
-
-	key = build_rt_key( msg->sub_id, msg->mtype );			// route table key to find the entry
-	if( msg->sub_id != UNSET_SUBID ) {
-		altk_ok = 1; 										// if caller's sub-id doesn't hit with mtype, allow mtype only key for retry
-	}
 	while( send_again ) {
-		sock_ok = uta_epsock_rr( ctx->rtable, key, group, &send_again, &nn_sock );		// round robin sel epoint; again set if mult groups
-		if( DEBUG ) fprintf( stderr, "[DBUG] send msg: type=%d again=%d group=%d len=%d sock_ok=%d ak_ok=%d\n",
-				msg->mtype, send_again, group, msg->len, sock_ok, altk_ok );
+		sock_ok = uta_epsock_rr( rte, group, &send_again, &nn_sock );								// select endpt from rr group and set again if more groups
 
-		if( ! sock_ok ) {
-			if( altk_ok ) {											// we can try with the alternate (no sub-id) key
-				altk_ok = 0;
-				key = build_rt_key( UNSET_SUBID, msg->mtype );		// build with just the mtype and try again
-				send_again = 1;										// ensure we don't exit the while
-				continue;
-			}
-
-			msg->state = RMR_ERR_NOENDPT;
-			errno = ENXIO;											// must ensure it's not eagain
-			msg->tp_state = errno;
-			return msg;												// caller can resend (maybe) or free
-		}
+		if( DEBUG ) fprintf( stderr, "[DBUG] mtosend_msg: flgs=0x%04x type=%d again=%d group=%d len=%d sock_ok=%d\n",
+				msg->flags, msg->mtype, send_again, group, msg->len, sock_ok );
 
 		group++;
 
-		if( send_again ) {
-			clone_m = clone_msg( msg );								// must make a copy as once we send this message is not available
-			if( DEBUG ) fprintf( stderr, "[DBUG] msg cloned: type=%d len=%d\n", msg->mtype, msg->len );
-			msg->flags |= MFL_NOALLOC;								// send should not allocate a new buffer
-			msg = send_msg( ctx, msg, nn_sock, max_to );			// do the hard work, msg should be nil on success
-			/*
-			if( msg ) {
-				// error do we need to count successes/errors, how to report some success, esp if last fails?
-			}
-			*/
+		if( sock_ok ) {													// with an rte we _should_ always have a socket, but don't bet on it
+			if( send_again ) {
+				clone_m = clone_msg( msg );								// must make a copy as once we send this message is not available
+				if( clone_m == NULL ) {
+					msg->state = RMR_ERR_SENDFAILED;
+					errno = ENOMEM;
+					msg->tp_state = errno;
+					if( ctx->flags & CTXFL_WARN ) {
+						fprintf( stderr, "[WARN] unable to clone message for multiple rr-group send\n" );
+					}
+					return msg;
+				}
 
-			msg = clone_m;											// clone will be the next to send
+				if( DEBUG ) fprintf( stderr, "[DBUG] msg cloned: type=%d len=%d\n", msg->mtype, msg->len );
+				msg->flags |= MFL_NOALLOC;								// keep send from allocating a new message; we have a clone to use
+				msg = send_msg( ctx, msg, nn_sock, max_to );			// do the hard work, msg should be nil on success
+	
+				if( msg != NULL ) {										// returned message indicates send error of some sort
+					rmr_free_msg( msg );								// must ditchone; pick msg so we don't have to unfiddle flags
+					msg = clone_m;
+				} else {
+					ok_sends++;
+					msg = clone_m;										// clone will be the next to send
+				}
+			} else {
+				msg = send_msg( ctx, msg, nn_sock, max_to );			// send the last, and allocate a new buffer; drops the clone if it was
+				if( DEBUG ) {
+					if( msg == NULL ) {
+						fprintf( stderr, "[DBUG] mtosend_msg:  send returned nil message!\n" );		
+					}
+				}
+			}
 		} else {
-			msg = send_msg( ctx, msg, nn_sock, max_to );			// send the last, and allocate a new buffer; drops the clone if it was
+			if( ctx->flags & CTXFL_WARN ) {
+				fprintf( stderr, "[WARN] invalid socket for rte, setting no endpoint err: mtype=%d sub_id=%d\n", msg->mtype, msg->sub_id );
+			}
+			msg->state = RMR_ERR_NOENDPT;
+			errno = ENXIO;
 		}
+	}
+
+	if( msg ) {							// call functions don't get a buffer back, so a nil check is required
+		msg->flags &= ~MFL_NOALLOC;		// must return with this flag off
+		if( ok_sends ) {				// multiple rr-groups and one was successful; report ok
+			msg->state = RMR_OK;
+		}
+	
+		if( DEBUG ) fprintf( stderr, "[DBUG] final send stats: ok=%d group=%d state=%d\n\n", ok_sends, group, msg->state );
+	
+		msg->tp_state = errno;
 	}
 
 	return msg;									// last message caries the status of last/only send attempt
