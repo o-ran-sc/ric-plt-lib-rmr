@@ -46,9 +46,6 @@ LIBRARY_PATH = $(LD_LIBRARY_PATH)
 .PHONY: all
 all: sender receiver caller mt_receiver
 
-receiver_nano: receiver.c
-	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr -lnanomsg -lpthread -lm
-
 receiver: receiver.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
@@ -57,9 +54,6 @@ mt_receiver: receiver.c
 
 lreceiver: lreceiver.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
-
-sender_nano: sender.c
-	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr -lnanomsg -lpthread -lm
 
 sender: sender.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
@@ -80,4 +74,4 @@ clean:
 	rm -f *.o
 
 nuke: clean
-	rm -f sender sender_nano receiver receiver_nano caller mt_receiver
+	rm -f sender receiver caller mt_receiver

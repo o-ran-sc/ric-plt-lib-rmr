@@ -21,7 +21,7 @@
 # ---------------------------------------------------------------------------------
 #	Mnemonic:	run_call_test.ksh
 #	Abstract:	This is a simple script to set up and run the basic send/receive
-#				processes for some library validation on top of nano/nng.
+#				processes for some library validation on top of nng.
 #				It should be possible to clone the repo, switch to this directory
 #				and execute  'ksh run -B'  which will build RMr, make the sender and
 #				recevier then  run the basic test.
@@ -56,27 +56,13 @@
 # file in order for the 'main' to pick them up easily.
 #
 function run_sender {
-	if (( nano_sender ))
-	then
-		#	./sender_nano $nmsg $delay
-		echo "nano is not supported"
-		exit 1
-	else
-		./caller $nmsg $delay $nthreads
-	fi
+	./caller $nmsg $delay $nthreads
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
 # start receiver listening for nmsgs from each thread
 function run_rcvr {
-	if (( nano_receiver ))
-	then
-		#./receiver_nano $(( nmsg * nthreads ))
-		echo "nano is not supported"
-		exit 1
-	else
-		./mt_receiver $(( nmsg * nthreads ))		# we'll test with the RMr multi threaded receive function
-	fi
+	./mt_receiver $(( nmsg * nthreads ))		# we'll test with the RMr multi threaded receive function
 	echo $? >/tmp/PID$$.rrc
 }
 
@@ -123,16 +109,12 @@ endKat
 
 nmsg=10						# total number of messages to be exchanged (-n value changes)
 delay=1000000				# microsec sleep between msg 1,000,000 == 1s
-nano_sender=0				# start nano version if set (-N)
-nano_receiver=0
 wait=1
 rebuild=0
 verbose=0
 nthreads=3
 dev_base=1					# -D turns off to allow this to run on installed libs
 
-nano_sender=0				# mt-call is not supported in nano
-nano_receiver=0
 
 
 while [[ $1 == -* ]]

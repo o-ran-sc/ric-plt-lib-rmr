@@ -21,7 +21,7 @@
 # ---------------------------------------------------------------------------------
 #	Mnemonic:	run_multi_test.ksh
 #	Abstract:	This is a simple script to set up and run the basic send/receive
-#				processes for some library validation on top of nano/nng. This
+#				processes for some library validation on top of nng. This
 #				particular tests starts several receivers and creates a route table
 #				which causes messages to be sent to all receivers in parallel
 #				(forcing message cloning internally in RMr).
@@ -31,7 +31,6 @@
 #
 #				Example command line:
 #					ksh ./run_multi_test.ksh		# default 10 messages at 1 msg/sec
-#					ksh ./run_multi_test.ksh -N    # default but with nanomsg lib
 #					ksh ./run_multi_test.ksh -d 100 -n 10000 # send 10k messages with 100ms delay between
 #
 #	Date:		24 April 2019
@@ -43,12 +42,7 @@
 # file in order for the 'main' to pick them up easily.
 #
 function run_sender {
-	if (( $nano_sender ))
-	then
-		./sender_nano $nmsg $delay
-	else
-		./sender $nmsg $delay
-	fi
+	./sender $nmsg $delay
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -58,12 +52,7 @@ function run_rcvr {
 
 	port=$(( 4460 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	if (( $nano_receiver ))
-	then
-		./receiver_nano $nmsg $port
-	else
-		./receiver $nmsg $port
-	fi
+	./receiver $nmsg $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -107,8 +96,6 @@ fi
 
 nmsg=10						# total number of messages to be exchanged (-n value changes)
 delay=1000000				# microsec sleep between msg 1,000,000 == 1s
-nano_sender=0				# start nano version if set (-N)
-nano_receiver=0
 wait=1
 rebuild=0
 nopull=""
@@ -121,16 +108,13 @@ do
 		-B)	rebuild=1;;
 		-b)	rebuild=1; nopull="nopull";;		# enable build but without pull
 		-d)	delay=$2; shift;;
-		-N)	nano_sender=1
-			nano_receiver=1
-			;;
 		-n)	nmsg=$2; shift;;
 		-r)	nrcvrs=$2; shift;;
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
-			echo "usage: $0 [-B] [-d micor-sec-delay] [-N] [-n num-msgs]"
-			echo "  -B forces a rebuild which will use .build"
+			echo "usage: $0 [-B] [-d micor-sec-delay] [-n num-msgs]"
+			echo "  -B forces an RMR rebuild which will use .build"
 			exit 1
 			;;
 	esac

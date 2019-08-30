@@ -132,9 +132,10 @@ int main( int argc, char** argv ) {
 	fprintf( stderr, "<RCVR> listening on port: %s for a max of %d messages\n", listen_port, nmsgs );
 
 #ifdef MTC
+	fprintf( stderr, "<RCVR> starting in multi-threaded mode\n" );
 	mrc = rmr_init( listen_port, RMR_MAX_RCV_BYTES, RMRFL_MTCALL ); // start RMr in mt-receive mode
-
 #else
+	fprintf( stderr, "<RCVR> starting in direct receive mode\n" );
 	mrc = rmr_init( listen_port, RMR_MAX_RCV_BYTES, RMRFL_NONE );	// start your engines!
 #endif
 	if( mrc == NULL ) {

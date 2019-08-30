@@ -21,7 +21,7 @@
 # ---------------------------------------------------------------------------------
 #	Mnemonic:	run_rts_test.ksh
 #	Abstract:	This is a simple script to set up and run the basic send/receive
-#				processes for some library validation on top of nano/nng. This
+#				processes for some library validation on top of nng. This
 #				particular test starts several senders and one receiver. All messages
 #				go to the receiver and an ack is sent back to the sending process.
 #				Each sender puts a tag into the message allowing it to verify that
@@ -42,12 +42,7 @@
 function run_sender {
 	export RMR_RTG_SVC=$(( 9991 + $1 ))
 	port=$((  43080 + $1 ))
-	if (( $nano_sender ))
-	then
-		./sender_nano $nmsg $delay 5:6 $port	# 5:6 causes mtype 5 only which is what receiver acks
-	else
-		./sender $nmsg $delay 5:6 $port
-	fi
+	./sender $nmsg $delay 5:6 $port
 	echo $? >/tmp/PID$$.$1.src		# must communicate state back via file b/c asynch
 }
 
@@ -57,12 +52,7 @@ function run_rcvr {
 
 	port=4460
 	export RMR_RTG_SVC=9990
-	if (( $nano_receiver ))
-	then
-		./receiver_nano $(( nmsg * nsenders ))  $port
-	else
-		./receiver $(( nmsg * nsenders ))  $port
-	fi
+	./receiver $(( nmsg * nsenders ))  $port
 	echo $? >/tmp/PID$$.rrc
 }
 
@@ -83,8 +73,6 @@ endKat
 
 nmsg=10						# total number of messages to be exchanged (-n value changes)
 delay=1000000				# microsec sleep between msg 1,000,000 == 1s
-nano_sender=0				# start nano version if set (-N)
-nano_receiver=0
 wait=1
 rebuild=0
 nopull=""
@@ -97,15 +85,12 @@ do
 		-B)	rebuild=1;;
 		-b)	rebuild=1; nopull="nopull";;	# build without pulling
 		-d)	delay=$2; shift;;
-		-N)	nano_sender=1
-			nano_receiver=1
-			;;
 		-n)	nmsg=$2; shift;;
 		-s)	nsenders=$2; shift;;
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
-			echo "usage: $0 [-B] [-d micor-sec-delay] [-N] [-n num-msgs] [-s nsenders]"
+			echo "usage: $0 [-B] [-d micor-sec-delay] [-n num-msgs] [-s nsenders]"
 			echo "  -B forces a rebuild which will use .build"
 			exit 1
 			;;

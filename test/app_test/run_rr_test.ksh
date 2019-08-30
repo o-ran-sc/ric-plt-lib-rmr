@@ -21,7 +21,7 @@
 # ---------------------------------------------------------------------------------
 #	Mnemonic:	run_multi_test.ksh
 #	Abstract:	This is a simple script to set up and run the basic send/receive
-#				processes for some library validation on top of nano/nng. This
+#				processes for some library validation on top of nng. This
 #				particular tests starts several receivers and creates a route table
 #				which causes messages to be sent round robin to all of the receivers.
 #				The number of messages command line parameter (-n) will be the number
@@ -31,7 +31,6 @@
 #
 #				Example command line:
 #					ksh ./run_rr_test.ksh		# default 10 messages at 1 msg/sec
-#					ksh ./run_rr_test.ksh -N    # default but with nanomsg lib
 #					ksh ./run_rr_test.ksh -d 100 -n 10000 # send 10k messages with 100ms delay between
 #
 #	Date:		24 April 2019
@@ -44,12 +43,7 @@
 #
 function run_sender {
 	export RMR_RTG_SVC=8990
-	if (( $nano_sender ))
-	then
-		./sender_nano $(( nmsg * nrcvrs )) $delay $max_mtype
-	else
-		./sender $(( nmsg * nrcvrs ))  $delay $max_mtype
-	fi
+	./sender $(( nmsg * nrcvrs ))  $delay $max_mtype
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -59,12 +53,7 @@ function run_rcvr {
 
 	port=$(( 4560 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	if (( $nano_receiver ))
-	then
-		./receiver_nano $nmsg $port
-	else
-		./receiver $nmsg $port
-	fi
+	./receiver $nmsg $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -109,8 +98,6 @@ fi
 
 nmsg=10						# total number of messages to be exchanged (-n value changes)
 delay=1000					# microsec sleep between msg 1,000,000 == 1s (shorter than others b/c/ we are sending to multiple)
-nano_sender=0				# start nano version if set (-N)
-nano_receiver=0
 wait=1
 rebuild=0
 nopull=""
@@ -125,15 +112,12 @@ do
 		-b)	rebuild=1; nopull="nopull";;		# build without pulling
 		-d)	delay=$2; shift;;
 		-m) max_mtype=$2; shift;;
-		-N)	nano_sender=1
-			nano_receiver=1
-			;;
 		-n)	nmsg=$2; shift;;
 		-r)	nrcvrs=$2; shift;;
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
-			echo "usage: $0 [-B] [-d micor-sec-delay] [-N] [-n num-msgs]"
+			echo "usage: $0 [-B] [-d micor-sec-delay] [-n num-msgs]"
 			echo "  -B forces a rebuild which will use .build"
 			exit 1
 			;;

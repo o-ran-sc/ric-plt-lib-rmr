@@ -21,7 +21,7 @@
 # ---------------------------------------------------------------------------------
 #	Mnemonic:	run_lcall_test.ksh
 #	Abstract:	This is a simple script to set up and run the basic send/receive
-#				processes for some library validation on top of nano/nng. This
+#				processes for some library validation on top of nng. This
 #				particular test starts the latency caller and latency receiver
 #				processes such that they exchange messages and track the latency
 #				from the caller's perepective (both outbound to receiver, and then
@@ -51,13 +51,7 @@
 # file in order for the 'main' to pick them up easily.
 #
 function run_sender {
-	if (( $nano_sender ))
-	then
-		echo "nanomsg not supportded"
-		exit 1
-	else
-		./lcaller ${nmsg:-10} ${delay:-500} ${cthreads:-3} 
-	fi
+	./lcaller ${nmsg:-10} ${delay:-500} ${cthreads:-3} 
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -67,13 +61,7 @@ function run_rcvr {
 
 	port=$(( 4460 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	if (( $nano_receiver ))
-	then
-		echo "nanomsg not supported"
-		exit 1
-	else
-		./lreceiver $(( ((nmsg * cthreads)/nrcvrs) + 10 )) $port
-	fi
+	./lreceiver $(( ((nmsg * cthreads)/nrcvrs) + 10 )) $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -117,8 +105,6 @@ fi
 cthreads=3					# number of caller threads
 nmsg=100					# total number of messages to be exchanged (-n value changes)
 delay=500					# microsec sleep between msg 1,000,000 == 1s
-nano_sender=0				# start nano version if set (-N)
-nano_receiver=0
 wait=1
 rebuild=0
 verbose=0
@@ -132,10 +118,6 @@ do
 		-B)	rebuild=1;;
 		-d)	delay=$2; shift;;
 		-i)	use_installed=1;;
-		-N)	echo "abort: nanomsg does not support epoll and thus cannot be used for mt-caller"
-			echo ""
-			exit 1;
-			;;
 		-n)	nmsg=$2; shift;;
 		-r)	nrcvrs=$2; shift;;
 		-v)	verbose=1;;

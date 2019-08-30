@@ -21,14 +21,13 @@
 # ---------------------------------------------------------------------------------
 #	Mnemonic:	run_app_test.ksh
 #	Abstract:	This is a simple script to set up and run the basic send/receive
-#				processes for some library validation on top of nano/nng.
+#				processes for some library validation on top of nng.
 #				It should be possible to clone the repo, switch to this directory
 #				and execute  'ksh run -B'  which will build RMr, make the sender and
 #				recevier then  run the basic test.
 #
 #				Example command line:
 #					ksh ./run_app_test.ksh		# default 20 messages at 2 msg/sec
-#					ksh ./run_app_test.ksh -N    # default but with nanomsg lib
 #					ksh ./run_app_test.ksh -d 100 -n 10000 # send 10k messages with 100ms delay between
 #
 #	Date:		22 April 2019
@@ -40,19 +39,15 @@
 # file in order for the 'main' to pick them up easily.
 #
 function run_sender {
-	if (( $nano_sender ))
-	then
-		./sender_nano $nmsg $delay
-	else
-		./sender $nmsg $delay
-	fi
+	./sender $nmsg $delay
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
 function run_rcvr {
-	if (( $nano_receiver ))
+	if (( mt_receiver ))
 	then
-		./receiver_nano $nmsg
+		echo "<TEST> testing with mt-receiver" >&2
+		./mt_receiver $nmsg
 	else
 		./receiver $nmsg
 	fi
@@ -104,8 +99,6 @@ endKat
 nmsg=20						# total number of messages to be exchanged (-n value changes)
 							# need two sent to each receiver to ensure hairpin entries were removed (will fail if they were not)
 delay=500000				# microsec sleep between msg 1,000,000 == 1s
-nano_sender=0				# start nano version if set (-N)
-nano_receiver=0
 wait=1
 rebuild=0
 nopull=""					# -b sets so that build does not pull
@@ -113,6 +106,8 @@ verbose=0
 use_installed=0
 my_ip=$(snarf_ip)			# get an ip to insert into the route table
 keep=0
+mt_receiver=0				# -m sets in order to test with multi-threaded receive stuff
+force_make=0
 
 
 while [[ $1 == -* ]]
@@ -123,17 +118,18 @@ do
 		-d)	delay=$2; shift;;
 		-k) keep=1;;
 		-i) use_installed=1;;
-		-N)	nano_sender=1
-			nano_receiver=1
-			;;
+		-M)	force_make=1;;
+		-m)	mt_receiver=1;;
 		-n)	nmsg=$2; shift;;
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
-			echo "usage: $0 [-B] [-d micor-sec-delay] [-i] [-k] [-N] [-n num-msgs]"
-			echo "  -B forces a rebuild which will use .build"
+			echo "usage: $0 [-B] [-d micor-sec-delay] [-i] [-k] [-M] [-m] [-n num-msgs]"
+			echo "  -B forces an RMR rebuild which will use .build"
 			echo "  -i causes the installd libraries (/usr/local) to be referenced; -B is ignored if supplied"
 			echo "  -k keeps the route table"
+			echo "  -M force make on test applications"
+			echo "  -m test with mt-receive mode"
 			echo ""
 			echo "total number of messages must > 20 to correctly test hairpin loop removal"
 			exit 1
@@ -175,8 +171,8 @@ else
 	
 		if [[ ! -d $build_path ]]
 		then
-			echo "cannot find build in: $build_path"
-			echo "either create, and then build RMr, or set BUILD_PATH as an evironment var before running this"
+			echo "[FAIL] cannot find build in: $build_path"
+			echo "[FAIL] either create, and then build RMr, or set BUILD_PATH as an evironment var before running this"
 			exit 1
 		fi
 	fi
@@ -192,9 +188,9 @@ fi
 
 export RMR_SEED_RT=${RMR_SEED_RT:-./app_test.rt}		# allow easy testing with different rt
 
-if [[ ! -f ./sender ]]
+if (( force_make )) || [[ ! -f ./sender || ! -f ./receiver ]]
 then
-	if ! make >/dev/null 2>&1
+	if ! make -B >/dev/null 2>&1
 	then
 		echo "[FAIL] cannot find sender binary, and cannot make it.... humm?"
 		exit 1
