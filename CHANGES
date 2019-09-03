@@ -2,6 +2,18 @@
 API and build change  and fixe summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2019 September 3; version 1.6.0
+	Fix bug in the rmr_rts_msg() function. If a return to sender message
+	failed, the source IP address was not correctly adjusted and could
+	cause the message to be "reflected" back to the sender on a retry.
+
+	Added the ability to set the source "ID" via an environment var
+	(RMR_SRC_ID).  When present in the environment, the string will
+	be placed in to the message header as the source and thus be used
+	by an application calling rmr_rts_smg() to return a response to
+	the sender.  If this environment variable is not present, the host
+	name (original behaviour) is used.
+
 2019 August 26; version 1.4.0 
 	New message types were added.
 

@@ -32,16 +32,21 @@
 #include <semaphore.h>
 
 static inline void queue_normal( uta_ctx_t* ctx, rmr_mbuf_t* mbuf ) {
+	static	int warned = 0;
 	chute_t*	chute;
-	int			state;
 
 	if( ! uta_ring_insert( ctx->mring, mbuf ) ) {
 		rmr_free_msg( mbuf );								// drop if ring is full
+		if( !warned ) {
+			fprintf( stderr, "[WARN] rmr_mt_receive: application is not receiving fast enough; messages dropping\n" );
+			warned++;
+		}
+
+		return;
 	}
 
 	chute = &ctx->chutes[0];
-	chute->mbuf = mbuf;
-	state = sem_post( &chute->barrier );								// tickle the ring monitor
+	sem_post( &chute->barrier );								// tickle the ring monitor
 }
 
 /*

@@ -122,16 +122,25 @@ static int rmr_api_test( ) {
 		return 1;
 	}
 
+	setenv( "RMR_SRC_ID", "somehost", 1 );								// context should have this as source
 	if( (rmc2 = rmr_init( ":6789", 1024, FL_NOTHREAD )) == NULL ) {		// init without starting a thread
 		errors += fail_if_nil( rmc, "rmr_init returned a nil pointer for non-threaded init "  );
 	}
 
+	fprintf( stderr, "<INFO> with RMR_SRC_ID env set, source name in context: (%s)\n", ((uta_ctx_t *) rmc2)->my_name );
+	v = strcmp( ((uta_ctx_t *) rmc2)->my_name, "somehost:6789" );
+	errors += fail_not_equal( v, 0, "source name not set from environment variable (see previous info)" );
 	free_ctx( rmc2 );			// coverage
-
+	
+	unsetenv( "RMR_SRC_ID" );												// context should NOT have our artificial name 
 	if( (rmc2 = rmr_init( NULL, 1024, FL_NOTHREAD )) == NULL ) {			// drive default port selector code
 		errors += fail_if_nil( rmc, "rmr_init returned a nil pointer when driving for default port "  );
 	}
 
+	fprintf( stderr, "<INFO> after unset of RMR_SRC_ID, source name in context: (%s)\n", ((uta_ctx_t *) rmc2)->my_name );
+	v = strcmp( ((uta_ctx_t *) rmc2)->my_name, "somehost:6789" );
+	errors += fail_if_equal( v, 0, "source name smells when removed from environment (see previous info)" );
+	free_ctx( rmc2 );			// attempt to reduce leak check errors
 
 	v = rmr_ready( rmc );		// unknown return; not checking at the moment
 
@@ -440,6 +449,10 @@ static int rmr_api_test( ) {
 	em_set_mtc_msgs( 0 );							// turn off 
 	em_set_rcvdelay( 0 );							// full speed receive rate
 	((uta_ctx_t *)rmc)->shutdown = 1;				// force the mt-reciver attached to the context to stop
+
+	em_set_rcvdelay( 0 );							// let the receive loop spin w/o receives so we drive warning code about queue full
+	sleep( 5 );
+	em_set_rcvdelay( 1 );							// restore slow receive pace for any later tests
 #endif
 
 
