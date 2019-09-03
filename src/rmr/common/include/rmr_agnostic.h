@@ -54,6 +54,7 @@ typedef struct uta_ctx  uta_ctx_t;
 #define ENV_VERBOSE_FILE "RMR_VCTL_FILE"	// file where vlevel may be managed for some (non-time critical) functions
 #define ENV_NAME_ONLY "RMR_SRC_NAMEONLY"	// src in message is name only
 #define ENV_WARNINGS	"RMR_WARNINGS"		// if == 1 then we write some, non-performance impacting, warnings
+#define ENV_SRC_ID		"RMR_SRC_ID"		// forces this string (adding :port, max 63 ch) into the source field; host name used if not set
 
 #define NO_FLAGS	0				// no flags to pass to a function
 
