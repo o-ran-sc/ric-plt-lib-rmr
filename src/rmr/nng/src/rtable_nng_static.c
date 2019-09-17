@@ -61,18 +61,30 @@
 */
 //static int uta_link2( char* target, nng_socket* nn_sock, nng_dialer* dialer, pthread_mutex* gate ) {
 static int uta_link2( endpoint_t* ep ) {
+	static int	flags = -1;
+
 	char* 		target;
 	nng_socket*	nn_sock;
 	nng_dialer*	dialer;
 	char		conn_info[NNG_MAXADDRLEN];	// string to give to nano to make the connection
 	char*		addr;
 	int			state = FALSE;
+	char*		tok;
 
 	if( ep == NULL ) {
 		return FALSE;
 	}
 
-	target = ep->addr;
+	if( flags < 0 ) {
+		tok = getenv( "RMR_ASYNC_CONN" );
+		if( tok == NULL || *tok == '1' ) {
+ 			flags = NNG_FLAG_NONBLOCK;				// start dialer asynch
+		} else {
+			flags = NO_FLAGS;
+		}
+	}
+
+	target = ep->name;				// always give name to transport so chaning dest IP does not break reconnect
 	nn_sock = &ep->nn_sock;
 	dialer = &ep->dialer;
 
@@ -110,7 +122,7 @@ static int uta_link2( endpoint_t* ep ) {
 	nng_dialer_setopt_ms( *dialer,  NNG_OPT_RECONNMAXT, 2000 );		// cap backoff on retries to reasonable amount (2s)
 	nng_dialer_setopt_ms( *dialer,  NNG_OPT_RECONNMINT, 100 );		// start retry 100m after last failure with 2s cap
 
-	if( (state = nng_dialer_start( *dialer, NO_FLAGS )) != 0 ) {						// can fail immediatly (unlike nanomsg)
+	if( (state = nng_dialer_start( *dialer, flags )) != 0 ) {						// can fail immediatly (unlike nanomsg)
 		pthread_mutex_unlock( &ep->gate );
 		fprintf( stderr, "[WRN] rmr: unable to create link to target: %s: %s\n", target, nng_strerror( state ) );
 		nng_close( *nn_sock );

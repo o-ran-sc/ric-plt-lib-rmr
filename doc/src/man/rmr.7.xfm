@@ -74,6 +74,13 @@ The following is a list of the various environment variables, what they control
 and the defaults which RMr uses if undefined.
 
 &beg_dlist(.75i : ^&bold_font )
+&di(RMR_ASYNC_CONN) Allows the asynch connection mode to be turned off (by setting the
+	value to 0. When set to 1, or missing from the environment, RMR will invoke the
+	connection interface in the transport mechanism using the non-blocking (asynch)
+	mode.  This will likely result in many "soft failures" (retry) until the connection
+	is established, but allows the application to continue unimpeeded should the 
+	connection be slow to set up.
+
 &di(RMR_BIND_IF) This provides the interface that RMr will bind listen ports to allowing
 	for a single interface to be used rather than listening across all interfaces.
 	This should be the IP address assigned to the interface that RMr should listen
