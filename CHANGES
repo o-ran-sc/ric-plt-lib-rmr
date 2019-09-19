@@ -2,6 +2,9 @@
 API and build change  and fixe summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2019 September 19; version 1.8.1
+	Correct missing constant for wrappers.
+	
 2019 September 19; version 1.8.0
 	New message types added:
 		RAN_CONNECTED, RAN_RESTARTED, RAN_RECONFIGURED

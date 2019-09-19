@@ -39,10 +39,13 @@
 
 
 # The sender and receivers are run asynch. Their exit statuses are captured in a
-# file in order for the 'main' to pick them up easily.
+# file in order for the 'main' to pick them up easily. For the multi test the 
+# async connect must be DISABLED because in some environments (um, jenkins) the
+# session connect time lags enough that the first message can be dropped silently.
+# It doesn't happen all of the time, but frequently enough to be annoying. 
 #
 function run_sender {
-	./sender $nmsg $delay
+	RMR_ASYNC_CONN=0 ./sender $nmsg $delay
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 

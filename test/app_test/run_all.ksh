@@ -16,7 +16,11 @@ do
 done
 
 set -e
+echo "---- app -------------"
 ksh run_app_test.ksh -v $installed $build
+echo "----- multi -----------"
 ksh run_multi_test.ksh
+echo "----- round robin ----"
 ksh run_rr_test.ksh
+echo "----- rts ------------"
 ksh run_rts_test.ksh -s 20

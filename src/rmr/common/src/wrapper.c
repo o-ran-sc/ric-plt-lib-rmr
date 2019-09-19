@@ -108,6 +108,8 @@ extern char* rmr_get_consts( ) {
 	remain -= bang_on( wbuf, phrase, remain );
 	phrase = build_ival( "RMRFL_AUTO_ALLOC",  RMRFL_AUTO_ALLOC, ADD_SEP );
 	remain -= bang_on( wbuf, phrase, remain );
+	phrase = build_ival( "RMRFL_MTCALL",	  RMRFL_MTCALL, ADD_SEP );
+	remain -= bang_on( wbuf, phrase, remain );
 
 	phrase = build_ival( "RMR_DEF_SIZE",      RMR_DEF_SIZE, ADD_SEP );
 	remain -= bang_on( wbuf, phrase, remain );
