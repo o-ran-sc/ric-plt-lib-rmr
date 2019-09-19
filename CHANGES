@@ -2,6 +2,16 @@
 API and build change  and fixe summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2019 September 19; version 1.8.0
+	New message types added:
+		RAN_CONNECTED, RAN_RESTARTED, RAN_RECONFIGURED
+
+2019 September 17; version 1.7.0
+	Initial connection mode now defaults to asynchronous. Set RMR_ASYNC_CONN=0
+	in the environment before rmr_init() is invoked to revert to
+	synchronous first TCP connections. (Recovery connection attempts
+	have always been asynchronous).
+
 2019 September 3; version 1.6.0
 	Fix bug in the rmr_rts_msg() function. If a return to sender message
 	failed, the source IP address was not correctly adjusted and could
