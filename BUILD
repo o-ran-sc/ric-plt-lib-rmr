@@ -55,6 +55,7 @@ the configuration:
   -DPACK_EXTERNALS=1	Include external libraries used to build in the run-time package
   -DPRESERVE_PTYPE=1	Do not change the processor type when naming deb packages
   -DSKIP_EXTERNALS=1	Do not use Nano/NNG submodules when building; use installed packages
+						(See caution in the 'Libraries' section below)
 
 
 Packages
@@ -141,6 +142,16 @@ to support different underlying transport mechanisms, which
 might require separate libraries, and thus the library name is
 given a suffix of _nng to reflect the transport mechanism
 in use.
+
+NNG version with a commit ID of 906d5ea1b3d67bece941d8a4e0a049e5f6c65051
+is required to build RMR.  That version (as yet untagged) adds a
+new error state which we must trap.  While application environments
+are encouraged to also build and install at least this version of
+NNG, RMR is still compatable back to the version tagged as 1.1.1.
+If you opt to build with the -DSKIP_EXTERNALS=1 flag set, you must
+ensure that this version of NNG is present in your build environment.
+If you do not set this flag, the proper NNG source will be used
+automatically.
 
 Regardless of transport mechanism supported by an RMR library,
 the RMR API will be identical, thus it is possible for an application

@@ -96,6 +96,7 @@ then
 	sed "s!%%hostname%%!$hn!" rt.mask >local.rt
 fi
 
+export RMR_ASYNC_CONN=0 	# ensure we don't lose first msg as drops waiting for conn look like errors
 nmsg=10						# total number of messages to be exchanged (-n value changes)
 delay=1000					# microsec sleep between msg 1,000,000 == 1s (shorter than others b/c/ we are sending to multiple)
 wait=1

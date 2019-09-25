@@ -42,6 +42,10 @@
 	into the message, and sets errno to something that might be useful.
 	If we don't have a specific RMr state, then we return the default (e.g.
 	receive failed).
+
+	The addition of the connection shut error code to the switch requires
+	that the NNG version at commit e618abf8f3db2a94269a (or after) be
+	used for compiling RMR. 
 */
 static inline int xlate_nng_state( int state, int def_state ) {
 
@@ -81,6 +85,7 @@ static inline int xlate_nng_state( int state, int def_state ) {
 			state = def_state;
 			break;
 
+		case NNG_ECONNSHUT:					// new error with nng commit e618abf8f3db2a94269a79c8901a51148d48fcc2 (Sept 2019)
 		case NNG_ECLOSED:
 			errno  = EBADFD;				// file des not in a good state for the operation
 			state = def_state;

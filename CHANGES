@@ -1,6 +1,13 @@
-
+pic2
 API and build change  and fixe summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
+
+2019 September 25; version 1.8.3
+	Correct application level test issue causing timing problems during
+	jenkins verification testing at command and merge
+
+	Handle the NNG connection shutdown status which may now be 
+	generated when a connection throug a proxy is reset.
 
 2019 September 25; version 1.8.2
 	Correct bug in rmr_torcv_msg() when timeout set to zero (0).
