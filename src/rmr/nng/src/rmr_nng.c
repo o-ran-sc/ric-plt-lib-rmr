@@ -883,11 +883,11 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 
 	chute = &ctx->chutes[0];					// chute 0 used only for its semaphore
 
-	if( max_wait > 0 ) {
+	if( max_wait >= 0 ) {
 		clock_gettime( CLOCK_REALTIME, &ts );	
 
 		if( max_wait > 999 ) {
-			seconds = (max_wait - 999)/1000;
+			seconds = max_wait / 1000;
 			max_wait -= seconds * 1000;
 			ts.tv_sec += seconds;
 		}
@@ -1000,11 +1000,11 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 	d1[D1_CALLID_IDX] = (unsigned char) call_id;					// set the caller ID for the response
 	mbuf->flags |= MFL_NOALLOC;										// send message without allocating a new one (expect nil from mtosend
 
-	if( max_wait > 0 ) {
+	if( max_wait >= 0 ) {
 		clock_gettime( CLOCK_REALTIME, &ts );	
 
 		if( max_wait > 999 ) {
-			seconds = (max_wait - 999)/1000;
+			seconds = max_wait / 1000;
 			max_wait -= seconds * 1000;
 			ts.tv_sec += seconds;
 		}

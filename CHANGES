@@ -2,6 +2,9 @@
 API and build change  and fixe summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2019 September 25; version 1.8.2
+	Correct bug in rmr_torcv_msg() when timeout set to zero (0).
+
 2019 September 19; version 1.8.1
 	Correct missing constant for wrappers.
 	
