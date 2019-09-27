@@ -7,6 +7,15 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+[0.13.0] - 9/27/2019
+--------------------
+
+::
+   * Add a helpers module to provide extensions and helper functions such as receive all queued messages.
+   * Enhance unit test to check only for RMR constants which are needed.
+   * Correct unprintable characters in documentation.
+   
+
 [0.12.0] - 8/23/2019
 --------------------
 
