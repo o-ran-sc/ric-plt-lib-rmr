@@ -15,9 +15,9 @@ new functions are added into the C lib, we only need to again wrap the
 function signatures.
 
 The downside is this seems to be Linux only currently. This wrapper
-immediately SIGABRT’s on Mac, and no one yet seems to know why. The
+immediately SIGABRT's on Mac, and no one yet seems to know why. The
 other downside is that there are currently some functionality that needs
-to be “exported” from the C library for this to be fully operational.
+to be 'exported' from the C library for this to be fully operational.
 For example, CTYPES does not have access to C header files, and
 important constants are defined in the C header files.
 

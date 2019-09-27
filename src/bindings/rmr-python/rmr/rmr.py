@@ -93,6 +93,9 @@ def _state_to_status(stateno):
     return sdict.get(stateno, "UNKNOWN STATE")
 
 
+_RCONST = _get_constants()
+
+
 ##############
 # PUBLIC API
 ##############
@@ -100,7 +103,15 @@ def _state_to_status(stateno):
 
 # These constants are directly usable by importers of this library
 # TODO: Are there others that will be useful?
-RMR_MAX_RCV_BYTES = _get_constants()["RMR_MAX_RCV_BYTES"]
+
+RMR_MAX_RCV_BYTES = _RCONST["RMR_MAX_RCV_BYTES"]
+
+RMRFL_NONE = _RCONST.get("RMRFL_MTCALL", 0x02)	  # initialisation flags
+RMRFL_NONE = _RCONST.get("RMRFL_NONE", 0x0)
+
+RMR_OK = _RCONST["RMR_OK"]                        # useful state constants
+RMR_ERR_TIMEOUT = _RCONST["RMR_ERR_TIMEOUT"]
+RMR_ERR_RETRY = _RCONST["RMR_ERR_RETRY"]
 
 
 class rmr_mbuf_t(Structure):
@@ -211,6 +222,20 @@ def rmr_alloc_msg(vctx, size):
     extern rmr_mbuf_t* rmr_alloc_msg(void* vctx, int size)
     """
     return _rmr_alloc_msg(vctx, size)
+
+
+_rmr_free_msg = rmr_c_lib.rmr_free_msg
+_rmr_free_msg.argtypes = [c_void_p]
+_rmr_free_msg.restype = None
+
+
+def rmr_free_msg(mbuf):
+    """
+    Refer to the rmr C documentation for rmr_free_msg
+    extern void rmr_free_msg( rmr_mbuf_t* mbuf )
+    """
+    if mbuf is not None:
+       _rmr_free_msg(mbuf)
 
 
 _rmr_payload_size = rmr_c_lib.rmr_payload_size
