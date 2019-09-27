@@ -1,3 +1,4 @@
+# :vim ts=4 sw=4 expandtab:
 # ==================================================================================
 #       Copyright (c) 2019 Nokia
 #       Copyright (c) 2018-2019 AT&T Intellectual Property.
@@ -100,7 +101,16 @@ def _state_to_status(stateno):
 
 # These constants are directly usable by importers of this library
 # TODO: Are there others that will be useful?
-RMR_MAX_RCV_BYTES = _get_constants()["RMR_MAX_RCV_BYTES"]
+_rconst = _get_constants()
+
+RMR_MAX_RCV_BYTES = _rconst["RMR_MAX_RCV_BYTES"]
+
+RMRFL_MTCALL = _rconst["RMRFL_MTCALL"]        # initialisation flags
+RMRFL_NONE = _rconst["RMRFL_NONE"]
+
+RMR_OK = _rconst["RMR_OK"]                        # useful state constants
+RMR_ERR_TIMEOUT = _rconst["RMR_ERR_TIMEOUT"]
+RMR_ERR_RETRY = _rconst["RMR_ERR_RETRY"]
 
 
 class rmr_mbuf_t(Structure):
@@ -212,6 +222,17 @@ def rmr_alloc_msg(vctx, size):
     """
     return _rmr_alloc_msg(vctx, size)
 
+
+_rmr_free_msg = rmr_c_lib.rmr_free_msg
+_rmr_free_msg.argtypes = [c_void_p]
+_rmr_free_msg.restype = None
+def rmr_free_msg( mbuf ) :
+    """
+    Refer to the rmr C documentation for rmr_free_msg
+    extern void rmr_free_msg( rmr_mbuf_t* mbuf )
+    """
+    if mbuf != None :
+       _rmr_free_msg( mbuf )
 
 _rmr_payload_size = rmr_c_lib.rmr_payload_size
 _rmr_payload_size.argtypes = [POINTER(rmr_mbuf_t)]
