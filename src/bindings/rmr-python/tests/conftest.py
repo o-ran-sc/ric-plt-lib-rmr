@@ -1,3 +1,4 @@
+# vim: ts=4 sw=4 expandtab:
 # ==================================================================================
 #       Copyright (c) 2019 Nokia
 #       Copyright (c) 2018-2019 AT&T Intellectual Property.
@@ -18,6 +19,10 @@ import pytest
 
 
 # These are here just to reduce the size of the code in test_rmr so those (important) tests are more readable; in theory these dicts could be large
+# The actual value of the constants should be ignored by the tests; all we should care
+# about is that the constant value was returned by the RMR function. Further, we should
+# not consider it an error if RMR returns more than what is listed here; these are the
+# list of what is/could be used by this package. 
 @pytest.fixture
 def expected_constants():
     return {
@@ -27,6 +32,7 @@ def expected_constants():
         "RMR_MAX_SRC": 64,
         "RMR_MAX_RCV_BYTES": 4096,
         "RMRFL_NONE": 0,
+        #"RMRFL_MTCALL": 2,  #can't be added here until jenkins version >= 1.8.3
         "RMRFL_AUTO_ALLOC": 3,
         "RMR_DEF_SIZE": 0,
         "RMR_VOID_MSGTYPE": -1,
