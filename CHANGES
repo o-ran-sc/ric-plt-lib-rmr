@@ -2,6 +2,9 @@ pic2
 API and build change  and fixe summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2019 September 27; version 1.9.0
+	Python bindings added receive all queued function and corrected a unit test
+
 2019 September 25; version 1.8.3
 	Correct application level test issue causing timing problems during
 	jenkins verification testing at command and merge
