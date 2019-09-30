@@ -95,13 +95,22 @@ execute_process(
 #list( GET mmp_version 1 minor_version )
 #list( GET mmp_version 2 patch_level )
 
+if( DEBUG )					# if set, we'll set debugging on in the compile
+	set( debugging ${DEBUG} )
+	message( "+++ debugging is being set to ${DEBUG}" )
+else()
+	set( debugging 0 )
+        message( "+++ debugging is set to off" )
+endif()
+unset( DEBUG CACHE )					# we don't want this to persist
 
-# define constants used in the version string
+# define constants used in the version string, debugging, etc.
 add_definitions(
 	-DGIT_ID=${git_id}
 	-DMAJOR_VER=${major_version}
 	-DMINOR_VER=${minor_version}
 	-DPATCH_VER=${patch_level}
+	-DDEBUG=${debugging}
 )
 
 # ---------------- suss out pkg gen tools so we don't fail generating packages that the system cannot support --------------
