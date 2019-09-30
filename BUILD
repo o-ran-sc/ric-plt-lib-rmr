@@ -173,4 +173,24 @@ and troff format.  The troff pages are placed into the deb and
 the postscript pages are left in the build directory for the
 developer to convert to PDF, or otherwise use.
 
+Debug Mode
+Because RMR is designed to keep it's overhead to an absolute minimum,
+messages written to standard error are by default very limited.
+The route table collection thread provides the means to enable
+debug messages on the fly, but only because that thread does not
+impact the sending and receiving of user messages.  
 
+If it becomes necessary, for development or problem soving, to have
+the RMR functions generate debugging messages the following
+CMake flag can be given when the CMake environment is created:
+	-DDEBUG=n
+
+The value for 'n' should be 1 or 2 to enable debugging.  The default
+when not given is the same as setting n to zero.
+
+When running in debug mode, RMR will log messages received, sent,
+and other useful information.  Because debugging uses fprintf() there
+is a significant amount of overhead with logging this information and
+thus in debugging mode the user should not expect that usual message
+rates can be achieved, and in some cases may cause messages to drop
+if TCP queues become full.
