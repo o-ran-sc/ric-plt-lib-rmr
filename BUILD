@@ -174,11 +174,11 @@ the postscript pages are left in the build directory for the
 developer to convert to PDF, or otherwise use.
 
 Debug Mode
-Because RMR is designed to keep it's overhead to an absolute minimum,
+Because RMR is designed to keep its overhead to an absolute minimum,
 messages written to standard error are by default very limited.
 The route table collection thread provides the means to enable
 debug messages on the fly, but only because that thread does not
-impact the sending and receiving of user messages.  
+impact the sending and receiving of user messages.
 
 If it becomes necessary, for development or problem soving, to have
 the RMR functions generate debugging messages the following
