@@ -150,7 +150,7 @@ def test_rmr_set_get():
 def test_rcv_timeout():
     """
     test torcv; this is a scary test because if it fails... it doesn't fail, it will run forever!
-    We recieve a message (though nothing has been sent) and make sure the function doesn't block forever.
+    We receive a message (though nothing has been sent) and make sure the function doesn't block forever.
 
     There is no unit test for rmr_rcv_msg; too dangerous, that is a blocking call that may never return.
     """
@@ -185,12 +185,12 @@ def test_send_rcv():
     assert send_summary["message status"] == rcv_summary["message status"] == "RMR_OK"
 
     # send an ACK back
-    ack_pay = b"message recieved"
+    ack_pay = b"message received"
     rmr.set_payload_and_length(ack_pay, sbuf_rcv)
     sbuf_rcv = rmr.rmr_rts_msg(MRC_RCV, sbuf_rcv)
     rcv_ack_summary = rmr.message_summary(sbuf_rcv)
 
-    # have the sender recieve it
+    # have the sender receive it
     sbuf_send = rmr.rmr_torcv_msg(MRC_SEND, sbuf_send, 2000)
     send_ack_summary = rmr.message_summary(sbuf_send)
 

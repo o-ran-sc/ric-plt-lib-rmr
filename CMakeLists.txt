@@ -100,6 +100,7 @@ if( DEBUG )					# if set, we'll set debugging on in the compile
 	message( "+++ debugging is being set to ${DEBUG}" )
 else()
 	set( debugging 0 )
+        message( "+++ debugging is set to off" )
 endif()
 unset( DEBUG CACHE )					# we don't want this to persist
 
