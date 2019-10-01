@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d566e796_77e939b3",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-10-01T13:19:36Z",
+      "side": 1,
+      "message": "Oh, I didn\u0027t even think about being able to set environment there.  I tried from the command line initially, which failed, but it never dawned on me that there\u0027d be a setup file for such things.",
+      "parentUuid": "13dfb229_1172ddcc",
+      "revId": "7767d0d8866223b6dbe27d447c1a952fcc0f6509",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "babc600a_d4d2c37c",
         "filename": "src/bindings/rmr-python/tests/test_rmr.py",
         "patchSetId": 1
@@ -33,6 +51,24 @@
       "revId": "7767d0d8866223b6dbe27d447c1a952fcc0f6509",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e8e596e7_ea636d1c",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-10-01T13:19:36Z",
+      "side": 1,
+      "message": "I am the world\u0027s worst speller, and I don\u0027t like the correct on the fly for reasons you\u0027ve mentioned.  Usually I don\u0027t notice, and I\u0027ve never thought it all that important to have every t crossed in comments. I only found this because I was searching for \"received\" in the message string which wasn\u0027t hitting.  I had to go look it up to be sure that my I before E except after C rule really applied and that I wasn\u0027t wrong.",
+      "parentUuid": "babc600a_d4d2c37c",
+      "revId": "7767d0d8866223b6dbe27d447c1a952fcc0f6509",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
