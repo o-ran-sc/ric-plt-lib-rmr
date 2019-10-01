@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b4d168d_1f9b4a51",
+        "filename": "BUILD",
+        "patchSetId": 1
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-10-01T01:05:07Z",
+      "side": 1,
+      "message": "its :)",
+      "range": {
+        "startLine": 177,
+        "startChar": 32,
+        "endLine": 177,
+        "endChar": 36
+      },
+      "revId": "7301ca8d0ebaa088a65cb4366c5e41760c42ce9f",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c73f235_f4f69d54",
+        "filename": "BUILD",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-10-01T01:05:07Z",
+      "side": 1,
+      "message": "trailing whitespace :(",
+      "range": {
+        "startLine": 181,
+        "startChar": 50,
+        "endLine": 181,
+        "endChar": 52
+      },
+      "revId": "7301ca8d0ebaa088a65cb4366c5e41760c42ce9f",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06f0e797_6940134c",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-10-01T01:05:07Z",
+      "side": 1,
+      "message": "it\u0027s worth emitting a message here saying that debugging is off",
+      "range": {
+        "startLine": 102,
+        "startChar": 1,
+        "endLine": 102,
+        "endChar": 5
+      },
+      "revId": "7301ca8d0ebaa088a65cb4366c5e41760c42ce9f",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
