@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "13dfb229_1172ddcc",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-10-01T13:06:52Z",
+      "side": 1,
+      "message": "I think a better way to do this would be to add this into the tox, please. That would open the door for multiple test envs where this is and is not set; not that we are using that yet. Please punt this over to tox.ini",
+      "revId": "7767d0d8866223b6dbe27d447c1a952fcc0f6509",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "babc600a_d4d2c37c",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-10-01T13:06:52Z",
+      "side": 1,
+      "message": "embarrassing!\ni would turn spell back on in vim. but it drives me nuts underlining programming keywords by default. I\u0027m gonna have to find a solution for that",
+      "revId": "7767d0d8866223b6dbe27d447c1a952fcc0f6509",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
