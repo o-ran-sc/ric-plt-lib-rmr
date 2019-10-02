@@ -250,8 +250,10 @@ static int rt_test( ) {
 	ep = uta_get_ep( rt, "bad_name:4560" );
 	errors += fail_not_nil( ep, "end point (fetch by name with bad name)" );
 
-	state = uta_epsock_byname( rt, "localhost:4561", &nn_sock );		// this should be found
+	ep = NULL;
+	state = uta_epsock_byname( rt, "localhost:4561", &nn_sock, &ep );		// this should be found
 	errors += fail_if_equal( state, 0, "socket (by name)" );
+	errors += fail_if_nil( ep, "epsock_byname did not populate endpoint pointer when expected to" );
 	//alt_value = uta_epsock_byname( rt, "localhost:4562" );			// we might do a memcmp on the two structs, but for now nothing
 	//errors += fail_if_equal( value, alt_value, "app1/app2 sockets" );
 
@@ -290,7 +292,7 @@ static int rt_test( ) {
 	rte = uta_get_rte( rt, 0, 1, FALSE );			// get an rte for the next loop
 	if( rte ) {
 		for( i = 0; i < 10; i++ ) {									// round robin return value should be different each time
-			value = uta_epsock_rr( rte, 0, &more, &nn_sock );			// msg type 1, group 1
+			value = uta_epsock_rr( rte, 0, &more, &nn_sock, &ep );		// msg type 1, group 1
 			errors += fail_if_equal( value, alt_value, "round robiin sockets with multiple end points" );
 			errors += fail_if_false( more, "more for mtype==1" );
 			alt_value = value;
@@ -301,7 +303,7 @@ static int rt_test( ) {
 	rte = uta_get_rte( rt, 0, 3, FALSE );				// get an rte for the next loop
 	if( rte ) {
 		for( i = 0; i < 10; i++ ) {								// this mtype has only one endpoint, so rr should be same each time
-			value = uta_epsock_rr( rte, 0, NULL, &nn_sock );		// also test ability to deal properly with nil more pointer
+			value = uta_epsock_rr( rte, 0, NULL, &nn_sock, &ep );		// also test ability to deal properly with nil more pointer
 			if( i ) {
 				errors += fail_not_equal( value, alt_value, "round robin sockets with one endpoint" );
 				errors += fail_not_equal( more, -1, "more value changed in single group instance" );
@@ -311,12 +313,12 @@ static int rt_test( ) {
 	}
 
 	rte = uta_get_rte( rt, 11, 3, TRUE );
-	state = uta_epsock_rr( rte, 22, NULL, NULL );
+	state = uta_epsock_rr( rte, 22, NULL, NULL, &ep );
 	errors += fail_if_true( state, "uta_epsock_rr returned bad (non-zero) state when given nil socket pointer" );
 
 	uta_rt_clone( NULL );								// verify null parms don't crash things
 	uta_rt_drop( NULL );
-	uta_epsock_rr( NULL, 0,  &more, &nn_sock );			// drive null case for coverage
+	uta_epsock_rr( NULL, 0,  &more, &nn_sock, &ep );			// drive null case for coverage
 	uta_add_rte( NULL, 99, 1 );
 	uta_get_rte( NULL, 0, 1000, TRUE );
 

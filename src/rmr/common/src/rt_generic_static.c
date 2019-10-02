@@ -60,7 +60,8 @@ typedef struct thing_list {
 // ---- debugging/testing -------------------------------------------------------------------------
 
 /*
-	Dump stats for an endpoint in the RT.
+	Dump some stats for an endpoint in the RT. This is generally called to
+	verify endpoints after a table load/change.
 */
 static void ep_stats( void* st, void* entry, char const* name, void* thing, void* vcounter ) {
 	int*	counter;
@@ -74,7 +75,34 @@ static void ep_stats( void* st, void* entry, char const* name, void* thing, void
 		(*counter)++;
 	}
 
-	fprintf( stderr, "[DBUG] endpoint: %s open=%d\n", ep->name, ep->open );
+	fprintf( stderr, "[DBUG] RMR sends: target=%s open=%d\n", ep->name, ep->open );
+}
+
+/*
+	Dump counts for an endpoint in the RT. The vid parm is assumed to point to
+	the 'source' information and is added to each message.
+*/
+static void ep_counts( void* st, void* entry, char const* name, void* thing, void* vid ) {
+	endpoint_t* ep;
+	char*	id;
+
+	if( (ep = (endpoint_t *) thing) == NULL ) {
+		return;
+	}
+
+	if( (id = (char *) vid) == NULL ) {
+		id = "missing";
+	}
+
+	fprintf( stderr, "[INFO] RMR sends: ts=%lld src=%s target=%s open=%d succ=%lld fail=%lld (hard=%lld soft=%lld)\n", 
+		(long long) time( NULL ), 
+		id, 
+		ep->name, 
+		ep->open, 
+		ep->scounts[EPSC_GOOD], 
+		ep->scounts[EPSC_FAIL] + ep->scounts[EPSC_TRANS], 
+		ep->scounts[EPSC_FAIL], 
+		ep->scounts[EPSC_TRANS]   );
 }
 
 /*
@@ -122,6 +150,19 @@ static void  rt_stats( route_table_t* rt ) {
 	fprintf( stderr, "[DBUG] %d entries\n", *counter );
 
 	free( counter );
+}
+
+/*
+	Given a route table, cause endpoint counters to be written to stderr. The id
+	parm is written as the "source" in the output.
+*/
+static void  rt_epcounts( route_table_t* rt, char* id ) {
+	if( rt == NULL ) {
+		fprintf( stderr, "[INFO] RMR endpoint: no counts: empty table\n" );
+		return;
+	}
+
+	rmr_sym_foreach_class( rt->hash, 1, ep_counts, id );		// run endpoints in the active table
 }
 
 
@@ -864,6 +905,7 @@ static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name ) {
 		ep->addr = uta_h2ip( ep_name );
 		ep->name = strdup( ep_name );
 		pthread_mutex_init( &ep->gate, NULL );		// init with default attrs
+		memset( &ep->scounts[0], 0, sizeof( ep->scounts ) );
 
 		rmr_sym_put( rt->hash, ep_name, 1, ep );
 	}
