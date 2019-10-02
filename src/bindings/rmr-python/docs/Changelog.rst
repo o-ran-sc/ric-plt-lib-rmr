@@ -7,6 +7,21 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+
+[0.13.2] - 10/2/2019
+--------------------
+
+::
+
+    * Fix a constant name (RMRFL_MT_CALL)
+
+[0.13.1] - 10/1/2019
+--------------------
+
+::
+
+    * Correct unit test bug in rmr-python. With RMR 1.8.x connections are forced to be asynch by default to prevent kubernetes blocking the attempt for minutes. However, the asynch nature of connections makes unit tests concerned with the ability to send and receive messages non-deterministic as some connections are established before the first message is sent, and others are not. This change ensures that unit tests establish connections in a synchronous manner which ensures that the first send will not be rejected by NNG due to a pending connection.
+
 [0.13.0] - 9/27/2019
 --------------------
 
@@ -14,7 +29,7 @@ Versioning <http://semver.org/>`__.
    * Add a helpers module to provide extensions and helper functions such as receive all queued messages.
    * Enhance unit test to check only for RMR constants which are needed.
    * Correct unprintable characters in documentation.
-   
+
 
 [0.12.0] - 8/23/2019
 --------------------

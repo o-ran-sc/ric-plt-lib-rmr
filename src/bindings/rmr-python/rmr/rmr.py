@@ -69,7 +69,7 @@ def _get_mapping_dict(cache={}):
     RMR_ERR_TIMEOUT     12  message processing call timed out
     RMR_ERR_UNSET       13  the message hasn't been populated with a transport buffer
     RMR_ERR_TRUNC       14  received message likely truncated
-    RMR_ERR_INITFAILED  15  initialisation of something (probably message) failed
+    RMR_ERR_INITFAILED  15  initialization of something (probably message) failed
 
     """
     if cache:
@@ -105,11 +105,9 @@ _RCONST = _get_constants()
 # TODO: Are there others that will be useful?
 
 RMR_MAX_RCV_BYTES = _RCONST["RMR_MAX_RCV_BYTES"]
-
-RMRFL_NONE = _RCONST.get("RMRFL_MTCALL", 0x02)	  # initialisation flags
+RMRFL_MTCALL = _RCONST.get("RMRFL_MTCALL", 0x02)  # initialization flags
 RMRFL_NONE = _RCONST.get("RMRFL_NONE", 0x0)
-
-RMR_OK = _RCONST["RMR_OK"]                        # useful state constants
+RMR_OK = _RCONST["RMR_OK"]  # useful state constants
 RMR_ERR_TIMEOUT = _RCONST["RMR_ERR_TIMEOUT"]
 RMR_ERR_RETRY = _RCONST["RMR_ERR_RETRY"]
 
