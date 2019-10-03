@@ -52,4 +52,5 @@ setup(
     data_files=[("", ["LICENSE.txt"])],
     install_requires=[],
     long_description=_long_descr(),
+    long_description_content_type="text/markdown",
 )
