@@ -1,4 +1,4 @@
-// : vi ts=4 sw=4 noet :
+// vim: ts=4 sw=4 noet :
 /*
 ==================================================================================
 	Copyright (c) 2019 Nokia
@@ -250,6 +250,7 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 	char*		hold_src;			// we need the original source if send fails
 	char*		hold_ip;			// also must hold original ip
 	int			sock_ok = 0;		// true if we found a valid endpoint socket
+	endpoint_t*	ep;					// end point to track counts
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL || msg == NULL ) {		// bad stuff, bail fast
 		errno = EINVAL;												// if msg is null, this is their clue
@@ -270,10 +271,10 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 
 	((uta_mhdr_t *) msg->header)->flags &= ~HFL_CALL_MSG;			// must ensure call flag is off
 
-	sock_ok = uta_epsock_byname( ctx->rtable, (char *) ((uta_mhdr_t *)msg->header)->src, &nn_sock );			// src is always used first for rts
+	sock_ok = uta_epsock_byname( ctx->rtable, (char *) ((uta_mhdr_t *)msg->header)->src, &nn_sock, &ep );			// src is always used first for rts
 	if( ! sock_ok ) {
 		if( HDR_VERSION( msg->header ) > 2 ) {							// with ver2 the ip is there, try if src name not known
-			sock_ok = uta_epsock_byname( ctx->rtable, (char *) ((uta_mhdr_t *)msg->header)->srcip, &nn_sock );
+			sock_ok = uta_epsock_byname( ctx->rtable, (char *) ((uta_mhdr_t *)msg->header)->srcip, &nn_sock, &ep );
 		}
 		if( ! sock_ok ) {
 			msg->state = RMR_ERR_NOENDPT;
@@ -287,6 +288,21 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 	strncpy( (char *) ((uta_mhdr_t *)msg->header)->src, ctx->my_name, RMR_MAX_SRC );	// must overlay the source to be ours
 	msg = send_msg( ctx, msg, nn_sock, -1 );
 	if( msg ) {
+		if( ep != NULL ) {
+			switch( msg->state ) {
+				case RMR_OK:
+					ep->scounts[EPSC_GOOD]++;
+					break;
+			
+				case RMR_ERR_RETRY:
+					ep->scounts[EPSC_TRANS]++;
+					break;
+
+				default:
+					ep->scounts[EPSC_FAIL]++;
+					break;
+			}
+		}
 		strncpy( (char *) ((uta_mhdr_t *)msg->header)->src, hold_src, RMR_MAX_SRC );	// always return original source so rts can be called again
 		strncpy( (char *) ((uta_mhdr_t *)msg->header)->srcip, hold_ip, RMR_MAX_SRC );	// always return original source so rts can be called again
 		msg->flags |= MFL_ADDSRC;														// if msg given to send() it must add source
@@ -599,8 +615,8 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	int		state;
 
 	if( ! announced ) {
-		fprintf( stderr, "[INFO] ric message routing library on NNG mv=%d (%s %s.%s.%s built: %s)\n",
-			RMR_MSG_VER, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
+		fprintf( stderr, "[INFO] ric message routing library on NNG mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
+			RMR_MSG_VER, flags, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
 	}
 

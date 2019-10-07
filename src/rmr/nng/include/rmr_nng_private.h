@@ -1,4 +1,4 @@
-// : vi ts=4 sw=4 noet :
+//  vim: ts=4 sw=4 noet :
 /*
 ==================================================================================
 	Copyright (c) 2019 Nokia
@@ -44,6 +44,7 @@ struct endpoint {
 	nng_dialer	dialer;		// the connection specific information (retry timout etc)
 	int		open;			// set to true if we've connected as socket cannot be checked directly)
 	pthread_mutex_t	gate;	// we must serialise when we open/link to the endpoint
+	long long scounts[EPSC_SIZE];		// send counts (indexed by EPSCOUNT_* constants
 };
 
 /*
@@ -107,8 +108,8 @@ static void free_ctx( uta_ctx_t* ctx );
 // --- rt table things ---------------------------
 static int uta_link2( endpoint_t* ep );
 static int rt_link2_ep( endpoint_t* ep );
-static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_sock );
-static int uta_epsock_rr( rtable_ent_t* rte, int group, int* more, nng_socket* nn_sock );
+static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_sock, endpoint_t** uepp );
+static int uta_epsock_rr( rtable_ent_t* rte, int group, int* more, nng_socket* nn_sock, endpoint_t** uepp );
 static rtable_ent_t* uta_get_rte( route_table_t *rt, int sid, int mtype, int try_alt );
 static inline int xlate_nng_state( int state, int def_state );
 

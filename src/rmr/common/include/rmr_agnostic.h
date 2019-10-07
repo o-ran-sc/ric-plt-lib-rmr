@@ -86,6 +86,12 @@ typedef struct uta_ctx  uta_ctx_t;
 #define UNSET_SUBID		(-1)			// initial value on msg allocation indicating not set
 #define UNSET_MSGTYPE	(-1)
 
+										// index values into the send counters for an enpoint
+#define EPSC_GOOD		0				// successful send
+#define EPSC_FAIL		1				// hard failurs
+#define EPSC_TRANS		2				// transient/soft faiures
+#define EPSC_SIZE		3				// number of counters
+
 // -- header length/offset macros must ensure network conversion ----
 #define RMR_HDR_LEN(h)		(ntohl(((uta_mhdr_t *)h)->len0)+htonl(((uta_mhdr_t *)h)->len1)+htonl(((uta_mhdr_t *)h)->len2)+htonl(((uta_mhdr_t *)h)->len3)) // ALL things, not just formal struct
 #define RMR_TR_LEN(h) 		(ntohl(((uta_mhdr_t *)h)->len1))

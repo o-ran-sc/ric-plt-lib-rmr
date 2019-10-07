@@ -1,4 +1,4 @@
-// : vi ts=4 sw=4 noet :
+// vim: ts=4 sw=4 noet :
 /*
 ==================================================================================
 	Copyright (c) 2019 Nokia
@@ -59,7 +59,6 @@
 	get things into a bad state if we allow a collision here.  The lock grab
 	only happens on the intial session setup.
 */
-//static int uta_link2( char* target, nng_socket* nn_sock, nng_dialer* dialer, pthread_mutex* gate ) {
 static int uta_link2( endpoint_t* ep ) {
 	static int	flags = -1;
 
@@ -218,7 +217,7 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 	the user pointer passed in and sets the return value to true (1). If the
 	endpoint cannot be found false (0) is returned.
 */
-static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_sock ) {
+static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_sock, endpoint_t** uepp ) {
 	endpoint_t* ep;
 	int state = FALSE;
 
@@ -227,6 +226,9 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_s
 	}
 
 	ep =  rmr_sym_get( rt->hash, ep_name, 1 );
+	if( uepp != NULL ) {							// caller needs endpoint too, give it back
+		*uepp = ep;
+	}
 	if( ep == NULL ) {
 		if( DEBUG ) fprintf( stderr, "[DBUG] get ep by name for %s not in hash!\n", ep_name );
 		if( ! ep_name || (ep = rt_ensure_ep( rt, ep_name)) == NULL ) {				// create one if not in rt (support rts without entry in our table)
@@ -279,8 +281,7 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_s
 		Both of these, in the grand scheme of things, is minor compared to the
 		overhead of grabbing a lock on each call.
 */
-static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, nng_socket* nn_sock ) {
-	//rtable_ent_t* rte;			// matching rt entry
+static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, nng_socket* nn_sock, endpoint_t** uepp ) {
 	endpoint_t*	ep;				// seected end point
 	int  state = FALSE;			// processing state
 	int dummy;
@@ -337,6 +338,9 @@ static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, nng_socket* n
 			break;
 	}
 
+	if( uepp != NULL ) {								// caller needs refernce to endpoint too
+		*uepp = ep;
+	}
 	if( state ) {										// end point selected, open if not, get socket either way
 		if( ! ep->open ) {								// not connected
 			if( ep->addr == NULL ) {					// name didn't resolve before, try again
@@ -382,6 +386,37 @@ static inline rtable_ent_t*  uta_get_rte( route_table_t *rt, int sid, int mtype,
 	}
 
 	return rte;
+}
+
+/*
+	Return a string of count information. E.g.:
+		<ep-name>:<port> <good> <hard-fail> <soft-fail>
+
+	Caller must free the string allocated if a buffer was not provided.
+
+	Pointer returned is to a freshly allocated string, or the user buffer
+	for convenience.
+
+	If the endpoint passed is a nil pointer, then we return a nil -- caller
+	must check!
+*/
+static inline char* get_ep_counts( endpoint_t* ep, char* ubuf, int ubuf_len ) {
+	char*	rs;			// result string
+
+	if( ep == NULL ) {
+		return NULL;
+	}
+
+	if( ubuf != NULL ) {
+		rs = ubuf;
+	} else {
+		ubuf_len = 256;
+		rs = malloc( sizeof( char ) * ubuf_len );
+	}
+
+	snprintf( rs, ubuf_len, "%s %lld %lld %lld", ep->name, ep->scounts[EPSC_GOOD], ep->scounts[EPSC_FAIL], ep->scounts[EPSC_TRANS] );
+
+	return rs;
 }
 
 #endif

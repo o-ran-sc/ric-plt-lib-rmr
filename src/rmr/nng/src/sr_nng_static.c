@@ -1,4 +1,4 @@
-// : vi ts=4 sw=4 noet 2
+// vim: ts=4 sw=4 noet :
 /*
 ==================================================================================
 	Copyright (c) 2019 Nokia
@@ -530,7 +530,7 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock
 	uta_mhdr_t*	hdr;
 	int nng_flags = NNG_FLAG_NONBLOCK;		// if we need to set any nng flags (zc buffer) add it to this
 	int spin_retries = 1000;				// if eagain/timeout we'll spin, at max, this many times before giving up the CPU
-	int	tr_len;								// trace len in sending message so we alloc new message with same trace size
+	int	tr_len;								// trace len in sending message so we alloc new message with same trace sizes
 
 	// future: ensure that application did not overrun the XID buffer; last byte must be 0
 
@@ -543,6 +543,11 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock
 	if( msg->flags & MFL_ADDSRC ) {									// buffer was allocated as a receive buffer; must add our source
 		strncpy( (char *) ((uta_mhdr_t *)msg->header)->src, ctx->my_name, RMR_MAX_SRC );					// must overlay the source to be ours
 		strncpy( (char *) ((uta_mhdr_t *)msg->header)->srcip, ctx->my_ip, RMR_MAX_SRC );
+	}
+
+	if( retries == 0 ) {
+		spin_retries = 100;
+		retries++;
 	}
 
 	errno = 0;
@@ -634,6 +639,7 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock
 
 */
 static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
+	endpoint_t*	ep;					// end point that we're attempting to send to
 	rtable_ent_t*	rte;			// the route table entry which matches the message key
 	nng_socket	nn_sock;			// endpoint socket for send
 	uta_ctx_t*	ctx;
@@ -656,7 +662,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 
 	errno = 0;													// clear; nano might set, but ensure it's not left over if it doesn't
 	if( msg->header == NULL ) {
-		fprintf( stderr, "rmr_send_msg: ERROR: message had no header\n" );
+		fprintf( stderr, "rmr_mtosend_msg: ERROR: message had no header\n" );
 		msg->state = RMR_ERR_NOHDR;
 		errno = EBADMSG;											// must ensure it's not eagain
 		msg->tp_state = errno;
@@ -680,7 +686,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 	send_again = 1;											// force loop entry
 	group = 0;												// always start with group 0
 	while( send_again ) {
-		sock_ok = uta_epsock_rr( rte, group, &send_again, &nn_sock );								// select endpt from rr group and set again if more groups
+		sock_ok = uta_epsock_rr( rte, group, &send_again, &nn_sock, &ep );		// select endpt from rr group and set again if more groups
 
 		if( DEBUG ) fprintf( stderr, "[DBUG] mtosend_msg: flgs=0x%04x type=%d again=%d group=%d len=%d sock_ok=%d\n",
 				msg->flags, msg->mtype, send_again, group, msg->len, sock_ok );
@@ -717,6 +723,22 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 					if( msg == NULL ) {
 						fprintf( stderr, "[DBUG] mtosend_msg:  send returned nil message!\n" );		
 					}
+				}
+			}
+
+			if( ep != NULL && msg != NULL ) {
+				switch( msg->state ) {
+					case RMR_OK:
+						ep->scounts[EPSC_GOOD]++;
+						break;
+				
+					case RMR_ERR_RETRY:
+						ep->scounts[EPSC_TRANS]++;
+						break;
+
+					default:
+						ep->scounts[EPSC_FAIL]++;
+						break;
 				}
 			}
 		} else {
