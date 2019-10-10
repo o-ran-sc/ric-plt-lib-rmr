@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "186f63a1_f2d272c5",
+        "filename": "src/bindings/rmr-python/rmr-version.yaml",
+        "patchSetId": 5
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-10-10T18:55:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2c21eb1_4b0c9ce4",
+      "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b360b8f_e2d71399",
         "filename": "src/bindings/rmr-python/tests/fixtures/test_local.rt",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2019-10-10T18:44:44Z",
       "side": 1,
       "message": "I assume this is gauranteed to work on my local machine, too..",
+      "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "28910b29_62721057",
+        "filename": "src/bindings/rmr-python/tests/fixtures/test_local.rt",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-10-10T18:55:26Z",
+      "side": 1,
+      "message": "I would hope so.  localhost works on my machines/containers, but seems not to play nicely in the jenkins VM.  Not sure why.",
+      "parentUuid": "6b360b8f_e2d71399",
       "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "8512dce3_24e0fe94",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-10-10T18:55:26Z",
+      "side": 1,
+      "message": "Yes, but not in the interest of speed.  If the send fails the receive won\u0027t work, and I wasn\u0027t seeing the send failure at first.",
+      "parentUuid": "862517df_c67a3530",
+      "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1d02f68d_df8479d3",
         "filename": "src/bindings/rmr-python/tests/test_rmr.py",
         "patchSetId": 5
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "f8bc0254_b2a65723",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-10-10T18:55:26Z",
+      "side": 1,
+      "message": "Ha, yes :)    Given that these loop back, I need to ensure that there is time for them to actually go out and come back.   My initial thought was that the problem I saw was timing, but this didn\u0027t help.  Decided to leave it anyway.",
+      "parentUuid": "1d02f68d_df8479d3",
+      "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "aa111300_8e6bb6d3",
         "filename": "src/bindings/rmr-python/tests/test_rmr.py",
         "patchSetId": 5
@@ -81,6 +153,24 @@
       "writtenOn": "2019-10-10T18:44:44Z",
       "side": 1,
       "message": "it would seem flake8 is turned off on the test code... If I reenable that, these spaces between the comments are going to fail",
+      "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8492447c_d1b88eb5",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-10-10T18:55:26Z",
+      "side": 1,
+      "message": "Yes.... everything must be a jumble with no horizontal white space; I noticed it wasn\u0027t complaining about spaces after parens either.  I cleaned up what I contributed there. You gave +2 already, so I\u0027ll fix with the next set of changes since this is minor IMHO.",
+      "parentUuid": "aa111300_8e6bb6d3",
       "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
