@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2c21eb1_4b0c9ce4",
+        "filename": "src/bindings/rmr-python/rmr-version.yaml",
+        "patchSetId": 5
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-10-10T18:44:44Z",
+      "side": 1,
+      "message": "aye lad, thanks",
+      "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b360b8f_e2d71399",
+        "filename": "src/bindings/rmr-python/tests/fixtures/test_local.rt",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-10-10T18:44:44Z",
+      "side": 1,
+      "message": "I assume this is gauranteed to work on my local machine, too..",
+      "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "862517df_c67a3530",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-10-10T18:44:44Z",
+      "side": 1,
+      "message": "i see, you\u0027re short circuting the test here, probably slightly faster than what I had",
+      "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d02f68d_df8479d3",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-10-10T18:44:44Z",
+      "side": 1,
+      "message": "until you added a sleep in the tests lol",
+      "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa111300_8e6bb6d3",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-10-10T18:44:44Z",
+      "side": 1,
+      "message": "it would seem flake8 is turned off on the test code... If I reenable that, these spaces between the comments are going to fail",
+      "revId": "b7eef0cc72b7b884eb2aae16fa84de693c7e35f7",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
