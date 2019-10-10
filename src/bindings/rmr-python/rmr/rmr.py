@@ -437,9 +437,6 @@ def message_summary(ptr_mbuf):
     dict:
         dict message summary
     """
-    if ptr_mbuf.contents.len > RMR_MAX_RCV_BYTES:
-        return "Malformed message: message length is greater than the maximum possible"
-
     return {
         "payload": get_payload(ptr_mbuf),
         "payload length": ptr_mbuf.contents.len,
