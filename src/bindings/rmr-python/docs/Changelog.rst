@@ -8,6 +8,14 @@ and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
 
+[0.13.3] - 10/10/2019
+--------------------
+
+::
+
+    * Add missing unit test for receive all.
+    * Correct bug in summary function.
+
 [0.13.2] - 10/2/2019
 --------------------
 
