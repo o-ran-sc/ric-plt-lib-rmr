@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "156f4267_114b1e8c",
+        "filename": "src/bindings/rmr-python/rmr/rmr.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-10-21T21:24:34Z",
+      "side": 1,
+      "message": "would prefer: \"payload\": get_payload(ptr_mbuf) if ptr_mbuf.contents.state \u003d\u003d RMR_OK: else None",
+      "revId": "1d8fc60a37c641ef841c8108aa33cda0a7b66482",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
