@@ -66,7 +66,7 @@ def test_send_mock(monkeypatch):
         "message state": 12,
         "message type": 666,
         "message status": "RMR_ERR_TIMEOUT",
-        "payload": b"testttt",
+        "payload": None,
         "payload length": 7,
         "payload max size": 4096,
         "subscription id": 0,
