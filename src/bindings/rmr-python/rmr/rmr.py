@@ -438,7 +438,7 @@ def message_summary(ptr_mbuf):
         dict message summary
     """
     return {
-        "payload": get_payload(ptr_mbuf),
+        "payload": get_payload(ptr_mbuf) if ptr_mbuf.contents.state == RMR_OK: else None,
         "payload length": ptr_mbuf.contents.len,
         "message type": ptr_mbuf.contents.mtype,
         "subscription id": ptr_mbuf.contents.sub_id,

@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+[0.13.4] - 10/21/2019
+--------------------
+
+::
+
+    * Correct cause of nil pointer exception in message summary.
+
 
 [0.13.3] - 10/10/2019
 --------------------
