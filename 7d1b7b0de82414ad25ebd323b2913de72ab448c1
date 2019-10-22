@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9e7e33bb_79b2195d",
+        "filename": "CHANGES",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-10-22T21:26:39Z",
+      "side": 1,
+      "message": "should this be 1.10.0?",
+      "revId": "7d1b7b0de82414ad25ebd323b2913de72ab448c1",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
