@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "dd17dc91_0320e6f0",
+        "filename": "src/bindings/rmr-python/rmr/rmr.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-10-22T00:54:45Z",
+      "side": 1,
+      "message": "Done, but I really don\u0027t like python\u0027s syntax -- to me it reads that get_payload() will execute.\nRuby also has the \u0027post if\u0027 clause which I just think is backwards. \n\nNew push going round gerrit, so when you\u0027re in tomorrow have a look.",
+      "parentUuid": "156f4267_114b1e8c",
+      "revId": "1d8fc60a37c641ef841c8108aa33cda0a7b66482",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7d31aa09_6f39c3e5",
         "filename": "src/bindings/rmr-python/tests/test_rmr_mocks.py",
         "patchSetId": 2
