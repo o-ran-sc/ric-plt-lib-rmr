@@ -69,6 +69,24 @@
       "revId": "1d8fc60a37c641ef841c8108aa33cda0a7b66482",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eadc3eeb_331962eb",
+        "filename": "src/bindings/rmr-python/tests/test_rmr_mocks.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-10-22T12:19:31Z",
+      "side": 1,
+      "message": "Ack on the mock test.\n\nI don\u0027t think this (1-5) will work because there will be a payload pointer, only it will point to a zero length buffer.  I think I added confusion earlier because I wasn\u0027t thinking about what the payload pointer really is.  I think the only way to test this is to issue a receive and force the session to close which I believe will produce a receive failure and cause the code path in RMR which sets the pointer to null to be taken.  I can try that, but my brain has run out of fuel, so tomorrow. \n\nIn looking at it based on your suggestion, I realised I was a bit confused. The payload pointer is set to nil only if the NNG receive fails completely or returns a message that is not large enough to contain a RMR header.  I was thinking that an application needing to send a 0 length ack wouldn\u0027t allocate a payload, but in reality when it allocates a message to send the ack, the payload exists and can be pointed to even if the application sets the length to 0.   I was thinking that the application would alloc a 0 byte message which just isn\u0027t possible; if an application allocates a buffer with len \u003c\u003d 0, the default payload size is allocated even if the application opts not to fill it in.\n\nI don\u0027t know what is causing NNG to fail the receive, but that\u0027s what is happening. (I don\u0027t know what NNG behaviour is if the only connection is closed, but it seems that it might fail a pending receive.)   RMR does need to be changed so that these messages are not queued onto the receive ring.  It makes sense to return them when the application is reading directly in order to ensure that a timed receive does not take longer than expected, but for a ring based receive getting back a message with no payload doesn\u0027t make sense, and timeout is handled differently, so dropping the message won\u0027t cause it to block longer than desired.\n\nThat said, I think the best thing to do is to let the null check in summary go in. I\u0027ll submit a patch to RMR to prevent the ring from caching these, but that will be in RMR version 1.10.x which I think is beyond your tested version, so I\u0027m planning on doing that separately. The change here is just a work round the RMR bug until fixed.  \n\nThoughts?",
+      "parentUuid": "8fb183da_52d248d0",
+      "revId": "1d8fc60a37c641ef841c8108aa33cda0a7b66482",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
