@@ -51,7 +51,7 @@ struct endpoint {
 	Epoll information needed for the rmr_torcv_msg() funciton
 */
 typedef struct epoll_stuff {
-	struct epoll_event events[1];				// wait on 10 possible events
+	struct epoll_event events[1];				// wait on 1 possible events
 	struct epoll_event epe;						// event definition for event to listen to
 	int ep_fd;									// file des from nng
 	int nng_fd;									// fd from nng

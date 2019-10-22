@@ -73,6 +73,12 @@ The &ital(state) field in the message buffer will be one of the following:
 &di(RMR_OK) The message buffer (payload) references the received data.
 
 &space
+&di(RMR_ERR_INITFAILED) The first call to this function must initialise an underlying
+	system notification mechanism. On failure, this error is returned and errno
+	will have the system error status set.  If this function fails to intialise,
+	the poll mechansim, it is likely that message receives will never be successful.
+
+&space
 &di(RMR_ERR_TIMEOUT) The timeout expired before a complete message was received.
 	All other fields in the message buffer are not valid.
 
