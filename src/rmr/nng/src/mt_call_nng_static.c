@@ -64,7 +64,8 @@ static inline void queue_normal( uta_ctx_t* ctx, rmr_mbuf_t* mbuf ) {
 		The transaction ID in the message matches the expected ID in the chute,
 		then the message is given to the chute and the chute's semaphore is tickled.
 
-		If none are true, the message is dropped.
+		If none are true, the message is queued on the normal receive queue and that
+		related semaphore is tickeled.
 */
 static void* mt_receive( void* vctx ) {
 	uta_ctx_t*		ctx;
@@ -84,7 +85,7 @@ static void* mt_receive( void* vctx ) {
 	while( ! ctx->shutdown ) {
 		mbuf = rcv_msg( ctx, NULL );
 
-		if( mbuf != NULL && (hdr = (uta_mhdr_t *) mbuf->header) != NULL ) {
+		if( mbuf != NULL && (hdr = (uta_mhdr_t *) mbuf->header) != NULL && mbuf->payload != NULL ) {
 			if( hdr->flags & HFL_CALL_MSG ) {					// call generated message; ignore call-id etc and queue
 				queue_normal( ctx, mbuf );
 			} else {

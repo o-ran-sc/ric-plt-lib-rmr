@@ -454,7 +454,12 @@ extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to ) {
 		if( (eps->ep_fd = epoll_create1( 0 )) < 0 ) {
 	    	fprintf( stderr, "[FAIL] unable to create epoll fd: %d\n", errno );
 			free( eps );
-			return NULL;
+			ctx->eps = NULL;
+			if( old_msg != NULL ) {
+				old_msg->state = RMR_ERR_INITFAILED;
+				old_msg->tp_state = errno;
+			}
+			return old_msg;
 		}
 
 		eps->nng_fd = rmr_get_rcvfd( ctx );
@@ -464,7 +469,12 @@ extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to ) {
 		if( epoll_ctl( eps->ep_fd, EPOLL_CTL_ADD, eps->nng_fd, &eps->epe ) != 0 )  {
 	    	fprintf( stderr, "[FAIL] epoll_ctl status not 0 : %s\n", strerror( errno ) );
 			free( eps );
-			return NULL;
+			ctx->eps = NULL;
+			if( old_msg != NULL ) {
+				old_msg->state = RMR_ERR_INITFAILED;
+				old_msg->tp_state = errno;
+			}
+			return old_msg;
 		}
 
 		ctx->eps = eps;
