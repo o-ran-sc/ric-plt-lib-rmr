@@ -1,0 +1,6 @@
+# Trigger test and push to pypi.org
+---
+distribution_type: pypi
+project: rmr
+python_version: 3.7
+version: 0.13.4
