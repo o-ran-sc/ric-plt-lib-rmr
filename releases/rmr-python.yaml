@@ -1,0 +1,7 @@
+# Trigger test and push to pypi.org
+---
+distribution_type: pypi
+log_dir: ric-plt-lib-rmr-python-pypi-merge-master/1
+pypi_project: rmr
+python_version: 3.7
+version: 0.13.4
