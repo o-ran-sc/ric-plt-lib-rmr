@@ -19,6 +19,7 @@ import json
 from ctypes import RTLD_GLOBAL, Structure, c_int, POINTER, c_char, c_char_p, c_void_p, memmove, cast
 from ctypes import CDLL
 from ctypes import create_string_buffer
+from rmr.exceptions import BadBufferAllocation
 
 # https://docs.python.org/3.7/library/ctypes.html
 # https://stackoverflow.com/questions/2327344/ctypes-loading-a-c-shared-library-that-has-dependencies/30845750#30845750
@@ -219,7 +220,12 @@ def rmr_alloc_msg(vctx, size):
     Refer to the rmr C documentation for rmr_alloc_msg
     extern rmr_mbuf_t* rmr_alloc_msg(void* vctx, int size)
     """
-    return _rmr_alloc_msg(vctx, size)
+    sbuf = _rmr_alloc_msg(vctx, size)
+    try:
+        sbuf.contents
+    except ValueError:
+        raise BadBufferAllocation
+    return sbuf
 
 
 _rmr_free_msg = rmr_c_lib.rmr_free_msg

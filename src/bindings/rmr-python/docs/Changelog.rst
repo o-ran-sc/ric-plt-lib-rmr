@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+[0.13.5] - 10/23/2019
+--------------------
+
+::
+
+    * Add an exceptions module and raise a proper exception when an allocated buffer has a NULL pointer. Likely due to a bad rmr context.
+
 [0.13.4] - 10/21/2019
 --------------------
 
