@@ -63,7 +63,7 @@ def _assert_new_sbuf(sbuf):
     assert summary["transaction id"] == b""
     assert summary["message state"] == 0
     assert summary["message status"] == "RMR_OK"
-    assert summary["meid"] == ""
+    assert summary["meid"] == b""
     assert summary["errno"] == 0
 
 
@@ -105,19 +105,19 @@ def test_meid():
     """
     sbuf = rmr.rmr_alloc_msg(MRC_SEND, SIZE)
 
-    rmr.rmr_set_meid(sbuf, b"\x01\x02", 2)
-    assert rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == "\x01\x02"
+    rmr.rmr_set_meid(sbuf, b"\x01\x02")
+    assert rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == b"\x01\x02"
     assert len(rmr.rmr_get_meid(sbuf)) == 2
 
-    rmr.rmr_set_meid(sbuf, b"\x00" * 32, 32)
-    assert rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == ""  # NULL bytes get truncated
+    rmr.rmr_set_meid(sbuf, b"\x00" * 32)
+    assert rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == b""  # NULL bytes get truncated
 
-    rmr.rmr_set_meid(sbuf, b"6" * 32, 32)
-    assert rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == "6" * 32  # string in string out
+    rmr.rmr_set_meid(sbuf, b"6" * 32)
+    assert rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == b"6" * 32  # string in string out
 
-    rmr.rmr_set_meid(sbuf, b"\x01\x02", 2)
+    rmr.rmr_set_meid(sbuf, b"\x01\x02")
     assert (
-        rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == "\x01\x02" + "6" * 30
+        rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == b"\x01\x02" + b"6" * 30
     )  # bytes in string out, 6s left over
     assert len(rmr.rmr_get_meid(sbuf)) == 32
 
@@ -145,10 +145,10 @@ def test_rmr_set_get():
     assert len(summary["transaction id"]) == 32
 
     # test meid
-    assert rmr.rmr_get_meid(sbuf) == summary["meid"] == ""
-    rmr.rmr_set_meid(sbuf, b"666\x01\x00\x01", 6)
+    assert rmr.rmr_get_meid(sbuf) == summary["meid"] == b""
+    rmr.rmr_set_meid(sbuf, b"666\x01\x00\x01")
     summary = rmr.message_summary(sbuf)
-    assert rmr.rmr_get_meid(sbuf) == summary["meid"] == "666\x01"
+    assert rmr.rmr_get_meid(sbuf) == summary["meid"] == b"666\x01"
     assert (len(summary["meid"])) == 4
 
 
@@ -274,3 +274,16 @@ def test_bad_buffer():
     """test that we get a proper exception when the buffer has a null pointer"""
     with pytest.raises(exceptions.BadBufferAllocation):
         rmr.rmr_alloc_msg(None, 4096)
+
+
+def test_alloc_fancy():
+    """test allocation with setting payload, trans, mtype"""
+    pay = b"yoo\x01\x00\x80"
+    sbuf = rmr.rmr_alloc_msg(MRC_SEND, SIZE, payload=pay, gen_transaction_id=True, mtype=14, meid=b"asdf")
+    summary = rmr.message_summary(sbuf)
+    assert summary["payload"] == pay
+    assert summary["payload length"] == 6
+    assert summary["transaction id"] != b""  # hard to test what it will be, but make sure not empty
+    assert summary["message state"] == 0
+    assert summary["message type"] == 14
+    assert summary["meid"] == b"asdf"

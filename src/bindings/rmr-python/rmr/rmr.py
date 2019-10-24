@@ -215,17 +215,37 @@ _rmr_alloc_msg.argtypes = [c_void_p, c_int]
 _rmr_alloc_msg.restype = POINTER(rmr_mbuf_t)
 
 
-def rmr_alloc_msg(vctx, size):
+def rmr_alloc_msg(vctx, size, payload=None, gen_transaction_id=False, mtype=None, meid=None):
     """
     Refer to the rmr C documentation for rmr_alloc_msg
     extern rmr_mbuf_t* rmr_alloc_msg(void* vctx, int size)
+
+    if payload is not None, attempts to set the payload
+    if gen_transaction_id is True, it generates and sets a transaction id
+    if mtype is not None, sets the sbuf's message type
+    if meid is not None, sets the sbuf's meid
+
     """
     sbuf = _rmr_alloc_msg(vctx, size)
+    # make sure it's good
     try:
         sbuf.contents
+        if payload:
+            set_payload_and_length(payload, sbuf)
+
+        if gen_transaction_id:
+            generate_and_set_transaction_id(sbuf)
+
+        if mtype:
+            sbuf.contents.mtype = mtype
+
+        if meid:
+            rmr_set_meid(sbuf, meid)
+
+        return sbuf
+
     except ValueError:
         raise BadBufferAllocation
-    return sbuf
 
 
 _rmr_free_msg = rmr_c_lib.rmr_free_msg
@@ -330,16 +350,13 @@ _rmr_bytes2meid.argtypes = [POINTER(rmr_mbuf_t), c_char_p, c_int]
 _rmr_bytes2meid.restype = c_int
 
 
-def rmr_bytes2meid(ptr_mbuf, src, length):
+def rmr_set_meid(ptr_mbuf, byte_str):
     """
     Refer to the rmr C documentation for rmr_bytes2meid
     extern int rmr_bytes2meid(rmr_mbuf_t* mbuf, unsigned char const* src, int len);
     """
-    return _rmr_bytes2meid(ptr_mbuf, src, length)
+    return _rmr_bytes2meid(ptr_mbuf, byte_str, len(byte_str))
 
-
-# this is an alias to rmr_bytes2meid using familiar set/get terminoloigy
-rmr_set_meid = rmr_bytes2meid
 
 # CAUTION:  Some of the C functions expect a mutable buffer to copy the bytes into;
 #           if there is a get_* function below, use it to set up and return the
@@ -370,7 +387,7 @@ def rmr_get_meid(ptr_mbuf):
     sz = _get_constants().get("RMR_MAX_MEID", 64)  # size for buffer to fill
     buf = create_string_buffer(sz)
     _rmr_get_meid(ptr_mbuf, buf)
-    return buf.value.decode()  # decode turns into a string
+    return buf.value
 
 
 _rmr_get_src = rmr_c_lib.rmr_get_src
