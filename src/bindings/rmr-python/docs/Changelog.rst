@@ -7,6 +7,19 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+
+[1.0.0] - 10/24/2019
+--------------------
+
+::
+
+    * It's been past due to bump this to 1.0.0 since people depend on it!
+    * Add the ability to set sbuf attributes in the same call that it is allocated
+    * (breaking) removes bytes2meid
+    * (breaking) rmr_set_meid now infers length
+    * (breaking) rmr_get_meid now returns bytes, to be symmetric with set_meid
+
+
 [0.13.5] - 10/23/2019
 --------------------
 
