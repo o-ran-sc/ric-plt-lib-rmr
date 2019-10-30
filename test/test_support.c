@@ -153,6 +153,7 @@ static int fail_if_equalp( void* a, void* b, char* what ) {
 }
 
 
+// for symtab and other non-message things this allows them to exclude by setting
 #ifndef NO_DUMMY_RMR
 /*
 	Dummy message allocator for testing without sr_static functions
@@ -166,7 +167,7 @@ static rmr_mbuf_t* test_mk_msg( int len, int tr_len ) {
 	uta_mhdr_t* hdr;
 	size_t	alen;
 
-	alen = sizeof( *hdr ) + tr_len + len;
+	alen = sizeof( *hdr ) + tr_len + len;	// this does no support allocating len2 and len3 data fields
 
 	new_msg = (rmr_mbuf_t *) malloc( sizeof *new_msg );
 	new_msg->tp_buf = (void *) malloc( alen );
@@ -197,7 +198,55 @@ static void test_set_ver( rmr_mbuf_t* msg, int ver ) {
 
 	return;
 }
-#endif
 
+/*
+	These allow values to be pushed deep into the real RMR header allocated
+	at the front of the transport buffer. These are needed to simulate
+	the actions of rmr_send() which pushes the values from the message buffer
+	just before putting them on the wire.
+*/
+static void test_set_mtype( rmr_mbuf_t* msg, int mtype ) {
+	uta_mhdr_t* hdr;
+
+	msg->mtype = mtype;
+	hdr = (uta_mhdr_t*) msg->tp_buf;
+	hdr->mtype = htonl( mtype );
+}
+
+static void test_set_sid( rmr_mbuf_t* msg, int sid ) {
+	uta_mhdr_t* hdr;
+
+	msg->sub_id = sid;
+	hdr = (uta_mhdr_t*) msg->tp_buf;
+	hdr->sub_id = htonl( sid );
+}
+
+static void test_set_plen( rmr_mbuf_t* msg, int plen ) {
+	uta_mhdr_t* hdr;
+
+	msg->len = plen;
+	hdr = (uta_mhdr_t*) msg->tp_buf;
+	hdr->plen = htonl( plen );
+}
+
+/*
+	Build a message and populate both the msg buffer and the tranport header
+	with mid, sid, and payload len. Tr_len causes that much space in the 
+	header for trace info to be reserved.
+*/
+static rmr_mbuf_t* mk_populated_msg( int alloc_len, int tr_len, int mtype, int sid, int plen ) {
+	uta_mhdr_t* hdr;
+	rmr_mbuf_t* mbuf;
+
+	mbuf = test_mk_msg( alloc_len, tr_len );
+	test_set_mtype( mbuf, mtype );
+	test_set_sid( mbuf, sid );
+	test_set_plen( mbuf, plen );
+
+	return mbuf;
+}
+
+
+#endif
 
 #endif

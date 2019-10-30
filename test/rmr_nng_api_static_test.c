@@ -274,6 +274,8 @@ static int rmr_api_test( ) {
 	snprintf( msg->xaction, 17, "%015d", 16 );		// dummy transaction id (emulation generates, this should arrive after a few calls to recv)
 	msg->mtype = 0;
 	msg->sub_id = -1;
+	em_set_rcvcount( 0 );							// reset message counter
+	em_set_rcvdelay( 1 );							// force slow msg rate during mt testing
 	msg = rmr_call( rmc, msg );						// dummy nng/nano function will sequentually add xactions and should match or '16'
 	errors += fail_if_nil( msg, "rmr_call returned a nil message on call expected to succeed "  );
 	if( msg ) {
@@ -447,12 +449,14 @@ static int rmr_api_test( ) {
 		
 
 	em_set_mtc_msgs( 0 );							// turn off 
-	em_set_rcvdelay( 0 );							// full speed receive rate
-	((uta_ctx_t *)rmc)->shutdown = 1;				// force the mt-reciver attached to the context to stop
+	em_set_rcvdelay( 0 );							// full speed receive rate to overflow the ring
+	//((uta_ctx_t *)rmc)->shutdown = 1;				// force the mt-reciver attached to the context to stop
 
-	em_set_rcvdelay( 0 );							// let the receive loop spin w/o receives so we drive warning code about queue full
-	sleep( 5 );
+	fprintf( stderr, "<INFO> pausing 5s to allow mt-call receive ring to fill  %ld\n", time( NULL ) );
+	sleep( 2 );
+	fprintf( stderr, "<INFO> tests continuing %ld\n", time( NULL ) );
 	em_set_rcvdelay( 1 );							// restore slow receive pace for any later tests
+	((uta_ctx_t *)rmc)->shutdown = 1;				// force the mt-reciver attached to the context to stop
 #endif
 
 

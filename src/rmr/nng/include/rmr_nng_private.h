@@ -124,6 +124,7 @@ static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg );
 static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  );
 static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, nng_socket nn_sock, int retries );
 static rmr_mbuf_t* send2ep( uta_ctx_t* ctx, endpoint_t* ep, rmr_mbuf_t* msg );
+static rmr_mbuf_t* realloc_payload( rmr_mbuf_t* mbuf, int new_len, int copy, int clone );
 
 
 
