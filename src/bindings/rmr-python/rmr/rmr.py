@@ -1,3 +1,4 @@
+# vim: expandtab ts=4 sw=4:
 # ==================================================================================
 #       Copyright (c) 2019 Nokia
 #       Copyright (c) 2018-2019 AT&T Intellectual Property.
@@ -248,6 +249,19 @@ def rmr_alloc_msg(vctx, size, payload=None, gen_transaction_id=False, mtype=None
         raise BadBufferAllocation
 
 
+_rmr_realloc_payload = rmr_c_lib.rmr_realloc_payload
+_rmr_realloc_payload.argtypes = [POINTER(rmr_mbuf_t), c_int, c_int, c_int]  # new_len, copy, clone
+_rmr_realloc_payload.restype = POINTER(rmr_mbuf_t)
+
+
+def rmr_realloc_payload(ptr_mbuf, new_len, copy=False, clone=False):
+    """
+    Refer to the rmr C documentation for rmr_realloc_payload().
+    extern rmr_mbuf_t* rmr_realloc_payload(rmr_mbuf_t*, int, int, int)
+    """
+    return _rmr_realloc_payload(ptr_mbuf, new_len, copy, clone)
+
+
 _rmr_free_msg = rmr_c_lib.rmr_free_msg
 _rmr_free_msg.argtypes = [c_void_p]
 _rmr_free_msg.restype = None
@@ -256,7 +270,7 @@ _rmr_free_msg.restype = None
 def rmr_free_msg(mbuf):
     """
     Refer to the rmr C documentation for rmr_free_msg
-    extern void rmr_free_msg( rmr_mbuf_t* mbuf )
+    extern void rmr_free_msg(rmr_mbuf_t* mbuf )
     """
     if mbuf is not None:
         _rmr_free_msg(mbuf)
@@ -487,6 +501,9 @@ def set_payload_and_length(byte_str, ptr_mbuf):
     ptr_mbuf: ctypes c_void_p
         Pointer to an rmr message buffer
     """
+    if rmr_payload_size(ptr_mbuf) < len(byte_str):  # existing message payload too small
+        ptr_mbuf = rmr_realloc_payload(ptr_mbuf, len(byte_str), True)
+
     memmove(ptr_mbuf.contents.payload, byte_str, len(byte_str))
     ptr_mbuf.contents.len = len(byte_str)
 
