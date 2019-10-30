@@ -190,6 +190,11 @@ static void em_set_rcvcount( int v ) {
 }
 
 static void em_set_rcvdelay( int v ) {
+	if( v < 0 ) {
+		fprintf( stderr, "<EM>   ##ERR## attempt to set receive delay with invalid value was ignored: %d seconds\n", v );
+		return;
+	}
+	fprintf( stderr, "<EM>   receive delay is now %d seconds\n", v );
 	rcv_delay = v;
 }
 
