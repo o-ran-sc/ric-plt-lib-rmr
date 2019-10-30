@@ -287,3 +287,25 @@ def test_alloc_fancy():
     assert summary["message state"] == 0
     assert summary["message type"] == 14
     assert summary["meid"] == b"asdf"
+
+
+# This test cannot be enabled until RMR 1.10.2 is available to the test environment as there is
+# no way to run py unit tests via jenkins against the current changes in RMR :(
+# When run locally this test passes.
+def test_resize_payload():
+    """test the ability to insert a larger payload into an existing message"""
+    return
+    #mtype = 99
+    #subid = 100
+
+    #mbuf = rmr.rmr_alloc_msg(MRC_SEND, 25)  # allocate buffer with small payload
+    #mbuf.contents.mtype = mtype             # type and sub-id should not change
+    #mbuf.contents.sub_id = subid
+
+    #long_payload = b"This is a long payload that should force the message buffer to be reallocated"
+    #rmr.set_payload_and_length(long_payload, mbuf)
+    #summary = rmr.message_summary(mbuf)
+    #assert summary["payload max size"] >= len(long_payload)  # RMR may allocate a larger payload space
+    #assert summary["payload length"] == len(long_payload)       # however, the length must be exactly the same
+    #assert summary["message type"] == mtype
+    #assert summary["subscription id"] == subid
