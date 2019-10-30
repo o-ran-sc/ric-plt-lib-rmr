@@ -1,4 +1,5 @@
-#==================================================================================
+#
+#=================================================================================
 #    Copyright (c) 2019 Nokia
 #    Copyright (c) 2018-2019 AT&T Intellectual Property.
 #
@@ -32,6 +33,8 @@
 #.SHELLFLAGS = -e	# hosed on some flavours so keep it off
 SHELL ?= /bin/ksh
 
+ex_cflags = $(shell echo $$EX_CFLAGS )
+
 build_path ?= ../../.build
 header_path := $(shell find $(build_path) -name 'rmr.h' |head -1 | sed 's!/rmr/.*!!' )
 
@@ -44,7 +47,7 @@ LIBRARY_PATH = $(LD_LIBRARY_PATH)
 
 
 .PHONY: all
-all: sender receiver caller mt_receiver
+all: sender receiver caller mt_receiver v_sender ex_rts_receiver
 
 receiver: receiver.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
@@ -53,6 +56,12 @@ mt_receiver: receiver.c
 	gcc -I $${C_INCLUDE_PATH:-.} -DMTC $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
 lreceiver: lreceiver.c
+	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+
+ex_rts_receiver: ex_rts_receiver.c
+	gcc $(ex_cflags) -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+
+v_sender: v_sender.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
 sender: sender.c
@@ -65,8 +74,6 @@ lcaller: lcaller.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@  -lrmr_nng -lnng -lpthread -lm
 
 lsender: lsender.c
-	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@  -lrmr_nng -lnng -lpthread -lm
-
 
 # clean removes intermediates; nuke removes everything that can be built
 .PHONY: clean nuke

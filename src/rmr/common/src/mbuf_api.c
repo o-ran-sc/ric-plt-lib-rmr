@@ -22,7 +22,9 @@
 	Mnemonic:	mbuf_api.c
 	Abstract:	These are common functions which work only on the mbuf and
 				thus (because they do not touch an endpoint or context)
-				can be agnostic to the underlying transport.
+				can be agnostic to the underlying transport, or the transport
+				layer provides a transport specific function (e.g. payload 
+				reallocation).
 
 	Author:		E. Scott Daniels
 	Date:		8 February 2019
@@ -447,3 +449,4 @@ extern unsigned char* rmr_get_srcip( rmr_mbuf_t* msg, unsigned char* dest ) {
 
 	return rstr;
 }
+
