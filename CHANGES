@@ -2,6 +2,10 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2019 October 31; version 1.10.2
+	Provide the means to increase the payload size of a received message
+	without losing the data needed to use the rmr_rts_msg() funciton.
+
 2019 October 21; version 1.10.1
 	Fix to prevent null message buffer from being returned by the timeout
 	receive function if the function is passed one to reuse.
