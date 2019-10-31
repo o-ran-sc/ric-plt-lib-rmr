@@ -1,5 +1,5 @@
 #!/usr/bin/env ksh
-# :vi ts=4 sw=4 noet :
+# vim: ts=4 sw=4 noet :
 #==================================================================================
 #    Copyright (c) 2019 Nokia
 #    Copyright (c) 2018-2019 AT&T Intellectual Property.

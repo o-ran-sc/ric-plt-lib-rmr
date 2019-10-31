@@ -346,6 +346,7 @@ do
 		-N)	run_nano_tests=1;;
 
 		-c)	module_cov_target=$2; shift;;
+		-e)	capture_file=$2; >$capture_file; shift;;		# capture errors from failed tests rather than spewing on tty
 		-f)	force_discounting=1;
 			trigger_discount_str="WARN|FAIL|PASS"		# check all outcomes for each module
 			;;
@@ -449,11 +450,20 @@ do
 	if ! ./${tfile%.c} >/tmp/PID$$.log 2>&1
 	then
 		echo "[FAIL] unit test failed for: $tfile"
-		if (( quiet ))
+		if [[ -n capture_file ]] 
 		then
-			grep "^<" /tmp/PID$$.log	# in quiet mode just dump <...> messages which are assumed from the test programme not appl
+			echo "all errors captured in $capture_file, listing only fail message on tty"
+			echo "$tfile --------------------------------------" >>$capture_file
+			cat /tmp/PID$$.log >>$capture_file
+			grep "^<FAIL>" /tmp/PID$$.log
+			echo ""
 		else
-			cat /tmp/PID$$.log
+			if (( quiet ))
+			then
+				grep "^<" /tmp/PID$$.log|grep -v "^<EM>"	# in quiet mode just dump <...> messages which are assumed from the test programme not appl
+			else
+				cat /tmp/PID$$.log
+			fi
 		fi
 		(( ut_errors++ ))				# cause failure even if not in strict mode
 		continue						# skip coverage tests for this

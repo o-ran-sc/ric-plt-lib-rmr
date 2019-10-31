@@ -19,30 +19,20 @@
 #
 
 # ---------------------------------------------------------------------------------
-#	Mnemonic:	run_lcall_test.ksh
-#	Abstract:	This is a simple script to set up and run the basic send/receive
-#				processes for some library validation on top of nng. This
-#				particular test starts the latency caller and latency receiver
-#				processes such that they exchange messages and track the latency
-#				from the caller's perepective (both outbound to receiver, and then
-#				back.  Stats are presented at the end.   This test is NOT intended
-#				to be used as a CI validation test.
-#
-#				The sender and receiver processes all have a 20s timeout (+/-)
-#				which means that all messages must be sent, and acked within that
-#				time or the processes will give up and report failure.  Keep in mind
-#				that n messages with a delay value (-d) set will affect whether or
-#				not the messages can be sent in the 20s timeout period.  There is
-#				currently no provision to adjust the timeout other than by changing
-#				the C source.  The default (100 msgs with 500 micro-sec delay) works
-#				just fine for base testing.
+#	Mnemonic:	run_exrts_test.ksh
+#	Abstract:	This is a simple script to set up and run the v_send/ex_rts_receive
+#				processes for some library validation on top of nng. This test
+#				starts these processes to verify that when a receiver has an ack 
+#				message larger than the received message it is able to allocate
+#				a new payload which can be returned via the RMR return to sender
+#				function.
 #
 #				Example command line:
 #					# run with 10 caller threads sending 10,000 meessages each, 
 #					# 5 receivers, and a 10 mu-s delay between each caller send
 #					ksh ./run_lcall_test.ksh -d 10 -n 10000 -r 5 -c 10
 #
-#	Date:		28 May 2019
+#	Date:		28 October 2019
 #	Author:		E. Scott Daniels
 # ---------------------------------------------------------------------------------
 
@@ -51,7 +41,7 @@
 # file in order for the 'main' to pick them up easily.
 #
 function run_sender {
-	./lcaller ${nmsg:-10} ${delay:-500} ${cthreads:-3} 
+	./v_sender ${nmsg:-10} ${delay:-100000} ${mtype_start_stop:-0:1} 
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -61,7 +51,7 @@ function run_rcvr {
 
 	port=$(( 4460 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	./lreceiver $(( ((nmsg * cthreads)/nrcvrs) + 10 )) $port
+	./ex_rts_receiver $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -76,7 +66,7 @@ function set_rt {
 		groups="$groups,localhost:$((port+i))"
 	done
 
-	cat <<endKat >lcall.rt
+	cat <<endKat >ex_rts.rt
 		newrt | start
 		mse |0 | 0 | $groups
 		mse |1 | 10 | $groups
@@ -92,6 +82,8 @@ function set_rt {
 		rte |11 | $groups
 		newrt | end
 endKat
+
+	cat ex_rts.rt
 }
 
 # ---------------------------------------------------------
@@ -102,37 +94,47 @@ then
 	sed "s!%%hostname%%!$hn!" rt.mask >local.rt
 fi
 
+export EX_CFLAGS=""
 export RMR_ASYNC_CONN=0 	# ensure we don't lose first msg as drops waiting for conn look like errors
-cthreads=3					# number of caller threads
 nmsg=100					# total number of messages to be exchanged (-n value changes)
 delay=500					# microsec sleep between msg 1,000,000 == 1s
 wait=1
 rebuild=0
 verbose=0
-nrcvrs=3					# this is sane, but -r allows it to be set up
+nrcvrs=1					# this is sane, but -r allows it to be set up
 use_installed=0
+mtype_start_stop=""
 
 while [[ $1 == -* ]]
 do
 	case $1 in
 		-c)	cthreads=$2; shift;;
 		-B)	rebuild=1;;
-		-d)	delay=$2; shift;;
+		-d)	delay=${2//,/}; shift;;				# delay in micro seconds allow 1,000 to make it easier on user
 		-i)	use_installed=1;;
+		-m)	mtype_start_stop="$2"; shift;;
+		-M)	mt_call="EX_CFLAGS=-DMTC=1";;					# turn on mt-call receiver option
 		-n)	nmsg=$2; shift;;
-		-r)	nrcvrs=$2; shift;;
+		-r) nrcvrs=$2; shift;;
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
-			echo "usage: $0 [-B] [-c caller-threads] [-d micor-sec-delay] [-i] [-n num-msgs] [-r num-receivers]"
+			echo "usage: $0 [-B] [-c caller-threads] [-d micor-sec-delay] [-i] [-M] [-m mtype] [-n num-msgs] [-r num-receivers] [-v]"
 			echo "  -B forces a rebuild which will use .build"
 			echo "  -i will use installed libraries (/usr/local) and cause -B to be ignored if supplied)"
+			echo "  -m mtype  will set the stopping (max) message type; sender will loop through 0 through mtype-1"
+			echo "  -m start:stop  will set the starting and stopping mtypes; start through stop -1"
+			echo "  -M enables mt-call receive processing to test the RMR asynch receive pthread"
+			echo ""
+			echo "The receivers will run until they have not received a message for a few seconds. The"
+			echo "sender will send the requested number of messages, 10 by default."
 			exit 1
 			;;
 	esac
 
 	shift
 done
+
 
 if (( verbose ))
 then
@@ -171,25 +173,30 @@ else
 fi
 
 export LIBRARY_PATH=$LD_LIBRARY_PATH
-export RMR_SEED_RT=./lcall.rt
+export RMR_SEED_RT=./ex_rts.rt
 
-set_rt $nrcvrs						# set up the rt for n receivers
+set_rt $nrcvrs														# set up the rt for n receivers
 
-if (( rebuild )) || [[ ! -f ./lcaller ]]
+if ! make $mt_call -B v_sender ex_rts_receiver >/tmp/PID$$.log 2>&1			# for sanity, always rebuild test binaries
 then
-	if ! make -B lcaller lreceiver >/dev/null 2>&1
-	then
-		echo "[FAIL] cannot find lcaller binary, and cannot make it.... humm?"
-		exit 1
-	fi
+	echo "[FAIL] cannot make binaries"
+	cat /tmp/PID$$.log
+	rm -f /tmp/PID$$*
+	exit 1
 fi
 
-for (( i=0; i < nrcvrs; i++ ))		# start the receivers with an instance number
+echo "<RUN> binaries built"
+
+for (( i=0; i < nrcvrs; i++  ))
 do
 	run_rcvr $i &
 done
 
-sleep 2				# let receivers init so we don't shoot at an empty target
+sleep 2				# let receivers init so we don't shoot at empty targets
+if (( verbose ))
+then
+	netstat -an|grep LISTEN
+fi
 run_sender &
 
 wait
@@ -208,7 +215,7 @@ then
 	echo "[FAIL] sender rc=$src  receiver rc=$rrc"
 else
 	echo "[PASS] sender rc=$src  receiver rc=$rrc"
-	rm -f lcall.rt
+	rm -f ex_rts.rt
 fi
 
 rm /tmp/PID$$.*
