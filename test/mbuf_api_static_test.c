@@ -40,6 +40,7 @@
 #include "rmr.h"
 #include "rmr_agnostic.h"
 
+// ---------------------------------------------------------------------------------------------
 
 int mbuf_api_test( ) {
 	unsigned char* c;
@@ -49,6 +50,8 @@ int mbuf_api_test( ) {
 	char*	buf;
 	void*	ptr;
 	rmr_mbuf_t*	mbuf;
+	rmr_mbuf_t*	mbuf2;
+	rmr_mbuf_t*	mbuf3;
 	uta_mhdr_t*	hdr;
 	unsigned char src_buf[256];
 	unsigned char dest_buf[256];
@@ -68,7 +71,7 @@ int mbuf_api_test( ) {
 	mbuf->header = mbuf->tp_buf;
 	mbuf->alloc_len = 1024;
 	mbuf->payload = PAYLOAD_ADDR( mbuf->header );
-	hdr = (rmr_mbuf_t *) mbuf->header;
+	hdr = (uta_mhdr_t *) mbuf->header;
 	mbuf->xaction = hdr->xid;
 
 
@@ -345,6 +348,7 @@ int mbuf_api_test( ) {
 
 	test_set_ver( mbuf, 2 );							// set older message version to ensure properly handled
 	buf = rmr_get_srcip( mbuf, src_buf );
+
 
 	return errors > 0;			// overall exit code bad if errors
 }
