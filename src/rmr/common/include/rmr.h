@@ -144,6 +144,7 @@ extern unsigned char*  rmr_get_src( rmr_mbuf_t* mbuf, unsigned char* dest );
 extern unsigned char* rmr_get_srcip( rmr_mbuf_t* msg, unsigned char* dest );
 extern unsigned char*  rmr_get_xact( rmr_mbuf_t* mbuf, unsigned char* dest );
 extern rmr_mbuf_t* rmr_realloc_msg( rmr_mbuf_t* mbuf, int new_tr_size );
+extern rmr_mbuf_t* rmr_realloc_payload( rmr_mbuf_t* old_msg, int new_len, int copy, int clone );
 extern int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char const* str );
 extern void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str );
 extern void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str );

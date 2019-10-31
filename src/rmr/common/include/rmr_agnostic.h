@@ -146,7 +146,7 @@ typedef struct uta_ctx  uta_ctx_t;
 */
 typedef struct {
 	int32_t	mtype;						// message type  ("long" network integer)
-	int32_t	plen;						// payload length
+	int32_t	plen;						// payload length (sender data length in payload)
 	int32_t rmr_ver;					// our internal message version number
 	unsigned char xid[RMR_MAX_XID];		// space for user transaction id or somesuch
 	unsigned char sid[RMR_MAX_SID];		// sender ID for return to sender needs

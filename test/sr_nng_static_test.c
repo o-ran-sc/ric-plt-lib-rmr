@@ -40,6 +40,12 @@
 #include "rmr.h"
 #include "rmr_agnostic.h"
 
+// ----------- local test support ----------------------------------------------------------
+#define CLONE 	1			// convenience constants for payload realloc tests
+#define NO_CLONE 0
+#define COPY 1
+#define NO_COPY 0
+
 /*
 	Generate a simple route table (for all but direct route table testing).
 	This gets tricky inasmuch as we generate two in one; first a whole table 
@@ -113,7 +119,7 @@ static int sr_nng_test() {
 	uta_ctx_t*	real_ctx;	// real one to force odd situations for error testing
 	int errors = 0;			// number errors found
 	rmr_mbuf_t*	mbuf;		// mbuf to send/receive
-	rmr_mbuf_t*	mb2;		// error capturing msg buf
+	rmr_mbuf_t*	mb2;		// second mbuf when needed
 	int		whid = -1;
 	int		last_whid;
 	int 	state;
@@ -121,6 +127,7 @@ static int sr_nng_test() {
 	int		size;
 	int		i;
 	void*	p;
+	char*	payload_str;
 
 	//ctx = rmr_init( "tcp:4360", 2048, 0 );				// do NOT call init -- that starts the rtc thread which isn't good here
 	ctx = (uta_ctx_t *) malloc( sizeof( uta_ctx_t ) );		// alloc the context manually
@@ -218,6 +225,114 @@ static int sr_nng_test() {
 	ctx->shutdown = 1;			// should force rtc to quit on first pass
 	rtc( NULL );				// coverage test with nil pointer
 	rtc( ctx );
+
+	setenv( "RMR_RTG_SVC", "4567", 1 );		// drive for edge case coverage to ensure no nil pointer etc
+	rtc( ctx );
+	setenv( "RMR_RTG_SVC", "tcp:4567", 1 );
+	rtc( ctx );
+	setenv( "RMR_RTG_SVC", "tcp:4567:error", 1 );
+	rtc( ctx );
+
+	// ------------- reallocation tests ------------------------------------------------------------
+	// we use mk_populated_msg() to create a message with mid/sid/plen pushed into the transport
+	// header to simulate a message having been sent and received which is what causes this data
+	// to push into the wire packet.
+
+	payload_str = "Stand Up and Cheer; OU78-82";
+
+
+	mbuf = mk_populated_msg( 1024, 0, 99, 100, strlen( payload_str ) );
+	memcpy( mbuf->payload, payload_str, mbuf->len );
+	mb2 = realloc_payload( mbuf, 512, NO_COPY, NO_CLONE );
+	errors += fail_if_nil( mb2, "realloc_payload (no copy) returned a nil pointer when reallocating with smaller size" );
+	errors += fail_if_false( mbuf == mb2, "non-clone realloc payload (no copy) of smaller size did not return the same buffer" );
+
+	mb2 = realloc_payload( NULL, 512, NO_COPY, NO_CLONE );
+	errors += fail_not_nil( mb2, "realloc payload did not return nil pointer when passed nil mbuf" );
+
+	mb2 = realloc_payload( mbuf, 0, NO_COPY, NO_CLONE );
+	errors += fail_not_nil( mb2, "realloc payload did not return nil pointer when passed bad len" );
+
+	fprintf( stderr, "<TEST> no copy/no clone test starts\n" );
+	mb2 = realloc_payload( mbuf, 2048, NO_COPY, NO_CLONE );
+	errors += fail_if_false( mbuf == mb2, "realloc payload (no copy) of larger size did not return the same msg buffer(1)" );
+	errors += fail_not_equal( mb2->mtype, -1, "realloc payload (no copy) did not reset mtype(a) to expected(b) value" );
+	errors += fail_not_equal( mb2->sub_id, -1, "realloc payload (no copy) did not reset sub-id(a) to expected(b) value" );
+	errors += fail_if_nil( mb2, "realloc payload returned (no copy) a nil pointer when increasing payload len" );
+	errors += fail_not_equal( mb2->len, 0, "realloc payload payload len(a) not expected(b):" );
+	errors += fail_not_equal( rmr_payload_size( mb2), 2048, "realloc payload alloc len(a) not expected(b)" );
+
+	fprintf( stderr, "<TEST> copy/no clone test starts\n" );
+	mbuf = mk_populated_msg( 1024, 0, 99, 100, strlen( payload_str ) );
+	memcpy( mbuf->payload, payload_str, mbuf->len );
+	mb2 = realloc_payload( mbuf, 2048, COPY, NO_CLONE );
+	errors += fail_if_false( mbuf == mb2, "non-clone realloc payload (copy) of larger size did not return the same msg buffer(2)" );
+	errors += fail_if_nil( mb2, "realloc payload (copy) returned a nil pointer when increasing payload len)" );
+	errors += fail_not_equal( mb2->mtype, 99, "realloc payload (copy) did not reset mtype(a) to expected(b) value" );
+	errors += fail_not_equal( mb2->sub_id, 100, "realloc payload (copy) did not reset sub-id(a) to expected(b) value" );
+	errors += fail_if_equal( mb2->len, 0, "realloc payload (copy) msg len(a) not expected(b)" );
+	errors += fail_not_equal( rmr_payload_size( mb2), 2048, "realloc payload (copy) alloc len(a) not expected(b)" );
+	errors += fail_not_equal( strncmp( payload_str, mb2->payload, strlen( payload_str )), 0, "realloc payload(copy) didn't copy payload" );
+
+	fprintf( stderr, "<TEST> copy/clone test starts requested buffer smaller than original\n" );
+	mbuf = mk_populated_msg( 1024, 0, 99, 100, strlen( payload_str ) );
+	memcpy( mbuf->payload, payload_str, mbuf->len );
+	mb2 = realloc_payload( mbuf, 512, COPY, CLONE );
+	errors += fail_if_true( mbuf == mb2, "realloc payload (clone+copy) of larger size did not return different message buffers" );
+	errors += fail_if_nil( mb2, "realloc payload (clone+copy) returned a nil pointer when increasing payload len)" );
+	errors += fail_not_equal( mb2->mtype, 99, "realloc payload (clone+copy) did not reset mtype(a) to expected(b) value" );
+	errors += fail_not_equal( mb2->sub_id, 100, "realloc payload (clone+copy) did not reset sub-id(a) to expected(b) value" );
+	errors += fail_not_equal( mb2->len, strlen( payload_str ), "realloc payload (clone+copy) msg len(a) not expected(b)" );
+	errors += fail_not_equal( rmr_payload_size( mb2), 1024, "realloc payload (clone+copy) alloc len(a) not expected(b)" );
+	errors += fail_not_equal( strncmp( payload_str, mb2->payload, strlen( payload_str )), 0, "realloc payload(clone+copy) didn't copy payload" );
+
+	// with a clone, we must verify that original message looks sane too
+	errors += fail_not_equal( mbuf->mtype, 99, "realloc payload (clone+copy) validation of unchanged mbuf->mtype fails" );
+	errors += fail_not_equal( mbuf->sub_id, 100, "realloc payload (clone+copy) validation of unchanged mbuf->subid fails" );
+	errors += fail_not_equal( mbuf->len, strlen( payload_str ), "realloc payload (clone+copy) validation of unchanged payload len fails" );
+	errors += fail_not_equal( rmr_payload_size( mbuf ), 1024, "realloc payload (clone+copy) validation of unchanged alloc length fails" );
+	errors += fail_not_equal( strncmp( payload_str, mbuf->payload, strlen( payload_str )), 0, "realloc payload(clone+copy) validation of unchanged payload fails" );
+
+
+	fprintf( stderr, "<TEST> copy/clone test starts requested buf is larger than original\n" );
+	mbuf = mk_populated_msg( 1024, 0, 99, 100, strlen( payload_str ) );
+	memcpy( mbuf->payload, payload_str, mbuf->len );
+	mb2 = realloc_payload( mbuf, 2048, COPY, CLONE );
+	errors += fail_if_true( mbuf == mb2, "realloc payload(clone+copy/lg) of larger size did not return different message buffers" );
+	errors += fail_if_nil( mb2, "realloc payload (clone+copy/lg) returned a nil pointer when increasing payload len)" );
+	errors += fail_not_equal( mb2->mtype, 99, "realloc payload (clone+copy/lg) did not reset mtype(a) to expected(b) value" );
+	errors += fail_not_equal( mb2->sub_id, 100, "realloc payload (clone+copy/lg) did not reset sub-id(a) to expected(b) value" );
+	errors += fail_not_equal( mb2->len, strlen( payload_str ), "realloc payload (clone+copy/lg) msg len(a) not expected(b)" );
+	errors += fail_not_equal( rmr_payload_size( mb2), 2048, "realloc payload (clone+copy/lg) alloc len(a) not expected(b)" );
+	errors += fail_not_equal( strncmp( payload_str, mb2->payload, strlen( payload_str )), 0, "realloc payload(clone+copy/lg) didn't copy payload" );
+
+	// with a clone, we must verify that original message looks sane too
+	errors += fail_not_equal( mbuf->mtype, 99, "realloc payload (clone+copy/lg) validation of unchanged mbuf->mtype fails" );
+	errors += fail_not_equal( mbuf->sub_id, 100, "realloc payload (clone+copy/lg) validation of unchanged mbuf->subid fails" );
+	errors += fail_not_equal( mbuf->len, strlen( payload_str ), "realloc payload (clone+copy/lg) validation of unchanged payload len fails" );
+	errors += fail_not_equal( rmr_payload_size( mbuf ), 1024, "realloc payload (clone+copy/lg) validation of unchanged alloc length fails" );
+	errors += fail_not_equal( strncmp( payload_str, mbuf->payload, strlen( payload_str )), 0, "realloc payload(clone+copy/lg) validation of unchanged payload fails" );
+
+	// original message should be unharmed, and new message should have no type/sid or payload len; total alloc len should be requested enlargement
+	fprintf( stderr, "<TEST> no copy/clone test starts requested buf is larger than original\n" );
+	mbuf = mk_populated_msg( 1024, 0, 99, 100, strlen( payload_str ) );
+	memcpy( mbuf->payload, payload_str, mbuf->len );
+	mb2 = realloc_payload( mbuf, 2048, NO_COPY, CLONE );
+	errors += fail_if_true( mbuf == mb2, "realloc payload (clone+nocopy) of larger size did not return different message buffers" );
+	errors += fail_if_nil( mb2, "realloc payload (clone+nocopy) returned a nil pointer when increasing payload len)" );
+	errors += fail_not_equal( mb2->mtype, -1, "realloc payload (clone+nocopy) did not reset mtype(a) to expected(b) value" );
+	errors += fail_not_equal( mb2->sub_id, -1, "realloc payload (clone+nocopy) did not reset sub-id(a) to expected(b) value" );
+	errors += fail_not_equal( mb2->len, 0, "realloc payload (clone+nocopy) msg len(a) not expected(b)" );
+	errors += fail_not_equal( rmr_payload_size( mb2 ), 2048, "realloc payload (clone+nocopy) alloc len(a) not expected(b)" );
+	errors += fail_if_equal( strncmp( payload_str, mb2->payload, strlen( payload_str )), 0, "realloc payload(clone+nocopy) copied payload when not supposed to" );
+
+	// with a clone, we must verify that original message looks sane too
+	errors += fail_not_equal( mbuf->mtype, 99, "realloc payload (clone+nocopy) validation of unchanged mbuf->mtype fails" );
+	errors += fail_not_equal( mbuf->sub_id, 100, "realloc payload (clone+nocopy) validation of unchanged mbuf->subid fails" );
+	errors += fail_not_equal( mbuf->len, strlen( payload_str ), "realloc payload (clone+nocopy) validation of unchanged payload len fails" );
+	errors += fail_not_equal( rmr_payload_size( mbuf ), 1024, "realloc payload (clone+nocopy) validation of unchanged alloc length fails" );
+	errors += fail_not_equal( strncmp( payload_str, mbuf->payload, strlen( payload_str )), 0, "realloc payload (clone+nocopy) validation of unchanged payload fails" );
+
 
 	return !!errors;
 }
