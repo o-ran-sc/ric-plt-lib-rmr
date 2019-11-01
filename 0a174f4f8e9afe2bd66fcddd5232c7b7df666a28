@@ -70,6 +70,30 @@
       "revId": "0a174f4f8e9afe2bd66fcddd5232c7b7df666a28",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "957cddb8_eb6b7761",
+        "filename": "src/bindings/rmr-python/docs/Changelog.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2019-11-01T17:22:08Z",
+      "side": 1,
+      "message": "What do you mean, you can\u0027t set a comment?  RST has a reasonable comment syntax -- blankline dot dot space YOUR COMMENT blankline.  What am I missing?",
+      "parentUuid": "a81eb4aa_5e595947",
+      "range": {
+        "startLine": 14,
+        "startChar": 1,
+        "endLine": 14,
+        "endChar": 2
+      },
+      "revId": "0a174f4f8e9afe2bd66fcddd5232c7b7df666a28",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
