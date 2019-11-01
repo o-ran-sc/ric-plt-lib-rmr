@@ -7,6 +7,12 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+[1.0.1] - 10/30/2019
+--------------------
+
+::
+    * The populate and set length function will reallocate the message buffer payload if the caller attempts to insert more bytes than the currrent message supports.
+
 
 [1.0.0] - 10/24/2019
 --------------------
