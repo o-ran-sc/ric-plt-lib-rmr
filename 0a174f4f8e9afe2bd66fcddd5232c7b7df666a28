@@ -22,6 +22,30 @@
       "revId": "0a174f4f8e9afe2bd66fcddd5232c7b7df666a28",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95fde70c_51322d43",
+        "filename": "src/bindings/rmr-python/docs/Changelog.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-11-01T17:13:07Z",
+      "side": 1,
+      "message": "I\u0027ll fix.  This is another HUGE problem with .rst/.md  I can\u0027t set a comment at the top to turn tab expansion on at the file level; and I don\u0027t want it globally on!  Just been one of those kind of weeks I guess.",
+      "parentUuid": "73b5a52e_8cf057e9",
+      "range": {
+        "startLine": 14,
+        "startChar": 1,
+        "endLine": 14,
+        "endChar": 2
+      },
+      "revId": "0a174f4f8e9afe2bd66fcddd5232c7b7df666a28",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
