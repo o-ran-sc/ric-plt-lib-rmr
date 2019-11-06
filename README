@@ -17,88 +17,44 @@
 #==================================================================================
 #
 
+RIC Message Router -- RMR
 
-Source for the RIC Messaging Library -- RMR.
+RMR is a message router library which an application can use to send messages
+to other RMR based applications. The destination of each message is governed
+by the message type and subscription ID, or just the message type.  RMR is
+responsible for establishing and managing each connection freeing the application
+from any network connectivity management.
 
-C does not provide the concept of package names,  yet we have
-a desire not to maintain all of the static code in a single large
-file, we use the following convention:
+This repo contains the source and documentation for both the core RMR library
+and for the Python bindings which allow a Python (v3) application to use RMR
+to send and receive messages.
 
-	<name>.c --		C code which builds separately and generates an object
-					that is ultimately added to the archive.
-
-	<name>_static.c - File containing nothing but static functions (a.k.a package
-					only functions). These files should be included by other *.c
-					files and should not generate object.
-
-	<name>.h		Header file that user applications are expected to include
-					in order to make use of the library
-
-	<name>_inline.h Header files containing inline static functions that the
-					user application is expected to include.
-
-	<name>_private.h Header file meant only to be included by the package.
-
-Further, as this code is used to generate libraries which make use of different
-transport mechanisms, there are some modules which are specific to the
-underlying transport being used.  The original code supported both Nanomsg and
-NNG, however Nanomsg has been phased out (starting with 1.0.45).  File naming
-convention for modules which are transport specific originally included a
-suffix (e.g. _nng), however as the directory structure was reorganised, and
-transport specific directories, plus a common directory, have been created,
-the need for the suffix has been eliminated (existing files were not changed).
+The directories at the root level are as follows, each contains its own readme
+file where additional details are necessary.
 
 
-External Names
-All externally facing function names and constants will start with rmr_ or
-RMR_ respectively (RIC Message Router).    For the time being, there is a
-set of mappings from the old uta_* names to rmr_* names. The user code must
-define UTA_COMPAT to have these enabled.
+ci		This directory contains the continuous integration scripts needed
+		to build and verify RMR when changes are made and committed to the repo.
 
-Internal Names
-Internal (static) functions have no mandated convention. There are some
-names which are prefixed with uta_.  These are left over from the original
-prototype library which had the name Uta.  The uta_ prefixes were mostly on
-functions which were initially external, but were pulled back for this release.
+doc		RMR documentation is written in a document language and thus is
+		source code.  This directory contains the source for all generated
+		documentation.
 
+docs	This is a 'canned' directory which is intended to be scraped. Direct
+		editing of documentation files in this directory is dangerous as
+		most of the files, even though checked into the repo per mandate,
+		are artifacts and will be overlaid if hand edited.
 
+examples This directory contains example programmes which illustrate the use
+		of RMR.
 
-Requirements
-To build the RMR libraries, NNG must be installed, or the external references
-in the source tree must be used to pull and build the NNG library. It might
-be necessary to alter the values of C_INCLUDE_PATH,  LD_LIBRARY_PATH, or
-LIBRARY_PATH to reflect the installation location when the installed version
-of NNG is being used.
+ext		RMR makes use of NNG (next generation Nanomsg). The ext directory is
+		the git reference allowing the NNG code to be pulled and built as
+		a reference.
 
-To install see the instructions on their html sites:
-	https://github.com/nanomsg/nng
+src		This directory is the top level source directory containing both the
+		core RMR code, and any bindings which have been written.
 
-The default CMake build will not require NNG to be installed, and this is the
-easiest way to build.
-
-Unit Testing
-The script ../test/unit_test.ksh should be used for running unit tests. With no
-parameters it will attempt to build any file in this directory which has the
-name *_test.c.  Build is attempted with either mk or make and enables the
-necessary compiler flags to support coverage output (gcov).  Once built, the
-test program is executed and if the return code is success (0), the
-coverage data is interpreted.
-
-The test programs may make use of ../test/tools.c which provide simple
-validation check functions.  These programs should also directly include
-the module(s) under test.  This ensures that they are not linked, and are
-compiled with the proper coverage flags. In addition, it allows modules that
-are not under test to be linked from the archive and (most importantly) not
-reported on from a coverage perspective. In cases where two modules depend on
-each other, and are static functions, they will need to be tested from a single
-unit test program (see the rt_tool test program).
-
-It might be necessary to write a higher level test driver as some of the modules
-(e.g. route table) have threaded daemons which might not be easy to drive
-completely or at all, and thus the code coverage for a passing test might need
-to be lower for this type of module.
-
-Containerized Build
-The Dockerfile defines an environment to build and test this library.  It uses
-a base image with the C toolchain.  The Dockerfile is NOT intended to create a
-distributable image.
+test	All unit and application level tests for the core library are kept
+		within this directory.  Tests for bindings are managed within the
+		binding's directory under the source directory.

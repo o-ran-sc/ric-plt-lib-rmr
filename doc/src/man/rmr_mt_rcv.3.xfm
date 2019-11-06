@@ -194,6 +194,3 @@ rmr_ring_free(3),
 rmr_torcv_msg(3)
 .ju on
 
-
-.qu
-

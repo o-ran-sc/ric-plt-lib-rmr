@@ -1,3 +1,4 @@
+.** vim: ts=4 noet sw=4:
 .if false
 ==================================================================================
 	Copyright (c) 2019 Nokia
@@ -17,41 +18,17 @@
 ==================================================================================
 .fi
 
+
 .if false
-	Mnemonic:	setup.im
-	Abstract:	Look at environment variables and pull in the correct setup prep
-				imbed file based on the desired output type (when running tfm).
-				Obviously, when running pfm we are always generating postscirpt
-				so this isn't really doing much.
-	Date:		29 July 2019
+	Mnemonic:	overview.xfm
+	Abstract:	Source for the overview which is just a reformatting of the main
+				rmr.7 manual page.
+	Date:		6 November 2019
+	Author:		E. Scott Daniels
 .fi
 
+.im setup.im
 
-.if  ! _setup_im 
+&h1(RMR Overview)
 
-.gv e LIB lib
-.if ! lib
-	.dv lib ..
-.fi
-
-.** CAUTION:  xfm comparisons are reverse polish so  "a b ="  is true if a == b.
-.if pfm
-	.im &{lib}/generic_ps.im
-.ei
-	.gv e OUTPUT_TYPE ot
-	.if "&ot" "txt" =
-		.im &{lib}/txt.im
-	.fi
-	.if "&ot" "rst" =
-		.im &{lib}/rst.im
-	.fi
-	.if "&ot" "markdown" =
-		.im &{lib}/markdown.im
-	.fi
-	.if "&ot" "troff" =
-		.im &{lib}/roff.im
-	.fi
-.fi
-
-.dv _setup_im 1
-.fi
+.im &{lib}/man/rmr.7.xfm

@@ -94,7 +94,3 @@ rmr_str2xact(3),
 rmr_wh_open(3),
 rmr_wh_send_msg(3)
 
-
-
-.qu
-

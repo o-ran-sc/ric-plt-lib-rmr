@@ -92,8 +92,3 @@ rmr_ring_free(3),
 rmr_str2meid(3),
 rmr_wh_open(3),
 rmr_wh_send_msg(3)
-
-
-
-.qu
-

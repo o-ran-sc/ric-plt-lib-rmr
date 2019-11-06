@@ -73,34 +73,8 @@ to the library.
 The following is a list of the various environment variables, what they control
 and the defaults which RMr uses if undefined.
 
-&beg_dlist(.75i : ^&bold_font )
-&di(RMR_ASYNC_CONN) Allows the asynch connection mode to be turned off (by setting the
-	value to 0. When set to 1, or missing from the environment, RMR will invoke the
-	connection interface in the transport mechanism using the non-blocking (asynch)
-	mode.  This will likely result in many "soft failures" (retry) until the connection
-	is established, but allows the application to continue unimpeeded should the
-	connection be slow to set up.
-
-&di(RMR_BIND_IF) This provides the interface that RMr will bind listen ports to allowing
-	for a single interface to be used rather than listening across all interfaces.
-	This should be the IP address assigned to the interface that RMr should listen
-	on, and if not defined RMr will listen on all interfaces.
-
-&di(RMR_RTG_SVC) RMr opens a TCP listen socket using the port defined by this
-	environment variable and expects that the route table generator process
-	will connect to this port.
-	If not supplied the port 4561 is used.
-
-&di(RMR_RTG_ISRAW) Is set to 1 if the route table generator is sending "plain" messages
-	(not using RMr to send messages, 0 if the rtg is using RMr to send. The default
-	is 1 as we don't expect the rtg to use RMr.
-
-&di(RMR_SEED_RT) This is used to supply a static route table which can be used for
-	debugging, testing, or if no route table generator process is being used to
-	supply the route table.
-	If not defined, no static table is used and RMr will not report &ital(ready)
-	until a table is received.
-&end_dlist
+.** the list of environment vars supported
+.im &{lib}/man/env_var_list.im
 
 
 &h2(SEE ALSO )
@@ -135,4 +109,3 @@ rmr_wh_send_msg(3)
 .ju on
 
 
-.qu

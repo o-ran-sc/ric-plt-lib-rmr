@@ -97,6 +97,7 @@ error message of a system call is propagated up, and thus this list might be inc
 &ex_end
 
 &h2(SEE ALSO )
+.ju off
 rmr_alloc_msg(3),
 rmr_call(3),
 rmr_free_msg(3),
@@ -114,7 +115,4 @@ rmr_mk_ring(3),
 rmr_ring_free(3),
 rmr_wh_send_msg(3),
 rmr_wh_close(3)
-
-
-.qu
-
+.ju on

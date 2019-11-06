@@ -1,3 +1,4 @@
+.** vim: ts=4 sw=4 noet:
 .if false
 ==================================================================================
 	Copyright (c) 2019 Nokia
@@ -23,12 +24,12 @@
 				imbed file based on the desired output type (when running tfm).
 				Obviously, when running pfm we are always generating postscirpt
 				so this isn't really doing much.
-	Date:		29 July 2019
+	Date:		6 November 2019
 .fi
 
+.if  ! _setup_im
 
-.if  ! _setup_im 
-
+.** if LIB is in the environment we expect it to point at our parent
 .gv e LIB lib
 .if ! lib
 	.dv lib ..
@@ -36,6 +37,7 @@
 
 .** CAUTION:  xfm comparisons are reverse polish so  "a b ="  is true if a == b.
 .if pfm
+	.dv ot postscript
 	.im &{lib}/generic_ps.im
 .ei
 	.gv e OUTPUT_TYPE ot
@@ -52,6 +54,13 @@
 		.im &{lib}/roff.im
 	.fi
 .fi
+
+.** if we can set a license into the output, do it early
+.cd 1 11i
+&line_len(10i)
+.im license.im
+.cd 1 6.5i m=0 i=0
+&line_len( 6i)
 
 .dv _setup_im 1
 .fi

@@ -110,7 +110,3 @@ rmr_send_msg(3),
 rmr_torcv_rcv(3),
 rmr_wh_send_msg(3)
 .ju on
-
-
-.qu
-
