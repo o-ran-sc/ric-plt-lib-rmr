@@ -191,6 +191,3 @@ rmr_wh_open(3),
 rmr_wh_close(3)
 .ju on
 
-
-.qu
-

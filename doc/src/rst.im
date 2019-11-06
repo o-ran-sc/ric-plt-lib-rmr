@@ -41,7 +41,7 @@
 	.** and of course they don't generate <hx> tags in the resulting HTML, but <section> tags. WTF?
 	.dv h1 .sp 1 $1 .br ============================================================================================ .sp 1
 	.dv h2 .sp 1 $1 .br -------------------------------------------------------------------------------------------- .sp 1
-	.dv h3 .sp 1 $1 .br ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ .sp 1
+	.dv h3 .sp 1 $1 .br ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ .sp 1
 	.dv h4 **$1**
 	.** .dv h1 === $1 .br ===  .sp 1
 	.** .dv h2 === $1 .br === .sp 1
@@ -69,12 +69,13 @@
 	.dv beg_list .sp 1 .dv lic $1 ^:
 	.dv end_list .sp 1
 
-	.dv beg_dlist .sp 1 
-	.dv end_dlist .br .in 0i
+	.dv beg_dlist .sp 1  .ll -3
+	.dv end_dlist .br .in 0i .ll +3
 
 	.** for now we allow only a single layer of defitems
-	.dv di .in 0i .br  $1 .br .in +.25i
-	.dv diitem .in 0i .br  $1 .br .in +.25i
+	.dv di     .in 0i .br  $1 .br .in +3
+	.** .dv diitem .in 0i .br  $1 .br .in +.25i
+	.dv diitem .in 0i .br  $1 .br .in +3
 	.dv item .br &lic
 	.dv li .br &lic
 	

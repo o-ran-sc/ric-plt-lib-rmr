@@ -83,7 +83,3 @@ rmr_wh_open(3),
 rmr_wh_send_msg(3),
 rmr_set_trace(3)
 .ju on
-
-
-.qu
-

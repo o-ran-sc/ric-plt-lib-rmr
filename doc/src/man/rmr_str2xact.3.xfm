@@ -1,4 +1,3 @@
-
 .if false
 ==================================================================================
 	Copyright (c) 2019 Nokia 
@@ -72,6 +71,7 @@ If the return value is not RMR_OK, then it will be set to one of the values belo
 
 
 &h2(SEE ALSO )
+.ju off
 rmr_alloc_msg(3),
 rmr_bytes2meid(3),
 rmr_bytes2xact(3),
@@ -94,5 +94,5 @@ rmr_ring_free(3),
 rmr_str2meid(3),
 rmr_wh_open(3),
 rmr_wh_send_msg(3)
-.qu
+.ju on
 

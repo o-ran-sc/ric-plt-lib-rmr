@@ -1,0 +1,31 @@
+This directory contains project documentation, most of which is
+generated from document source in the doc directory (proj_doc 
+would be a better name for this directory).
+
+Because this directory is "scraped" by some other process(es)
+which seem to be python based, and are completely unrelated to
+this repo, there are some files in this directory which are
+necessary, misterious, and somewhat fragile:
+
+	_static
+	conf.py
+	conf.yaml
+	requirements-docs.txt
+	index.rst
+	favicon.ico		// checking in jpg/png is just as bad as checking a jar
+
+It is also very possible that introducing a change in the files
+listed above will cause the vetting jobs which run on checkin,
+and/or merge, to fail.
+
+The documentation that we place here which is generated (read
+don't modify it in place here as it won't be merged):
+	config-deploy.rst  
+	developer-guide.rst  
+	rel-notes.rst  
+	user-guide.rst
+
+Look for the source, along with instructions on how to compile
+the doc in rmr/doc/src/rtd.  Some of the source for these docs
+is pulled directly from the manual pages in rmr/doc/src/man.
+

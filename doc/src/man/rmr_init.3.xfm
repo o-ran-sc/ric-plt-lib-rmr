@@ -62,16 +62,16 @@ following flags are supported:
 
 &half_space
 &beg_dlist(1i : &bold_font )
-&ditem(RMRFL_NONE) 
+&diitem(RMRFL_NONE) 
 	No flags are set.
 
 &half_space
-&ditem(RMRFL_NOTHREAD)
+&diitem(RMRFL_NOTHREAD)
 	The route table collector thread is not to be started. This should only be used
 	by the route table generator application if it is based on RMr.
 
 &half_space
-&ditem(RMRFL_MTCALL)
+&diitem(RMRFL_MTCALL)
 	Enable multi-threaded call support. 
 &end_dlist
 
@@ -103,7 +103,7 @@ The following variables will be used when found.
 &half_space 
 
 &beg_dlist(1i : &bold_font )
-&ditem(RMR_SEED_RT) 
+&diitem(RMR_SEED_RT) 
 Assumes this is the filename of the seed route table file to use. In normal situations,
 the library will wait for an update from the route table generator (expected within a few seconds
 of initialisation) before being able to send messages.
@@ -111,7 +111,7 @@ However, in some situations where a bootstrap table is necessary, this is the me
 supply it to the library.
 &half_space
 
-&ditem(RMR_RTG_SVC) 
+&diitem(RMR_RTG_SVC) 
 The route table generator assumes that RMr is listening on a well known port (4561) by 
 default, but this environment variable can be used to change the listening port if 
 needed. 
@@ -142,6 +142,7 @@ error message of a system call is propagated up, and thus this list might be inc
 &ex_end
 
 &h2(SEE ALSO )
+.ju off
 rmr_alloc_msg(3),
 rmr_call(3),
 rmr_free_msg(3),
@@ -159,7 +160,5 @@ rmr_has_str(3),
 rmr_tokenise(3),
 rmr_mk_ring(3),
 rmr_ring_free(3)
-
-
-.qu
+.ju on
 

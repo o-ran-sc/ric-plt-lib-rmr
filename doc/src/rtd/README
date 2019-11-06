@@ -1,0 +1,17 @@
+
+This directory contains source for the project mandated "read the docs"
+.rst documentation.  The Makefile will both build the doc from the source
+here and "install" it into the docs directory at the repo root.  While 
+it is not good practice, the generated .rst files must be checked into
+the repo and committed with changes to the source.  
+
+The command 'make all' should be all that is needed to build the 
+rtd documentation.
+
+Rationale
+Documentation is just code, and by maintaining the documentation as
+source is is possible to generate various forms of output with a 
+single make.  While it is possible to convert X to Y, a true document
+composition language is far better at geneating readable Postscript
+output with embedded figures as well as text and tables. 
+

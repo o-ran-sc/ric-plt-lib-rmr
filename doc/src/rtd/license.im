@@ -1,0 +1,58 @@
+.** vim: ts=4 noet sw=4:
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+
+
+.if false
+	These things are forced into some output to cary the license forward since 
+	someone believes the documentation generated is 'source'. We know better.
+	Also, we want to prevent anybody from acutally changing stuff in docs/ 
+	only to be overlaid by a regen.  Committing output is stupid.
+.fi
+
+.dv lic_comment_1 This work is licensed under a Creative Commons Attribution 4.0 International License.
+.dv lic_comment_2 SPDX-License-Identifier: CC-BY-4.0
+.dv caution_1 CAUTION: this document is generated from source in doc/src/rtd. 
+.dv caution_2 To make changes edit the source and recompile the document.
+.dv caution_3 Do NOT make changes directly to .rst or ^.md files.
+
+.if &ot "postscript" =
+	.** this is native postscript, so as is
+	.ai
+	% &lic_comment_1
+	% &lic_comment_2
+	.fo
+	.** no caution because nobody will change the postscript
+.ei
+	.if "&ot" "rst" = 
+		^.. &lic_comment_1
+		.br
+		^.. &lic_comment_2
+		.br
+		^.. &caution_1
+		.br
+		^.. &caution_2
+		.br
+		^.. &caution_3
+	.fi
+.fi
+
+.sp 1
+
