@@ -69,6 +69,7 @@ A value of 1 is returned on success, and 0 on failure.  A failure indicates that
 RMr context (void *) passed to this function was not valid.
 
 &h2(SEE ALSO )
+.ju off
 rmr_alloc_msg(3),
 rmr_tr_alloc_msg(3),
 rmr_call(3),
@@ -88,7 +89,5 @@ rmr_tokenise(3),
 rmr_mk_ring(3),
 rmr_ring_free(3),
 rmr_set_trace(3)
-
-
-.qu
+.ju on
 

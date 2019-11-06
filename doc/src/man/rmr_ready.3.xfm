@@ -70,6 +70,3 @@ rmr_mk_ring(3),
 rmr_ring_free(3)
 .ju on
 
-
-.qu
-

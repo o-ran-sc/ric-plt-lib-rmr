@@ -1,8 +1,8 @@
 
-Documentation for RMr.
+Documentation for RMR.
 
-Most (all?) documentation for RMr is built from source ({X)fm, or other text
-formatter source, not the RMr code) rather than hand editing the output 
+Most (all?) documentation for RMR is built from source ({X)fm, or other text
+formatter source, not the RMR code) rather than hand editing the output 
 (markdown/rst) files.  This allows for more control over the output, a wider 
 variety of output types, and (most importantly) the generation of multiple 
 output from the same source (e.g. man pages can be rendered in troff which 
@@ -10,8 +10,9 @@ the man command required, and also rendered as .rst or .md files which some
 wikis prefer, and as PDF which can be easily distributed).
 
 Thus, there is a source file below this directory which has the document
-source.  There may also be an output directory at this level. If necessary, 
-the output directory will contain generated documents (.rst files?) which for
-some odd reason need to also be committed to the repo (I don't commit binaries
-so I'm having a difficult time sorting out the reason why these generated files
-might be committed).
+source.  Directories are as follows:
+
+	man		Manual pages included with the development package
+
+	rtd		Source to generate the .rst files for the "read the docs"
+			repo scraper.

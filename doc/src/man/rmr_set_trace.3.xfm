@@ -57,6 +57,7 @@ If 0 is returned either the message pointer was nil, or the size in the paramete
 
 
 &h2(SEE ALSO )
+.ju off
 rmr_alloc_msg(3),
 rmr_tralloc_msg(3),
 rmr_bytes2xact(3),
@@ -84,8 +85,4 @@ rmr_str2meid(3),
 rmr_str2xact(3),
 rmr_wh_open(3),
 rmr_wh_send_msg(3)
-
-
-
-.qu
-
+.ju on

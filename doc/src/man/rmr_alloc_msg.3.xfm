@@ -70,7 +70,7 @@ typedef struct {
 
 &space
 &beg_dlist(.75i : ^&bold_font )
-&ditem(state)  Is the current buffer state.  Following a call to &cw(rmr_send_msg)
+&diitem(state)  Is the current buffer state.  Following a call to &cw(rmr_send_msg)
 the state indicates whether the buffer was successfully sent which determines
 exactly what the payload points to.  If the send failed, the payload referenced
 by the buffer is the message that failed to send (allowing the application to
@@ -79,14 +79,14 @@ When the state is &cw(RMR_OK) the buffer represents an empty buffer that the app
 may fill in in preparation to send.
 
 &half_space
-&ditem(mtype)  When sending a message, the application is expected to set this field
+&diitem(mtype)  When sending a message, the application is expected to set this field
 to the appropriate message type value (as determined by the user programme). Upon send
 this value determines how the RMR library will route the message.
 For a buffer which has been received, this field will contain the message type that was
 set by the sending application.
 
 &half_space
-&ditem(len) The application using a buffer to send a message is expected to set the
+&diitem(len) The application using a buffer to send a message is expected to set the
 length value to the actual number of bytes that it placed into the message. This
 is likely less than the total number of bytes that the message can carry.
 For a message buffer that is passed to the application as the result of a receive
@@ -94,7 +94,7 @@ call, this will be the value that the sending application supplied and should
 indicate the number of bytes in the payload which are valid.
 
 &half_space
-&ditem(payload) The payload is a pointer to the actual received data.  The
+&diitem(payload) The payload is a pointer to the actual received data.  The
 user programme may read and write from/to the memory referenced by the payload
 up until the point in time that the buffer is used on a &cw(rmr_send, rmr_call)
 or &cw(rmr_reply) function call.
@@ -103,7 +103,7 @@ should &bold(NOT) make use of the payload pointer.
 
 
 &half_space
-&ditem(xaction) The &ital(xaction) field is a pointer to a fixed sized area in
+&diitem(xaction) The &ital(xaction) field is a pointer to a fixed sized area in
 the message into which the user may write a transaction ID.
 The ID is optional with the exception of when the user application uses the &cw(rmr_call)
 function to send a message and wait for the reply; the underlying RMR processing
@@ -112,7 +112,7 @@ expects that the matching reply message will also contain the same data in the
 &end_dlist
 
 &half_space
-&ditem(sub_id)
+&diitem(sub_id)
 This value is the subscription ID. It, in combination with the message type is used
 by rmr to determine the target endpoint when sending a message.
 If the application to application protocol does not warrant the use of a subscription
@@ -121,7 +121,7 @@ When an application is forwarding or returning a buffer to the sender, it is the
 application's responsibility to set/reset this value.
 
 &half_space
-&ditem(tp_state)
+&diitem(tp_state)
 For C applications making use of RMR, the state of a transport based failure will
 often be available via &cw(errno.)
 However, some wrapper environments may not have direct access to the C-lib &cw(errno)
@@ -131,6 +131,7 @@ field which should make it available to wrapper functions.
 User applications are strongly cautioned against relying on the value of errno as
 some transport mechanisms may not set this value on all calls.
 This value should also be ignored any time the message status is &cw(RMR_OK.)
+&end_dlist
 
 &h2(RETURN VALUE)
 The function returns a pointer to a &cw(rmr_mbuf) structure, or NULL on error.
@@ -162,6 +163,4 @@ rmr_tokenise(3),
 rmr_mk_ring(3),
 rmr_ring_free(3),
 rmr_set_trace(3)
-
-.qu
 

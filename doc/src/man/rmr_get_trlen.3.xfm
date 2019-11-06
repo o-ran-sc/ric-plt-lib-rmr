@@ -57,6 +57,7 @@ The number of bytes allocated for trace information in the given message.
 
 
 &h2(SEE ALSO )
+.ju off
 rmr_alloc_msg(3),
 rmr_call(3),
 rmr_free_msg(3),
@@ -75,7 +76,5 @@ rmr_mk_ring(3),
 rmr_ring_free(3),
 rmr_set_trace(3),
 rmr_tralloc_msg(3)
-
-
-.qu
+.ju on
 

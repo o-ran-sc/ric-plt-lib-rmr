@@ -1,0 +1,51 @@
+.** vim: ts=4 noet sw=4:
+.if false
+==================================================================================
+	Copyright (c) 2019 Nokia
+	Copyright (c) 2018-2019 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+
+.if false
+	Mnemonic:	config-deploy.xfm
+	Abstract:	Source to generate a configuration delployment guide.
+	Date:		6 November 2019
+	Author:		E. Scott Daniels
+.fi
+
+.im setup.im
+
+&h1(RMR Configuration and Delpoyment)
+
+The RIC Message Router (RMR) is a library which applications use to send and receive
+messages where the message routing, endpoint selection, is based on the message type 
+rather than on traditional DNS names or IP addresses. 
+This document contains information regarding the configuration of RMR when it is
+embedded by a &ital(user application).  
+RMR itself is not a deployable entity.
+
+&h2(Configuration)
+Several aspects of RMR behaviour is controlled via environment variables which are 
+set at the time that a user application invokes the RMR initialisation function.
+This allows these variables to be set before the application is started as a 
+function of the true environment, or set by the application as a means for the 
+application to influence RMR's behaviour. 
+The following is a list of RMR variables which RMR recognises (see the main
+RMR manual page in the development package for more details).
+
+
+.** use the same list which is used in the manual pages
+.im &{lib}/man/env_var_list.im

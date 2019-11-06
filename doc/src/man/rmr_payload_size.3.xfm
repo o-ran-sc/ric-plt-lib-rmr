@@ -58,6 +58,7 @@ The number of bytes available in the payload.
 
 
 &h2(SEE ALSO )
+.ju off
 rmr_alloc_msg(3),
 rmr_call(3),
 rmr_free_msg(3),
@@ -72,7 +73,4 @@ rmr_has_str(3),
 rmr_tokenise(3),
 rmr_mk_ring(3),
 rmr_ring_free(3)
-
-
-.qu
-
+.ju on
