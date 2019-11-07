@@ -24,7 +24,7 @@ core library should have an excellent working knowledge of C.
 There currently is one set of cross languages bindings 
 supporting Python, and a developer wishing to contribute to 
 the bindings source should be familiar with Python (version 
-3.7+) and with the Ptyhhon *ctypes* library. 
+3.7+) and with the Python *ctypes* library. 
  
 Code Structure 
 -------------------------------------------------------------------------------------------- 
@@ -32,7 +32,7 @@ Code Structure
 RMR is designed to provide an insulation layer between user 
 applications and the actual transport mechanism. Initially 
 RMR was built on top of Nanosmg, and shortly after was ported 
-to NNG (Nanomsg Next Generation). Becuase RMR presents the 
+to NNG (Nanomsg Next Generation). Because RMR presents the 
 same API to the user application regardless of the underlying 
 transport library, the resulting output when compiling RMR is 
 a transport specific library. As an example, librmr_nng.a is 
@@ -51,8 +51,8 @@ common
 nano 
    
   Source which is tightly coupled with the underlying 
-  Nanomsg library. (Nanomsg has been dreprecated, but the 
-  RMR source remains as an example.) 
+  Nanomsg library. (Nanomsg has been deprecated, but the RMR 
+  source remains as an example.) 
  
 nng 
    
@@ -65,16 +65,16 @@ Internal Function Exposure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The decision to limit as much as practical the exposure of 
-truely interal RMR functions was made, and as a result most 
+truely internal RMR functions was made, and as a result most 
 of the RMR functions carry a static label. In order to 
-modularlise the code as much as possible, this means that the 
-primary module (e.g. rmr_nng.c) will driectly include other 
-RMR modules, rather than depending on referencing the interal 
-functions during linking. While this is an infrequenly used 
-approach, it does mean that there are very few functions 
-visible for the user application to reference, all of them 
-having the prefix rmr_, while allowing internal functions to 
-have shorter names while still being meaningful. 
+modularise the code as much as possible, this means that the 
+primary module (e.g. rmr_nng.c) will directly include other 
+RMR modules, rather than depending on referencing the 
+internal functions during linking. While this is an 
+infrequently used approach, it does mean that there are very 
+few functions visible for the user application to reference, 
+all of them having the prefix rmr\_, while allowing internal 
+functions to have shorter names while still being meaningful. 
  
 Coding Style 
 -------------------------------------------------------------------------------------------- 
@@ -83,7 +83,7 @@ There is a list of coding style guidelines in the top level
 directory, and as such they are not expanded upon here. The 
 general practice is to follow the style when editing an 
 existing module, respect the author's choice where style 
-alternatves are not frowned upon. When creating new modules, 
+alternatives are not frowned upon. When creating new modules, 
 select a style that fits the guidelines and is easy for you 
 to work with. There are a few things that are insisted on by 
 the maintainers of RMR, but for the most part style is up to 

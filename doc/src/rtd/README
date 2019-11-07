@@ -15,3 +15,11 @@ single make.  While it is possible to convert X to Y, a true document
 composition language is far better at geneating readable Postscript
 output with embedded figures as well as text and tables. 
 
+CAUTION:
+The RST syntax is as bad as python when it comes to dealing with
+spaces.  For example &bold( foo ) will insert spaces after the initial
+bold trigger, and before the trailing bold trigger which will throw
+the tox validation into a tizzy.  Further,  something like 'void *' 
+and 'rmr_ '  does as well.  If needed, use the defined escape macro
+to add an escape in such situations; it should only generate for RST
+and not impact other output formats.

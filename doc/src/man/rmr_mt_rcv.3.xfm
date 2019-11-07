@@ -114,7 +114,7 @@ indicate either &cw(RMR_OK) or
 
 &half_space
 &di(RMR_ERR_NOTSUPP) The multi-threaded option was not enabled when RMr was 
-initialised.  See the man page for &ital(rmr_init() ) for details.
+initialised.  See the man page for &ital(rmr_init()) for details.
 
 &half_space
 &di(RMR_ERR_RCVFAILED) A hard error occurred preventing the receive from completing.

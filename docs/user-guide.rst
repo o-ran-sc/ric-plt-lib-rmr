@@ -14,9 +14,9 @@ use to send and receive messages where the message routing,
 endpoint selection, is based on the message type rather than 
 on traditional DNS names or IP addresses. Because the user 
 documentation for RMR is a collection of UNIX manpages 
-(included in the development package, and avalable via the 
+(included in the development package, and available via the 
 man command when installed), there is no separate "User's 
-Guide." To prvide something for the document scrapers to 
+Guide." To provide something for the document scrapers to 
 find, this is a collection of the RMR manual pages formatted 
 directly from their source which might be a bit ragged when 
 combined into a single markup document. Read the manual pages 
@@ -275,11 +275,11 @@ DESCRIPTION
  
 This is a convenience function as some wrapper languages 
 might not have the ability to directly copy into the payload 
-buffer. The bytes from * src * for the length given are 
-copied to the payload. It is the caller's responsibility to 
-ensure that the payload is large enough. Upon successfully 
-copy, the len field in the message buffer is updated to 
-reflect the number of bytes copied. 
+buffer. The bytes from *src* for the length given are copied 
+to the payload. It is the caller's responsibility to ensure 
+that the payload is large enough. Upon successfully copy, the 
+len field in the message buffer is updated to reflect the 
+number of bytes copied. 
  
 There is little error checking, and no error reporting. 
  
@@ -691,18 +691,18 @@ DESCRIPTION
  
 The rmr_get_meid function will copy the managed equipment ID 
 (meid) field from the message into the *dest* buffer provided 
-by the user. The buffer referenced by * dest * is assumed to 
-be at least RMR_MAX_MEID bytes in length. If * dest * is 
-NULL, then a buffer is allocated (the calling application is 
+by the user. The buffer referenced by *dest* is assumed to be 
+at least RMR_MAX_MEID bytes in length. If *dest* is NULL, 
+then a buffer is allocated (the calling application is 
 expected to free when the buffer is no longer needed). 
  
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
  
 On success, a pointer to the extracted string is returned. If 
-* dest * was supplied, then this is just a pointer to the 
-caller's buffer. If * dest * was NULL, this is a pointer to 
-the allocated buffer. If an error occurs, a nil pointer is 
+*dest* was supplied, then this is just a pointer to the 
+caller's buffer. If *dest* was NULL, this is a pointer to the 
+allocated buffer. If an error occurs, a nil pointer is 
 returned and errno is set as described below. 
  
 ERRORS 
@@ -722,7 +722,7 @@ EINVAL
  
 ENOMEM 
    
-  A nil pointer was passed for * dest, * however it was not 
+  A nil pointer was passed for *dest,* however it was not 
   possible to allocate a buffer using malloc(). 
  
  
@@ -1107,18 +1107,18 @@ DESCRIPTION
  
 The rmr_get_xact function will copy the transaction field 
 from the message into the *dest* buffer provided by the user. 
-The buffer referenced by * dest * is assumed to be at least 
-RMR_MAX_XID bytes in length. If * dest * is NULL, then a 
-buffer is allocated (the calling application is expected to 
-free when the buffer is no longer needed). 
+The buffer referenced by *dest* is assumed to be at least 
+RMR_MAX_XID bytes in length. If *dest* is NULL, then a buffer 
+is allocated (the calling application is expected to free 
+when the buffer is no longer needed). 
  
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
  
 On success, a pointer to the extracted string is returned. If 
-* dest * was supplied, then this is just a pointer to the 
-caller's buffer. If * dest * was NULL, this is a pointer to 
-the allocated buffer. If an error occurs, a nil pointer is 
+*dest* was supplied, then this is just a pointer to the 
+caller's buffer. If *dest* was NULL, this is a pointer to the 
+allocated buffer. If an error occurs, a nil pointer is 
 returned and errno is set as described below. 
  
 ERRORS 
@@ -1138,7 +1138,7 @@ EINVAL
  
 ENOMEM 
    
-  A nil pointer was passed for * dest, * however it was not 
+  A nil pointer was passed for *dest,* however it was not 
   possible to allocate a buffer using malloc(). 
  
  
@@ -1186,7 +1186,7 @@ allocated, possibly, prior to the application knowing the
 actual size of a specific message. 
  
 *Flags* allows for selection of some RMr options at the time 
-of initialisation. These are set by ORing RMRFL_ constants 
+of initialisation. These are set by ORing RMRFL constants 
 from the RMr header file. Currently the following flags are 
 supported: 
  
@@ -1220,8 +1220,8 @@ based and not time unit based. Multi-threaded call support
 adds the ability for a user application with multiple threads 
 to invoke a blocking call function with the guarentee that 
 the correct response message is delivered to the thread. The 
-additional support is implemented with the * rmr_mt_call() * 
-and * rmr_mt_rcv() * function calls. 
+additional support is implemented with the *rmr_mt_call()* 
+and *rmr_mt_rcv()* function calls. 
  
 Multi-threaded call support requires the user application to 
 specifically enable it when RMr is initialised. This is 
@@ -1351,8 +1351,8 @@ RETURN VALUE
 -------------------------------------------------------------------------------------------- 
  
 A value of 1 is returned on success, and 0 on failure. A 
-failure indicates that the RMr context (void *) passed to 
-this function was not valid. 
+failure indicates that the RMr context (a void pointer passed 
+to this function was not valid. 
  
 SEE ALSO 
 -------------------------------------------------------------------------------------------- 
@@ -1390,23 +1390,23 @@ message before returning control to the user application. The
 user application supplies a completed message buffer, as it 
 would for a rmr_send_msg call, but unlike with a send, the 
 buffer returned will have the response from the application 
-that received the message. The thread invoking the * 
-rmr_mt_call()* will block until a message arrives or until 
+that received the message. The thread invoking the 
+*rmr_mt_call()* will block until a message arrives or until 
 *timeout* milliseconds has passed; which ever comes first. 
 Using a timeout value of zero (0) will cause the thread to 
 block without a timeout. 
  
-The * id * supplied as the third parameter is an integer in 
-the range of 2 through 255 inclusive. This is a caller 
-defined "thread number" and is used to match the response 
-message with the correct user application thread. If the ID 
-value is not in the proper range, the attempt to make the 
-call will fail. 
+The *id* supplied as the third parameter is an integer in the 
+range of 2 through 255 inclusive. This is a caller defined 
+"thread number" and is used to match the response message 
+with the correct user application thread. If the ID value is 
+not in the proper range, the attempt to make the call will 
+fail. 
  
 Messages which are received while waiting for the response 
 are queued on a *normal* receive queue and will be delivered 
-to the user application with the next invocation of * 
-rmr_mt_rcv() * or * rmr_rvv_msg().* by RMR, and are returned 
+to the user application with the next invocation of 
+*rmr_mt_rcv()* or *rmr_rvv_msg().* by RMR, and are returned 
 to the user application when rmr_rcv_msg is invoked. These 
 messages are returned in th order received, one per call to 
 rmr_rcv_msg. 
@@ -1428,7 +1428,7 @@ that they are set correctly to avoid missing the response
 message. (The application which returns the response message 
 is also expected to ensure that the return buffer has the 
 matching transaction ID. This can be done transparently if 
-the application uses the * rmr_rts_msg() * function and does 
+the application uses the *rmr_rts_msg()* function and does 
 not adjust the transaction ID. 
  
 Retries 
@@ -1722,7 +1722,7 @@ RMR_ERR_EMPTY
 RMR_ERR_NOTSUPP 
    
   The multi-threaded option was not enabled when RMr was 
-  initialised. See the man page for *rmr_init() * for 
+  initialised. See the man page for *rmr_init()* for 
   details. 
    
  
@@ -2467,8 +2467,8 @@ state and should be RMR_OK.
  
 When the message cannot be successfully sent this function 
 will return the unsent (original) message buffer with the 
-state set to indicate the reason for failure. The value of * 
-errno * may also be set to reflect a more detailed failure 
+state set to indicate the reason for failure. The value of 
+*errno* may also be set to reflect a more detailed failure 
 reason if it is known. 
  
 In the event of extreme failure, a NULL pointer is returned. 
@@ -2651,44 +2651,44 @@ DESCRIPTION
  
 The rmr_set_stimeout function sets the configuration for how 
 RMr will retry message send operations which complete with 
-either a * timeout * or * again * completion value. (Send 
+either a *timeout* or *again* completion value. (Send 
 operations include all of the possible message send 
-functions: * rmr_send_msg(), rmr_call(), rmr_rts_msg() * and 
-* rmr_wh_send_msg(). * The * rloops * parameter sets the 
-maximum number of retry loops that will be attempted before 
-giving up and returning the unsuccessful state to the user 
-application. Each retry loop is approximately 1000 attempts, 
-and RMr does ** not ** invoke any sleep function between 
-retries in the loop; a small, 1 mu-sec, sleep is executed 
-between loop sets if the * rloops * value is greater than 1. 
+functions: *rmr_send_msg(), rmr_call(), rmr_rts_msg()* and 
+*rmr_wh_send_msg().* The *rloops* parameter sets the maximum 
+number of retry loops that will be attempted before giving up 
+and returning the unsuccessful state to the user application. 
+Each retry loop is approximately 1000 attempts, and RMr does 
+**not** invoke any sleep function between retries in the 
+loop; a small, 1 mu-sec, sleep is executed between loop sets 
+if the *rloops* value is greater than 1. 
  
  
 Disabling Retries 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
-By default, the send operations will execute with an * rloop 
-* setting of 1; each send operation will attempt to resend 
-the message approximately 1000 times before giving up. If the 
+By default, the send operations will execute with an *rloop* 
+setting of 1; each send operation will attempt to resend the 
+message approximately 1000 times before giving up. If the 
 user application does not want to have send operations retry 
-when the underlying transport mechanism indicates * timeout * 
-or * again, * the application should invoke this function and 
-pass a value of 0 (zero) for * rloops. * With this setting, 
-all RMr send operations will attempt a send operation only ** 
-once, ** returning immediately to the caller with the state 
+when the underlying transport mechanism indicates *timeout* 
+or *again,* the application should invoke this function and 
+pass a value of 0 (zero) for *rloops.* With this setting, all 
+RMr send operations will attempt a send operation only 
+**once,** returning immediately to the caller with the state 
 of that single attempt. 
  
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
  
-This function returns a -1 to indicate that the * rloops * 
-value could not be set, and the value * RMR_OK * to indicate 
+This function returns a -1 to indicate that the *rloops* 
+value could not be set, and the value *RMR_OK* to indicate 
 success. 
  
 ERRORS 
 -------------------------------------------------------------------------------------------- 
  
-Currently errno is ** not ** set by this function; the only 
-cause of a failure is an invalid context (* vctx *) pointer. 
+Currently errno is **not** set by this function; the only 
+cause of a failure is an invalid context (*vctx*) pointer. 
  
 EXAMPLE 
 -------------------------------------------------------------------------------------------- 

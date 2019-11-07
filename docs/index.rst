@@ -3,6 +3,8 @@
 
 
 .. who in bloody hell knows what format this should be; guessing!
+.. it does seem though that every .rst file in the directory must be listed here
+.. or tox will complain and fail.
 
 
 RIC Message Router -- RMR
@@ -15,6 +17,7 @@ RIC Message Router -- RMR
 
    overview.rst
    config-deploy.rst
+   user-guide.rst
    developer-guide.rst
    rel-notes.rst
 

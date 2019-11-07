@@ -44,35 +44,35 @@ rmr_mbuf_t* rmr_set_stimeout( void* vctx, int rloops );
 
 &h2(DESCRIPTION)
 The &cw(rmr_set_stimeout) function sets the configuration for how RMr will retry
-message send operations which complete with either a &ital( timeout )  or &ital( again )
+message send operations which complete with either a &ital(timeout)  or &ital(again)
 completion value.  (Send operations include all of the possible message send
-functions: &ital( rmr_send_msg(), rmr_call(), rmr_rts_msg() ) and &ital( rmr_wh_send_msg(). )
-The &ital( rloops ) parameter sets the maximum number of retry loops
+functions: &ital(rmr_send_msg(), rmr_call(), rmr_rts_msg()) and &ital(rmr_wh_send_msg().)
+The &ital(rloops) parameter sets the maximum number of retry loops
 that will be attempted before giving up and returning the unsuccessful state to the user
 application.
-Each retry loop is approximately 1000 attempts, and RMr does &bold( not ) invoke any sleep
+Each retry loop is approximately 1000 attempts, and RMr does &bold(not) invoke any sleep
 function between retries in the loop; a small, 1 mu-sec, sleep is executed between loop
-sets if the &ital( rloops ) value is greater than 1.
+sets if the &ital(rloops) value is greater than 1.
 
 .sp
 &h3(Disabling Retries)
-By default, the send operations will execute with an &ital( rloop ) setting of 1; each send
+By default, the send operations will execute with an &ital(rloop) setting of 1; each send
 operation will attempt to resend the message approximately 1000 times before giving up.
 If the user application does not want to have send operations retry when the underlying
-transport mechanism indicates &ital( timeout ) or &ital( again, ) the application should
-invoke this function and pass a value of 0 (zero) for &ital( rloops. )
-With this setting, all RMr send operations will attempt a send operation only &bold( once, )
+transport mechanism indicates &ital(timeout) or &ital(again,) the application should
+invoke this function and pass a value of 0 (zero) for &ital(rloops.)
+With this setting, all RMr send operations will attempt a send operation only &bold(once,)
 returning immediately to the caller with the state of that single attempt.
 
 
 &h2(RETURN VALUE)
-This function returns a -1 to indicate that the &ital( rloops ) value could not be set, and
-the value &ital( RMR_OK ) to indicate success.
+This function returns a -1 to indicate that the &ital(rloops) value could not be set, and
+the value &ital(RMR_OK) to indicate success.
 
 
 &h2(ERRORS)
-Currently errno is &bold( not ) set by this function; the only cause of a failure is an
-invalid context ( .sm &ital( vctx ) .sm ) pointer.
+Currently errno is &bold(not) set by this function; the only cause of a failure is an
+invalid context ( .sm &ital(vctx) .sm ) pointer.
 
 &h2(EXAMPLE)
 The following is a simple example of how the &cw(rmr_set_stimeout) function is called.

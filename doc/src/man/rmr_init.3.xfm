@@ -57,7 +57,7 @@ a specific message.
 
 &space
 &ital(Flags) allows for selection of some RMr options at the time of initialisation. 
-These are set by ORing &cw(RMRFL_) constants from the RMr header file. Currently the 
+These are set by ORing &cw(RMRFL) constants from the RMr header file. Currently the 
 following flags are supported:
 
 &half_space
@@ -83,7 +83,7 @@ Further, timeouts were message count based and not time unit based.
 Multi-threaded call support adds the ability for a user application with multiple threads
 to invoke a blocking call function with the guarentee that the correct response message 
 is delivered to the thread.  
-The additional support is implemented with the &ital( rmr_mt_call() ) and &ital( rmr_mt_rcv() )
+The additional support is implemented with the &ital(rmr_mt_call()) and &ital(rmr_mt_rcv())
 function calls. 
 &space
 

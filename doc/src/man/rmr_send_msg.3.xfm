@@ -67,7 +67,7 @@ The state in this buffer will reflect the overall send operation state and shoul
 &space
 When the message cannot be successfully sent this function will return the unsent (original) 
 message buffer with the state set to indicate the reason for failure.  
-The value of &ital( errno ) may also be set to reflect a more detailed failure reason if it
+The value of &ital(errno) may also be set to reflect a more detailed failure reason if it
 is known.
 
 &space

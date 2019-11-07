@@ -57,6 +57,8 @@
 .dv lic2 +
 .dv lic3 -
 
+.dv esc : .** rst needs an escape for some things
+
 .dv line_len .ll $1
 .dv space .sp 1
 .dv mult_space .sp $1
