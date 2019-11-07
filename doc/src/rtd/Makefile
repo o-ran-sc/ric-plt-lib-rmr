@@ -37,7 +37,6 @@
 docs = config-deploy developer-guide user-guide rel-notes overview
 
 all:: $(docs:%=%.rst) $(docs:%=%.txt) $(docs:%=%.md) 
-	echo ">>> rm rel-notes.xfm"
 
 rel-notes.xfm:
 	ksh fmt_changes.ksh >rel-notes.xfm

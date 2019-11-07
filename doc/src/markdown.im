@@ -37,6 +37,7 @@
 .hn off
 
 
+.dv esc : .** rst needs an escape for some things
 
 .**  these macros are common for prfm/tfm, markdown will override some
 .dv indent .ll -.5i .in +.25i

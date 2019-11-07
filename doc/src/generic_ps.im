@@ -20,6 +20,8 @@
 .** macros compatable with the roff/troff and rts imbed files
 .** this is included when generating postscript from the man source.
 
+	.dv esc : .** rst needs an escape for some things
+
 	.hn off
 	.dv text_size 10p
 	.dv ex_size 8p

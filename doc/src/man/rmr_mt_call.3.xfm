@@ -50,12 +50,12 @@ control to the user application.
 The user application supplies a completed message buffer, as it would for
 a &cw(rmr_send_msg) call, but unlike with a send, the buffer returned will have
 the response from the application that received the message.
-The thread invoking the &ital( rmr_mt_call())  will block until a message arrives
+The thread invoking the &ital(rmr_mt_call())  will block until a message arrives
 or until &ital(timeout) milliseconds has passed; which ever comes first.  
 Using a timeout value of zero (0) will cause the thread to block without a timeout.
 
 &space
-The &ital( id ) supplied as the third parameter is an integer in the range of 2 through
+The &ital(id) supplied as the third parameter is an integer in the range of 2 through
 255 inclusive. 
 This is a caller defined "thread number" and is used to match the response message
 with the correct user application thread.
@@ -64,7 +64,7 @@ If the ID value is not in the proper range, the attempt to make the call will fa
 &space
 Messages which are received while waiting for the response are queued on a &ital(normal)
 receive queue and will be delivered to the user application with the next invocation 
-of &ital( rmr_mt_rcv() ) or &ital( rmr_rvv_msg().) 
+of &ital(rmr_mt_rcv()) or &ital(rmr_rvv_msg().) 
 by RMR, and are returned to the user application when &cw(rmr_rcv_msg) is 
 invoked.
 These messages are returned in th order received, one per call to &cw(rmr_rcv_msg.)
@@ -84,7 +84,7 @@ RMr will compare &bold(all) of the bytes in the field, so the caller must ensure
 that they are set correctly to avoid missing the response message. 
 (The application which returns the response message is also expected to ensure that
 the return buffer has the matching transaction ID. This can be done transparently if
-the application uses the &ital( rmr_rts_msg() ) function and does not adjust the 
+the application uses the &ital(rmr_rts_msg()) function and does not adjust the 
 transaction ID.
 
 .** pull in common retry text

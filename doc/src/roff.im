@@ -50,6 +50,8 @@
 .dv center_start .br ^^.ce 999
 .dv center_end .br ^.ce 0
 
+.dv esc : .** rst needs an escape for some things
+
 .dv line_len ^^.ll $1
 .dv space .br ^^.sp 1 .br
 .dv half_space .br ^^.sp 1 .br

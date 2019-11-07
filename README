@@ -58,3 +58,17 @@ src		This directory is the top level source directory containing both the
 test	All unit and application level tests for the core library are kept
 		within this directory.  Tests for bindings are managed within the
 		binding's directory under the source directory.
+
+Top level pollution
+There are several "configuration" files which sit at the top level of the
+repo that are required for some sort of CI/CD/Documentation automation. Most,
+if not all of the CI/CD goo is in the ci directory where it's out of the way
+and thus not confusing. However, there is some pollution that can generally
+be ignored:
+
+	tox.ini -- this seems to drive the scraper which pulls from docs and 
+			writes to some external documentation repo/host.
+
+	
+	.readthedocs.yaml -- this seems to be some configuration for the docs
+			scraping process(es).

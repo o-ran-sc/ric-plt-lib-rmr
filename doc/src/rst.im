@@ -62,6 +62,7 @@
 
 	.in 0i						.** bloody rst is indention sensitive like markdown; sheesh
 
+	.dv esc \ : .** bloody need to escape _ and * at the end of a word
 	.dv line_len .ll $1
 	.dv space .sp 1 
 	.dv half_space .sp 1
