@@ -12,13 +12,19 @@ RIC Message Router -- RMR
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: Documents:
 
    overview.rst
    config-deploy.rst
    user-guide.rst
    developer-guide.rst
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Misc:
+
    rel-notes.rst
 
 * :ref:`search`
