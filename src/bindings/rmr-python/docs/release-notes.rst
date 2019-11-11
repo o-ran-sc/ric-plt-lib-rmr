@@ -7,12 +7,14 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
-[X.X.X] - 10/30/2019
+[X.X.X] - xxx
 --------------------
 
 ::
     * This is a breaking change as it rquires that RMR version 1.10.2 or later be used.
     * The populate and set length function will reallocate the message buffer payload if the caller attempts to insert more bytes than the currrent message supports.
+    * add ability to set subscription id when allocating a message
+    * add testing involving subscription ids
 
 
 [1.0.0] - 10/24/2019
