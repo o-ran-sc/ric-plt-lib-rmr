@@ -78,7 +78,7 @@ module (e.g. rmr_nng.c) will directly include other RMR modules, rather than
 depending on referencing the internal functions during linking.
 While this is an infrequently used approach, it does mean that there are very 
 few functions visible for the user application to reference, all of them having 
-the prefix &cw(rmr_,) while allowing internal functions to have shorter names
+the prefix &cw(rmr&{esc}_,) while allowing internal functions to have shorter names
 while still being meaningful.
 
 &h2(Coding Style)

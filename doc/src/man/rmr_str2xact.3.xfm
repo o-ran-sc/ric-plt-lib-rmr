@@ -48,7 +48,7 @@ The &cw(rmr_str2xact) function will copy the string pointed to by src to the
 transaction ID (xaction) field in the given message.  
 The field is a fixed length, gated by the constant &cw(RMR_MAX_XID) and if string length is larger
 than this value, then &bold(nothing) will be copied. (Note, this differs slightly from the
-behaviour of the &cw( lrmr_bytes2xact() ) function.)
+behaviour of the &cw(lrmr_bytes2xact()) function.)
 
 &beg_dlist(.75i : ^&bold_font )
 &h2(RETURN VALUE)

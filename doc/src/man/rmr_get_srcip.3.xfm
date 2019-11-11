@@ -62,7 +62,7 @@ On success, a pointer to the destination buffer is given as a convenience to the
 On failure, a nil pointer is returned and the value of errno is set.
 
 &h2(ERRORS)
-If an error occurs, the value of the global variable &cw( errno ) will be set to one of
+If an error occurs, the value of the global variable &cw(errno) will be set to one of
 the following with the indicated meaning.
 
 &beg_dlist(.75i : ^&bold_font )
