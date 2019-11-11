@@ -216,7 +216,7 @@ _rmr_alloc_msg.argtypes = [c_void_p, c_int]
 _rmr_alloc_msg.restype = POINTER(rmr_mbuf_t)
 
 
-def rmr_alloc_msg(vctx, size, payload=None, gen_transaction_id=False, mtype=None, meid=None):
+def rmr_alloc_msg(vctx, size, payload=None, gen_transaction_id=False, mtype=None, meid=None, sub_id=None):
     """
     Refer to the rmr C documentation for rmr_alloc_msg
     extern rmr_mbuf_t* rmr_alloc_msg(void* vctx, int size)
@@ -228,9 +228,11 @@ def rmr_alloc_msg(vctx, size, payload=None, gen_transaction_id=False, mtype=None
 
     """
     sbuf = _rmr_alloc_msg(vctx, size)
-    # make sure it's good
     try:
+        # make sure the alloc worked
         sbuf.contents
+
+        # set specified fields
         if payload:
             set_payload_and_length(payload, sbuf)
 
@@ -242,6 +244,9 @@ def rmr_alloc_msg(vctx, size, payload=None, gen_transaction_id=False, mtype=None
 
         if meid:
             rmr_set_meid(sbuf, meid)
+
+        if sub_id:
+            sbuf.contents.sub_id = sub_id
 
         return sbuf
 
