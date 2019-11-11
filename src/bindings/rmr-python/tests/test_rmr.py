@@ -60,6 +60,7 @@ def _assert_new_sbuf(sbuf):
     summary = rmr.message_summary(sbuf)
     assert summary["payload"] == b""
     assert summary["payload length"] == 0
+    assert summary["subscription id"] == -1
     assert summary["transaction id"] == b""
     assert summary["message state"] == 0
     assert summary["message status"] == "RMR_OK"
@@ -152,6 +153,21 @@ def test_rmr_set_get():
     assert (len(summary["meid"])) == 4
 
 
+def test_alloc_fancy():
+    """test allocation with setting payload, trans, mtype, subid"""
+    pay = b"yoo\x01\x00\x80"
+    sbuf = rmr.rmr_alloc_msg(MRC_SEND, SIZE, payload=pay, gen_transaction_id=True, mtype=14, meid=b"asdf", sub_id=654321)
+    summary = rmr.message_summary(sbuf)
+    assert summary["payload"] == pay
+    assert summary["payload length"] == 6
+    assert summary["transaction id"] != b""  # hard to test what it will be, but make sure not empty
+    assert len(summary["transaction id"]) == 32
+    assert summary["message state"] == 0
+    assert summary["message type"] == sbuf.contents.mtype == 14
+    assert rmr.rmr_get_meid(sbuf) == summary["meid"] == b"asdf"
+    assert sbuf.contents.sub_id == summary["subscription id"] == 654321
+
+
 def test_rcv_timeout():
     """
     test torcv; this is a scary test because if it fails... it doesn't fail, it will run forever!
@@ -205,6 +221,33 @@ def test_send_rcv():
     assert send_ack_summary["message state"] == rcv_ack_summary["message state"] == 0
     assert send_ack_summary["message status"] == rcv_ack_summary["message status"] == "RMR_OK"
     assert send_ack_summary["payload"] == ack_pay
+
+
+def test_send_rcv_subid():
+    """
+    test send and receive
+    """
+    pay = b"\x01\x00\x80"
+
+    # send a message
+    sbuf_send = rmr.rmr_alloc_msg(MRC_SEND, 3, pay, mtype=46656, sub_id=777)
+    sbuf_send = rmr.rmr_send_msg(MRC_SEND, sbuf_send)
+    send_summary = rmr.message_summary(sbuf_send)
+    assert send_summary["message state"] == 0  # if send fails don't attempt receive
+    assert send_summary["message status"] == "RMR_OK"
+    time.sleep(0.5)
+
+    # WHY IS THIS BEING SLURPPED BY TEST FOLLOWING THIS?
+
+    # receive it in other context
+    sbuf_rcv = rmr.rmr_alloc_msg(MRC_RCV, 3)
+    sbuf_rcv = rmr.rmr_torcv_msg(MRC_RCV, sbuf_rcv, 2000)
+    rcv_summary = rmr.message_summary(sbuf_rcv)
+    assert rcv_summary["message state"] == 0
+    assert rcv_summary["message status"] == "RMR_OK"
+    assert rcv_summary["message type"] == 46656
+    assert rcv_summary["payload"] == pay
+    assert rcv_summary["subscription id"] == 777
 
 
 def send_burst(mrc, fmt, mtype=1, num=13, counter=0):
@@ -276,32 +319,19 @@ def test_bad_buffer():
         rmr.rmr_alloc_msg(None, 4096)
 
 
-def test_alloc_fancy():
-    """test allocation with setting payload, trans, mtype"""
-    pay = b"yoo\x01\x00\x80"
-    sbuf = rmr.rmr_alloc_msg(MRC_SEND, SIZE, payload=pay, gen_transaction_id=True, mtype=14, meid=b"asdf")
-    summary = rmr.message_summary(sbuf)
-    assert summary["payload"] == pay
-    assert summary["payload length"] == 6
-    assert summary["transaction id"] != b""  # hard to test what it will be, but make sure not empty
-    assert summary["message state"] == 0
-    assert summary["message type"] == 14
-    assert summary["meid"] == b"asdf"
-
-
 def test_resize_payload():
     """test the ability to insert a larger payload into an existing message"""
     mtype = 99
     subid = 100
 
     mbuf = rmr.rmr_alloc_msg(MRC_SEND, 25)  # allocate buffer with small payload
-    mbuf.contents.mtype = mtype             # type and sub-id should not change
+    mbuf.contents.mtype = mtype  # type and sub-id should not change
     mbuf.contents.sub_id = subid
 
     long_payload = b"This is a long payload that should force the message buffer to be reallocated"
     rmr.set_payload_and_length(long_payload, mbuf)
     summary = rmr.message_summary(mbuf)
-    assert summary["payload max size"] >= len(long_payload)     # RMR may allocate a larger payload space
-    assert summary["payload length"] == len(long_payload)       # however, the length must be exactly the same
-    assert summary["message type"] == mtype                     # both mtype and sub-id should be preserved in new
+    assert summary["payload max size"] >= len(long_payload)  # RMR may allocate a larger payload space
+    assert summary["payload length"] == len(long_payload)  # however, the length must be exactly the same
+    assert summary["message type"] == mtype  # both mtype and sub-id should be preserved in new
     assert summary["subscription id"] == subid
