@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cfdafb6f_90de7600",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-11-11T16:08:27Z",
+      "side": 1,
+      "message": "scott; see email, this test is not working and the message is bring slurped up in the next test, what did I do wrong?",
+      "revId": "590f0ea0da6d230ced93181bc5e2b9624bcddf8e",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
