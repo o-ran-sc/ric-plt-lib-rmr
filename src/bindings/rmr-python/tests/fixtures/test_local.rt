@@ -1,6 +1,8 @@
 # do NOT use localhost, seems unresolved on jenkins VMs
+# the 4563 lines are used by MRC_RCV; the 4564 are used by MRC_BUF_RCV
 newrt|start
 mse| 0 | -1 | 127.0.0.1:4563
+mse| 46656 | 777 | 127.0.0.1:4563
 mse| 1 | -1 | 127.0.0.1:4564
 mse| 2 | -1 | 127.0.0.1:4564
 newrt|end
