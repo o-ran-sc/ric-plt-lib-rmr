@@ -17,12 +17,15 @@
 #
 
 # The demo programmes assume that RMr (along with nng) is installed
-# It may be necessary to set LD_LIBRARY_PATH=/usr/local/lib
+# It may be necessary to set LD_LIBRARY_PATH=/usr/local/lib. The SI95
+# library is a part of RMR, so there is no third library needed for
+# linking the SI95 based examples.
 
 
 .PHONY: all
-all: sender receiver
+all: sender receiver sender_si receiver_si
 
+# ---- binaries on top of NNG -------------------------
 receiver: receiver.c
 	gcc $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
@@ -35,3 +38,21 @@ health_check: health_check.c
 msg_echo: msg_echo.c
 	gcc $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
+
+
+# ----- binaries linked on top of SI95 -----------------
+# These all are based on the same source, but just need 
+# different link options.
+#
+
+receiver_si: receiver.c
+	gcc $< -g -o $@ -lrmr_si -lpthread -lm
+
+sender_si: sender.c
+	gcc $< -g -o $@ -lrmr_si -lpthread -lm
+
+health_check_: health_check.c
+	gcc $< -g -o $@ -lrmr_si -lpthread -lm
+
+msg_echo_si: msg_echo.c
+	gcc $< -g -o $@ -lrmr_si -lpthread -lm

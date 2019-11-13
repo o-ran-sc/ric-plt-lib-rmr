@@ -17,10 +17,10 @@
 #==================================================================================
 #
 
-# NOTE:  this makefile assumes that RMr has been built using the directory .build
+# NOTE:  this makefile assumes that RMR has been built using the directory .build
 #		at the top most repo directory (e.g. ../../.build). It can be changed 
 #		if you need to by adding "build_path=<path>" to the make command line.
-#		To use this makefile to build on a system where RMr is already installed
+#		To use this makefile to build on a system where RMR is already installed
 #		try:    make build_path=/usr/local/lib
 #
 #		By default we prefer the Korn shell (it's just better). If you really need
@@ -46,8 +46,13 @@ LIBRARY_PATH = $(LD_LIBRARY_PATH)
 # from the perspective of two, or more, communicating processes. 
 
 
-.PHONY: all
+.PHONY: all all_si
 all: sender receiver caller mt_receiver v_sender ex_rts_receiver
+
+all_si: sender_si receiver_si
+
+
+# ------ nng based builds ------------------------------------------------------------
 
 receiver: receiver.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
@@ -74,6 +79,20 @@ lcaller: lcaller.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@  -lrmr_nng -lnng -lpthread -lm
 
 lsender: lsender.c
+	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@  -lrmr_nng -lnng -lpthread -lm
+
+
+
+# ----- si test builds -------------------------------------------------------------
+
+sender_si: sender.c
+	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_si -lpthread -lm
+
+receiver_si: receiver.c
+	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_si -lpthread -lm
+
+
+# --------- housekeeping -----------------------------------------------------------
 
 # clean removes intermediates; nuke removes everything that can be built
 .PHONY: clean nuke

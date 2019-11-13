@@ -68,6 +68,9 @@
 
 #include <rmr/rmr.h>
 
+#define WBUF_SIZE	1024
+#define TRACE_SIZE	1024
+
 static int sum( char* str ) {
 	int sum = 0;
 	int	i = 0;
@@ -112,15 +115,18 @@ int main( int argc, char** argv ) {
 	int		mtype = 0;
 	int		stats_freq = 100;
 	int		successful = 0;					// set to true after we have a successful send
-	char	wbuf[1024];
+	char*	wbuf = NULL;					// working buffer
 	char	me[128];						// who I am to vet rts was actually from me
-	char	trace[1024];
+	char*	trace = NULL;					// area to build trace data in
 	long	timeout = 0;
 	int		delay = 100000;					// usec between send attempts
 	int		nmsgs = 10;						// number of messages to send
 	int		max_mt = 10;					// reset point for message type
 	int		start_mt = 0;
 	int		pass = 1;
+
+	wbuf = (char *) malloc( sizeof( char ) * WBUF_SIZE );
+	trace = (char *) malloc( sizeof( char ) * TRACE_SIZE );
 
 	if( argc > 1 ) {
 		nmsgs = atoi( argv[1] );
@@ -187,7 +193,7 @@ int main( int argc, char** argv ) {
 
 	timeout = time( NULL ) + 20;
 
-	gethostname( wbuf, sizeof( wbuf ) );
+	gethostname( wbuf, WBUF_SIZE );
 	snprintf( me, sizeof( me ), "%s-%d", wbuf, getpid( ) );
 
 	while( count < nmsgs ) {								// we send n messages after the first message is successful

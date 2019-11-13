@@ -102,6 +102,9 @@ typedef struct {
 	unsigned char* id;			// if we need an ID in the message separate from the xaction id
 	int		flags;				// various MFL_ (private) flags as needed
 	int		alloc_len;			// the length of the allocated space (hdr+payload)
+
+	void*	ring;				// ring this buffer should be queued back to
+	int		rts_fd;				// SI fd for return to sender
 } rmr_mbuf_t;
 
 
@@ -112,6 +115,7 @@ typedef int rmr_whid_t;			// wormhole identifier returned by rmr_wh_open(), pass
 extern rmr_mbuf_t* rmr_alloc_msg( void* vctx, int size );
 extern rmr_mbuf_t* rmr_call( void* vctx, rmr_mbuf_t* msg );
 extern void rmr_close( void* vctx );
+extern void rmr_set_fack( void* vctx );
 extern void* rmr_init( char* proto_port, int max_msg_size, int flags );
 extern int rmr_init_trace( void* vctx, int size );
 extern int rmr_payload_size( rmr_mbuf_t* msg );
@@ -124,6 +128,7 @@ extern int rmr_ready( void* vctx );
 extern int rmr_set_rtimeout( void* vctx, int time );
 extern int rmr_set_stimeout( void* vctx, int time );
 extern int rmr_get_rcvfd( void* vctx );								// only supported with nng
+extern void rmr_set_low_latency( void* vctx );
 extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to );
 extern rmr_mbuf_t*  rmr_tralloc_msg( void* context, int msize, int trsize, unsigned const char* data );
 extern rmr_whid_t rmr_wh_open( void* vctx, char const* target );

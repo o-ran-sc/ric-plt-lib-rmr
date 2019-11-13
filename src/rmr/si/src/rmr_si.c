@@ -1,8 +1,8 @@
 // vim: ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@
 */
 
 /*
-	Mnemonic:	rmr_nng.c
-	Abstract:	This is the compile point for the nng version of the rmr
+	Mnemonic:	rmr_si.c
+	Abstract:	This is the compile point for the si version of the rmr
 				library (formarly known as uta, so internal function names
 				are likely still uta_*)
 
@@ -53,27 +53,25 @@
 #include <semaphore.h>
 #include <pthread.h>
 
-#include <nng/nng.h>
-#include <nng/protocol/pubsub0/pub.h>
-#include <nng/protocol/pubsub0/sub.h>
-#include <nng/protocol/pipeline0/push.h>
-#include <nng/protocol/pipeline0/pull.h>
+#include "si95/socket_if.h"
+#include "si95/siproto.h"
 
 
 #include "rmr.h"				// things the users see
 #include "rmr_agnostic.h"		// agnostic things (must be included before private)
-#include "rmr_nng_private.h"	// things that we need too
+#include "rmr_si_private.h"	// things that we need too
 #include "rmr_symtab.h"
 
 #include "ring_static.c"			// message ring support
 #include "rt_generic_static.c"		// route table things not transport specific
-#include "rtable_nng_static.c"		// route table things -- transport specific
+#include "rtable_si_static.c"		// route table things -- transport specific
 #include "rtc_static.c"				// route table collector
+#include "rtc_si_static.c"			// our private test function
 #include "tools_static.c"
-#include "sr_nng_static.c"			// send/receive static functions
+#include "sr_si_static.c"			// send/receive static functions
 #include "wormholes.c"				// wormhole api externals and related static functions (must be LAST!)
 #include "mt_call_static.c"
-#include "mt_call_nng_static.c"
+#include "mt_call_si_static.c"
 
 
 //------------------------------------------------------------------------------
@@ -100,6 +98,14 @@ static void free_ctx( uta_ctx_t* ctx ) {
 	function returns the absolute maximum space that the user has available
 	in the payload. On error (bad msg buffer) -1 is returned and errno should
 	indicate the rason.
+
+	The allocated len stored in the msg is:
+		transport header length +
+		message header + 
+		user requested payload 
+
+	The msg header is a combination of the fixed RMR header and the variable
+	trace data and d2 fields which may vary for each message.
 */
 extern int rmr_payload_size( rmr_mbuf_t* msg ) {
 	if( msg == NULL || msg->header == NULL ) {
@@ -108,7 +114,7 @@ extern int rmr_payload_size( rmr_mbuf_t* msg ) {
 	}
 
 	errno = 0;
-	return msg->alloc_len - RMR_HDR_LEN( msg->header );				// allocated transport size less the header and other data bits
+	return msg->alloc_len - RMR_HDR_LEN( msg->header ) - TP_HDR_LEN;	// allocated transport size less the header and other data bits
 }
 
 /*
@@ -168,20 +174,19 @@ extern rmr_mbuf_t* rmr_realloc_msg( rmr_mbuf_t* msg, int new_tr_size ) {
 	Return the message to the available pool, or free it outright.
 */
 extern void rmr_free_msg( rmr_mbuf_t* mbuf ) {
+	//fprintf( stderr, "SKIPPING FREE: %p\n", mbuf );
+	//return;
+
 	if( mbuf == NULL ) {
 		return;
 	}
 
-	if( mbuf->header ) {
-		if( mbuf->flags & MFL_ZEROCOPY ) {
-			//nng_free( (void *) mbuf->header, mbuf->alloc_len );
-			if( mbuf->tp_buf ) {
-				nng_msg_free(  mbuf->tp_buf );
-			}
+	if( !mbuf->ring || ! uta_ring_insert( mbuf->ring, mbuf ) ) {			// just queue, free if ring is full
+		if( mbuf->tp_buf ) {
+			free( mbuf->tp_buf );
 		}
+		free( mbuf );
 	}
-
-	free( mbuf );
 }
 
 /*
@@ -221,6 +226,10 @@ extern rmr_mbuf_t* rmr_send_msg( void* vctx, rmr_mbuf_t* msg ) {
 
 /*
 	Return to sender allows a message to be sent back to the endpoint where it originated.
+
+	In the SI world the file descriptor that was the source of the message is captured in
+	the mbuffer and thus can be used to quickly find the target for an RTS call. 
+
 	The source information in the message is used to select the socket on which to write
 	the message rather than using the message type and round-robin selection. This
 	should return a message buffer with the state of the send operation set. On success
@@ -241,16 +250,16 @@ extern rmr_mbuf_t* rmr_send_msg( void* vctx, rmr_mbuf_t* msg ) {
 
 	CAUTION:
 		Like send_msg(), this is non-blocking and will return the msg if there is an errror.
-		The caller must check for this and handle.
+		The caller must check for this and handle it properly.
 */
 extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
-	nng_socket	nn_sock;			// endpoint socket for send
+	int			nn_sock;			// endpoint socket for send
 	uta_ctx_t*	ctx;
 	int			state;
 	char*		hold_src;			// we need the original source if send fails
 	char*		hold_ip;			// also must hold original ip
 	int			sock_ok = 0;		// true if we found a valid endpoint socket
-	endpoint_t*	ep;					// end point to track counts
+	endpoint_t*	ep = NULL;			// end point to track counts
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL || msg == NULL ) {		// bad stuff, bail fast
 		errno = EINVAL;												// if msg is null, this is their clue
@@ -271,16 +280,20 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 
 	((uta_mhdr_t *) msg->header)->flags &= ~HFL_CALL_MSG;			// must ensure call flag is off
 
-	sock_ok = uta_epsock_byname( ctx->rtable, (char *) ((uta_mhdr_t *)msg->header)->src, &nn_sock, &ep );			// src is always used first for rts
+/*
+	sock_ok = uta_epsock_byname( ctx->rtable, (char *) ((uta_mhdr_t *)msg->header)->src, &nn_sock, &ep, ctx->si_ctx );			// src is always used first for rts
 	if( ! sock_ok ) {
+*/
+	if( (nn_sock = msg->rts_fd) < 0 ) {
 		if( HDR_VERSION( msg->header ) > 2 ) {							// with ver2 the ip is there, try if src name not known
-			sock_ok = uta_epsock_byname( ctx->rtable, (char *) ((uta_mhdr_t *)msg->header)->srcip, &nn_sock, &ep );
+			sock_ok = uta_epsock_byname( ctx->rtable, (char *) ((uta_mhdr_t *)msg->header)->srcip, &nn_sock, &ep, ctx->si_ctx );
 		}
 		if( ! sock_ok ) {
 			msg->state = RMR_ERR_NOENDPT;
 			return msg;																// preallocated msg can be reused since not given back to nn
 		}
 	}
+
 
 	msg->state = RMR_OK;																// ensure it is clear before send
 	hold_src = strdup( (char *) ((uta_mhdr_t *)msg->header)->src );						// the dest where we're returning the message to
@@ -299,6 +312,7 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 					break;
 
 				default:
+					// FIX ME uta_fd_failed( nn_sock );			// we don't have an ep so this requires a look up/search to mark it failed
 					ep->scounts[EPSC_FAIL]++;
 					break;
 			}
@@ -344,7 +358,6 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 */
 extern rmr_mbuf_t* rmr_call( void* vctx, rmr_mbuf_t* msg ) {
 	uta_ctx_t*		ctx;
-	unsigned char	expected_id[RMR_MAX_XID+1];		// the transaction id in the message; we wait for response with same ID
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL || msg == NULL ) {		// bad stuff, bail fast
 		if( msg != NULL ) {
@@ -353,26 +366,7 @@ extern rmr_mbuf_t* rmr_call( void* vctx, rmr_mbuf_t* msg ) {
 		return msg;
 	}
 
-	if( ctx->flags & CFL_MTC_ENABLED ) {				// if multi threaded call is on, use that
-		return rmr_mt_call( vctx, msg, 1, 1000 );		// use the reserved call-id of 1 and wait up to 1 sec
-	}
-
-	memcpy( expected_id, msg->xaction, RMR_MAX_XID );
-	expected_id[RMR_MAX_XID] = 0;					// ensure it's a string
-	if( DEBUG > 1 ) fprintf( stderr, "[DBUG] rmr_call is making call, waiting for (%s)\n", expected_id );
-	errno = 0;
-	msg->flags |= MFL_NOALLOC;						// we don't need a new buffer from send
-
-	msg = rmr_send_msg( ctx, msg );
-	if( msg ) {										// msg should be nil, if not there was a problem; return buffer to user
-		if( msg->state != RMR_ERR_RETRY ) {
-			msg->state = RMR_ERR_CALLFAILED;		// errno not available to all wrappers; don't stomp if marked retry
-		}
-		msg->tp_state = errno;
-		return msg;
-	}
-
-	return rmr_rcv_specific( ctx, NULL, (char *) expected_id, 20 ); 		// wait for msg allowing 20 to queue ahead
+	return rmr_mt_call( vctx, msg, 1, 1000 );		// use the reserved call-id of 1 and wait up to 1 sec
 }
 
 /*
@@ -398,33 +392,15 @@ extern rmr_mbuf_t* rmr_rcv_msg( void* vctx, rmr_mbuf_t* old_msg ) {
 	}
 	errno = 0;
 
-	if( ctx->flags & CFL_MTC_ENABLED ) {						// must pop from ring with a semaphore dec first
-		return rmr_mt_rcv( ctx, old_msg, -1 );
-	}
-
-	qm = (rmr_mbuf_t *) uta_ring_extract( ctx->mring );			// pop if queued
-	if( qm != NULL ) {
-		if( old_msg ) {
-			rmr_free_msg( old_msg ); 							// future:  push onto a free list???
-		}
-
-		return qm;
-	}
-
-	return rcv_msg( ctx, old_msg );								// nothing queued, wait for one
+	return rmr_mt_rcv( ctx, old_msg, -1 );
 }
 
 /*
-	This implements a receive with a timeout via epoll. Mostly this is for
-	wrappers as native C applications can use epoll directly and will not have
-	to depend on this.
+	This allows a timeout based receive for applications unable to implement epoll_wait()
+	(e.g. wrappers).
 */
 extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to ) {
-	struct epoll_stuff* eps;	// convience pointer
 	uta_ctx_t*	ctx;
-	rmr_mbuf_t*	qm;				// message that was queued on the ring
-	int nready;
-	rmr_mbuf_t* msg;
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
 		errno = EINVAL;
@@ -435,70 +411,7 @@ extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to ) {
 		return old_msg;
 	}
 
-	if( ctx->flags & CFL_MTC_ENABLED ) {						// must pop from ring with a semaphore dec first
-		return rmr_mt_rcv( ctx, old_msg, ms_to );
-	}
-
-	qm = (rmr_mbuf_t *) uta_ring_extract( ctx->mring );			// pop if queued
-	if( qm != NULL ) {
-		if( old_msg ) {
-			rmr_free_msg( old_msg ); 							// future:  push onto a free list???
-		}
-
-		return qm;
-	}
-
-	if( (eps = ctx->eps)  == NULL ) {					// set up epoll on first call
-		eps = malloc( sizeof *eps );
-
-		if( (eps->ep_fd = epoll_create1( 0 )) < 0 ) {
-	    	fprintf( stderr, "[FAIL] unable to create epoll fd: %d\n", errno );
-			free( eps );
-			ctx->eps = NULL;
-			if( old_msg != NULL ) {
-				old_msg->state = RMR_ERR_INITFAILED;
-				old_msg->tp_state = errno;
-			}
-			return old_msg;
-		}
-
-		eps->nng_fd = rmr_get_rcvfd( ctx );
-   		eps->epe.events = EPOLLIN;
-		eps->epe.data.fd = eps->nng_fd;
-
-		if( epoll_ctl( eps->ep_fd, EPOLL_CTL_ADD, eps->nng_fd, &eps->epe ) != 0 )  {
-	    	fprintf( stderr, "[FAIL] epoll_ctl status not 0 : %s\n", strerror( errno ) );
-			free( eps );
-			ctx->eps = NULL;
-			if( old_msg != NULL ) {
-				old_msg->state = RMR_ERR_INITFAILED;
-				old_msg->tp_state = errno;
-			}
-			return old_msg;
-		}
-
-		ctx->eps = eps;
-	}
-
-	if( old_msg ) {
-		msg = old_msg;
-	} else {
-		msg = alloc_zcmsg( ctx, NULL, RMR_MAX_RCV_BYTES, RMR_OK, DEF_TR_LEN );			// will abort on failure, no need to check
-	}
-
-	if( ms_to < 0 ) {
-		ms_to = 0;
-	}
-
-	nready = epoll_wait( eps->ep_fd, eps->events, 1, ms_to );     // block until something or timedout
-	if( nready <= 0 ) {						// we only wait on ours, so we assume ready means it's ours
-		msg->state = RMR_ERR_TIMEOUT;
-		msg->tp_state = errno;
-	} else {
-		return rcv_msg( ctx, msg );								// receive it and return it
-	}
-
-	return msg;				// return empty message with state set
+	return rmr_mt_rcv( ctx, old_msg, ms_to );
 }
 
 /*
@@ -599,7 +512,7 @@ extern int rmr_set_stimeout( void* vctx, int time ) {
 	CAUTION:  this is not supported as they must be set differently (between create and open) in NNG.
 */
 extern int rmr_set_rtimeout( void* vctx, int time ) {
-	fprintf( stderr, "[WRN] Current implementation of RMR ontop of NNG does not support setting a receive timeout\n" );
+	fprintf( stderr, "[WRN] Current underlying transport mechanism (SI) does not support rcv timeout; not set\n" );
 	return 0;
 }
 
@@ -623,9 +536,10 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	char*	tok;						// pointer at token in a buffer
 	char*	tok2;
 	int		state;
+	int		i;
 
 	if( ! announced ) {
-		fprintf( stderr, "[INFO] ric message routing library on NNG mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
+		fprintf( stderr, "[INFO] ric message routing library on SI95 mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
 			RMR_MSG_VER, flags, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
 	}
@@ -643,15 +557,22 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	}
 	memset( ctx, 0, sizeof( uta_ctx_t ) );
 
+	if( DEBUG ) fprintf( stderr, "[DBUG] rmr_init: allocating 266 rivers\n" );
+	ctx->nrivers = 256;								// number of input flows we'll manage
+	ctx->rivers = (river_t *) malloc( sizeof( river_t ) * ctx->nrivers );
+	memset( ctx->rivers, 0, sizeof( river_t ) * ctx->nrivers );
+	for( i = 0; i < ctx->nrivers; i++ ) {
+		ctx->rivers[i].state = RS_NEW;				// force allocation of accumulator on first received packet
+	}
+
 	ctx->send_retries = 1;							// default is not to sleep at all; RMr will retry about 10K times before returning
 	ctx->d1_len = 4;								// data1 space in header -- 4 bytes for now
+	ctx->max_ibm = max_msg_size;					// default to user supplied message size
 
-	if( flags & RMRFL_MTCALL ) {					// mt call support is on, need bigger ring
-		ctx->mring = uta_mk_ring( 2048 );			// message ring filled by rcv thread
-		init_mtcall( ctx );							// set up call chutes
-	} else {
-		ctx->mring = uta_mk_ring( 128 );			// ring filled only on blocking call
-	}
+	ctx->mring = uta_mk_ring( 4096 );				// message ring is always on for si
+	init_mtcall( ctx );								// set up call chutes
+
+	ctx->zcb_mring = uta_mk_ring( 128 );			// zero copy buffer mbuf ring
 
 	ctx->max_plen = RMR_MAX_RCV_BYTES;				// max user payload lengh
 	if( max_msg_size > 0 ) {
@@ -661,8 +582,9 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	// we're using a listener to get rtg updates, so we do NOT need this.
 	//uta_lookup_rtg( ctx );							// attempt to fill in rtg info; rtc will handle missing values/errors
 
-	if( nng_pull0_open( &ctx->nn_sock )  !=  0 ) {		// and assign the mode
-		fprintf( stderr, "[CRI] rmr_init: unable to initialise nng listen (pull) socket: %d\n", errno );
+	ctx->si_ctx = SIinitialise( SI_OPT_FG );		// FIX ME: si needs to streamline and drop fork/bg stuff
+	if( ctx->si_ctx == NULL ) {
+		fprintf( stderr, "[CRI] unable to initialise SI95 interface\n" );
 		free_ctx( ctx );
 		return NULL;
 	}
@@ -735,28 +657,24 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	if( (interface = getenv( ENV_BIND_IF )) == NULL ) {
 		interface = "0.0.0.0";
 	}
-	// NOTE: if there are options that might need to be configured, the listener must be created, options set, then started
-	//       rather than using this generic listen() call.
-	snprintf( bind_info, sizeof( bind_info ), "%s://%s:%s", proto, interface, port );
-	if( (state = nng_listen( ctx->nn_sock, bind_info, NULL, NO_FLAGS )) != 0 ) {
-		fprintf( stderr, "[CRI] rmr_init: unable to start nng listener for %s: %s\n", bind_info, nng_strerror( state ) );
-		nng_close( ctx->nn_sock );
+	
+	snprintf( bind_info, sizeof( bind_info ), "%s:%s", interface, port );		// FIXME -- si only supports 0.0.0.0 by default
+	if( (state = SIlistener( ctx->si_ctx, TCP_DEVICE, bind_info )) < 0 ) {
+		fprintf( stderr, "[CRI] rmr_init: unable to start si listener for %s: %s\n", bind_info, strerror( errno ) );
 		free_ctx( ctx );
 		return NULL;
 	}
 
-	if( !(flags & FL_NOTHREAD) ) {										// skip if internal function that doesnt need an rtc
-		if( pthread_create( &ctx->rtc_th,  NULL, rtc, (void *) ctx ) ) { 	// kick the rt collector thread
+	if( !(flags & FL_NOTHREAD) ) {												// skip if internal function that doesnt need an rtc
+		if( pthread_create( &ctx->rtc_th,  NULL, rtc_file, (void *) ctx ) ) { 	// kick the rt collector thread
 			fprintf( stderr, "[WRN] rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
 		}
 	}
 
-	if( (flags & RMRFL_MTCALL) && ! (ctx->flags & CFL_MTC_ENABLED) ) {	// mt call support is on, must start the listener thread if not running
-		ctx->flags |= CFL_MTC_ENABLED;
-		if( pthread_create( &ctx->mtc_th,  NULL, mt_receive, (void *) ctx ) ) { 	// kick the receiver
-			fprintf( stderr, "[WRN] rmr_init: unable to start multi-threaded receiver: %s", strerror( errno ) );
-		}
-		
+	//fprintf( stderr, ">>>>> starting threaded receiver with ctx=%p si_ctx=%p\n", ctx, ctx->si_ctx );
+	ctx->flags |= CFL_MTC_ENABLED;												// for SI threaded receiver is the only way
+	if( pthread_create( &ctx->mtc_th,  NULL, mt_receive, (void *) ctx ) ) { 	// so kick it
+		fprintf( stderr, "[WRN] rmr_init: unable to start multi-threaded receiver: %s", strerror( errno ) );
 	}
 
 	free( proto_port );
@@ -822,32 +740,34 @@ extern int rmr_ready( void* vctx ) {
 }
 
 /*
-	Returns a file descriptor which can be used with epoll() to signal a receive
-	pending. The file descriptor should NOT be read from directly, nor closed, as NNG
-	does not support this.
+	This returns the message queue ring's filedescriptor which can be used for
+	calls to epoll.  The user shouild NOT read, write, or close the fd.
+
+	Returns the file descriptor or -1 on error.
 */
 extern int rmr_get_rcvfd( void* vctx ) {
 	uta_ctx_t* ctx;
-	int fd;
 	int state;
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
 		return -1;
 	}
 
+/*
 	if( (state = nng_getopt_int( ctx->nn_sock, NNG_OPT_RECVFD, &fd )) != 0 ) {
 		fprintf( stderr, "[WRN] rmr cannot get recv fd: %s\n", nng_strerror( state ) );
 		return -1;
 	}
+*/
 
-	return fd;
+	return uta_ring_getpfd( ctx->mring );
 }
 
 
 /*
 	Clean up things.
 
-	There isn't an nng_flush() per se, but we can pause, generate
+	There isn't an si_flush() per se, but we can pause, generate
 	a context switch, which should allow the last sent buffer to
 	flow. There isn't exactly an nng_term/close either, so there
 	isn't much we can do.
@@ -860,7 +780,12 @@ extern void rmr_close( void* vctx ) {
 	}
 
 	ctx->shutdown = 1;
-	nng_close( ctx->nn_sock );
+
+	SItp_stats( ctx->si_ctx );			// dump some interesting stats
+
+	// FIX ME -- how to we turn off si; close all sessions etc?
+	//SIclose( ctx->nn_sock );
+
 }
 
 
@@ -892,25 +817,32 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 		return mbuf;
 	}
 
-	if( ! (ctx->flags & CFL_MTC_ENABLED) ) {
-		errno = EINVAL;
-		if( mbuf != NULL ) {
-			mbuf->state = RMR_ERR_NOTSUPP;
-			mbuf->tp_state = errno;
+	ombuf = mbuf;		// if we timeout we must return original msg with status, so save it
+
+	chute = &ctx->chutes[0];					// chute 0 used only for its semaphore
+
+	if( max_wait == 0 ) {						// one shot poll; handle wihtout sem check as that is SLOW!
+		if( (mbuf = (rmr_mbuf_t *) uta_ring_extract( ctx->mring )) != NULL ) {			// pop if queued
+			if( ombuf ) {
+				rmr_free_msg( ombuf );				// can't reuse, caller's must be trashed now
+			}	
+		} else {
+			mbuf = ombuf;						// return original if it was given with timeout status
+			if( ombuf != NULL ) {
+				mbuf->state = RMR_ERR_TIMEOUT;			// preset if for failure
+				mbuf->len = 0;
+			}
 		}
+
 		return mbuf;
 	}
 
-	ombuf = mbuf;
 	if( ombuf ) {
 		ombuf->state = RMR_ERR_TIMEOUT;			// preset if for failure
 		ombuf->len = 0;
 	}
-
-	chute = &ctx->chutes[0];					// chute 0 used only for its semaphore
-
-	if( max_wait >= 0 ) {
-		clock_gettime( CLOCK_REALTIME, &ts );	
+	if( max_wait > 0 ) {
+		clock_gettime( CLOCK_REALTIME, &ts );	// sem timeout based on clock, not a delta
 
 		if( max_wait > 999 ) {
 			seconds = max_wait / 1000;
@@ -1088,38 +1020,28 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 }
 
 /*
-	Given an existing message buffer, reallocate the payload portion to
-	be at least new_len bytes.  The message header will remain such that
-	the caller may use the rmr_rts_msg() function to return a payload
-	to the sender. 
-
-	The mbuf passed in may or may not be reallocated and the caller must
-	use the returned pointer and should NOT assume that it can use the 
-	pointer passed in with the exceptions based on the clone flag.
-
-	If the clone flag is set, then a duplicated message, with larger payload
-	size, is allocated and returned.  The old_msg pointer in this situation is
-	still valid and must be explicitly freed by the application. If the clone 
-	message is not set (0), then any memory management of the old message is
-	handled by the function.
-
-	If the copy flag is set, the contents of the old message's payload is 
-	copied to the reallocated payload.  If the flag is not set, then the 
-	contents of the payload is undetermined.
+	Enable low latency things in the transport (when supported).
 */
-extern rmr_mbuf_t* rmr_realloc_payload( rmr_mbuf_t* old_msg, int new_len, int copy, int clone ) {
-	if( old_msg == NULL ) {
-		return NULL;
-	}
+extern void rmr_set_low_latency( void* vctx ) {
+	uta_ctx_t*	ctx;
 
-	return realloc_payload( old_msg, new_len, copy, clone );	// message allocation is transport specific, so this is a passthrough
+	if( (ctx = (uta_ctx_t *) vctx) != NULL ) {
+		if( ctx->si_ctx != NULL ) {
+			SIset_tflags( ctx->si_ctx, SI_TF_NODELAY );
+		}
+	}
 }
 
 /*
-	The following functions are "dummies" as NNG has no concept of supporting
-	them, but are needed to resolve calls at link time.
+	Turn on fast acks.
 */
+extern void rmr_set_fack( void* vctx ) {
+	uta_ctx_t*	ctx;
 
-extern void rmr_set_fack( void* p ) {
-	return;
+	if( (ctx = (uta_ctx_t *) vctx) != NULL ) {
+		if( ctx->si_ctx != NULL ) {
+			SIset_tflags( ctx->si_ctx, SI_TF_FASTACK );
+		}
+	}
 }
+
