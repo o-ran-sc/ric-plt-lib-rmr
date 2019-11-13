@@ -243,6 +243,7 @@ typedef struct ring {
 	uint16_t tail;				// index of the tail (extract point)
 	uint16_t nelements;			// number of elements in the ring
 	void**	data;				// the ring data (pointers to blobs of stuff)
+	int		pfd;				// event fd for the ring for epoll
 } ring_t;
 
 

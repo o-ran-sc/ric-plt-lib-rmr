@@ -35,8 +35,31 @@
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>
+#include <sys/eventfd.h>
 
 #define RING_FAST 1			// when set we skip nil pointer checks on the ring pointer
+
+/*
+	This returns the ring's pollable file descriptor. If one does not exist, then
+	it is created.
+*/
+static int uta_ring_getpfd( void* vr ) {
+	ring_t*		r;
+
+	if( !RING_FAST ) {								// compiler should drop the conditional when always false
+		if( (r = (ring_t*) vr) == NULL ) {
+			return 0;
+		}
+	} else {
+		r = (ring_t*) vr;
+	}
+
+	if( r->pfd < 0 ) {
+		r->pfd = eventfd( 0, EFD_SEMAPHORE | EFD_NONBLOCK );
+	}
+
+	return r->pfd;
+}
 
 /*
 	Make a new ring.
@@ -63,6 +86,7 @@ static void* uta_mk_ring( int size ) {
 	}
 
 	memset( r->data, 0, sizeof( void** ) * r->nelements );
+	r->pfd = eventfd( 0, EFD_SEMAPHORE | EFD_NONBLOCK );		// in semaphore mode counter is maintained with each insert/extract
 	return (void *) r;
 }
 
@@ -88,6 +112,7 @@ static void uta_ring_free( void* vr ) {
 static inline void* uta_ring_extract( void* vr ) {
 	ring_t*		r;
 	uint16_t	ti;		// real index in data
+	int64_t	ctr;		// pfd counter
 
 	if( !RING_FAST ) {								// compiler should drop the conditional when always false
 		if( (r = (ring_t*) vr) == NULL ) {
@@ -107,6 +132,12 @@ static inline void* uta_ring_extract( void* vr ) {
 		r->tail = 0;
 	}
 
+	read( r->pfd, &ctr, sizeof( ctr )  );				// when not in semaphore, this zeros the counter and value is meaningless
+/*
+future -- investigate if it's possible only to set/clear when empty or going to empty
+	if( r->tail == r->head ) {								// if this emptied the ring, turn off ready
+	}
+*/
 	return r->data[ti];
 }
 
@@ -116,6 +147,7 @@ static inline void* uta_ring_extract( void* vr ) {
 */
 static inline int uta_ring_insert( void* vr, void* new_data ) {
 	ring_t*		r;
+	int64_t	inc = 1;				// used to set the counter in the pfd
 
 	if( !RING_FAST ) {								// compiler should drop the conditional when always false
 		if( (r = (ring_t*) vr) == NULL ) {
@@ -128,6 +160,13 @@ static inline int uta_ring_insert( void* vr, void* new_data ) {
 	if( r->head+1 == r->tail || (r->head+1 >= r->nelements && !r->tail) ) {		// ring is full
 		return 0;
 	}
+
+	write( r->pfd, &inc, sizeof( inc ) );
+/*
+future -- investigate if it's possible only to set/clear when empty or going to empty
+	if( r->tail == r->head ) {								// turn on ready if ring was empty
+	}
+*/
 
 	r->data[r->head] = new_data;
 	r->head++;

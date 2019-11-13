@@ -1,8 +1,8 @@
 // vim: ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 */
 
 /*
-	Mnemonic:	rtable_nng_static.c
+	Mnemonic:	rtable_si_static.c
 	Abstract:	Route table management functions which depend on the underlying
 				transport mechanism and thus cannot be included with the generic
 				route table functions.
@@ -49,6 +49,16 @@
 // -----------------------------------------------------------------------------------------------------
 
 /*
+	Mark an endpoint closed because it's in a failing state.
+*/
+static void uta_ep_failed( endpoint_t* ep ) {
+	if( ep != NULL ) {
+		if( DEBUG ) fprintf( stderr, "[DBUG] connection to %s was closed\n", ep->name );
+		ep->open = 0;
+	}
+}
+
+/*
 	Establish a TCP connection to the indicated target (IP address).
 	Target assumed to be address:port.  The new socket is returned via the
 	user supplied pointer so that a success/fail code is returned directly.
@@ -59,41 +69,26 @@
 	get things into a bad state if we allow a collision here.  The lock grab
 	only happens on the intial session setup.
 */
-static int uta_link2( endpoint_t* ep ) {
-	static int	flags = -1;
+static int uta_link2( si_ctx_t* si_ctx, endpoint_t* ep ) {
+	static int	flags = 0;
 
 	char* 		target;
-	nng_socket*	nn_sock;
-	nng_dialer*	dialer;
-	char		conn_info[NNG_MAXADDRLEN];	// string to give to nano to make the connection
+	char		conn_info[SI_MAX_ADDR_LEN];	// string to give to nano to make the connection
 	char*		addr;
 	int			state = FALSE;
 	char*		tok;
 
 	if( ep == NULL ) {
+		if( DEBUG ) fprintf( stderr, "[DBUG] link2 ep was nil!\n" );
 		return FALSE;
 	}
 
-	if( flags < 0 ) {
-		tok = getenv( "RMR_ASYNC_CONN" );
-		if( tok == NULL || *tok == '1' ) {
- 			flags = NNG_FLAG_NONBLOCK;				// start dialer asynch
-		} else {
-			flags = NO_FLAGS;
-		}
-	}
-
-	target = ep->name;				// always give name to transport so chaning dest IP does not break reconnect
-	nn_sock = &ep->nn_sock;
-	dialer = &ep->dialer;
-
+	target = ep->name;				// always give name to transport so changing dest IP does not break reconnect
 	if( target == NULL  ||  (addr = strchr( target, ':' )) == NULL ) {		// bad address:port
-		fprintf( stderr, "rmr: link2: unable to create link: bad target: %s\n", target == NULL ? "<nil>" : target );
-		return FALSE;
-	}
-
-	if( nn_sock == NULL ) {
-		errno = EINVAL;
+		if( ep->notify ) {
+			fprintf( stderr, "[WARN] rmr: link2: unable to create link: bad target: %s\n", target == NULL ? "<nil>" : target );
+			ep->notify = 0;
+		}
 		return FALSE;
 	}
 
@@ -103,34 +98,29 @@ static int uta_link2( endpoint_t* ep ) {
 		return TRUE;
 	}
 
-
-	if( nng_push0_open( nn_sock ) != 0 ) {			// and assign the mode
+	snprintf( conn_info, sizeof( conn_info ), "%s", target );
+	errno = 0;
+	if( DEBUG > 1 ) fprintf( stderr, "[DBUG] link2 attempting connection with: %s\n", conn_info );
+	if( (ep->nn_sock = SIconnect( si_ctx, conn_info )) < 0 ) {
 		pthread_mutex_unlock( &ep->gate );
-		fprintf( stderr, "[CRI] rmr: link2: unable to initialise nanomsg push socket to: %s\n", target );
+
+		if( ep->notify ) {							// need to notify if set
+			fprintf( stderr, "[WRN] rmr: link2: unable to connect  to target: %s: %d %s\n", target, errno, strerror( errno ) );
+			ep->notify = 0;
+		}
+		//nng_close( *nn_sock );
 		return FALSE;
 	}
 
-	snprintf( conn_info, sizeof( conn_info ), "tcp://%s", target );
-	if( (state = nng_dialer_create( dialer, *nn_sock, conn_info )) != 0 ) {
-		pthread_mutex_unlock( &ep->gate );
-		fprintf( stderr, "[WRN] rmr: link2: unable to create dialer for link to target: %s: %d\n", target, errno );
-		nng_close( *nn_sock );
-		return FALSE;
+	if( DEBUG ) fprintf( stderr, "[INFO] rmr_si_link2: connection was successful to: %s\n", target );
+
+	ep->open = TRUE;						// set open/notify before giving up lock
+
+	if( ! ep->notify ) {						// if we yammered about a failure, indicate finally good
+		fprintf( stderr, "[INFO] rmr: link2: connection finally establisehd with target: %s\n", target );
+		ep->notify = 1;
 	}
 
-	nng_dialer_setopt_ms( *dialer,  NNG_OPT_RECONNMAXT, 2000 );		// cap backoff on retries to reasonable amount (2s)
-	nng_dialer_setopt_ms( *dialer,  NNG_OPT_RECONNMINT, 100 );		// start retry 100m after last failure with 2s cap
-
-	if( (state = nng_dialer_start( *dialer, flags )) != 0 ) {						// can fail immediatly (unlike nanomsg)
-		pthread_mutex_unlock( &ep->gate );
-		fprintf( stderr, "[WRN] rmr: unable to create link to target: %s: %s\n", target, nng_strerror( state ) );
-		nng_close( *nn_sock );
-		return FALSE;
-	}
-
-	if( DEBUG ) fprintf( stderr, "[INFO] rmr_link2l: dial was successful: %s\n", target );
-
-	ep->open = TRUE;						// must set before release
 	pthread_mutex_unlock( &ep->gate );
 	return TRUE;
 }
@@ -138,10 +128,10 @@ static int uta_link2( endpoint_t* ep ) {
 /*
 	This provides a protocol independent mechanism for establishing the connection to an endpoint.
 	Return is true (1) if the link was opened; false on error.
-
-	For some flavours, the context is needed by this function, but not for nng.
 */
 static int rt_link2_ep( void* vctx, endpoint_t* ep ) {
+	uta_ctx_t* ctx;
+
 	if( ep == NULL ) {
 		return FALSE;
 	}
@@ -150,7 +140,11 @@ static int rt_link2_ep( void* vctx, endpoint_t* ep ) {
 		return TRUE;
 	}
 
-	uta_link2( ep );
+	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
+		return FALSE;
+	}
+
+	uta_link2( ctx->si_ctx, ep );
 	return ep->open;
 }
 
@@ -171,11 +165,12 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 		return NULL;
 	}
 
-	if( rte->nrrgroups <= group ) {
+	if( rte->nrrgroups <= group || group < 0 ) {
 		fprintf( stderr, "[WRN] uda_add_ep group out of range: %d (max == %d)\n", group, rte->nrrgroups );
 		return NULL;
 	}
 
+	//fprintf( stderr, ">>>> add ep grp=%d to rte @ 0x%p  rrg=%p\n", group, rte, rte->rrgroups[group] );
 	if( (rrg = rte->rrgroups[group]) == NULL ) {
 		if( (rrg = (rrgroup_t *) malloc( sizeof( *rrg ) )) == NULL ) {
 			fprintf( stderr, "[WRN] rmr_add_ep: malloc failed for round robin group: group=%d\n", group );
@@ -190,10 +185,13 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 		memset( rrg->epts, 0, sizeof( endpoint_t ) * MAX_EP_GROUP );
 
 		rte->rrgroups[group] = rrg;
+		//fprintf( stderr, ">>>> added new rrg grp=%d to rte @ 0x%p  rrg=%p\n", group, rte, rte->rrgroups[group] );
 
 		rrg->ep_idx = 0;						// next endpoint to send to
 		rrg->nused = 0;							// number populated
 		rrg->nendpts = MAX_EP_GROUP;			// number allocated
+
+		if( DEBUG > 1 ) fprintf( stderr, "[DBUG] rrg added to rte: mtype=%d group=%d\n", rte->mtype, group );
 	}
 
 	ep = rt_ensure_ep( rt, ep_name ); 			// get the ep and create one if not known
@@ -209,7 +207,7 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 		rrg->nused++;
 	}
 
-	if( DEBUG > 1 ) fprintf( stderr, "[DBUG] endpoint added to mtype/group: %d/%d %s\n", rte->mtype, group, ep_name );
+	if( DEBUG > 1 ) fprintf( stderr, "[DBUG] endpoint added to mtype/group: %d/%d %s nused=%d\n", rte->mtype, group, ep_name, rrg->nused );
 	return ep;
 }
 
@@ -219,7 +217,7 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 	the user pointer passed in and sets the return value to true (1). If the
 	endpoint cannot be found false (0) is returned.
 */
-static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_sock, endpoint_t** uepp ) {
+static int uta_epsock_byname( route_table_t* rt, char* ep_name, int* nn_sock, endpoint_t** uepp, si_ctx_t* si_ctx ) {
 	endpoint_t* ep;
 	int state = FALSE;
 
@@ -243,7 +241,7 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_s
 		if( ep->addr == NULL ) {					// name didn't resolve before, try again
 			ep->addr = strdup( ep->name );			// use the name directly; if not IP then transport will do dns lookup
 		}
-		if( uta_link2( ep ) ) {											// find entry in table and create link
+		if( uta_link2( si_ctx, ep ) ) {											// find entry in table and create link
 			state = TRUE;
 			ep->open = TRUE;
 			*nn_sock = ep->nn_sock;							// pass socket back to caller
@@ -283,37 +281,40 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, nng_socket* nn_s
 		Both of these, in the grand scheme of things, is minor compared to the
 		overhead of grabbing a lock on each call.
 */
-static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, nng_socket* nn_sock, endpoint_t** uepp ) {
+static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, int* nn_sock, endpoint_t** uepp, si_ctx_t* si_ctx ) {
 	endpoint_t*	ep;				// seected end point
 	int  state = FALSE;			// processing state
 	int dummy;
 	rrgroup_t* rrg;
 	int	idx;
 
+	//fprintf( stderr, ">>>> epsock_rr selecting: grp=%d mtype=%d ngrps=%d\n", group, rte->mtype, rte->nrrgroups );
 
 	if( ! more ) {				// eliminate cheks each time we need to use
 		more = &dummy;
 	}
 
 	if( ! nn_sock ) {			// user didn't supply a pointer
+		if( DEBUG ) fprintf( stderr, "[DBUG] epsock_rr invalid nnsock pointer\n" );
 		errno = EINVAL;
 		*more = 0;
 		return FALSE;
 	}
 
 	if( rte == NULL ) {
+		if( DEBUG ) fprintf( stderr, "[DBUG] epsock_rr rte was nil; nothing selected\n" );
 		*more = 0;
 		return FALSE;
 	}
 
 	if( group < 0 || group >= rte->nrrgroups ) {
-		//if( DEBUG ) fprintf( stderr, ">>>> group out of range: group=%d max=%d\n", group, rte->nrrgroups );
+		if( DEBUG > 1 ) fprintf( stderr, "[DBUG] group out of range: group=%d max=%d\n", group, rte->nrrgroups );
 		*more = 0;
 		return FALSE;
 	}
 
 	if( (rrg = rte->rrgroups[group]) == NULL ) {
-		//if( DEBUG ) fprintf( stderr, ">>>> rrg not found for group \n", group );
+		if( DEBUG > 1 ) fprintf( stderr, "[DBUG] rrg not found for group %d (ptr rrgroups[g] == nil)\n", group );
 		*more = 0; 					// groups are inserted contig, so nothing should be after a nil pointer
 		return FALSE;
 	}
@@ -322,34 +323,34 @@ static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, nng_socket* n
 
 	switch( rrg->nused ) {
 		case 0:				// nothing allocated, just punt
-			//if( DEBUG ) fprintf( stderr, ">>>> nothing allocated for the rrg\n" );
+			if( DEBUG > 1 ) fprintf( stderr, "[DBUG] nothing allocated for the rrg\n" );
 			return FALSE;
 
 		case 1:				// exactly one, no rr to deal with
 			ep = rrg->epts[0];
-			//if( DEBUG ) fprintf( stderr, ">>>> _rr returning socket with one choice in group \n" );
+			if( DEBUG > 1 ) fprintf( stderr, "[DBUG] _rr returning socket with one choice in group \n" );
 			state = TRUE;
 			break;
 
 		default:										// need to pick one and adjust rr counts
-
 			idx = rrg->ep_idx++ % rrg->nused;			// see note above
 			ep = rrg->epts[idx];						// select next endpoint
-			//if( DEBUG ) fprintf( stderr, ">>>> _rr returning socket with multiple choices in group idx=%d \n", rrg->ep_idx );
+			if( DEBUG > 1 ) fprintf( stderr, "[DBUG] _rr returning socket with multiple choices in group idx=%d \n", rrg->ep_idx );
 			state = idx + 1;							// unit test checks to see that we're cycling through, so must not just be TRUE
 			break;
 	}
 
-	if( uepp != NULL ) {								// caller needs refernce to endpoint too
+	if( uepp != NULL ) {								// caller may need refernce to endpoint too; give it if pointer supplied
 		*uepp = ep;
 	}
 	if( state ) {										// end point selected, open if not, get socket either way
 		if( ! ep->open ) {								// not connected
+			if( DEBUG ) fprintf( stderr, "[DBUG] epsock_rr selected endpoint not yet open; opening %s\n", ep->name );
 			if( ep->addr == NULL ) {					// name didn't resolve before, try again
 				ep->addr = strdup( ep->name );			// use the name directly; if not IP then transport will do dns lookup
 			}
 
-			if( uta_link2( ep ) ) {											// find entry in table and create link
+			if( uta_link2( si_ctx, ep ) ) {											// find entry in table and create link
 				ep->open = TRUE;
 				*nn_sock = ep->nn_sock;							// pass socket back to caller
 			} else {
@@ -361,6 +362,7 @@ static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, nng_socket* n
 		}
 	}
 
+	if( DEBUG > 1 ) fprintf( stderr, "[DBUG] epsock_rr returns state=%d\n", state );
 	return state;
 }
 
@@ -388,20 +390,6 @@ static inline rtable_ent_t*  uta_get_rte( route_table_t *rt, int sid, int mtype,
 	}
 
 	return rte;
-}
-
-/*
-	Given a route table and meid string, find the owner (if known). Returns a pointer to
-	the endpoint struct or nil.
-*/
-static inline endpoint_t*  get_meid_owner( route_table_t *rt, char* meid ) {
-	endpoint_t* ep;		// the ep we found in the hash
-
-	if( rt == NULL || rt->hash == NULL || meid == NULL || *meid == 0 ) {
-		return NULL;
-	}
-
-	return (endpoint_t *) rmr_sym_get( rt->hash, meid, RT_ME_SPACE ); 
 }
 
 /*
@@ -433,58 +421,6 @@ static inline char* get_ep_counts( endpoint_t* ep, char* ubuf, int ubuf_len ) {
 	snprintf( rs, ubuf_len, "%s %lld %lld %lld", ep->name, ep->scounts[EPSC_GOOD], ep->scounts[EPSC_FAIL], ep->scounts[EPSC_TRANS] );
 
 	return rs;
-}
-
-/*
-	Given a message, use the meid field to find the owner endpoint for the meid.
-	The owner ep is then used to extract the socket through which the message
-	is sent. This returns TRUE if we found a socket and it was written to the
-	nn_sock pointer; false if we didn't.
-
-	We've been told that the meid is a string, thus we count on it being a nil
-	terminated set of bytes.
-*/
-static int epsock_meid( route_table_t *rtable, rmr_mbuf_t* msg, nng_socket* nn_sock, endpoint_t** uepp ) {
-	endpoint_t*	ep;				// seected end point
-	int  	state = FALSE;			// processing state
-	char*	meid;
-
-
-	errno = 0;
-	if( ! nn_sock || msg == NULL || rtable == NULL ) {			// missing stuff; bail fast
-		errno = EINVAL;
-		return FALSE;
-	}
-
-	meid = ((uta_mhdr_t *) msg->header)->meid;
-
-	if( (ep = get_meid_owner( rtable, meid )) == NULL ) {
-		if( uepp != NULL ) {								// caller needs refernce to endpoint too
-			*uepp = NULL;
-		}
-
-		if( DEBUG ) fprintf( stderr, "[DBUG] epsock_meid: no ep in hash for (%s)\n", meid );
-		return FALSE;
-	}
-
-	state = TRUE;
-	if( ! ep->open ) {								// not connected
-		if( ep->addr == NULL ) {					// name didn't resolve before, try again
-			ep->addr = strdup( ep->name );			// use the name directly; if not IP then transport will do dns lookup
-		}
-
-		if( uta_link2( ep ) ) {						// find entry in table and create link
-			ep->open = TRUE;
-			*nn_sock = ep->nn_sock;					// pass socket back to caller
-		} else {
-			state = FALSE;
-		}
-		if( DEBUG ) fprintf( stderr, "[DBUG] epsock_meid: connection attempted with %s: %s\n", ep->name, state ? "[OK]" : "[FAIL]" );
-	} else {
-		*nn_sock = ep->nn_sock;
-	}
-
-	return state;
 }
 
 #endif

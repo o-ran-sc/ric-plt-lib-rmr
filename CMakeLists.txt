@@ -19,6 +19,7 @@
 
 # This CMake definition supports several -D command line options:
 #
+#	-DDEBUG=n			Enable debugging level n
 #	-DDEV_PKG=1			Development package configuration
 #	-DBUILD_DOC=1		Man pages generated
 #	-DIGNORE_LIBDIR=1	Installation of rmr libries is into /usr/local/lib and ignores
@@ -28,15 +29,16 @@
 #	-DPACK_EXTERNALS=1	Include external libraries used to build in the run-time package
 #						(This makes some stand-alone unit testing of bindings possible, it
 #						is not meant to be used for production package generation.)
+#	-DGPROF=1			Enable profiling compile time flags
 #	-DSKIP_EXTERNALS=1	Do not use NNG submodule when building; uee installed packages
 #	-DMAN_PREFIX=<path>	Supply a path where man pages are installed (default: /usr/share/man)
 
 project( rmr LANGUAGES C )
 cmake_minimum_required( VERSION 3.5 )
 
-set( major_version "1" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
-set( minor_version "13" )
-set( patch_level "1" )
+set( major_version "3" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
+set( minor_version "0" )
+set( patch_level "0" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_inc "include/rmr" )
@@ -100,9 +102,10 @@ if( DEBUG )					# if set, we'll set debugging on in the compile
 	message( "+++ debugging is being set to ${DEBUG}" )
 else()
 	set( debugging 0 )
-        message( "+++ debugging is set to off" )
+	message( "+++ debugging is set to off" )
 endif()
 unset( DEBUG CACHE )					# we don't want this to persist
+
 
 # define constants used in the version string, debugging, etc.
 add_definitions(
@@ -225,11 +228,21 @@ include_directories( "${CMAKE_CURRENT_BINARY_DIR}/include" )
 # Compiler flags
 #
 set( CMAKE_POSITION_INDEPENDENT_CODE ON )
-set( CMAKE_CXX_FLAGS "-g -Wall " )
+#set( CMAKE_C_FLAGS "-g -Wall " )
+#set( CMAKE_C_FLAGS "-g " )
+if( GPROF )					# if set, we'll set profiling flag on compiles
+	message( "+++ profiling is on" )
+	set( CMAKE_C_FLAGS "-pg " )
+else()
+	message( "+++ profiling is off" )
+	set( CMAKE_C_FLAGS "-g " )
+endif()
+unset( GPROF CACHE )					# we don't want this to persist
 
 # Include modules
 add_subdirectory( src/rmr/common )
 add_subdirectory( src/rmr/nng )
+add_subdirectory( src/rmr/si )
 add_subdirectory( doc )				# this will auto skip if {X}fm is not available
 
 
@@ -254,6 +267,23 @@ if( DEV_PKG )
 		VERSION ${major_version}.${minor_version}.${patch_level} )
 endif()
 
+add_library( rmr_si_shared SHARED "$<TARGET_OBJECTS:rmr_si_objects>;$<TARGET_OBJECTS:common_objects>" )
+set_target_properties( rmr_si_shared
+	PROPERTIES
+	OUTPUT_NAME "rmr_si"
+	SOVERSION ${major_version}
+	VERSION ${major_version}.${minor_version}.${patch_level} )
+
+# we only build/export the static archive (.a) if generating a dev package
+if( DEV_PKG )
+	add_library( rmr_si_static STATIC "$<TARGET_OBJECTS:rmr_si_objects>;$<TARGET_OBJECTS:common_objects>" )
+	set_target_properties( rmr_si_static
+		PROPERTIES
+		OUTPUT_NAME "rmr_si"
+		SOVERSION ${major_version}
+		VERSION ${major_version}.${minor_version}.${patch_level} )
+endif()
+
 # if externals need to be built, then we must force them to be built first by depending on them
 if( need_ext )
 	if( DEV_PKG )
@@ -274,9 +304,9 @@ endif()
 # the library (.so) files and nothing more.
 #
 if( DEV_PKG )
-	set( target_list "rmr_nng_static" )
+	set( target_list "rmr_nng_static;rmr_si_static" )
 else()
-	set( target_list "rmr_nng_shared" )
+	set( target_list "rmr_nng_shared;rmr_si_shared" )
 endif()
 
 install( TARGETS ${target_list} EXPORT LibraryConfig

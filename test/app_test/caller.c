@@ -64,6 +64,7 @@
 #include <rmr/rmr.h>
 
 #define TRACE_SIZE 40		// bytes in header to provide for trace junk
+#define WBUF_SIZE 1024
 
 /*
 	Thread data
@@ -108,12 +109,14 @@ static void* mk_calls( void* data ) {
 	int		drops = 0;
 	int		fail_count = 0;					// # of failure sends after first successful send
 	int		successful = 0;					// set to true after we have a successful send
-	char	wbuf[1024];
+	char*	wbuf = NULL;
 	char	xbuf[1024];						// build transaction string here
 	char	trace[1024];
 	int		xaction_id = 1;
 	char*	tok;
 	int		state = 0;
+
+	wbuf = (char *) malloc( sizeof( char ) * WBUF_SIZE );
 
 	if( (control  = (tdata_t *) data) == NULL ) {
 		fprintf( stderr, "thread data was nil; bailing out\n" );

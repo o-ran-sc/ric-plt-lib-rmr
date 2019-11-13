@@ -54,7 +54,7 @@ int main( int argc, char** argv ) {
 	rmr_mbuf_t* msg = NULL;				// message received
 	int stat_freq = 10;				// write stats after reciving this many messages
 	int i;
-	char*	listen_port;
+	char*	listen_port = "4560";		// default to what has become the standard RMR port
 	long long count = 0;
 	long long bad = 0;
 	long long empty = 0;

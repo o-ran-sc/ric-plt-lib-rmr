@@ -230,7 +230,7 @@ extern rmr_whid_t rmr_wh_open( void* vctx, char const* target ) {
 		}
 	}
 
-	if( !rt_link2_ep( ep ) ) {			// start a connection if open already
+	if( !rt_link2_ep( ctx, ep ) ) {			// start a connection if not already open
 		errno = ECONNREFUSED;
 		return -1;
 	}
