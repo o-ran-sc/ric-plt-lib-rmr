@@ -132,6 +132,11 @@
 #define DC_ADM_GET_POLICY			20002
 #define DC_ADM_GET_POLICY_ACK		20003
 
+#define A1_POLICY_REQ      			20010
+#define A1_POLICY_RESP    			20011
+#define A1_POLICY_QUERY				20012
+
+
 
 
 // ---- these are old (release 0) definitions and should not be used ------
