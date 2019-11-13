@@ -1,0 +1,19 @@
+
+SI95 is a port of a lightweight TCP|UDP/IP communications library
+originally called Socket Interface and was written in 1995. For
+use by RMR as an integrated transport layer it has been dubbed
+SI95, and unneeded features (UDP, multicast, child process support)
+have been removed.  The orignal code was released into the public
+domain (open source) with a 2-part BSD style license; the orignal 
+authors have allowed the Apache license covering RMR to replace
+the original license text in each file provided that the original
+file headers are left to document the origin of the source. 
+
+The library is constructed as an integrated set of externally visible
+functions within the RMR library (librmr_si), however there is no
+plan to make any SI95 headers directly available in the RMR development
+package; in other words, it will be difficult for a user application
+to make use of SI95 directly.
+
+All external SI95 functions will retain their original SI prefix (e.g.
+SIsendt). 

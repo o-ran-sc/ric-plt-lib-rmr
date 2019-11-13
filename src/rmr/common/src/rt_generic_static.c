@@ -344,6 +344,7 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 				ngtoks = 0;																	// special indicator that uses meid to find endpoint, no rrobin
 			}
 			rte = uta_add_rte( ctx->new_rtable, key, ngtoks );								// get/create entry for this key
+			rte->mtype = atoi( ts_field );													// capture mtype for debugging
 
 			for( grp = 0; grp < ngtoks; grp++ ) {
 				if( (ntoks = uta_rmip_tokenise( gtokens[grp], ctx->ip_list, tokens, 64, ',' )) > 0 ) {		// remove any referneces to our ip addrs
@@ -1085,6 +1086,7 @@ static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name ) {
 			return NULL;
 		}
 
+		ep->notify = 1;								// show notification on first connection failure
 		ep->open = 0;								// not connected
 		ep->addr = uta_h2ip( ep_name );
 		ep->name = strdup( ep_name );

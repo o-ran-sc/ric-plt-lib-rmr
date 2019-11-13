@@ -1,0 +1,149 @@
+// vim: noet sw=4 ts=4:
+/*
+==================================================================================
+    Copyright (c) 2020 Nokia
+    Copyright (c) 2020 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+*/
+
+/*
+**************************************************************************
+*  Mnemonic: SIwait
+*  Abstract: This  routine will wait for an event to occur on the
+*            connections in tplist. When an event is received on a fd
+*            the status of the fd is checked and the event handled, driving
+*            a callback routine if necessary. The system call poll is usd
+*            to wait, and will be interrupted if a signal is caught,
+*            therefore the routine will handle any work that is required
+*            when a signal is received. The routine continues to loop
+*            until the shutdown flag is set, or until there are no open
+*            file descriptors on which to wait.
+*  Parms:    gptr - Pointer to the global information block
+*  Returns:  SI_OK if the caller can continue, SI_ERROR if all sessions have been
+*            stopped, or the interface cannot proceed. When SI_ERROR is
+*            returned the caller should cleanup and exit immediatly (we
+*            have probably received a sigter or sigquit.
+*  Date:     28 March 1995
+*  Author:   E. Scott Daniels
+*
+*  Modified: 11 Apr 1995 - To pass execption to select when no keyboard
+*            19 Apr 1995 - To call do key to do better keyboard editing
+*            18 Aug 1995 - To init kstat to 0 to prevent key hold if
+*                          network data pending prior to entry.
+*			31 Jul 2016 - Major formatting clean up in the main while loop.
+**************************************************************************
+*/
+#include  "sisetup.h"     //  get the setup stuff 
+#include "sitransport.h"
+#include	<sys/wait.h>
+
+
+extern int SIwait( struct ginfo_blk *gptr ) {
+	int fd;							//  file descriptor for use in this routine 
+	int ((*cbptr)());				//  pointer to callback routine to call 
+	int status = SI_OK;				//  return status 
+	int addrlen;					//  length of address from recvfrom call 
+	int i;							//  loop index 
+	struct tp_blk *tpptr;			//  pointer at tp stuff 
+	struct tp_blk *nextone;			//  point at next block to process in loop 
+	int pstat;						//  poll status 
+ 	struct timeval  timeout;		//  delay to use on select call
+	char *buf;
+	char *ibuf;
+
+	ibuf = (char *) malloc( 2048 );
+
+	gptr->sierr = SI_ERR_SHUTD;
+
+	if( gptr->flags & GIF_SHUTDOWN ) {				//  cannot do if we should shutdown 
+		fprintf( stderr, ">>> wait: shutdown on entry????\n" );
+		return SI_ERROR;							//  so just get out 
+	}
+
+	gptr->sierr = SI_ERR_HANDLE;
+
+	if( gptr->magicnum != MAGICNUM ) {				//  if not a valid ginfo block 
+		fprintf( stderr, ">>> wait: bad magic on entry????\n" );
+		return SI_ERROR;
+	}
+
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 500000;				// pop every 500ms to ensure we pick up new outbound connections in list
+
+ 	do {									// main wait/process loop 
+
+		SIbldpoll( gptr );					// build the fdlist for poll 
+		pstat = select( gptr->fdcount, &gptr->readfds, &gptr->writefds, &gptr->execpfds, &timeout );
+
+		if( (pstat < 0 && errno != EINTR)  ) {
+			gptr->fdcount = 0;				//  prevent trying to look at a session 
+			gptr->flags |= GIF_SHUTDOWN;	//  cause cleanup and exit at end 
+		}
+
+		if( pstat > 0  &&  (! (gptr->flags & GIF_SHUTDOWN)) ) {
+			for( tpptr = gptr->tplist; tpptr != NULL; tpptr = nextone ) {
+				nextone = tpptr->next;				//  prevent issues if we delete the block during loop 
+
+				if( tpptr->fd >= 0 ) {
+					if( tpptr->squeue != NULL && (FD_ISSET( tpptr->fd, &gptr->writefds )) ) {
+						SIsend( gptr, tpptr );			//  send if clear to send 
+					}
+	
+					if( FD_ISSET( tpptr->fd, &gptr->execpfds ) ) {
+							;  				// sunos seems to set the except flag for unknown reasons; ignore it
+					} else {
+						if( FD_ISSET( tpptr->fd, &gptr->readfds ) ) {			// ready to read
+							fd = tpptr->fd;
+							tpptr->rcvd++;
+	
+							if( tpptr->flags & TPF_LISTENFD ) {					// new session request
+								errno=0;
+								status = SInewsession( gptr, tpptr );			// accept connection
+							} else  {											//  data received on a regular port (we support just tcp now
+								status = RECV( fd, gptr->rbuf, MAX_RBUF, 0 );	//  read data 
+								if( status > 0  &&  ! (tpptr->flags & TPF_DRAIN) ) {
+									if( (cbptr = gptr->cbtab[SI_CB_CDATA].cbrtn) != NULL ) {
+										status = (*cbptr)( gptr->cbtab[SI_CB_CDATA].cbdata, fd, gptr->rbuf, status );
+										SIcbstat( gptr, status, SI_CB_CDATA );	//  handle cb status 
+									}
+								} else {	 									// no bites, but read flagged indicates disconnect
+									if( (cbptr = gptr->cbtab[SI_CB_DISC].cbrtn) != NULL ) {
+										status = (*cbptr)( gptr->cbtab[SI_CB_DISC].cbdata, tpptr->fd );
+										SIcbstat( gptr, status, SI_CB_DISC );	//  handle status 
+									}
+									SIterm( gptr, tpptr );
+								}
+							}
+						}
+					}
+				}								//  if still good fd 
+			}
+		}
+	} while( gptr->tplist != NULL && !(gptr->flags & GIF_SHUTDOWN) );
+
+	free( ibuf );
+	if( gptr->tplist == NULL )					//  indicate all fds closed 
+		gptr->sierr = SI_ERR_NOFDS;
+
+	if( gptr->flags & GIF_SHUTDOWN ) {			//  we need to stop for some reason 
+		gptr->sierr = SI_ERR_SHUTD;				//  indicate error exit status 
+		status = SI_ERROR;						//  status should indicate to user to die 
+		SIshutdown( gptr );						//  clean things up 
+	} else {
+		status = SI_OK;							//  user can continue to process 
+	}
+
+	return status;
+}
