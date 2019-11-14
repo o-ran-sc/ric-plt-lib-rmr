@@ -467,10 +467,10 @@ static inline rmr_mbuf_t* realloc_payload( rmr_mbuf_t* old_msg, int payload_len,
 
 	if( copy ) {																// if we need to copy the old payload too
 		if( DEBUG ) fprintf( stderr, "[DBUG] rmr_realloc_payload: copy payload into new message: %d bytes\n", old_psize );
-		memcpy( nm->header, omhdr, sizeof( char ) * old_psize );
+		memcpy( nm->header, omhdr, sizeof( char ) * (old_psize + RMR_HDR_LEN( omhdr )) );
 	} else {																	// just need to copy header
 		if( DEBUG ) fprintf( stderr, "[DBUG] rmr_realloc_payload: copy only header into new message: %d bytes\n", RMR_HDR_LEN( nm->header ) );
-		memcpy( nm->header, omhdr, sizeof( char ) * RMR_HDR_LEN( nm->header ) );
+		memcpy( nm->header, omhdr, sizeof( char ) * RMR_HDR_LEN( omhdr ) );
 	}
 
 	ref_tpbuf( nm, mlen );			// set payload and other pointers in the message to the new tp buffer

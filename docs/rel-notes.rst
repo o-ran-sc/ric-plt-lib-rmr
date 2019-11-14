@@ -15,6 +15,20 @@ file at the repo root; please refer to that file for a
 completely up to date listing of API changes. 
  
  
+2019 November 14; version 1.11.1 
+-------------------------------------------------------------------------------------------- 
+ 
+Fix bug in payload reallocation function; correct length of 
+payload was not always copied. 
+ 
+ 
+2019 November 4; version 1.11.0 
+-------------------------------------------------------------------------------------------- 
+ 
+Version bump to move away from the 1.10.* to distinguish 
+between release A and the trial. 
+ 
+ 
 2019 October 31; version 1.10.2 
 -------------------------------------------------------------------------------------------- 
  
@@ -64,6 +78,7 @@ Correct bug in rmr_torcv_msg() when timeout set to zero (0).
 -------------------------------------------------------------------------------------------- 
  
 Correct missing constant for wrappers. 
+ 
  
 2019 September 19; version 1.8.0 
 -------------------------------------------------------------------------------------------- 
@@ -127,6 +142,7 @@ operations. C programmes should continue to use errno
 directly, but in some environments wrappers may not be able 
 to access errno and this provides the value to them. See the 
 rmr_alloc_msg manual page for more details. 
+ 
  
 2019 August 6; version 1.0.45 (build changes) 
 -------------------------------------------------------------------------------------------- 
