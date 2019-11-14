@@ -198,6 +198,9 @@ int main( int argc, char** argv ) {
 					while( rt_count > 0 && msg != NULL && msg->state == RMR_ERR_RETRY ) {		// to work right in nano we need this :(
 						if( ack_count < 1 ) {									// 1st ack, so we need to connect, and we'll wait for that
 							sleep( 1 );
+							if( rt_count > 5 ) {
+								rt_count = 5;									// but only for 5sec; not 1000sec!
+							}
 						}
 						rt_count--;
 						msg = rmr_rts_msg( mrc, msg );							// we don't try to resend if this returns retry

@@ -214,10 +214,15 @@ int main( int argc, char** argv ) {
 					sbuf = rmr_send_msg( mrc, sbuf );			// retry send until it's good (simple test; real programmes should do better)
 				}
 				if( sbuf->state == RMR_OK ) {
+					if( successful == 0 ) {
+						fail_count = 0;							// count only after first message goes through
+					}
 					successful = 1; 							// indicates only that we sent one successful message, not the current state
 				} else {
-					if( successful ) {
-						fail_count++;							// count failures after first successful message
+					fail_count++;							// count failures after first successful message
+					if( !successful && fail_count > 30 ) {
+						fprintf( stderr, "[FAIL] too many send errors for this test\n" );
+						exit( 1 );
 					}
 				}
 				break;
@@ -273,7 +278,7 @@ int main( int argc, char** argv ) {
 		}
 	}
 
-	timeout = time( NULL ) + 2;				// allow 2 seconds for the pipe to drain from the receiver
+	timeout = time( NULL ) + 20;				// allow 20 seconds for the pipe to drain from the receiver
 	while( time( NULL ) < timeout );
 		if( rcv_fd >= 0 ) {
 			while( (nready = epoll_wait( ep_fd, events, 1, 100 )) > 0 ) {			// if something ready to receive (non-blocking check)
@@ -283,7 +288,7 @@ int main( int argc, char** argv ) {
 					if( rbuf ) {
 						rcvd_count++;
 						rts_ok += vet_received( me, rbuf->payload );
-						timeout = time( NULL ) + 2;
+						timeout = time( NULL ) + 10;							// break 10s after last received message
 					}
 				}
 			}
