@@ -2,6 +2,14 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2019 November 14; version 1.11.1
+	Fix bug in payload reallocation function; correct length of payload
+	was not always copied.
+
+2019 November 4; version 1.11.0
+	Version bump to move away from the 1.10.* to distinguish between
+	release A and the trial.
+
 2019 October 31; version 1.10.2
 	Provide the means to increase the payload size of a received message
 	without losing the data needed to use the rmr_rts_msg() funciton.
@@ -20,7 +28,7 @@ and/or changes are not mentioned here; see the commit messages.
 	Correct application level test issue causing timing problems during
 	jenkins verification testing at command and merge
 
-	Handle the NNG connection shutdown status which may now be 
+	Handle the NNG connection shutdown status which may now be
 	generated when a connection throug a proxy is reset.
 
 2019 September 25; version 1.8.2
@@ -28,7 +36,7 @@ and/or changes are not mentioned here; see the commit messages.
 
 2019 September 19; version 1.8.1
 	Correct missing constant for wrappers.
-	
+
 2019 September 19; version 1.8.0
 	New message types added:
 		RAN_CONNECTED, RAN_RESTARTED, RAN_RECONFIGURED
@@ -51,7 +59,7 @@ and/or changes are not mentioned here; see the commit messages.
 	the sender.  If this environment variable is not present, the host
 	name (original behaviour) is used.
 
-2019 August 26; version 1.4.0 
+2019 August 26; version 1.4.0
 	New message types were added.
 
 2019 August 16; version 1.3.0
@@ -68,9 +76,9 @@ and/or changes are not mentioned here; see the commit messages.
 	that the transport mechanism might set during send and/or
 	receive operations.  C programmes should continue to use
 	errno directly, but in some environments wrappers may not be
-	able to access errno and this provides the value to them. 
+	able to access errno and this provides the value to them.
 	See the rmr_alloc_msg manual page for more details.
-	
+
 2019 August 6; version 1.0.45 (build changes)
 	Support for the Nanomsg transport library has been dropped.
 		The library librmr.* will no longer be included in packages.
