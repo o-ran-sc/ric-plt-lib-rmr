@@ -62,7 +62,7 @@ echo "----- round robin -----------"
 run_test run_rr_test.ksh
 
 echo "----- rts -------------------"
-run_test run_rts_test.ksh -s 20
+run_test run_rts_test.ksh -s 5 -d 100
 
 echo "----- extended payload ------"
 run_test run_exrts_test.ksh -d 10 -n 1000

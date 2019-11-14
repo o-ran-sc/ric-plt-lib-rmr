@@ -182,13 +182,14 @@ int main( int argc, char** argv ) {
 					sbuf = rmr_send_msg( mrc, sbuf );			// retry send until it's good (simple test; real programmes should do better)
 				}
 				if( sbuf->state == RMR_OK ) {
+					if( successful == 0 ) {
+						fail_count = 0;							// reset on first good message out
+					}
 					successful = 1; 							// indicates only that we sent one successful message, not the current state
 				} else {
-					if( successful ) {
-						fail_count++;							// count failures after first successful message
-					}
-					if( fail_count > 10 ) {
-						fprintf( stderr, "too many failures\n" );
+					fail_count++;								// count failures after first successful message
+					if( ! successful && fail_count > 10 ) {
+						fprintf( stderr, "[FAIL] too many send failures\n" );
 						exit( 1 );
 					}
 				}
@@ -243,7 +244,7 @@ int main( int argc, char** argv ) {
 		}
 	}
 
-	timeout = time( NULL ) + 2;				// allow 2 seconds for the pipe to drain from the receiver
+	timeout = time( NULL ) + 20;				// allow 20 seconds for the pipe to drain from the receiver
 	while( time( NULL ) < timeout ) {
 		if( rcv_fd >= 0 ) {
 			while( (nready = epoll_wait( ep_fd, events, 1, 100 )) > 0 ) {
@@ -256,7 +257,7 @@ int main( int argc, char** argv ) {
 							rts_ok += validate_msg( rbuf->payload, rbuf->len );
 						}
 
-						timeout = time( NULL ) + 2;
+						timeout = time( NULL ) + 10;
 					}
 				}
 			}
@@ -264,6 +265,7 @@ int main( int argc, char** argv ) {
 	}
 
 	if( rcvd_count != rts_ok || count != nmsgs ) {			// we might not receive all back if receiver didn't retry, so that is NOT a failure here
+		fprintf( stderr, "<VSNDR> rcvd=%d rts_ok=%d count=%d nmsg=%d\n", rcvd_count, rts_ok, count, nmsgs );
 		pass = 0;
 	}
 
