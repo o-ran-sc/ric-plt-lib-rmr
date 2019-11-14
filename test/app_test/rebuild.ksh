@@ -47,7 +47,7 @@ echo "$(date) build starts" >&2
 		git pull						# get the up to date code so if run from an old image it's a good test
 	fi
 	cd $build_path
-	cmake ..
+	cmake .. -DDEV_PKG=1
 	make package
 ) >/tmp/PID$$.log
 if (( $? != 0 ))

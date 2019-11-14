@@ -214,10 +214,15 @@ int main( int argc, char** argv ) {
 					sbuf = rmr_send_msg( mrc, sbuf );			// retry send until it's good (simple test; real programmes should do better)
 				}
 				if( sbuf->state == RMR_OK ) {
+					if( successful == 0 ) {
+						fail_count = 0;							// count only after first message goes through
+					}
 					successful = 1; 							// indicates only that we sent one successful message, not the current state
 				} else {
-					if( successful ) {
-						fail_count++;							// count failures after first successful message
+					fail_count++;							// count failures after first successful message
+					if( !successful && fail_count > 30 ) {
+						fprintf( stderr, "[FAIL] too many send errors for this test\n" );
+						exit( 1 );
 					}
 				}
 				break;
