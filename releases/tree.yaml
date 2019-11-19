@@ -1,0 +1,7 @@
+---
+distribution_type: 'packagecloud'
+distro_type: 'Enterprise Linux'
+package_name: 
+    - name: 'tree-1.6.0-10.el7.x86_64.rpm'
+    - name: 'tree-1.5.3-3.el6.i686.rpm'
+    - name: 'tree-1.5.3-3.el6.x86_64.rpm'
