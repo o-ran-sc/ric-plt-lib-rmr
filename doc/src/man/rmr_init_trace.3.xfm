@@ -38,7 +38,7 @@
 &ex_start
 #include <rmr/rmr.h>
 
-void* rmr_init_trace( void* ctx )
+void* rmr_init_trace( void* ctx, int length )
 &ex_end
 
 &uindent
@@ -46,6 +46,8 @@ void* rmr_init_trace( void* ctx )
 &h2(DESCRIPTION)
 The &cw(rmr_init_trace) function establishes the default trace space placed in each 
 message buffer allocated with &cw(rmr_alloc_msg().)
+After calling this function, all messages allocated will contain &ital(length) bytes
+allocated in the message header for trace data.
 If this function is never called, then no trace space is allocated by default into
 any message buffer. 
 
