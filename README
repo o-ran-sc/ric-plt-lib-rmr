@@ -72,3 +72,9 @@ be ignored:
 	
 	.readthedocs.yaml -- this seems to be some configuration for the docs
 			scraping process(es).
+
+	.releases  -- a directory which contains a single .yaml file to direct how 
+			the package could .rpm/.deb files are promoted. (It doesn't allow 
+			multiple yaml files, and thus does not seem to support promoting the
+			RMR wrapper code into Python-land. More details can be found
+			using: https://docs.releng.linuxfoundation.org/projects/global-jjb/en/latest/jjb/lf-release-jobs.html
