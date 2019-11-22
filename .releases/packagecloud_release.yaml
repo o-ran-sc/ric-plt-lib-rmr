@@ -1,0 +1,9 @@
+# these packages will be automatically pushed to 'release'
+
+---
+distribution_type: packagecloud
+package_name:
+    - name: 'rmr_1.11.1_amd64.deb'
+    - name: ' rmr-dev_1.11.1_amd64.deb'
+    - name: 'rmr-1.11.1-1.x86_64.rpm'
+    - name: 'rmr-devel-1.11.1-1.x86_64.rpm'
