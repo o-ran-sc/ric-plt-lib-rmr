@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "21856294_7ad32ec0",
+        "filename": "releases/1.11.2-rmr.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000126
+      },
+      "writtenOn": "2019-11-25T20:35:58Z",
+      "side": 1,
+      "message": "Removed",
+      "range": {
+        "startLine": 3,
+        "startChar": 13,
+        "endLine": 3,
+        "endChar": 14
+      },
+      "revId": "460b33bd6e6987c0334fb36574628ae59ed064f8",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "53289008_3b72f680",
+        "filename": "releases/1.11.2-rmr.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1000126
+      },
+      "writtenOn": "2019-11-25T20:35:58Z",
+      "side": 1,
+      "message": "Removed",
+      "revId": "460b33bd6e6987c0334fb36574628ae59ed064f8",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    }
+  ]
+}
