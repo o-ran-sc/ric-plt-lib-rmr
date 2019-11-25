@@ -1,0 +1,7 @@
+---
+distribution_type: 'packagecloud'
+package_name:
+    - name: 'rmr_1.11.2_amd64.deb'
+    - name: 'rmr-dev_1.11.2_amd64.deb'
+    - name: 'rmr-devel-1.11.2-x86_64.rpm'
+    - name: 'rmr-1.11.2-x86_64.rpm'
