@@ -7,7 +7,7 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
-[X.X.X] - xxx
+[2.0.0] - 12/2/2019
 --------------------
 
 ::

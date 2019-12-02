@@ -14,14 +14,15 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 # ==================================================================================
+# install a well known working rmr
 FROM python:3.7-alpine
-
-# the alpine image keeps changing; if it fails try searching:
-# https://nexus3.o-ran-sc.org/#browse/search=keyword%3Dalpine3
-#
-# copy NNG and rmr out of the  CI builder nng
-COPY --from=nexus3.o-ran-sc.org:10004/bldr-alpine3:5-a3.9 /usr/local/lib64/libnng.so /usr/local/lib64/libnng.so
-COPY --from=nexus3.o-ran-sc.org:10004/bldr-alpine3:5-a3.9 /usr/local/lib64/librmr_nng.so /usr/local/lib64/librmr_nng.so
+RUN apk update && apk add autoconf automake build-base cmake libtool ninja pkgconfig git
+RUN git clone --branch 1.10.2 https://gerrit.o-ran-sc.org/r/ric-plt/lib/rmr \
+    && cd rmr \
+    && mkdir build \
+    && cd build \
+    && cmake .. -DPACK_EXTERNALS=1 \
+    && make install
 
 COPY rmr/ /tmp/rmr
 COPY tests/ /tmp/tests
