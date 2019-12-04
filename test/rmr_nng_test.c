@@ -79,6 +79,7 @@ static void gen_rt( uta_ctx_t* ctx );		// defined in sr_nng_static_test, but use
 
 											// specific test tools in this directory
 #include "test_support.c"					// things like fail_if()
+#include "test_gen_rt.c"
 											// and finally....
 #include "tools_static_test.c"				// local test functions pulled directly because of static nature of things
 #include "symtab_static_test.c"

@@ -44,7 +44,7 @@ request response, or call response relationship when needed.
 The Route Table 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
-The library is supplied with a route table which maps message 
+The library must be given a route table which maps message 
 numbers to endpoint groups such that each time a message of 
 type T is sent, the message is delivered to one member of 
 each group associated with T. For example, message type 2 
@@ -57,6 +57,113 @@ accept which message types. Once understood, the route table
 generator publishes a table that is ingested by RMr and used 
 for mapping messages to end points. 
  
+The following is a simple route table which causes message 
+types 0 through 9 to be routed to specific applications: 
+ 
+:: 
+  
+ newrt|start
+    mse|0|-1| %meid
+    mse|1|-1|app10:4560,app11:4560
+    mse|2|-1|app12:4560
+    mse|3|-1|app14:4560
+    mse|4|-1|app18:4560
+    mse|5|-1|app01:4560
+    mse|6|-1|app02:4560
+    mse|7|-1|app03:4560
+    mse|8|-1|app04:4560
+    mse|9|-1|app05:4560
+ newrt|end
+ 
+ 
+ 
+The special endpoint "%meid" indicates that the message type 
+(0 in this case) is to be routed to the endpoint which has 
+been listed as the "owner" for the meid appearing in the 
+message. MEID ownership is communicated to RMR using the same 
+Route Table Manager interface and by supplying a "table" such 
+as the one below: 
+ 
+:: 
+  
+ meid_map | start
+    mme_ar | control1 | meid000 meid001 meid002 meid003 meid004 meid005
+    mme_ar | control2 | meid100 meid101 meid102 meid103 
+ meid_map | end | 2
+ 
+ 
+This table indicates that the application (endpoint) 
+*control1* "owns" 6 MEIDs and *control2* owns 4. When message 
+type 0 is sent, the MEID in the message will be used to 
+select the endpoint via this table. 
+ 
+The MEID table will update the existing owner relationships, 
+and add new ones; it is necessary to send only the changes 
+with the add/replace (mme_ar) entries in the table. When 
+necessary, MEIDs can be deleted by adding an mme_del record 
+to the table. The following example illustrates how this 
+might look: 
+ 
+:: 
+  
+ meid_map | start
+    mme_ar | control1 | meid000 meid001 meid002 meid003 meid004 meid005
+    mme_ar | control2 | meid100 meid101 meid102 meid103 
+    mme_del| meid200 meid401
+ meid_map | end | 1
+ 
+ 
+ 
+Route Table Syntax 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+The following illustrates the syntax for both the route 
+table. 
+ 
+ 
+:: 
+  
+ newrt | start
+ mse | <message-type>[,<sender-endpoint>] | <sub-id> <roud-robin-grp>[;<round-robin-grp>]...
+ newrt | end
+ 
+ 
+ 
+A round robin group is one or more endpoints from which one 
+will be selected to receive the message. When multiple 
+endpoints are given in a group, they must be separated with a 
+comma. An endpoint is the IP address and port (e.g. 
+192.158.4.30:8219) or DNS name and port of the application 
+that should receive the message type. If multiple round-robin 
+groups are given, they must be separated by a semicolon, and 
+ 
+MEID Map Syntax 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+The MEID map is similar to the route table. Entries are used 
+to add or replace the ownership of one or more MEIDs (mme_ar) 
+or to delete one or more MEIDs (mme_del). The following is 
+the syntax for the MEID map. 
+ 
+ 
+:: 
+  
+ meid_map | start
+ mme_ar | <owner-endpoint> | <meid> [<meid>...]
+ mme_del | <meid> [<meid>...]
+ meid_map | end | <count>
+ 
+ 
+ 
+The <count> on the end record indicates the number of mme_ar 
+and mme_del records which were sent; if the count does not 
+match the whole map is refused and dropped. The 
+<owner-endpoint> is the endpoint which should receive the 
+message when a message is routed based on the MEID it 
+contains. A MEID may be "owned" by only one endpoint, and if 
+supplied multiple times, the last observed relationship is 
+used. Each of the lists of MEIDs are blank separated. 
+ 
 Environment 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
@@ -66,6 +173,7 @@ environment variables which provide information to the
 library. The following is a list of the various environment 
 variables, what they control and the defaults which RMr uses 
 if undefined. 
+ 
  
  
 RMR_ASYNC_CONN 
@@ -108,7 +216,10 @@ RMR_SEED_RT
   used for debugging, testing, or if no route table 
   generator process is being used to supply the route table. 
   If not defined, no static table is used and RMr will not 
-  report *ready* until a table is received. 
+  report *ready* until a table is received. The static route 
+  table may contain both the route table (between newrt 
+  start and end records), and the MEID map (between meid_map 
+  start and end records) 
  
 RMR_SRC_ID 
    

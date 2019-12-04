@@ -53,6 +53,12 @@
 		EINVAL id poitner, buf or buf header are bad.
 		EOVERFLOW if the bytes given would have overrun
 
+	We have been told that the meid will be a string, so we enforce that even if
+	the user is copying in bytes.  We will add a 0 byte at len+1 when len is less
+	than the field size, or as the last byte (doing damage to their string) if
+	the caller didn't play by the rules. If they pass a non-nil terminated set
+	of bytes which are the field length, we'll indicate truncation.
+
 */
 extern int rmr_bytes2meid( rmr_mbuf_t* mbuf, unsigned char const* src, int len ) {
 	uta_mhdr_t* hdr;
@@ -66,10 +72,19 @@ extern int rmr_bytes2meid( rmr_mbuf_t* mbuf, unsigned char const* src, int len )
 	if( len > RMR_MAX_MEID ) {
 		len = RMR_MAX_MEID;
 		errno = EOVERFLOW;
-	}
+	} 
 
 	hdr = (uta_mhdr_t *) mbuf->header;
 	memcpy( hdr->meid, src, len );
+
+	if( len == RMR_MAX_MEID ) {
+		if( *(hdr->meid+len-1) != 0 ) {
+			*(hdr->meid+len-1) = 0;
+			errno = EOVERFLOW;
+		}
+	} else {
+		*(hdr->meid+len) = 0;
+	}
 
 	return len;
 }

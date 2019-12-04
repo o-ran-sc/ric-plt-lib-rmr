@@ -6,7 +6,9 @@ it is not good practice, the generated .rst files must be checked into
 the repo and committed with changes to the source.  
 
 The command 'make all' should be all that is needed to build the 
-rtd documentation.
+rtd documentation. Follow that with 'make publish' to actually move
+the .rst files into the docs directory at the root; only the changed
+files are moved.
 
 Rationale
 Documentation is just code, and by maintaining the documentation as

@@ -55,6 +55,7 @@ typedef struct thing_list {
 	int nalloc;
 	int nused;
 	void** things;
+	const char** names;
 } thing_list_t;
 
 // ---- debugging/testing -------------------------------------------------------------------------
@@ -75,7 +76,26 @@ static void ep_stats( void* st, void* entry, char const* name, void* thing, void
 		(*counter)++;
 	}
 
-	fprintf( stderr, "[DBUG] RMR sends: target=%s open=%d\n", ep->name, ep->open );
+	fprintf( stderr, "[DBUG] RMR rt endpoint: target=%s open=%d\n", ep->name, ep->open );
+}
+
+/*
+	Called to count meid entries in the table. The meid points to an 'owning' endpoint
+	so we can list what we find
+*/
+static void meid_stats( void* st, void* entry, char const* name, void* thing, void* vcounter ) {
+	int*	counter;
+	endpoint_t* ep;
+
+	if( (ep = (endpoint_t *) thing) == NULL ) {
+		return;
+	}
+
+	if( (counter = (int *) vcounter) != NULL ) {
+		(*counter)++;
+	}
+
+	fprintf( stderr, "[DBUG] RMR meid=%s owner=%s open=%d\n", name, ep->name, ep->open );
 }
 
 /*
@@ -94,14 +114,14 @@ static void ep_counts( void* st, void* entry, char const* name, void* thing, voi
 		id = "missing";
 	}
 
-	fprintf( stderr, "[INFO] RMR sends: ts=%lld src=%s target=%s open=%d succ=%lld fail=%lld (hard=%lld soft=%lld)\n", 
-		(long long) time( NULL ), 
-		id, 
-		ep->name, 
-		ep->open, 
-		ep->scounts[EPSC_GOOD], 
-		ep->scounts[EPSC_FAIL] + ep->scounts[EPSC_TRANS], 
-		ep->scounts[EPSC_FAIL], 
+	fprintf( stderr, "[INFO] RMR sends: ts=%lld src=%s target=%s open=%d succ=%lld fail=%lld (hard=%lld soft=%lld)\n",
+		(long long) time( NULL ),
+		id,
+		ep->name,
+		ep->open,
+		ep->scounts[EPSC_GOOD],
+		ep->scounts[EPSC_FAIL] + ep->scounts[EPSC_TRANS],
+		ep->scounts[EPSC_FAIL],
 		ep->scounts[EPSC_TRANS]   );
 }
 
@@ -125,7 +145,7 @@ static void rte_stats( void* st, void* entry, char const* name, void* thing, voi
 	mtype = rte->key & 0xffff;
 	sid = (int) (rte->key >> 32);
 
-	fprintf( stderr, "[DBUG] rte: key=%016lx mtype=%4d sid=%4d nrrg=%2d refs=%d\n", rte->key, mtype, sid, rte->nrrgroups, rte->refs );
+	fprintf( stderr, "[DBUG] RMR rte: key=%016lx mtype=%4d sid=%4d nrrg=%2d refs=%d\n", rte->key, mtype, sid, rte->nrrgroups, rte->refs );
 }
 
 /*
@@ -141,13 +161,20 @@ static void  rt_stats( route_table_t* rt ) {
 
 	counter = (int *) malloc( sizeof( int ) );
 	*counter = 0;
-	fprintf( stderr, "[DBUG] rtstats:\n" );
-	rmr_sym_foreach_class( rt->hash, 1, ep_stats, counter );		// run endpoints in the active table
-	fprintf( stderr, "[DBUG] %d endpoints\n", *counter );
+	fprintf( stderr, "[DBUG] RMR route table stats:\n" );
+	fprintf( stderr, "[DBUG] RMR route table endpoints:\n" );
+	rmr_sym_foreach_class( rt->hash, RT_NAME_SPACE, ep_stats, counter );		// run endpoints (names) in the active table
+	fprintf( stderr, "[DBUG] RMR rtable: %d known endpoints\n", *counter );
 
+	fprintf( stderr, "[DBUG] RMR route table entries:\n" );
 	*counter = 0;
-	rmr_sym_foreach_class( rt->hash, 0, rte_stats, counter );		// run entries
-	fprintf( stderr, "[DBUG] %d entries\n", *counter );
+	rmr_sym_foreach_class( rt->hash, RT_MT_SPACE, rte_stats, counter );			// run message type entries
+	fprintf( stderr, "[DBUG] RMR rtable: %d mt entries in table\n", *counter );
+
+	fprintf( stderr, "[DBUG] RMR route table meid map:\n" );
+	*counter = 0;
+	rmr_sym_foreach_class( rt->hash, RT_ME_SPACE, meid_stats, counter );		// run meid space
+	fprintf( stderr, "[DBUG] RMR rtable: %d meids in map\n", *counter );
 
 	free( counter );
 }
@@ -204,7 +231,6 @@ static char* clip( char* buf ) {
 static char* ensure_nlterm( char* buf ) {
 	char*	nb = NULL;
 	int		len = 1;
-	
 
 	nb = buf;
 	if( buf == NULL || (len = strlen( buf )) < 2 ) {
@@ -219,7 +245,7 @@ static char* ensure_nlterm( char* buf ) {
 				memcpy( nb, buf, len );
 				*(nb+len) = '\n';			// insert \n and nil into the two extra bytes we allocated
 				*(nb+len+1) = 0;
-			}	
+			}
 
 			free( buf );
 		}
@@ -249,16 +275,21 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups
 	rte->refs = 1;
 	rte->key = key;
 
-	if( nrrgroups <= 0 ) {
+	if( nrrgroups < 0 ) {		// zero is allowed as %meid entries have no groups
 		nrrgroups = 10;
 	}
 
-	if( (rte->rrgroups = (rrgroup_t **) malloc( sizeof( rrgroup_t * ) * nrrgroups )) == NULL ) {
-		fprintf( stderr, "rmr_add_rte: malloc failed for rrgroup array\n" );
-		free( rte );
-		return NULL;
+	if( nrrgroups ) {
+		if( (rte->rrgroups = (rrgroup_t **) malloc( sizeof( rrgroup_t * ) * nrrgroups )) == NULL ) {
+			fprintf( stderr, "rmr_add_rte: malloc failed for rrgroup array\n" );
+			free( rte );
+			return NULL;
+		}
+		memset( rte->rrgroups, 0, sizeof( rrgroup_t *) * nrrgroups );
+	} else {
+		rte->rrgroups = NULL;
 	}
-	memset( rte->rrgroups, 0, sizeof( rrgroup_t *) * nrrgroups );
+
 	rte->nrrgroups = nrrgroups;
 
 	if( (old_rte = rmr_sym_pull( rt->hash, key )) != NULL ) {
@@ -272,7 +303,7 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups
 }
 
 /*
-	This accepts partially parsed information from a record sent by route manager or read from
+	This accepts partially parsed information from an rte or mse record sent by route manager or read from
 	a file such that:
 		ts_field is the msg-type,sender field
 		subid is the integer subscription id
@@ -304,29 +335,32 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 		(uta_has_str( ts_field,  ctx->my_name, ',', 127) >= 0) ||		// our name is in the list
 		has_myip( ts_field, ctx->ip_list, ',', 127 ) ) {				// the list has one of our IP addresses
 
-			key = build_rt_key( subid, atoi( ts_field ) );
+		key = build_rt_key( subid, atoi( ts_field ) );
 
-			if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] create rte for mtype=%s subid=%d key=%lx\n", ts_field, subid, key );
+		if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] create rte for mtype=%s subid=%d key=%lx\n", ts_field, subid, key );
 
-			if( (ngtoks = uta_tokenise( rr_field, gtokens, 64, ';' )) > 0 ) {					// split round robin groups
-				rte = uta_add_rte( ctx->new_rtable, key, ngtoks );								// get/create entry for this key
+		if( (ngtoks = uta_tokenise( rr_field, gtokens, 64, ';' )) > 0 ) {					// split round robin groups
+			if( strcmp( gtokens[0], "%meid" ) == 0 ) {
+				ngtoks = 0;																	// special indicator that uses meid to find endpoint, no rrobin
+			}
+			rte = uta_add_rte( ctx->new_rtable, key, ngtoks );								// get/create entry for this key
 
-				for( grp = 0; grp < ngtoks; grp++ ) {
-					if( (ntoks = uta_rmip_tokenise( gtokens[grp], ctx->ip_list, tokens, 64, ',' )) > 0 ) {		// remove any referneces to our ip addrs
-						for( i = 0; i < ntoks; i++ ) {
-							if( strcmp( tokens[i], ctx->my_name ) != 0 ) {					// don't add if it is us -- cannot send to ourself
-								if( DEBUG > 1  || (vlevel > 1)) fprintf( stderr, "[DBUG] add endpoint  ts=%s %s\n", ts_field, tokens[i] );
-								uta_add_ep( ctx->new_rtable, rte, tokens[i], grp );
-							}
+			for( grp = 0; grp < ngtoks; grp++ ) {
+				if( (ntoks = uta_rmip_tokenise( gtokens[grp], ctx->ip_list, tokens, 64, ',' )) > 0 ) {		// remove any referneces to our ip addrs
+					for( i = 0; i < ntoks; i++ ) {
+						if( strcmp( tokens[i], ctx->my_name ) != 0 ) {					// don't add if it is us -- cannot send to ourself
+							if( DEBUG > 1  || (vlevel > 1)) fprintf( stderr, "[DBUG] add endpoint  ts=%s %s\n", ts_field, tokens[i] );
+							uta_add_ep( ctx->new_rtable, rte, tokens[i], grp );
 						}
 					}
 				}
 			}
-		} else {
-			if( DEBUG || (vlevel > 2) ) {
-				fprintf( stderr, "entry not included, sender not matched: %s\n", tokens[1] );
-			}
 		}
+	} else {
+		if( DEBUG || (vlevel > 2) ) {
+			fprintf( stderr, "entry not included, sender not matched: %s\n", tokens[1] );
+		}
+	}
 }
 
 /*
@@ -372,6 +406,153 @@ static void trash_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, int vle
 }
 
 /*
+	Given the tokens from an mme_ar (meid add/replace) entry, add the entries.
+	the 'owner' which should be the dns name or IP address of an enpoint
+	the meid_list is a space separated list of me IDs
+
+	This function assumes the caller has vetted the pointers as needed.
+
+	For each meid in the list, an entry is pushed into the hash which references the owner
+	endpoint such that when the meid is used to route a message it references the endpoint
+	to send messages to.
+*/
+static void parse_meid_ar( route_table_t* rtab, char* owner, char* meid_list, int vlevel ) {
+	char*	tok;
+	int		ntoks;
+	char* 	tokens[128];
+	int		i;
+	int		state;
+	endpoint_t*	ep;						// endpoint struct for the owner
+
+	owner = clip( owner );				// ditch extra whitespace and trailing comments
+	meid_list = clip( meid_list );
+
+	ntoks = uta_tokenise( meid_list, tokens, 128, ' ' );
+	for( i = 0; i < ntoks; i++ ) {
+		if( (ep = rt_ensure_ep( rtab, owner )) != NULL ) {
+			state = rmr_sym_put( rtab->hash, tokens[i], RT_ME_SPACE, ep );						// slam this one in if new; replace if there
+			if( DEBUG || (vlevel > 1) ) fprintf( stderr, "[DBUG] parse_meid_ar: add/replace meid: %s owned by: %s state=%d\n", tokens[i], owner, state );
+fprintf( stderr, "[DBUG] parse_meid_ar: add/replace meid: %s owned by: %s state=%d\n", tokens[i], owner, state );
+		} else {
+			fprintf( stderr, "[WRN] rmr parse_meid_ar: unable to create an endpoint for owner: %s", owner );
+		}
+	}
+}
+
+/*
+	Given the tokens from an mme_del, delete the listed meid entries from the new
+	table. The list is a space separated list of meids.
+
+	The meids in the hash reference endpoints which are never deleted and so
+	the only thing that we need to do here is to remove the meid from the hash.
+
+	This function assumes the caller has vetted the pointers as needed.
+*/
+static void parse_meid_del( route_table_t* rtab, char* meid_list, int vlevel ) {
+	char*	tok;
+	int		ntoks;
+	char* 	tokens[128];
+	int		i;
+
+	if( rtab->hash == NULL ) {
+		return;
+	}
+
+	meid_list = clip( meid_list );
+
+	ntoks = uta_tokenise( meid_list, tokens, 128, ' ' );
+	for( i = 0; i < ntoks; i++ ) {
+		rmr_sym_del( rtab->hash, tokens[i], RT_ME_SPACE );						// and it only took my little finger to blow it away!
+		if( DEBUG || (vlevel > 1) ) fprintf( stderr, "[DBUG] parse_meid_del: meid deleted: %s\n", tokens[i] );
+	}
+}
+
+/*
+	Parse a partially parsed meid record. Tokens[0] should be one of:
+		meid_map, mme_ar, mme_del.
+*/
+static void meid_parser( uta_ctx_t* ctx, char** tokens, int ntoks, int vlevel ) {
+	if( tokens == NULL || ntoks < 1 ) {
+		return;							// silent but should never happen
+	}
+
+	if( ntoks < 2 ) {					// must have at least two for any valid request record
+		fprintf( stderr, "[ERR] meid_parse: not enough tokens on %s record\n", tokens[0] );
+		return;
+	}
+
+	if( strcmp( tokens[0], "meid_map" ) == 0 ) {					// start or end of the meid map update
+		tokens[1] = clip( tokens[1] );
+		if( *(tokens[1]) == 's' ) {
+			if( ctx->new_rtable != NULL ) {					// one in progress?  this forces it out
+				if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] meid map start: dropping incomplete table\n" );
+				uta_rt_drop( ctx->new_rtable );
+			}
+
+			ctx->new_rtable = uta_rt_clone_all( ctx->rtable );		// start with a clone of everything (mtype, endpoint refs and meid)
+			ctx->new_rtable->mupdates = 0;
+			if( DEBUG || (vlevel > 1)  ) fprintf( stderr, "[DBUG] meid_parse: meid map start found\n" );
+		} else {
+			if( strcmp( tokens[1], "end" ) == 0 ) {								// wrap up the table we were building
+				if( ntoks > 2 ) {												// meid_map | end | <count> |??? given
+					if( ctx->new_rtable->mupdates != atoi( tokens[2] ) ) {		// count they added didn't match what we received
+						fprintf( stderr, "[ERR] meid_parse: meid map update had wrong number of records: received %d expected %s\n", ctx->new_rtable->mupdates, tokens[2] );
+						uta_rt_drop( ctx->new_rtable );
+						ctx->new_rtable = NULL;
+						return;
+					}
+
+					if( DEBUG ) fprintf( stderr, "[DBUG] meid_parse: meid map update ended; found expected number of entries: %s\n", tokens[2] );
+				}
+
+				if( ctx->new_rtable ) {
+					uta_rt_drop( ctx->old_rtable );				// time to drop one that was previously replaced
+					ctx->old_rtable = ctx->rtable;				// currently active becomes old and allowed to 'drain'
+					ctx->rtable = ctx->new_rtable;				// one we've been adding to becomes active
+					ctx->new_rtable = NULL;
+					if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] end of meid map noticed\n" );
+
+					if( vlevel > 0 ) {
+						fprintf( stderr, "[DBUG] old route table:\n" );
+						rt_stats( ctx->old_rtable );
+						fprintf( stderr, "[DBUG] new route table:\n" );
+						rt_stats( ctx->rtable );
+					}
+				} else {
+					if( DEBUG ) fprintf( stderr, "[DBUG] end of meid map noticed, but one was not started!\n" );
+					ctx->new_rtable = NULL;
+				}
+			}
+		}
+
+		return;
+	}	
+
+	if( ! ctx->new_rtable ) { 			// for any other mmap entries, there must be a table in progress or we punt
+		if( DEBUG ) fprintf( stderr, "[DBUG] meid update/delte (%s) encountered, but table update not started\n", tokens[0] );
+		return;
+	}
+
+	if( strcmp( tokens[0], "mme_ar" ) == 0 ) {
+		if( ntoks < 3  || tokens[1] == NULL || tokens[2] == NULL ) {
+			fprintf( stderr, "[ERR] meid_parse: mme_ar record didn't have enough tokens found %d\n", ntoks );
+			return;
+		}
+		parse_meid_ar( ctx->new_rtable,  tokens[1], tokens[2], vlevel );
+		ctx->new_rtable->mupdates++;
+	}
+
+	if( strcmp( tokens[0], "mme_del" ) == 0 ) {
+		if( ntoks < 2 ) {
+			fprintf( stderr, "[ERR] meid_parse: mme_del record didn't have enough tokens\n" );
+			return;
+		}
+		parse_meid_del( ctx->new_rtable,  tokens[1], vlevel );
+		ctx->new_rtable->mupdates++;
+	}
+}
+
+/*
 	Parse a single record recevied from the route table generator, or read
 	from a static route table file.  Start records cause a new table to
 	be started (if a partial table was received it is discarded. Table
@@ -379,10 +560,32 @@ static void trash_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, int vle
 	end record causes the in progress table to be finalised and the
 	currently active table is replaced.
 
-	We expect one of several types:
-		newrt|{start|end}
+	The updated table will be activated when the *|end record is encountered.
+	However, to allow for a "double" update, where both the meid map and the
+	route table must be updated at the same time, the end indication on a
+	route table (new or update) may specifiy "hold" which indicates that meid
+	map entries are to follow and the updated route table should be held as
+	pending until the end of the meid map is received and validated.
+
+	CAUTION:  we are assuming that there is a single route/meid map generator
+		and as such only one type of update is received at a time; in other
+		words, the sender cannot mix update records and if there is more than
+		one sender process they must synchronise to avoid issues.
+
+
+	For a RT update, we expect:
+		newrt|{start|end [hold]}
 		rte|<mtype>[,sender]|<endpoint-grp>[;<endpoint-grp>,...]
 		mse|<mtype>[,sender]|<sub-id>|<endpoint-grp>[;<endpoint-grp>,...]
+		mse| <mtype>[,sender] | <sub-id> | %meid
+
+
+	For a meid map update we expect:
+		meid_map | start
+		meid_map | end | <count> | <md5-hash>
+		mme_ar | <e2term-id> | <meid0> <meid1>...<meidn>
+		mme_del | <meid0> <meid1>...<meidn>
+
 */
 static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 	int i;
@@ -391,7 +594,6 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 	int	grp;							// group number
 	rtable_ent_t*	rte;				// route table entry added
 	char*	tokens[128];
-	char*	gtokens[64];				// groups
 	char*	tok;						// pointer into a token or string
 
 	if( ! buf ) {
@@ -405,6 +607,7 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 	*(tok+1) = 0;
 
 	if( (ntoks = uta_tokenise( buf, tokens, 128, '|' )) > 0 ) {
+		tokens[0] = clip( tokens[0] );
 		switch( *(tokens[0]) ) {
 			case 0:													// ignore blanks
 				// fallthrough
@@ -451,27 +654,28 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 						uta_rt_drop( ctx->new_rtable );
 					}
 
-					if( ctx->rtable )  {
-						ctx->new_rtable = uta_rt_clone( ctx->rtable );	// create by cloning endpoint entries from active table
-					} else {
-						ctx->new_rtable = uta_rt_init(  );				// don't have one yet, just crate empty
-					}
+					ctx->new_rtable = NULL;
+					ctx->new_rtable = uta_rt_clone( ctx->rtable );	// create by cloning endpoint and meidtentries from active table
 					if( DEBUG > 1 || (vlevel > 1)  ) fprintf( stderr, "[DBUG] start of route table noticed\n" );
 				}
 				break;
 
-			case 'm':					// assume mse entry
-				if( ! ctx->new_rtable ) {			// bad sequence, or malloc issue earlier; ignore siliently
-					break;
-				}
+			case 'm':								// mse entry or one of the meid_ records
+				if( strcmp( tokens[0], "mse" ) == 0 ) {
+					if( ! ctx->new_rtable ) {			// bad sequence, or malloc issue earlier; ignore siliently
+						break;
+					}
 
-				if( ntoks < 4 ) {
-					if( DEBUG ) fprintf( stderr, "[WRN] rmr_rtc: mse record had too few fields: %d instead of 4\n", ntoks );
-					break;
-				}
+					if( ntoks < 4 ) {
+						if( DEBUG ) fprintf( stderr, "[WRN] rmr_rtc: mse record had too few fields: %d instead of 4\n", ntoks );
+						break;
+					}
 
-				build_entry( ctx, tokens[1], atoi( tokens[2] ), tokens[3], vlevel );
-				ctx->new_rtable->updates++;
+					build_entry( ctx, tokens[1], atoi( tokens[2] ), tokens[3], vlevel );
+					ctx->new_rtable->updates++;
+				} else {
+					meid_parser( ctx, tokens, ntoks, vlevel );
+				}
 				break;
 
 			case 'r':					// assume rt entry
@@ -527,12 +731,7 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 						uta_rt_drop( ctx->new_rtable );
 					}
 
-					if( ctx->rtable )  {
-						ctx->new_rtable = uta_rt_clone_all( ctx->rtable );	// start with a clone of everything (endpts and entries)
-					} else {
-						ctx->new_rtable = uta_rt_init(  );				// don't have one yet, just crate empty
-					}
-
+					ctx->new_rtable = uta_rt_clone_all( ctx->rtable );	// start with a clone of everything (endpts and entries)
 					ctx->new_rtable->updates = 0;						// init count of updates received
 					if( DEBUG > 1 || (vlevel > 1)  ) fprintf( stderr, "[DBUG] start of rt update noticed\n" );
 				}
@@ -592,7 +791,7 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 		parse_rt_rec( ctx, rec, vlevel );
 	}
 
-	if( DEBUG ) fprintf( stderr, "[DBUG] rmr:  seed route table successfully parsed: %d records\n", rcount );
+	if( DEBUG ) fprintf( stderr, "[DBUG] rmr_read_static:  seed route table successfully parsed: %d records\n", rcount );
 	free( fbuf );
 }
 
@@ -611,6 +810,7 @@ static void collect_things( void* st, void* entry, char const* name, void* thing
 		return;
 	}
 
+	tl->names[tl->nused] = name;			// the name/key
 	tl->things[tl->nused++] = thing;		// save a reference to the thing
 }
 
@@ -728,7 +928,7 @@ static route_table_t* uta_rt_init( ) {
 		return NULL;
 	}
 
-	if( (rt->hash = rmr_sym_alloc( 509 )) == NULL ) {		// modest size, prime
+	if( (rt->hash = rmr_sym_alloc( RT_SIZE )) == NULL ) {
 		free( rt );
 		return NULL;
 	}
@@ -737,121 +937,105 @@ static route_table_t* uta_rt_init( ) {
 }
 
 /*
-	Clone (sort of) an existing route table.  This is done to preserve the endpoint
-	names referenced in a table (and thus existing sessions) when a new set
-	of message type to endpoint name mappings is received.  A new route table
-	with only endpoint name references is returned based on the active table in
-	the context.
+	Clones one of the spaces in the given table.
+	Srt is the source route table, Nrt is the new route table; if nil, we allocate it.
+	Space is the space in the old table to copy. Space 0 uses an integer key and
+	references rte structs. All other spaces use a string key and reference endpoints.
 */
-static route_table_t* uta_rt_clone( route_table_t* srt ) {
+static route_table_t* rt_clone_space( route_table_t* srt, route_table_t* nrt, int space ) {
 	endpoint_t*		ep;		// an endpoint
-	route_table_t*	nrt;	// new route table
+	rtable_ent_t*	rte;	// a route table entry
 	void*	sst;			// source symtab
 	void*	nst;			// new symtab
-	thing_list_t things;
-	int i;
+	thing_list_t things;	// things from the space to copy
+	int		i;
+	int		free_on_err = 0;
 
-	if( srt == NULL ) {
-		return NULL;
+	if( nrt == NULL ) {				// make a new table if needed
+		free_on_err = 1;
+		nrt = uta_rt_init();
 	}
 
-	if( (nrt = (route_table_t *) malloc( sizeof( *nrt ) )) == NULL ) {
-		return NULL;
-	}
-
-	if( (nrt->hash = rmr_sym_alloc( 509 )) == NULL ) {		// modest size, prime
-		free( nrt );
-		return NULL;
+	if( srt == NULL ) {		// source was nil, just give back the new table
+		return nrt;
 	}
 
 	things.nalloc = 2048;
 	things.nused = 0;
 	things.things = (void **) malloc( sizeof( void * ) * things.nalloc );
+	things.names = (const char **) malloc( sizeof( char * ) * things.nalloc );
 	if( things.things == NULL ) {
-		free( nrt->hash );
-		free( nrt );
-		return NULL;
+		if( free_on_err ) {
+			free( nrt->hash );
+			free( nrt );
+			nrt = NULL;
+		}
+
+		return nrt;
 	}
 
 	sst = srt->hash;											// convenience pointers (src symtab)
 	nst = nrt->hash;
 
-	rmr_sym_foreach_class( sst, 1, collect_things, &things );		// collect the named endpoints in the active table
+	rmr_sym_foreach_class( sst, space, collect_things, &things );		// collect things from this space
 
+	if( DEBUG ) fprintf( stderr, "[DBUG] clone space cloned %d things in space %d\n",  things.nused, space );
 	for( i = 0; i < things.nused; i++ ) {
-		ep = (endpoint_t *) things.things[i];
-		rmr_sym_put( nst, ep->name, 1, ep );						// slam this one into the new table
+		if( space ) {												// string key, epoint reference
+			ep = (endpoint_t *) things.things[i];
+			rmr_sym_put( nst, things.names[i], space, ep );					// slam this one into the new table
+		} else {
+			rte = (rtable_ent_t *) things.things[i];
+			rte->refs++;											// rtes can be removed, so we track references
+			rmr_sym_map( nst, rte->key, rte );						// add to hash using numeric mtype/sub-id as key (default to space 0)
+		}
 	}
 
 	free( things.things );
+	free( (void *) things.names );
 	return nrt;
 }
 
 /*
-	Clones _all_ of the given route table (references both endpoints AND the route table
-	entries. Needed to support a partial update where some route table entries will not
-	be deleted if not explicitly in the update.
+	Creates a new route table and then clones the parts of the table which we must keep with each newrt|start.
+	The endpoint and meid entries in the hash must be preserved.
 */
-static route_table_t* uta_rt_clone_all( route_table_t* srt ) {
-	endpoint_t*		ep;		// an endpoint
-	rtable_ent_t*	rte;	// a route table entry
-	route_table_t*	nrt;	// new route table
-	void*	sst;			// source symtab
-	void*	nst;			// new symtab
-	thing_list_t things0;	// things from space 0 (table entries)
-	thing_list_t things1;	// things from space 1 (end points)
+static route_table_t* uta_rt_clone( route_table_t* srt ) {
+	endpoint_t*		ep;				// an endpoint
+	rtable_ent_t*	rte;			// a route table entry
+	route_table_t*	nrt = NULL;		// new route table
 	int i;
 
 	if( srt == NULL ) {
-		return NULL;
+		return uta_rt_init();		// no source to clone, just return an empty table
 	}
 
-	if( (nrt = (route_table_t *) malloc( sizeof( *nrt ) )) == NULL ) {
-		return NULL;
+	nrt = rt_clone_space( srt, nrt, RT_NAME_SPACE );		// allocate a new one, add endpoint refs
+	rt_clone_space( srt, nrt, RT_ME_SPACE );				// add meid refs to new
+
+	return nrt;
+}
+
+/*
+	Creates a new route table and then clones  _all_ of the given route table (references 
+	both endpoints AND the route table entries. Needed to support a partial update where 
+	some route table entries will not be deleted if not explicitly in the update and when 
+	we are adding/replacing meid references.
+*/
+static route_table_t* uta_rt_clone_all( route_table_t* srt ) {
+	endpoint_t*		ep;				// an endpoint
+	rtable_ent_t*	rte;			// a route table entry
+	route_table_t*	nrt = NULL;		// new route table
+	int i;
+
+	if( srt == NULL ) {
+		return uta_rt_init();		// no source to clone, just return an empty table
 	}
 
-	if( (nrt->hash = rmr_sym_alloc( 509 )) == NULL ) {		// modest size, prime
-		free( nrt );
-		return NULL;
-	}
+	nrt = rt_clone_space( srt, nrt, RT_MT_SPACE );			// create new, clone all spaces to it
+	rt_clone_space( srt, nrt, RT_NAME_SPACE );
+	rt_clone_space( srt, nrt, RT_ME_SPACE );
 
-	things0.nalloc = 2048;
-	things0.nused = 0;
-	things0.things = (void **) malloc( sizeof( void * ) * things0.nalloc );
-	if( things0.things == NULL ) {
-		free( nrt->hash );
-		free( nrt );
-		return NULL;
-	}
-
-	things1.nalloc = 2048;
-	things1.nused = 0;
-	things1.things = (void **) malloc( sizeof( void * ) * things1.nalloc );
-	if( things1.things == NULL ) {
-		free( nrt->hash );
-		free( nrt );
-		return NULL;
-	}
-
-	sst = srt->hash;											// convenience pointers (src symtab)
-	nst = nrt->hash;
-
-	rmr_sym_foreach_class( sst, 0, collect_things, &things0 );		// collect the rtes
-	rmr_sym_foreach_class( sst, 1, collect_things, &things1 );		// collect the named endpoints in the active table
-
-	for( i = 0; i < things0.nused; i++ ) {
-		rte = (rtable_ent_t *) things0.things[i];
-		rte->refs++;												// rtes can be removed, so we track references
-		rmr_sym_map( nst, rte->key, rte );							// add to hash using numeric mtype/sub-id as key (default to space 0)
-	}
-
-	for( i = 0; i < things1.nused; i++ ) {
-		ep = (endpoint_t *) things1.things[i];
-		rmr_sym_put( nst, ep->name, 1, ep );						// slam this one into the new table
-	}
-
-	free( things0.things );
-	free( things1.things );
 	return nrt;
 }
 

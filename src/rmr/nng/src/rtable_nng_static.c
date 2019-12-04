@@ -389,6 +389,20 @@ static inline rtable_ent_t*  uta_get_rte( route_table_t *rt, int sid, int mtype,
 }
 
 /*
+	Given a route table and meid string, find the owner (if known). Returns a pointer to
+	the endpoint struct or nil.
+*/
+static inline endpoint_t*  get_meid_owner( route_table_t *rt, char* meid ) {
+	endpoint_t* ep;		// the ep we found in the hash
+
+	if( rt == NULL || rt->hash == NULL || meid == NULL || *meid == 0 ) {
+		return NULL;
+	}
+
+	return (endpoint_t *) rmr_sym_get( rt->hash, meid, RT_ME_SPACE ); 
+}
+
+/*
 	Return a string of count information. E.g.:
 		<ep-name>:<port> <good> <hard-fail> <soft-fail>
 
@@ -417,6 +431,58 @@ static inline char* get_ep_counts( endpoint_t* ep, char* ubuf, int ubuf_len ) {
 	snprintf( rs, ubuf_len, "%s %lld %lld %lld", ep->name, ep->scounts[EPSC_GOOD], ep->scounts[EPSC_FAIL], ep->scounts[EPSC_TRANS] );
 
 	return rs;
+}
+
+/*
+	Given a message, use the meid field to find the owner endpoint for the meid.
+	The owner ep is then used to extract the socket through which the message
+	is sent. This returns TRUE if we found a socket and it was written to the
+	nn_sock pointer; false if we didn't.
+
+	We've been told that the meid is a string, thus we count on it being a nil
+	terminated set of bytes.
+*/
+static int epsock_meid( route_table_t *rtable, rmr_mbuf_t* msg, nng_socket* nn_sock, endpoint_t** uepp ) {
+	endpoint_t*	ep;				// seected end point
+	int  	state = FALSE;			// processing state
+	char*	meid;
+
+
+	errno = 0;
+	if( ! nn_sock || msg == NULL || rtable == NULL ) {			// missing stuff; bail fast
+		errno = EINVAL;
+		return FALSE;
+	}
+
+	meid = ((uta_mhdr_t *) msg->header)->meid;
+
+	if( (ep = get_meid_owner( rtable, meid )) == NULL ) {
+		if( uepp != NULL ) {								// caller needs refernce to endpoint too
+			*uepp = NULL;
+		}
+
+		if( DEBUG ) fprintf( stderr, "[DBUG] epsock_meid: no ep in hash for (%s)\n", meid );
+		return FALSE;
+	}
+
+	state = TRUE;
+	if( ! ep->open ) {								// not connected
+		if( ep->addr == NULL ) {					// name didn't resolve before, try again
+			ep->addr = strdup( ep->name );			// use the name directly; if not IP then transport will do dns lookup
+		}
+
+		if( uta_link2( ep ) ) {						// find entry in table and create link
+			ep->open = TRUE;
+			*nn_sock = ep->nn_sock;					// pass socket back to caller
+		} else {
+			state = FALSE;
+		}
+		if( DEBUG ) fprintf( stderr, "[DBUG] epsock_meid: connection attempted with %s: %s\n", ep->name, state ? "[OK]" : "[FAIL]" );
+	} else {
+		*nn_sock = ep->nn_sock;
+	}
+
+	return state;
 }
 
 #endif

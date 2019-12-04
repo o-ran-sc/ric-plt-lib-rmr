@@ -44,12 +44,19 @@ typedef struct uta_ctx  uta_ctx_t;
 #define QUOTE_DEF(a) QUOTE(a)	// allow a #define value to be quoted (e.g. QUOTE(MAJOR_VERSION) )
 
 
+#define RT_SIZE			10009	// primary entries in route table (prime) meids hash through this so larger than expected # meids
+								// space deginations in the hash table
+#define RT_MT_SPACE	0		// (integer) message type as the key
+#define RT_NAME_SPACE	1		// enpoint name/address is the key
+#define RT_ME_SPACE	2		// message id is the key
+
 #define RMR_MSG_VER	3			// message version this code was designed to handle
 
 											// environment variable names we'll suss out
 #define ENV_BIND_IF "RMR_BIND_IF"			// the interface to bind to for both normal comma and RTG (0.0.0.0 if missing)
 #define ENV_RTG_PORT "RMR_RTG_SVC"			// the port we'll listen on for rtg connections
 #define ENV_SEED_RT	"RMR_SEED_RT"			// where we expect to find the name of the seed route table
+#define ENV_SEED_MEMAP	"RMR_SEED_MEMAP"	// where we expect to find the name of the seed route table
 #define ENV_RTG_RAW "RMR_RTG_ISRAW"			// if > 0 we expect route table gen messages as raw (not sent from an RMr application)
 #define ENV_VERBOSE_FILE "RMR_VCTL_FILE"	// file where vlevel may be managed for some (non-time critical) functions
 #define ENV_NAME_ONLY "RMR_SRC_NAMEONLY"	// src in message is name only
@@ -197,7 +204,7 @@ typedef struct {
 	uint64_t key;			// key used to reinsert this entry into a new symtab
 	int	refs;				// number of symtabs which reference the entry
 	int mtype;				// the message type for this list
-	int	nrrgroups;			// number of rr groups to send to
+	int	nrrgroups;			// number of rr groups to send to (if 0, the meid in a message determines endpoint)
 	rrgroup_t**	rrgroups;	// one or more set of endpoints to round robin messages to
 } rtable_ent_t;
 
@@ -207,6 +214,7 @@ typedef struct {
 typedef struct {
 	void*	hash;			// hash table.
 	int		updates;		// counter of update records received
+	int		mupdates;		// counter of meid update records received
 } route_table_t;
 
 /*

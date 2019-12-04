@@ -63,9 +63,9 @@
 
 	.dv beg_dlist .bd $1 $2
 	.dv end_dlist .ed
-	.dv ditem .cc 2 .di $1 ^:
-	.dv di .cc 2 .di $1 ^:
-	.dv li .cc 2 .li
+	.dv ditem .cc 2 .sp .5 .di $1 ^:
+	.dv di .cc 2 .sp .5 .di $1 ^:
+	.dv li .cc 2 .sp .5 .li
 	.dv item .cc 2 .li
 	
 	.dv proto_start .sp 1 .cc .5i .st 9 .sf Courier-bold .nf

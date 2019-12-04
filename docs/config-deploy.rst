@@ -71,7 +71,10 @@ RMR_SEED_RT
   used for debugging, testing, or if no route table 
   generator process is being used to supply the route table. 
   If not defined, no static table is used and RMr will not 
-  report *ready* until a table is received. 
+  report *ready* until a table is received. The static route 
+  table may contain both the route table (between newrt 
+  start and end records), and the MEID map (between meid_map 
+  start and end records) 
  
 RMR_SRC_ID 
    

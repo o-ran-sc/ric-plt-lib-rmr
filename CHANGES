@@ -2,14 +2,19 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
-2019 November 14; version 1.11.1
+2019 December 6; version 1.13.0
+	Add ability to route messages based on the MEID in a message combined
+	with the message type/subscription-ID.
+
+
+2019 November 14; version 1.11.1 (Amber)
 	Fix bug in payload reallocation function; correct length of payload
 	was not always copied.
 
 2019 November 13; version 1.12.1
 	New message type constants added to support A1.
 
-2019 November 4; version 1.11.0
+2019 November 4; version 1.11.0 (Amber)
 	Version bump to move away from the 1.10.* to distinguish between
 	release A and the trial.
 

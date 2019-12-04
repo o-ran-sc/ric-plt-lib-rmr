@@ -110,11 +110,19 @@ int mbuf_api_test( ) {
 	errors += fail_if( i > 0, "(rv) attempt to copy bytes to meid with nil message" );
 
 	errno = 0;
+	strncpy( src_buf, "a very long string that should trigger an error when stuffing it into meid", sizeof( src_buf ) );		// ensure no zero byte at field length
 	i = rmr_bytes2meid( mbuf, src_buf, RMR_MAX_MEID + 1 );
 	errors += fail_if( errno == 0, "(errno) attempt to copy bytes to meid with large source buffer" );
 	errors += fail_if( i != RMR_MAX_MEID, "(rv) attempt to copy bytes to meid with large source buffer" );
+	
+	errno = 0;
+	i = rmr_bytes2meid( mbuf, src_buf, RMR_MAX_MEID );			// it's not 0 terminated at length expect failure
+	errors += fail_if( errno == 0, "(errno) attempt to copy non-zero termianted bytes to meid with large source buffer" );
+	errors += fail_if( i != RMR_MAX_MEID, "(rv) attempt to copy bytes to meid with large source buffer" );
 
 	errno = 0;
+	memset( src_buf, 0, RMR_MAX_MEID+2 );
+	strcpy( src_buf, "smaller bytes" );
 	i = rmr_bytes2meid( mbuf, src_buf, RMR_MAX_MEID  );
 	errors += fail_if( errno != 0, "copy bytes to meid; expected errno to be ok" );
 	errors += fail_if( i != RMR_MAX_MEID, "copy bytes to meid; expected return value to be max meid len" );

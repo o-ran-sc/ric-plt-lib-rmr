@@ -794,7 +794,12 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 	send_again = 1;											// force loop entry
 	group = 0;												// always start with group 0
 	while( send_again ) {
-		sock_ok = uta_epsock_rr( rte, group, &send_again, &nn_sock, &ep );		// select endpt from rr group and set again if more groups
+		if( rte->nrrgroups > 0 ) {							// this is a round robin entry
+			sock_ok = uta_epsock_rr( rte, group, &send_again, &nn_sock, &ep );		// select endpt from rr group and set again if more groups
+		} else {
+			sock_ok = epsock_meid( ctx->rtable, msg, &nn_sock, &ep );
+			send_again = 0;
+		}
 
 		if( DEBUG ) fprintf( stderr, "[DBUG] mtosend_msg: flgs=0x%04x type=%d again=%d group=%d len=%d sock_ok=%d\n",
 				msg->flags, msg->mtype, send_again, group, msg->len, sock_ok );

@@ -123,6 +123,7 @@ static int rt_test( ) {
 	char	*buf;
 	char*	seed_fname;		// seed file
 	nng_socket nn_sock;		// this is a struct in nng, so difficult to validate
+	rmr_mbuf_t*	mbuf;		// message for meid route testing
 
 	setenv( "ENV_VERBOSE_FILE", ".ut_rmr_verbose", 1 );			// allow for verbose code in rtc to be driven
 	i = open( ".ut_rmr_verbose", O_RDWR | O_CREAT, 0644 );
@@ -316,6 +317,7 @@ static int rt_test( ) {
 	state = uta_epsock_rr( rte, 22, NULL, NULL, &ep );
 	errors += fail_if_true( state, "uta_epsock_rr returned bad (non-zero) state when given nil socket pointer" );
 
+
 	uta_rt_clone( NULL );								// verify null parms don't crash things
 	uta_rt_drop( NULL );
 	uta_epsock_rr( NULL, 0,  &more, &nn_sock, &ep );			// drive null case for coverage
@@ -367,6 +369,24 @@ static int rt_test( ) {
 	state = uta_link2( ep );
 	errors += fail_if_true( state, "link2 did not return false when given nil pointers" );
 
+	// ----------------- test the meid support for looking up an endpoint based on the meid in the message -----
+
+	ctx->my_name = strdup( "my_host_name" );		// set up to load a rtable
+	ctx->my_ip = strdup( "192.168.1.30" );
+	gen_rt( ctx );									// generate a route table with meid entries and hang off ctx
+
+	mbuf = rmr_alloc_msg( ctx, 2048 );               //  buffer to play with
+	mbuf->len = 100;
+	rmr_str2meid( mbuf, "meid1" );					// id that we know is in the map
+
+	state = epsock_meid( ctx->rtable, mbuf, &nn_sock, &ep );
+	errors += fail_if_nil( ep, "ep was nil when looking up ep with known meid in message" );
+	errors += fail_not_equal( state, 1, "state was not true when looking up ep with known meid in message" );
+
+	rmr_str2meid( mbuf, "XXXmeid1" );				// id that we know is NOT in the map
+	state = epsock_meid( ctx->rtable, mbuf, &nn_sock, &ep );
+	errors += fail_not_nil( ep, "ep was NOT nil when looking ep up with unknown meid in message" );
+	errors += fail_not_equal( state, 0, "state was not false when looking up ep with unknown meid in message" );
 
 	return !!errors;			// 1 or 0 regardless of count
 }

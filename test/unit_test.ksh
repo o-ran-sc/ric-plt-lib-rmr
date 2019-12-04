@@ -450,7 +450,7 @@ do
 	if ! ./${tfile%.c} >/tmp/PID$$.log 2>&1
 	then
 		echo "[FAIL] unit test failed for: $tfile"
-		if [[ -n capture_file ]] 
+		if [[ -n $capture_file ]] 
 		then
 			echo "all errors captured in $capture_file, listing only fail message on tty"
 			echo "$tfile --------------------------------------" >>$capture_file

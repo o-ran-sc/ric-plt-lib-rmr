@@ -47,65 +47,6 @@
 #define NO_COPY 0
 
 /*
-	Generate a simple route table (for all but direct route table testing).
-	This gets tricky inasmuch as we generate two in one; first a whole table 
-	and then two update tables. The first is a table with a bad counter in the
-	last record to test that we don't load that table and error. The second
-	is a good update.
-*/
-static void gen_rt( uta_ctx_t* ctx ) {
-	int		fd;
-	char* 	rt_stuff;		// strings for the route table
-
-	rt_stuff =
-		"newrt|end\n"								// end of table check before start of table found
-		"# comment to drive full comment test\n"
-		"\n"										// handle blank lines
-		"   \n"										// handle blank lines
-	    "mse|4|10|localhost:4561\n"					// entry before start message
-	    "rte|4|localhost:4561\n"					// entry before start message
-		"newrt|start\n"								// false start to drive detection
-		"xxx|badentry to drive default case"
-		"newrt|start\n"
-	    "rte|0|localhost:4560,localhost:4562\n"					// these are legitimate entries for our testing
-	    "rte|1|localhost:4562;localhost:4561,localhost:4569\n"
-	    "rte|2|localhost:4562| 10\n"								// new subid at end
-	    "mse|4|10|localhost:4561\n"									// new msg/subid specifier rec
-	    "mse|4|localhost:4561\n"									// new mse entry with less than needed fields
-		"   rte|   5   |localhost:4563    #garbage comment\n"		// tests white space cleanup
-	    "rte|6|localhost:4562\n"
-		"newrt|end\n";
-
-	fd = open( "utesting.rt", O_WRONLY | O_CREAT, 0600 );
-	if( fd < 0 ) {
-		fprintf( stderr, "<BUGGERED> unable to open file for testing route table gen\n" );
-		return;
-	}
-
-	setenv( "RMR_SEED_RT", "utesting.rt", 1 );
-	write( fd, rt_stuff, strlen( rt_stuff ) );		// write in the whole table
-
-	rt_stuff =
-		"updatert|start\n"									// this is an update to the table
-	    "mse|4|99|fooapp:9999,barapp:9999;logger:9999\n"	// update just one entry
-		"updatert|end | 3\n";								// bad count; this update should be rejected
-	write( fd, rt_stuff, strlen( rt_stuff ) );
-
-	rt_stuff =
-		"updatert|start\n"									// this is an update to the table
-	    "mse|4|10|fooapp:4561,barapp:4561;logger:9999\n"	// update just one entry
-		"del|2|-1\n"										// delete an entry; not there so no action
-		"del|2|10\n"										// delete an entry
-		"updatert|end | 3\n";								// end table; updates have a count as last field
-	write( fd, rt_stuff, strlen( rt_stuff ) );
-	
-	close( fd );
-	read_static_rt( ctx, 1 );								// force in verbose mode to see stats on tty if failure
-	unlink( "utesting.rt" );
-}
-
-
-/*
 	Drive the send and receive functions.  We also drive as much of the route
 	table collector as is possible without a real rtg process running somewhere.
 
@@ -113,6 +54,9 @@ static void gen_rt( uta_ctx_t* ctx ) {
 	module as it tests the user facing send/receive/call/rts functions. These tests
 	should exercise specific cases for the internal functions as they will not
 	specifically be driven elsewhere.
+
+	This requires the gen_rt funcition that is in the test_gen_rt module and should
+	have been included by the test module(s) which include this.
 */
 static int sr_nng_test() {
 	uta_ctx_t* ctx;				// context needed to test load static rt

@@ -42,6 +42,20 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+static int refresh_vlevel( int vfd ) {
+	int vlevel = 0;
+	char	rbuf[128];
+
+	if( vfd >= 0 ) {					// if file is open, read current value
+		rbuf[0] = 0;
+		lseek( vfd, 0, 0 );
+		read( vfd, rbuf, 10 );
+		vlevel = atoi( rbuf );
+	}
+
+	return vlevel;
+}
+
 /*
 	Route Table Collector
 	A side thread which opens a socket and subscribes to a routing table generator.
@@ -71,7 +85,7 @@
 
 	Buffers received from the route table generator can contain multiple newline terminated
 	records, but each buffer must be less than 4K in length, and the last record in a
-	buffere may NOT be split across buffers.
+	buffer may NOT be split across buffers.
 
 	Other chores:
 	In addition to the primary task of getting, vetting, and installing a new route table, or
@@ -119,12 +133,7 @@ static void* rtc( void* vctx ) {
 
 	if( (eptr = getenv( ENV_VERBOSE_FILE )) != NULL ) {
 		vfd = open( eptr, O_RDONLY );
-		if( vfd >= 0 ) {
-			wbuf[0] = 0;
-			lseek( vfd, 0, 0 );
-			read( vfd, wbuf, 10 );
-			vlevel = atoi( wbuf );
-		}
+		vlevel = refresh_vlevel( vfd );
 	}                
 
 	read_static_rt( ctx, vlevel );						// seed the route table if one provided
@@ -210,20 +219,18 @@ static void* rtc( void* vctx ) {
 			}
 
 			if( time( NULL ) > blabber  ) {
-				blabber = time( NULL ) + count_delay;					// set next time to blabber, then do so
-				if( blabber > bump_freq ) {
-					count_delay = 300;
+				vlevel = refresh_vlevel( vfd );
+				if( vlevel >= 0 ) {										// allow it to be forced off with -n in verbose file
+					blabber = time( NULL ) + count_delay;				// set next time to blabber, then do so
+					if( blabber > bump_freq ) {
+						count_delay = 300;
+					}
+					rt_epcounts( ctx->rtable, ctx->my_name );
 				}
-				rt_epcounts( ctx->rtable, ctx->my_name );
 			}
 		}
 
-		if( vfd >= 0 ) {							// if file open, check for change to vlevel
-			wbuf[0] = 0;
-			lseek( vfd, 0, 0 );
-			read( vfd, wbuf, 10 );
-			vlevel = atoi( wbuf );
-		}
+		vlevel = refresh_vlevel( vfd );			// ensure it's fresh when we get a message
 
 		if( msg != NULL && msg->len > 0 ) {
 			payload = msg->payload;
