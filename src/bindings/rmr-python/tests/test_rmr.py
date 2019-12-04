@@ -210,8 +210,7 @@ def test_send_rcv():
 
     # send an ACK back
     ack_pay = b"message received"
-    rmr.set_payload_and_length(ack_pay, sbuf_rcv)
-    sbuf_rcv = rmr.rmr_rts_msg(MRC_RCV, sbuf_rcv)
+    sbuf_rcv = rmr.rmr_rts_msg(MRC_RCV, sbuf_rcv, payload=ack_pay, mtype=6666)
     rcv_ack_summary = rmr.message_summary(sbuf_rcv)
 
     # have the sender receive it
@@ -221,6 +220,7 @@ def test_send_rcv():
     assert send_ack_summary["message state"] == rcv_ack_summary["message state"] == 0
     assert send_ack_summary["message status"] == rcv_ack_summary["message status"] == "RMR_OK"
     assert send_ack_summary["payload"] == ack_pay
+    assert send_ack_summary["message type"] == 6666
 
 
 def test_send_rcv_subid_good():
@@ -311,7 +311,7 @@ def test_rcv_all():
     bundle = helpers.rmr_rcvall_msgs(MRC_BUF_RCV)  # use the buffered receiver to read all with a single call
     assert len(bundle) == 13
 
-    for i in range(len(bundle)):
+    for i, ms in enumerate(bundle):
         ms = bundle[i]  # validate each summary returned, and ordering preserved
         assert ms["message state"] == 0
         expected_pay = bytes(pay_fmt % i, "UTF-8")
@@ -323,15 +323,17 @@ def test_rcv_all():
     send_burst(MRC_SEND, pay_fmt, mtype=2, num=4, counter=8)  # total of 12 messages with type 2 should be queued
     time.sleep(1)  # ensure underlying transport gets cycles to send/receive
 
-    bundle = helpers.rmr_rcvall_msgs(MRC_BUF_RCV, [2])  # receive only message type 2 messages
+    bundle = helpers.rmr_rcvall_msgs_raw(MRC_BUF_RCV, [2])  # receive only message type 2 messages
     assert len(bundle) == 12  # we should only get the second batch of 12 messages
 
-    for i in range(len(bundle)):
-        ms = bundle[i]  # validate each summary
+    for i, (ms, sbuf) in enumerate(bundle):  # test the raw version
+        test_summary = rmr.message_summary(sbuf)
+        assert test_summary == ms
         assert ms["message state"] == 0  # all should be OK
         assert ms["message type"] == 2  # only mtype 2 should have been received
         expected_pay = bytes(pay_fmt % i, "UTF-8")  # ordering should still jive with the counter
         assert ms["payload"] == expected_pay
+        rmr.rmr_free_msg(sbuf)
 
 
 def test_bad_buffer():

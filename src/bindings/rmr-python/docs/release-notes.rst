@@ -7,6 +7,16 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+[2.1.0] - 12/4/2019
+--------------------
+
+::
+
+    * Allow the setting of payload and message type in rts
+    * Add a new function, helpers.rmr_rcvall_msgs_raw, that also returns the sbuf alongside the summary
+    * Add a mock for free_msg
+
+
 [2.0.0] - 12/2/2019
 --------------------
 

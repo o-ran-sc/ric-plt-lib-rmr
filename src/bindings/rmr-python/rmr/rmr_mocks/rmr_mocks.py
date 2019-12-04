@@ -121,6 +121,10 @@ def patch_rmr(monkeypatch):
     def fake_rmr_payload_size(_sbuf):
         return 4096
 
+    def fake_free(_sbuf):
+        pass
+
+    monkeypatch.setattr("rmr.rmr.rmr_free_msg", fake_free)
     monkeypatch.setattr("rmr.rmr.rmr_alloc_msg", fake_alloc)
     monkeypatch.setattr("rmr.rmr.set_payload_and_length", fake_set_payload_and_length)
     monkeypatch.setattr("rmr.rmr.generate_and_set_transaction_id", fake_generate_and_set_transaction_id)

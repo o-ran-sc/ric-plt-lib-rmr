@@ -343,11 +343,22 @@ _rmr_rts_msg.argtypes = [c_void_p, POINTER(rmr_mbuf_t)]
 _rmr_rts_msg.restype = POINTER(rmr_mbuf_t)
 
 
-def rmr_rts_msg(vctx, ptr_mbuf):
+def rmr_rts_msg(vctx, ptr_mbuf, payload=None, mtype=None):
     """
     Refer to the rmr C documentation for rmr_rts_msg
     extern rmr_mbuf_t*  rmr_rts_msg(void* vctx, rmr_mbuf_t* msg)
+
+    additional features beyond c-rmr:
+        if payload is not None, attempts to set the payload
+        if mtype is not None, sets the sbuf's message type
     """
+
+    if payload:
+        set_payload_and_length(payload, ptr_mbuf)
+
+    if mtype:
+        ptr_mbuf.contents.mtype = mtype
+
     return _rmr_rts_msg(vctx, ptr_mbuf)
 
 
