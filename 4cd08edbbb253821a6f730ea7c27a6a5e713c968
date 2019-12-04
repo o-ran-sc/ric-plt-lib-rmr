@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11b450c1_56335502",
+        "filename": "releases/pypi-2.1.0.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-12-04T20:02:24Z",
+      "side": 1,
+      "message": "still suuuuuper unclear to me how this references the exact commit hash to upload but ¯\\_(ツ)_/¯",
+      "revId": "4cd08edbbb253821a6f730ea7c27a6a5e713c968",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
