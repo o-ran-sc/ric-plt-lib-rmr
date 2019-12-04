@@ -16,6 +16,24 @@
       "revId": "4cd08edbbb253821a6f730ea7c27a6a5e713c968",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2de47d77_676a9e67",
+        "filename": "releases/pypi-2.1.0.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-12-04T20:16:12Z",
+      "side": 1,
+      "message": "I don\u0027t like having to rely on gerrit logs, but c\u0027est la vie.",
+      "parentUuid": "11b450c1_56335502",
+      "revId": "4cd08edbbb253821a6f730ea7c27a6a5e713c968",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
