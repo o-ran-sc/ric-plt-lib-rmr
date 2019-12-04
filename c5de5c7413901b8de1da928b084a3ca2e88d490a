@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "aee0b00d_f6dae82f",
+        "filename": "src/bindings/rmr-python/rmr/helpers.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-12-04T19:45:12Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "679ae405_034a24b3",
+      "revId": "c5de5c7413901b8de1da928b084a3ca2e88d490a",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9e47f9ad_78bdcaf8",
         "filename": "src/bindings/rmr-python/rmr/helpers.py",
         "patchSetId": 1
@@ -33,6 +51,24 @@
       "revId": "c5de5c7413901b8de1da928b084a3ca2e88d490a",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "406f3a9c_00ef9bc6",
+        "filename": "src/bindings/rmr-python/rmr/helpers.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-12-04T19:45:12Z",
+      "side": 1,
+      "message": "I agree with your reasoning.  Makes perfect sense.",
+      "parentUuid": "9e47f9ad_78bdcaf8",
+      "revId": "c5de5c7413901b8de1da928b084a3ca2e88d490a",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "da83ccf9_1b0d97df",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-12-04T19:45:12Z",
+      "side": 1,
+      "message": "Easy, easy.",
+      "parentUuid": "69911f2a_f6b3118a",
+      "revId": "c5de5c7413901b8de1da928b084a3ca2e88d490a",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0cd1529d_32ea0cb2",
         "filename": "src/bindings/rmr-python/tests/test_rmr.py",
         "patchSetId": 1
@@ -67,6 +121,24 @@
       "revId": "c5de5c7413901b8de1da928b084a3ca2e88d490a",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48de31cf_853a8700",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2019-12-04T19:45:12Z",
+      "side": 1,
+      "message": "I always remember it with key,value, or _,value if I just want values.  The thing that tosses me a spanner in python is the need for parentheses because I\u0027m used to \u0027range foo\u0027  in go.",
+      "parentUuid": "0cd1529d_32ea0cb2",
+      "revId": "c5de5c7413901b8de1da928b084a3ca2e88d490a",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
