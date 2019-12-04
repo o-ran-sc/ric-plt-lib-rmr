@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "679ae405_034a24b3",
+        "filename": "src/bindings/rmr-python/rmr/helpers.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-12-04T19:26:55Z",
+      "side": 1,
+      "message": "flake8....",
+      "revId": "c5de5c7413901b8de1da928b084a3ca2e88d490a",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9e47f9ad_78bdcaf8",
+        "filename": "src/bindings/rmr-python/rmr/helpers.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-12-04T19:26:55Z",
+      "side": 1,
+      "message": "i really debated merging this into the above function, but the return type would be different, and people seem to dislike that. We would have had, returns [{},{}] and returns [({}, sbuf),...] based on a flag, seems wrong to me. So, until I think of a better way, we have two functions.",
+      "revId": "c5de5c7413901b8de1da928b084a3ca2e88d490a",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69911f2a_f6b3118a",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-12-04T19:26:55Z",
+      "side": 1,
+      "message": "ONE STOP SHOP BABY SET THAT PAYLOAD AND MTYPE",
+      "revId": "c5de5c7413901b8de1da928b084a3ca2e88d490a",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0cd1529d_32ea0cb2",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2019-12-04T19:26:55Z",
+      "side": 1,
+      "message": "python protip here scott (this is similar to go for iindex, i in (iterable), I always forget in go which comes first the index or the item)",
+      "revId": "c5de5c7413901b8de1da928b084a3ca2e88d490a",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
