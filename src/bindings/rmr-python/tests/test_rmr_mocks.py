@@ -91,8 +91,24 @@ def test_rcv_mock(monkeypatch):
 
     # test torcv, although the timeout portion is not currently mocked or tested
     monkeypatch.setattr("rmr.rmr.rmr_torcv_msg", rmr_mocks.rcv_mock_generator({"foo": "bar"}, 666, 0, True, 50))
-    sbuf = rmr.rmr_torcv_msg(MRC, sbuf)
+    sbuf = rmr.rmr_torcv_msg(MRC, sbuf, 5)
     assert rmr.get_payload(sbuf) == b'{"foo": "bar"}'
     assert sbuf.contents.mtype == 666
     assert sbuf.contents.state == 0
     assert sbuf.contents.len == 14
+
+
+def test_alloc(monkeypatch):
+    """
+    test alloc with all fields set
+    """
+    rmr_mocks.patch_rmr(monkeypatch)
+    sbuf = rmr.rmr_alloc_msg(
+        MRC, SIZE, payload=b"foo", gen_transaction_id=True, mtype=5, meid=b"mee", sub_id=234, fixed_transaction_id=b"t" * 32
+    )
+    summary = rmr.message_summary(sbuf)
+    assert summary["payload"] == b"foo"
+    assert summary["transaction id"] == b"t" * 32
+    assert summary["message type"] == 5
+    assert summary["meid"] == b"mee"
+    assert summary["subscription id"] == 234

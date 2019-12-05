@@ -168,6 +168,13 @@ def test_alloc_fancy():
     assert sbuf.contents.sub_id == summary["subscription id"] == 654321
 
 
+def test_alloc_overlapping_flags():
+    """test allocation with setting the transaction id"""
+    sbuf = rmr.rmr_alloc_msg(MRC_SEND, SIZE, gen_transaction_id=True, fixed_transaction_id=b"6" * 32)
+    summary = rmr.message_summary(sbuf)
+    assert summary["transaction id"] == b"66666666666666666666666666666666"
+
+
 def test_rcv_timeout():
     """
     test torcv; this is a scary test because if it fails... it doesn't fail, it will run forever!

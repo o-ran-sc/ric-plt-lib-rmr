@@ -7,6 +7,17 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+
+[2.2.0] - 12/5/2019
+--------------------
+
+::
+
+    * add ability to set a deterministic transaction id in alloc, and in the mock of alloc
+    * add ability to set meid in fake alloc; before None was always returned erroneously
+    * Fix a bug where fake_alloc was way out of date with alloc, and add a test for it
+
+
 [2.1.0] - 12/4/2019
 --------------------
 

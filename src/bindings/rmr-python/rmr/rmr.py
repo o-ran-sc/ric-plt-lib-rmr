@@ -216,15 +216,20 @@ _rmr_alloc_msg.argtypes = [c_void_p, c_int]
 _rmr_alloc_msg.restype = POINTER(rmr_mbuf_t)
 
 
-def rmr_alloc_msg(vctx, size, payload=None, gen_transaction_id=False, mtype=None, meid=None, sub_id=None):
+def rmr_alloc_msg(
+    vctx, size, payload=None, gen_transaction_id=False, mtype=None, meid=None, sub_id=None, fixed_transaction_id=None
+):
     """
     Refer to the rmr C documentation for rmr_alloc_msg
     extern rmr_mbuf_t* rmr_alloc_msg(void* vctx, int size)
+    TODO: on next API break, clean up transaction_id ugliness. Kept for now to preserve API.
 
     if payload is not None, attempts to set the payload
-    if gen_transaction_id is True, it generates and sets a transaction id
+    if gen_transaction_id is True, it generates and sets a transaction id. Note, fixed_transaction_id supersedes this option
     if mtype is not None, sets the sbuf's message type
     if meid is not None, sets the sbuf's meid
+    if sub_id is not None, sets the sbud's subscription id
+    if fixed_transaction_id is set, it deterministically sets the transaction_id. This overrides the option gen_transation_id
 
     """
     sbuf = _rmr_alloc_msg(vctx, size)
@@ -236,7 +241,9 @@ def rmr_alloc_msg(vctx, size, payload=None, gen_transaction_id=False, mtype=None
         if payload:
             set_payload_and_length(payload, sbuf)
 
-        if gen_transaction_id:
+        if fixed_transaction_id:
+            set_transaction_id(sbuf, fixed_transaction_id)
+        elif gen_transaction_id:
             generate_and_set_transaction_id(sbuf)
 
         if mtype:
@@ -526,17 +533,30 @@ def set_payload_and_length(byte_str, ptr_mbuf):
 
 def generate_and_set_transaction_id(ptr_mbuf):
     """
-    | Generate a UUID and Set an rmr transaction id to it
-    | In place method, no return
+    Generate a UUID and Set an rmr transaction id to it
 
     Parameters
     ----------
     ptr_mbuf: ctypes c_void_p
         Pointer to an rmr message buffer
     """
-    uu_id = uuid.uuid1().hex.encode("utf-8")
+    set_transaction_id(ptr_mbuf, uuid.uuid1().hex.encode("utf-8"))
+
+
+def set_transaction_id(ptr_mbuf, tid_bytes):
+    """
+    Set an rmr transaction id
+    TODO: on next API break, merge these two functions. Not done now to preserve API.
+
+    Parameters
+    ----------
+    ptr_mbuf: ctypes c_void_p
+        Pointer to an rmr message buffer
+    tid_bytes: bytes
+        bytes of the desired transaction id
+    """
     sz = _get_constants().get("RMR_MAX_XID", 0)
-    memmove(ptr_mbuf.contents.xaction, uu_id, sz)
+    memmove(ptr_mbuf.contents.xaction, tid_bytes, sz)
 
 
 def get_src(ptr_mbuf):
