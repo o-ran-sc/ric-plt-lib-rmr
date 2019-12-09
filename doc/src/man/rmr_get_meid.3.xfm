@@ -44,7 +44,7 @@ char* rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest )
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_get_meid) function will copy the managed equipment ID (meid) field from the message
+The &cw(rmr_get_meid) function will copy the managed entity ID (meid) field from the message
 into the &ital(dest) buffer provided by the user.  
 The buffer referenced by &ital(dest) is assumed to be at least &cw(RMR_MAX_MEID) bytes in length.
 If &ital(dest) is NULL, then a buffer is allocated (the calling application is expected

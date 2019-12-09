@@ -45,7 +45,7 @@ int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char* src, int len )
 
 &h2(DESCRIPTION)
 The &cw(rmr_str2meid) function will copy the string pointed to by src to the 
-managed equipment ID (meid) field in the given message.  
+managed entity ID (meid) field in the given message.  
 The field is a fixed length, gated by the constant &cw(RMR_MAX_MEID) and if string length is larger
 than this value, then &bold(nothing) will be copied. (Note, this differs slightly from the
 behaviour of the &cw(lrmr_bytes2meid()) function.)

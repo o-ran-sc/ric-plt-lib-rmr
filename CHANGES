@@ -2,6 +2,9 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2019 December 9; version 1.13.1
+	Correct documentation and missing rel-notes update for RTD.
+
 2019 December 6; version 1.13.0
 	Add ability to route messages based on the MEID in a message combined
 	with the message type/subscription-ID.

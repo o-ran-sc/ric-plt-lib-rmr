@@ -239,7 +239,7 @@ extern unsigned char*  rmr_get_xact( rmr_mbuf_t* mbuf, unsigned char* dest ) {
 }
 
 /*
-	Extracts the meid (managed equipment) from the header and copies the bytes
+	Extracts the meid (managed entity) from the header and copies the bytes
 	to the user supplied area. If the user supplied pointer is nil, then
 	a buffer will be allocated and it is the user's responsibilty to free.
 	A pointer is returned to the destination memory (allocated or not)

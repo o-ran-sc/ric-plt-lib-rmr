@@ -204,8 +204,8 @@ DESCRIPTION
 -------------------------------------------------------------------------------------------- 
  
 The rmr_bytes2meid function will copy up to *len* butes from 
-*src* to the managed equipment ID (meid) field in the 
-message. The field is a fixed length, gated by the constant 
+*src* to the managed entity ID (meid) field in the message. 
+The field is a fixed length, gated by the constant 
 RMR_MAX_MEID and if len is larger than this value, only 
 RMR_MAX_MEID bytes will actually be copied. 
  
@@ -689,7 +689,7 @@ SYNOPSIS
 DESCRIPTION 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_get_meid function will copy the managed equipment ID 
+The rmr_get_meid function will copy the managed entity ID 
 (meid) field from the message into the *dest* buffer provided 
 by the user. The buffer referenced by *dest* is assumed to be 
 at least RMR_MAX_MEID bytes in length. If *dest* is NULL, 
@@ -2786,7 +2786,7 @@ DESCRIPTION
 -------------------------------------------------------------------------------------------- 
  
 The rmr_str2meid function will copy the string pointed to by 
-src to the managed equipment ID (meid) field in the given 
+src to the managed entity ID (meid) field in the given 
 message. The field is a fixed length, gated by the constant 
 RMR_MAX_MEID and if string length is larger than this value, 
 then **nothing** will be copied. (Note, this differs slightly 

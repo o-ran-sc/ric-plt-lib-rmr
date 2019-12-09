@@ -88,7 +88,7 @@ as the one below:
   
  meid_map | start
     mme_ar | control1 | meid000 meid001 meid002 meid003 meid004 meid005
-    mme_ar | control2 | meid100 meid101 meid102 meid103 
+    mme_ar | control2 | meid100 meid101 meid102 meid103
  meid_map | end | 2
  
  
@@ -108,9 +108,9 @@ might look:
   
  meid_map | start
     mme_ar | control1 | meid000 meid001 meid002 meid003 meid004 meid005
-    mme_ar | control2 | meid100 meid101 meid102 meid103 
+    mme_ar | control2 | meid100 meid101 meid102 meid103
     mme_del| meid200 meid401
- meid_map | end | 1
+ meid_map | end | 3
  
  
  
@@ -151,7 +151,7 @@ the syntax for the MEID map.
  meid_map | start
  mme_ar | <owner-endpoint> | <meid> [<meid>...]
  mme_del | <meid> [<meid>...]
- meid_map | end | <count>
+ meid_map | end | <count> [| <md5sum>
  
  
  
@@ -163,6 +163,12 @@ message when a message is routed based on the MEID it
 contains. A MEID may be "owned" by only one endpoint, and if 
 supplied multiple times, the last observed relationship is 
 used. Each of the lists of MEIDs are blank separated. 
+ 
+The optional <md5sum> on the *end* record should be the 
+computed MD5 hash for all records which appear between the 
+start and and records. This allows for a tighter verification 
+that all data was received exactly as the route manager 
+transmitted them. 
  
 Environment 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 

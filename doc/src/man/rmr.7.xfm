@@ -94,28 +94,28 @@ and by supplying a "table" such as the one below:
 &ex_start
 meid_map | start
    mme_ar | control1 | meid000 meid001 meid002 meid003 meid004 meid005
-   mme_ar | control2 | meid100 meid101 meid102 meid103 
+   mme_ar | control2 | meid100 meid101 meid102 meid103
 meid_map | end | 2
 &ex_end
 
 This table indicates that the application (endpoint) &ital(control1) "owns" 6 MEIDs
-and &ital(control2) owns 4.  
-When message type 0 is sent, the MEID in the message will be used to select the 
-endpoint via this table. 
+and &ital(control2) owns 4. 
+When message type 0 is sent, the MEID in the message will be used to select the
+endpoint via this table.
 
 &space
 The MEID table will update the existing owner relationships, and add new ones; it
 is necessary to send only the changes with the add/replace (mme_ar) entries in
-the table. 
+the table.
 When necessary, MEIDs can be deleted by adding an &cw(mme_del) record to the table.
 The following example illustrates how this might look:
 
 &ex_start
 meid_map | start
    mme_ar | control1 | meid000 meid001 meid002 meid003 meid004 meid005
-   mme_ar | control2 | meid100 meid101 meid102 meid103 
+   mme_ar | control2 | meid100 meid101 meid102 meid103
    mme_del| meid200 meid401
-meid_map | end | 1
+meid_map | end | 3
 &ex_end
 
 &h3(Route Table Syntax)
@@ -129,15 +129,15 @@ newrt | end
 &ex_end
 &space
 A round robin group is one or more endpoints from which one will be selected to receive
-the message. 
+the message.
 When multiple endpoints are given in a group, they must be separated with a comma.
 An endpoint is the IP address and port (e.g. 192.158.4.30:8219) or DNS name and port of the
 application that should receive the message type.
-If multiple round-robin groups are given, they must be separated by a semicolon, and 
+If multiple round-robin groups are given, they must be separated by a semicolon, and
 
 &h3(MEID Map Syntax)
-The MEID map is similar to the route table. 
-Entries are used to add or replace the ownership of one or more MEIDs (mme_ar) or to 
+The MEID map is similar to the route table.
+Entries are used to add or replace the ownership of one or more MEIDs (mme_ar) or to
 delete one or more MEIDs (mme_del).
 The following is the syntax for the MEID map.
 
@@ -146,7 +146,7 @@ The following is the syntax for the MEID map.
 meid_map | start
 mme_ar | <owner-endpoint> | <meid> [<meid>...]
 mme_del | <meid> [<meid>...]
-meid_map | end | <count>
+meid_map | end | <count> [| <md5sum>
 &ex_end
 
 &space
@@ -157,6 +157,12 @@ is routed based on the MEID it contains.
 A MEID may be "owned" by only one endpoint, and if supplied multiple times, the last
 observed relationship is used.
 Each of the lists of MEIDs are blank separated.
+
+&space
+The optional <md5sum> on the &ital(end) record should be the computed MD5 hash for all
+records which appear between the start and and records.
+This allows for a tighter verification that all data was received exactly as the
+route manager transmitted them.
 
 
 &h3(Environment)

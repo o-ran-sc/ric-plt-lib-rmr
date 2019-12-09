@@ -15,18 +15,46 @@ file at the repo root; please refer to that file for a
 completely up to date listing of API changes. 
  
  
-2019 November 14; version 1.11.1 
+2019 December 9; version 1.13.1 
+-------------------------------------------------------------------------------------------- 
+ 
+Correct documentation and missing rel-notes update for RTD. 
+ 
+ 
+2019 December 6; version 1.13.0 
+-------------------------------------------------------------------------------------------- 
+ 
+Add ability to route messages based on the MEID in a message 
+combined with the message type/subscription-ID. 
+ 
+ 
+ 
+2019 November 14; version 1.11.1 (Amber) 
 -------------------------------------------------------------------------------------------- 
  
 Fix bug in payload reallocation function; correct length of 
 payload was not always copied. 
  
  
-2019 November 4; version 1.11.0 
+2019 November 13; version 1.12.1 
+-------------------------------------------------------------------------------------------- 
+ 
+New message type constants added to support A1. 
+ 
+ 
+2019 November 4; version 1.11.0 (Amber) 
 -------------------------------------------------------------------------------------------- 
  
 Version bump to move away from the 1.10.* to distinguish 
 between release A and the trial. 
+ 
+ 
+2019 November 7; version 1.12.0 
+-------------------------------------------------------------------------------------------- 
+ 
+Version cut to support continued development for next release 
+preserving the 1.11.* versions for release 1 (Amber) and 
+related fixes. 
  
  
 2019 October 31; version 1.10.2 

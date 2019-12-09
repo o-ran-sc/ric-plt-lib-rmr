@@ -36,10 +36,19 @@
 
 docs = config-deploy developer-guide user-guide rel-notes overview
 
-all:: $(docs:%=%.rst) $(docs:%=%.txt) $(docs:%=%.md) 
+all:: $(docs:%=%.rst) $(docs:%=%.txt) $(docs:%=%.md)
 
-rel-notes.xfm:
+rel-notes.xfm: ../../../CHANGES
 	ksh fmt_changes.ksh >rel-notes.xfm
+
+# we force the docs to always be out of date so that we don't have to
+# manage the list of man pages and other files that are read to generate the
+# output needed for RTD.
+#
+$(docs:%=%.rst): always
+$(docs:%=%.txt): always
+$(docs:%=%.md): always
+
 
 # copy the .rst files which have changed into the docs (plural) directory at the root of the repo
 publish : $(docs:%=%.rst)
@@ -51,6 +60,16 @@ publish : $(docs:%=%.rst)
 		fi;\
 	done
 
+# just list what would be published
+verify : $(docs:%=%.rst)
+	for f in *.rst;\
+	do\
+		if ! diff -N -q $$f ../../../docs/$$f >/dev/null 2>&1;\
+		then\
+			echo "$$f would be published";\
+		fi;\
+	done
+
 # ditch any intermediate files
 clean:
 	rm -f rel-notes.xfm *.sp *.ca
@@ -59,3 +78,5 @@ clean:
 nuke: clean
 	rm -f *.ps *.pdf *.rst *.md
 
+# make hack to force a rule to always be out of date
+always:
