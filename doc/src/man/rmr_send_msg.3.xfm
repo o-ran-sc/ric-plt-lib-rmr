@@ -61,8 +61,8 @@ responsibility of the library.)
 &h2(RETURN VALUE)
 On success, a new message buffer, with an empty payload, is returned for the application
 to use for the next send.
-The state in this buffer will reflect the overall send operation state and should be
-&cw(RMR_OK.)
+The state in this buffer will reflect the overall send operation state and will be
+&cw(RMR_OK) when the send was successful.
 
 &space
 When the message cannot be successfully sent this function will return the unsent (original) 
@@ -74,6 +74,16 @@ is known.
 In the event of extreme failure, a NULL pointer is returned. In this case the value of 
 &cw(errno) might be of some use, for documentation, but there will be little that the 
 user application can do other than to move on.
+
+.sp 1
+&bold(CAUTION^:) 
+In some cases it is extremely likely that the message returned by the send function 
+does  &bold(not) reference the same memory structure. 
+Thus is important for the user programme to capture the new pointer for future use
+or to be passed to &cw(rmr_free().) 
+If you are experiencing either double free errors or segment faults in either &cw(rmr_free()) or 
+&cw(rmr_send_msg(),) ensure that the return value from this function is being captured
+and used.
 
 &h2(ERRORS)
 The following values may be passed back in the &ital(state) field of the returned message
@@ -149,13 +159,13 @@ eliminating alloc/free cycles.
     pm = (msg_t*) send_msg->payload;
     send_msg->mtype = MT_ANSWER;		
 
-    msg->len = generate_data( pm );		// something that fills the payload in
-    msg = rmr_send_msg( mr, send_msg );
+    msg->len = generate_data( pm );       // something that fills the payload in
+    msg = rmr_send_msg( mr, send_msg );   // ensure new pointer used after send
 	if( ! msg ) {
 		return ERROR;
 	} else {
 		if( msg->state != RMR_OK ) {
-			// check for eagain, and resend if needed
+			// check for RMR_ERR_RETRY, and resend if needed
 			// else return error
 		}
 	}

@@ -49,15 +49,14 @@
 
 #define EMULATE_NNG
 #include "test_nng_em.c"
-#include "sr_nng_static.c"
+
+#include "symtab.c"
+#include "mbuf_api.c"
+#include <rtable_nng_static.c>
+#include <sr_nng_static.c>
+#include "rmr_nng.c"
 
 #include "test_support.c"
-
-/*
-	Dummy for testing here
-*/
-extern void rmr_free_msg( rmr_mbuf_t* mbuf ) {
-}
 
 static int hdr_test( ) {
 	int errors = 0;
@@ -72,8 +71,9 @@ static int hdr_test( ) {
 	ctx = (uta_ctx_t *) malloc( sizeof( *ctx ) );
 	ctx->trace_data_len = 0;
 	ctx->my_name = strdup( "my-dummy-host-name-and-port:xxxx" );
+	ctx->my_ip = strdup( "192.168.98.99" );
 
-	msg = alloc_zcmsg( ctx, NULL, payload_len, 0 );				// header len here should just be len of our struct
+	msg = alloc_zcmsg( ctx, NULL, payload_len, 0, 0 );				// header len here should just be len of our struct
 	hdr = (uta_mhdr_t *) msg->header;
 	hlen = RMR_HDR_LEN( hdr );
 
@@ -85,7 +85,7 @@ static int hdr_test( ) {
 
 
 	ctx->trace_data_len = trace_len;		// alloc messages with tracing buffer in place
-	msg = alloc_zcmsg( ctx, NULL, payload_len, 0 );				// header len here should just be len of our struct
+	msg = alloc_zcmsg( ctx, NULL, payload_len, 0, 0 );				// header len here should just be len of our struct
 	hdr = (uta_mhdr_t *) msg->header;
 	hlen = RMR_HDR_LEN( hdr );
 	fprintf( stderr, "<INFO> with trace data: struct+trace len= %d  msg len= %d %d\n", (int) sizeof( uta_mhdr_t )+trace_len, hlen, htonl( hlen ) );
