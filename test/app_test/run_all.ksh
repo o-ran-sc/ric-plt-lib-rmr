@@ -64,8 +64,11 @@ run_test run_rr_test.ksh
 echo "----- rts -------------------"
 run_test run_rts_test.ksh -s 5 -d 100
 
-echo "----- extended payload ------"
+echo "----- extended payload nocopy no clone------"
 run_test run_exrts_test.ksh -d 10 -n 1000
+
+echo "----- extended payload copy clone------"
+run_test run_exrts_test.ksh -d 10 -n 1000 -c 11
 
 if (( errors == 0 ))
 then

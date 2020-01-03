@@ -56,7 +56,6 @@
 #define DATA_SIZE (HDR_SIZE-HDR_SIZE)		// the actual 'data' length returned in the ack msg
 #endif
 
-
 void spew( char* buf, int len ) {
 	int i;
 	char wbuf[1024];				// slower, but buffer so that mult writers to the tty don't jumble (too much)
@@ -233,6 +232,7 @@ int validate_msg( char* buf, int rmr_len ) {
 	int		good = 0;
 
 	if( buf == 0 && rmr_len <= 0 ) {
+		fprintf( stderr, "<TEST> validate msg: nil buffer or no len: %p len=%d\n", buf, rmr_len );
 		return 0;
 	}
 
@@ -244,7 +244,7 @@ int validate_msg( char* buf, int rmr_len ) {
 
 		if( ! isprint( *buf ) ) {  // we expect the header to be a zero terminated string
 			fprintf( stderr, "<TEST> validate msg: header is not completely ASCII i=%d\n", i );
-			spew( buf, 64 );
+			spew( buf, rmr_len > 64 ? 64 : rmr_len );
 			return 0;
 		}
 	}
@@ -256,7 +256,7 @@ int validate_msg( char* buf, int rmr_len ) {
 
 	ohdr = strdup( buf );		// must copy so we can trash
 
-	search_start = buf;
+	search_start = ohdr;
 	for( i = 0; i < 3; i++ ) {
 		tok = strtok_r( search_start, " ", &tok_mark );
 		search_start = NULL;
@@ -282,12 +282,12 @@ int validate_msg( char* buf, int rmr_len ) {
 
 	if( ex_mlen != rmr_len ) {
 		fprintf( stderr, "[FAIL] received message length did not match hdr+data lengths, rmr_len=%d data follows:\n", rmr_len );
-		if( ! isprint( ohdr ) ) {
-			fprintf( stderr, "[CONT] header isn't printable\n" );
-			spew( ohdr, 64 );
+		if( ! isprint( *ohdr ) ) {
+			fprintf( stderr, "<TEST> validate msg: header isn't printable\n" );
+			spew( ohdr, rmr_len > 64 ? 64 : rmr_len );
 		} else {
-			fprintf( stderr, "[CONT] header: (%s)\n", ohdr );
-			fprintf( stderr, "[CONT] computed length: %d (expected)\n", ex_mlen );
+			fprintf( stderr, "<TEST> validate msg: header: (%s)\n", ohdr );
+			fprintf( stderr, "<TEST> validate msg: computed length: %d (expected)\n", ex_mlen );
 		}
 		free( ohdr );
 		return 0;
@@ -302,7 +302,7 @@ int validate_msg( char* buf, int rmr_len ) {
 	sv = sum( tok, data_len );			// compute checksum of data portion
 
 	if( sv != ex_sv ) {
-		fprintf( stderr, "[FAIL] data checksum mismatch, got %d, expected %d. header: %s\n", sv, ex_sv, ohdr );
+		fprintf( stderr, "<TEST> validate msg:  data checksum mismatch, got %d, expected %d. header: %s\n", sv, ex_sv, ohdr );
 		free( ohdr );
 		return 0;
 	}

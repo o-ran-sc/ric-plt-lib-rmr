@@ -202,6 +202,12 @@ int main( int argc, char** argv ) {
 			default:
 				if( successful ) {
 					fail_count++;							// count failures after first successful message
+				} else {
+					fail_count++;
+					if( fail_count > 10 ) {
+						fprintf( stderr, "<VSEND> giving up\n" );
+						exit( 1 );
+					}
 				}
 				// some error (not connected likely), don't count this
 				//sleep( 1 );
@@ -222,11 +228,13 @@ int main( int argc, char** argv ) {
 					errno = 0;
 					rbuf = rmr_rcv_msg( mrc, rbuf );
 					if( rbuf && rbuf->state == RMR_OK ) {
-						if( rmr_payload_size( rbuf ) > HDR_SIZE+DATA_SIZE ) {		// verify that response has a larger payload than we should have sent
+						if( rmr_payload_size( rbuf ) >= HDR_SIZE+DATA_SIZE ) {		// vet message
 							rts_ok += validate_msg( rbuf->payload, rbuf->len );
 						} else { 
+							fprintf( stderr, "<VSNDR> received short response: >%d expected, got %d\n", HDR_SIZE+DATA_SIZE, rmr_payload_size( rbuf ) );
 							short_count++;
 						}
+
 						rcvd_count++;
 					}
 				}
@@ -253,7 +261,7 @@ int main( int argc, char** argv ) {
 					rbuf = rmr_rcv_msg( mrc, rbuf );
 					if( rbuf && rbuf->state == RMR_OK ) {
 						rcvd_count++;
-						if( rmr_payload_size( rbuf ) > HDR_SIZE+DATA_SIZE ) {		// verify that response has a larger payload than we should have sent
+						if( rmr_payload_size( rbuf ) >= HDR_SIZE+DATA_SIZE ) {		// vet message
 							rts_ok += validate_msg( rbuf->payload, rbuf->len );
 						}
 
@@ -264,8 +272,8 @@ int main( int argc, char** argv ) {
 		}
 	}
 
-	if( rcvd_count != rts_ok || count != nmsgs ) {			// we might not receive all back if receiver didn't retry, so that is NOT a failure here
-		fprintf( stderr, "<VSNDR> rcvd=%d rts_ok=%d count=%d nmsg=%d\n", rcvd_count, rts_ok, count, nmsgs );
+	if( (rcvd_count != rts_ok) || (count != nmsgs) ) {			// we might not receive all back if receiver didn't retry, so that is NOT a failure here
+		fprintf( stderr, "<VSNDR> recvd=%d rts_ok=%d short=%d count=%d nmsg=%d\n", rcvd_count, rts_ok, short_count, count, nmsgs );
 		pass = 0;
 	}
 
