@@ -36,6 +36,7 @@
 #	Author:		E. Scott Daniels
 # ---------------------------------------------------------------------------------
 
+ulimit -c unlimited
 
 # The sender and receivers are run asynch. Their exit statuses are captured in a
 # file in order for the 'main' to pick them up easily.
@@ -51,7 +52,7 @@ function run_rcvr {
 
 	port=$(( 4460 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	./ex_rts_receiver $port
+	./ex_rts_receiver $copyclone -p $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -108,7 +109,7 @@ mtype_start_stop=""
 while [[ $1 == -* ]]
 do
 	case $1 in
-		-c)	cthreads=$2; shift;;
+		-c)	copyclone="-c $2"; shift;;
 		-B)	rebuild=1;;
 		-d)	delay=${2//,/}; shift;;				# delay in micro seconds allow 1,000 to make it easier on user
 		-i)	use_installed=1;;
