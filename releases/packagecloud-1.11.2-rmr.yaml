@@ -1,6 +1,10 @@
 ---
-package_name:
+package_name: rmr
+packages:
     - name: rmr_1.11.2_amd64.deb
     - name: rmr-dev_1.11.2_amd64.deb
     - name: rmr-devel-1.11.2-1.x86_64.rpm
     - name: rmr-1.11.2-1.x86_64.rpm
+ref: b6c253dd8851836d46fe06cd70c01ff2ac948318
+log_dir: vex-sjc-oran-jenkins-prod-1/ric-plt-lib-rmr-docker-ci-pc-merge-master/3
+version: 1.11.2
