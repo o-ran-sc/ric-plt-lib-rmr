@@ -65,7 +65,7 @@
 #include "ring_static.c"			// message ring support
 #include "rt_generic_static.c"		// route table things not transport specific
 #include "rtable_si_static.c"		// route table things -- transport specific
-#include "rtc_static.c"				// route table collector
+//#include "rtc_static.c"				// route table collector
 #include "rtc_si_static.c"			// our private test function
 #include "tools_static.c"
 #include "sr_si_static.c"			// send/receive static functions
@@ -535,11 +535,12 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	char	wbuf[1024];					// work buffer
 	char*	tok;						// pointer at token in a buffer
 	char*	tok2;
+	int		static_rtc = 0;				// if rtg env var is < 1, then we set and don't listen on a port
 	int		state;
 	int		i;
 
 	if( ! announced ) {
-		fprintf( stderr, "[INFO] ric message routing library on SI95 mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
+		fprintf( stderr, "[INFO] ric message routing library on SI95/b mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
 			RMR_MSG_VER, flags, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
 	}
@@ -598,6 +599,12 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		}
 	} else {
 		port = proto_port;			// assume something like "1234" was passed
+	}
+
+	if( (tok = getenv( "ENV_RTG_PORT" )) != NULL ) {				// must check port here -- if < 1 then we just start static file 'listener'
+		if( atoi( tok ) < 1 ) {
+			static_rtc = 1;
+		}
 	}
 
 	if( (tok = getenv( ENV_SRC_ID )) != NULL ) {							// env var overrides what we dig from system
@@ -665,13 +672,18 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		return NULL;
 	}
 
-	if( !(flags & FL_NOTHREAD) ) {												// skip if internal function that doesnt need an rtc
-		if( pthread_create( &ctx->rtc_th,  NULL, rtc_file, (void *) ctx ) ) { 	// kick the rt collector thread
-			fprintf( stderr, "[WRN] rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
+	if( !(flags & FL_NOTHREAD) ) {												// skip if internal function that doesnt need a RTC
+		if( static_rtc ) {
+			if( pthread_create( &ctx->rtc_th,  NULL, rtc_file, (void *) ctx ) ) { 	// kick the rt collector thread as just file reader
+				fprintf( stderr, "[WRN] rmr_init: unable to start static route table collector thread: %s", strerror( errno ) );
+			}
+		} else {
+			if( pthread_create( &ctx->rtc_th,  NULL, rtc, (void *) ctx ) ) { 	// kick the real rt collector thread
+				fprintf( stderr, "[WRN] rmr_init: unable to start dynamic route table collector thread: %s", strerror( errno ) );
+			}
 		}
 	}
 
-	//fprintf( stderr, ">>>>> starting threaded receiver with ctx=%p si_ctx=%p\n", ctx, ctx->si_ctx );
 	ctx->flags |= CFL_MTC_ENABLED;												// for SI threaded receiver is the only way
 	if( pthread_create( &ctx->mtc_th,  NULL, mt_receive, (void *) ctx ) ) { 	// so kick it
 		fprintf( stderr, "[WRN] rmr_init: unable to start multi-threaded receiver: %s", strerror( errno ) );

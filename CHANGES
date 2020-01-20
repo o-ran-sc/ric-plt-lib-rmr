@@ -2,6 +2,9 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 January 20; verison 3.0.1
+	Enable support for dynamic route table updates via RMR session.
+
 2020 January 16; version 3.0.0
 	Introduce support for SI95 transport library to replace NNG.
 	(RMR library versions will use leading odd numbers to avoid tag collisions
