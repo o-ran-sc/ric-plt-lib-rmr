@@ -116,8 +116,6 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 	uta_mhdr_t*	hdr;			// convenience pointer
 	int			tr_len;			// trace data len (default or override)
 	int*		alen;			// convenience pointer to set allocated len
-	//int			tpb_len;		// transport buffer total len
-static int logged = 0;
 
 	tr_len = trlo > 0 ? trlo : ctx->trace_data_len;
 
@@ -243,11 +241,7 @@ static void ref_tpbuf( rmr_mbuf_t* msg, size_t alen )  {
 	int ver;
 	int	hlen;						// header len to use for a truncation check
 
-	msg->header = ((char *) msg->tp_buf) + TP_HDR_LEN;				// FIX ME:  hard 50 needs to be some kind of tp header struct
-
-	// do NOT reduce alen any more.  alen must be TP_HEADER + RMR_HEADER + user space
-	// get payload size will do the right thing and subtract TP_HEADER and RMR_HEADER lengths
-	//alen -= 50;						// actual length of "rmr space" 
+	msg->header = ((char *) msg->tp_buf) + TP_HDR_LEN;
 
 	v1hdr = (uta_v1mhdr_t *) msg->header;					// v1 will always allow us to suss out the version
 

@@ -54,8 +54,6 @@ static inline void queue_normal( uta_ctx_t* ctx, rmr_mbuf_t* mbuf ) {
 	call ref to point to all of the various bits and set real len etc,
 	then we queue it.  Raw_msg is expected to include the transport goo
 	placed in front of the RMR header and payload.
-
-	done -- FIX ME?? can we eliminate the buffer copy here?
 */
 static void buf2mbuf( uta_ctx_t* ctx, char *raw_msg, int msg_size, int sender_fd ) {
 	rmr_mbuf_t*		mbuf;
@@ -70,17 +68,9 @@ static void buf2mbuf( uta_ctx_t* ctx, char *raw_msg, int msg_size, int sender_fd
 		}
 	}
 
-/*
-	if( (mbuf = (rmr_mbuf_t *) malloc( sizeof( *mbuf ))) != NULL ) {		// alloc mbuf and point at various bits of payload
-		memset( mbuf, 0, sizeof( *mbuf ) );
-		mbuf->tp_buf = raw_msg;
-		mbuf->ring = ctx->zcb_mring;
-*/
 	if( (mbuf = alloc_mbuf( ctx, RMR_ERR_UNSET )) != NULL ) {
 		mbuf->tp_buf = raw_msg;
 		mbuf->rts_fd = sender_fd;
-
-		// eliminated :)   memcpy( mbuf->tp_buf, river->accum + offset, river->msg_size );
 
 		ref_tpbuf( mbuf, msg_size );				// point mbuf at bits in the datagram
 		hdr = mbuf->header;							// convenience
@@ -124,17 +114,16 @@ static int mt_data_cb( void* vctx, int fd, char* buf, int buflen ) {
 	int				need;			// bytes needed for something
 	int				i;
 
-	// for speed these checks should be enabled only in debug mode and assume we always get a good context
-	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
-		return SI_RET_OK;
+	if( PARINOID_CHECKS ) {									// PARINOID mode is slower; off by default
+		if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
+			return SI_RET_OK;
+		}
+	
+		if( fd >= ctx->nrivers || fd < 0 ) {
+			if( DEBUG ) fprintf( stderr, "[DBUG] callback fd is out of range: %d nrivers=%d\n", fd, ctx->nrivers );
+			return SI_RET_OK;
+		}
 	}
-
-	if( fd >= ctx->nrivers || fd < 0 ) {
-		if( DEBUG ) fprintf( stderr, "[DBUG] callback fd is out of range: %d nrivers=%d\n", fd, ctx->nrivers );
-		return SI_RET_OK;
-	}
-
-	// -------- end debug checks -----------------
 
 	if( buflen <= 0 ) {
 		return SI_RET_OK;
@@ -159,7 +148,7 @@ static int mt_data_cb( void* vctx, int fd, char* buf, int buflen ) {
 /*
 fprintf( stderr, "\n>>>>> data callback for %d bytes from %d\n", buflen, fd );
 for( i = 0; i < 40; i++ ) {
-fprintf( stderr, "%02x ", (unsigned char) *(buf+i) );
+	fprintf( stderr, "%02x ", (unsigned char) *(buf+i) );
 }
 fprintf( stderr, "\n" );
 */
@@ -226,7 +215,7 @@ fprintf( stderr, "\n" );
 	This is expected to execute in a separate thread. It is responsible for
 	_all_ receives and queues them on the appropriate ring, or chute.
 	It does this by registering the callback function above with the SI world
-	and then caling SIwait() to drive the callback when data has arrived.
+	and then calling SIwait() to drive the callback when data has arrived.
 
 
 	The "state" of the message is checked which determines where the message

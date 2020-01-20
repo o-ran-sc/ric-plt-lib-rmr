@@ -113,6 +113,7 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 								status = SInewsession( gptr, tpptr );			// accept connection
 							} else  {											//  data received on a regular port (we support just tcp now
 								status = RECV( fd, gptr->rbuf, MAX_RBUF, 0 );	//  read data 
+								//fprintf( stderr, ">>>>> wait popped status =%d\n", status );
 								if( status > 0  &&  ! (tpptr->flags & TPF_DRAIN) ) {
 									if( (cbptr = gptr->cbtab[SI_CB_CDATA].cbrtn) != NULL ) {
 										status = (*cbptr)( gptr->cbtab[SI_CB_CDATA].cbdata, fd, gptr->rbuf, status );
