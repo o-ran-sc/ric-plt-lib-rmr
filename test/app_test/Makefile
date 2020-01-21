@@ -1,7 +1,7 @@
 #
 #=================================================================================
-#    Copyright (c) 2019 Nokia
-#    Copyright (c) 2018-2019 AT&T Intellectual Property.
+#    Copyright (c) 2019-2020 Nokia
+#    Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -54,42 +54,46 @@ all_si: sender_si receiver_si
 
 # ------ nng based builds ------------------------------------------------------------
 
-receiver: receiver.c
+%:%.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+
+#receiver: receiver.c
+#	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
 mt_receiver: receiver.c
 	gcc -I $${C_INCLUDE_PATH:-.} -DMTC $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
-lreceiver: lreceiver.c
-	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+#lreceiver: lreceiver.c
+#	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
-ex_rts_receiver: ex_rts_receiver.c
-	gcc $(ex_cflags) -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+#ex_rts_receiver: ex_rts_receiver.c
+#	gcc $(ex_cflags) -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
-v_sender: v_sender.c
-	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+#v_sender: v_sender.c
+#	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
-sender: sender.c
-	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+#sender: sender.c
+#	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
-caller: caller.c
-	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
+#caller: caller.c
+#	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
 
-lcaller: lcaller.c
-	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@  -lrmr_nng -lnng -lpthread -lm
+#lcaller: lcaller.c
+#	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@  -lrmr_nng -lnng -lpthread -lm
 
-lsender: lsender.c
-	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@  -lrmr_nng -lnng -lpthread -lm
+#lsender: lsender.c
+#	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@  -lrmr_nng -lnng -lpthread -lm
 
 
 
 # ----- si test builds -------------------------------------------------------------
 
-sender_si: sender.c
+%_si : %.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_si -lpthread -lm
 
-receiver_si: receiver.c
-	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_si -lpthread -lm
+# explicit rule because there is no mt_recever.c
+mt_receiver_si: receiver.c
+	gcc -I $${C_INCLUDE_PATH:-.} -DMTC $< -g -o $@ -lrmr_si -lpthread -lm
 
 
 # --------- housekeeping -----------------------------------------------------------

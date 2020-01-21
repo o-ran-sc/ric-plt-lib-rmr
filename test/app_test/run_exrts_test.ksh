@@ -1,8 +1,8 @@
 #!/usr/bin/env ksh
 # vim: ts=4 sw=4 noet :
 #==================================================================================
-#    Copyright (c) 2019 Nokia
-#    Copyright (c) 2018-2019 AT&T Intellectual Property.
+#    Copyright (c) 2019-2020 Nokia
+#    Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ ulimit -c unlimited
 # file in order for the 'main' to pick them up easily.
 #
 function run_sender {
-	./v_sender ${nmsg:-10} ${delay:-100000} ${mtype_start_stop:-0:1} 
+	./v_sender${si} ${nmsg:-10} ${delay:-100000} ${mtype_start_stop:-0:1} 
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -52,7 +52,7 @@ function run_rcvr {
 
 	port=$(( 4460 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	./ex_rts_receiver $copyclone -p $port
+	./ex_rts_receiver${si} $copyclone -p $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -105,6 +105,7 @@ verbose=0
 nrcvrs=1					# this is sane, but -r allows it to be set up
 use_installed=0
 mtype_start_stop=""
+si=""						# -S will enable si library testing
 
 while [[ $1 == -* ]]
 do
@@ -114,9 +115,11 @@ do
 		-d)	delay=${2//,/}; shift;;				# delay in micro seconds allow 1,000 to make it easier on user
 		-i)	use_installed=1;;
 		-m)	mtype_start_stop="$2"; shift;;
-		-M)	mt_call="EX_CFLAGS=-DMTC=1";;					# turn on mt-call receiver option
+		-M)	mt_call_flag="EX_CFLAGS=-DMTC=1";;	# turn on mt-call receiver option
+		-N)	si="";;								# enable nng based testing
 		-n)	nmsg=$2; shift;;
 		-r) nrcvrs=$2; shift;;
+		-S)	si="_si";;							# run SI95 based binaries
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
@@ -126,6 +129,8 @@ do
 			echo "  -m mtype  will set the stopping (max) message type; sender will loop through 0 through mtype-1"
 			echo "  -m start:stop  will set the starting and stopping mtypes; start through stop -1"
 			echo "  -M enables mt-call receive processing to test the RMR asynch receive pthread"
+			echo "  -N enables NNG based testing (default)"
+			echo "  -S enables SI95 based testing"
 			echo ""
 			echo "The receivers will run until they have not received a message for a few seconds. The"
 			echo "sender will send the requested number of messages, 10 by default."
@@ -178,7 +183,7 @@ export RMR_SEED_RT=./ex_rts.rt
 
 set_rt $nrcvrs														# set up the rt for n receivers
 
-if ! make $mt_call -B v_sender ex_rts_receiver >/tmp/PID$$.log 2>&1			# for sanity, always rebuild test binaries
+if ! make -B $mt_call_flag v_sender${si} ex_rts_receiver${si} >/tmp/PID$$.log 2>&1			# for sanity, always rebuild test binaries
 then
 	echo "[FAIL] cannot make binaries"
 	cat /tmp/PID$$.log

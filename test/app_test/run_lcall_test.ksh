@@ -1,8 +1,8 @@
 #!/usr/bin/env ksh
 # vim: ts=4 sw=4 noet :
 #==================================================================================
-#    Copyright (c) 2019 Nokia
-#    Copyright (c) 2018-2019 AT&T Intellectual Property.
+#    Copyright (c) 2019-2020 Nokia
+#    Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@
 # file in order for the 'main' to pick them up easily.
 #
 function run_sender {
-	./lcaller ${nmsg:-10} ${delay:-500} ${cthreads:-3} 
+	./lcaller${si} ${nmsg:-10} ${delay:-500} ${cthreads:-3} 
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -61,7 +61,7 @@ function run_rcvr {
 
 	port=$(( 4460 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	./lreceiver $(( ((nmsg * cthreads)/nrcvrs) + 10 )) $port
+	./lreceiver${si} $(( ((nmsg * cthreads)/nrcvrs) + 10 )) $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -111,6 +111,8 @@ rebuild=0
 verbose=0
 nrcvrs=3					# this is sane, but -r allows it to be set up
 use_installed=0
+force_make=0
+si=""
 
 while [[ $1 == -* ]]
 do
@@ -120,7 +122,10 @@ do
 		-d)	delay=$2; shift;;
 		-i)	use_installed=1;;
 		-n)	nmsg=$2; shift;;
+		-M)	force_make=1;;
+		-N)	si="";;					# build NNG binaries (turn off si)
 		-r)	nrcvrs=$2; shift;;
+		-S)	si="_si";;				# build SI95 binaries
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
@@ -175,11 +180,11 @@ export RMR_SEED_RT=./lcall.rt
 
 set_rt $nrcvrs						# set up the rt for n receivers
 
-if (( rebuild )) || [[ ! -f ./lcaller ]]
+if (( force_make || rebuild )) || [[ ! -f ./lcaller{$si} || ! -f ./lreceiver${si} ]]
 then
-	if ! make -B lcaller lreceiver >/dev/null 2>&1
+	if ! make -B lcaller${si} lreceiver${si} >/dev/null 2>&1
 	then
-		echo "[FAIL] cannot find lcaller binary, and cannot make it.... humm?"
+		echo "[FAIL] cannot find lcaller${si} and/or lreceiver${si} binary, and cannot make them.... humm?"
 		exit 1
 	fi
 fi

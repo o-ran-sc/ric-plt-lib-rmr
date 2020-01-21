@@ -141,6 +141,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 		}
 	}
 
+	msg->rts_fd = -1;					// must force to be invalid; not a received message that can be returned
 
 	if( !msg->alloc_len && (msg->tp_buf = (void *) malloc( mlen )) == NULL ) {
 		fprintf( stderr, "[CRI] rmr_alloc_zc: cannot get memory for zero copy buffer: %d bytes\n", (int) mlen );
@@ -419,6 +420,127 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 }
 
 /*
+	Realloc the message such that the payload is at least payload_len bytes.  
+	The clone and copy options affect what portion of the original payload is copied to
+	the reallocated message, and whether or not the original payload is lost after the
+	reallocation process has finished.
+
+		copy == true
+		The entire payload from the original message will be coppied to the reallocated
+		payload.
+
+		copy == false
+		Only the header (preserving return to sender information, message type, etc)
+		is preserved after reallocation; the payload used lengrh is set to 0 and the
+		payload is NOT initialised/cleared.
+
+		clone == true
+		The orignal message is preserved and a completely new message buffer and payload
+		are allocated (even if the size given is the same). A pointer to the new message
+		buffer is returned and it is the user application's responsibility to manage the
+		old buffer (e.g. free when not needed).
+
+		clone == false
+		The old payload will be lost after reallocation. The message buffer pointer which
+		is returned will likely reference the same structure (don't depend on that).
+		
+
+	CAUTION:
+	If the message is not a message which was received, the mtype, sub-id, length values in the
+	RMR header in the allocated transport buffer will NOT be accurate and will cause the resulting
+	mbuffer information for mtype and subid to be reset even when copy is true. To avoid silently
+	resetting information in the mbuffer, this funciton will reset the mbuf values from the current
+	settings and NOT from the copied RMR header in transport buffer.
+*/
+static inline rmr_mbuf_t* realloc_payload( rmr_mbuf_t* old_msg, int payload_len, int copy, int clone ) {
+	rmr_mbuf_t* nm = NULL;	// new message buffer when cloning
+	size_t	mlen;
+	uta_mhdr_t* omhdr;		// old message header
+	int		tr_old_len;		// tr size in new buffer
+	int		old_psize = 0;	// size of payload in the message passed in (alloc size - tp header and rmr header lengths)
+	int		hdr_len = 0;	// length of RMR and transport headers in old msg
+	void*	old_tp_buf;		// pointer to the old tp buffer
+	int		free_tp = 1;	// free the transport buffer (old) when done (when not cloning)
+	int		old_mt;			// msg type and sub-id from the message passed in
+	int		old_sid;
+	int		old_len;
+	int		old_rfd;		// rts file descriptor from old message
+
+	if( old_msg == NULL || payload_len <= 0 ) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	old_mt = old_msg->mtype;			// preserve mbuf info
+	old_sid = old_msg->sub_id;
+	old_len = old_msg->len;
+	old_rfd = old_msg->rts_fd;
+
+	old_psize = old_msg->alloc_len - (RMR_HDR_LEN( old_msg->header ) + TP_HDR_LEN);		// user payload size in orig message
+
+	if( !clone  && payload_len <= old_psize ) {										// not cloning and old is large enough; nothing to do
+		if( DEBUG ) fprintf( stderr, "[DBUG] rmr_realloc_payload: old msg payload larger than requested: cur=%d need=%d\n", old_psize, payload_len );
+		return old_msg;
+	}
+
+	hdr_len = RMR_HDR_LEN( old_msg->header ) + TP_HDR_LEN;				// with SI we manage the transport header; must include in len
+	old_tp_buf = old_msg->tp_buf;
+
+	if( clone ) {
+		if( DEBUG ) fprintf( stderr, "[DBUG] rmr_realloc_payload: cloning message\n" );
+		free_tp = 0;
+
+		nm = (rmr_mbuf_t *) malloc( sizeof( *nm ) );
+		if( nm == NULL ) {
+			fprintf( stderr, "[CRI] rmr_realloc_payload: cannot get memory for message buffer. bytes requested: %d\n", (int) sizeof(*nm) );
+			return NULL;
+		}
+		memset( nm, 0, sizeof( *nm ) );
+		nm->rts_fd = old_rfd;				// this is managed only in the mbuf; dup now
+	} else {
+		nm = old_msg;
+	}
+
+	omhdr = old_msg->header;
+	mlen = hdr_len + (payload_len > old_psize ? payload_len : old_psize);		// must have larger in case copy is true
+
+	if( DEBUG ) fprintf( stderr, "[DBUG] reallocate for payload increase. new message size: %d\n", (int) mlen );	
+	if( (nm->tp_buf = (char *) malloc( sizeof( char ) * mlen )) == NULL ) {
+		fprintf( stderr, "[CRI] rmr_realloc_payload: cannot get memory for zero copy buffer. bytes requested: %d\n", (int) mlen );
+		return NULL;
+	}
+
+	nm->header = ((char *) nm->tp_buf) + TP_HDR_LEN;			// point at the new header and copy from old
+	SET_HDR_LEN( nm->header );
+
+	if( copy ) {																// if we need to copy the old payload too
+		if( DEBUG ) fprintf( stderr, "[DBUG] rmr_realloc_payload: copy payload into new message: %d bytes\n", old_psize );
+		memcpy( nm->header, omhdr, sizeof( char ) * (old_psize + RMR_HDR_LEN( omhdr )) );
+	} else {																	// just need to copy header
+		if( DEBUG ) fprintf( stderr, "[DBUG] rmr_realloc_payload: copy only header into new message: %d bytes\n", RMR_HDR_LEN( nm->header ) );
+		memcpy( nm->header, omhdr, sizeof( char ) * RMR_HDR_LEN( omhdr ) );
+	}
+
+	ref_tpbuf( nm, mlen );			// set payload and other pointers in the message to the new tp buffer
+
+	if( !copy ) {
+		nm->mtype = -1;						// didn't copy payload, so mtype, sub-id, and rts fd are invalid
+		nm->sub_id = -1;
+		nm->len = 0;						// and len is 0
+	} else {
+		nm->len = old_len;					// we must force these to avoid losing info if msg wasn't a received message
+		nm->mtype = old_mt;
+		nm->sub_id = old_sid;
+	}
+
+	if( free_tp ) {
+		free( old_tp_buf );				// we did not clone, so free b/c no references
+	}
+
+	return nm;
+}
+
+/*
 	For SI95 based transport all receives are driven through the threaded
 	ring and thus this function should NOT be called. If it is we will panic
 	and abort straight away.
@@ -443,7 +565,7 @@ exit( 1 );
 static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
 	return NULL;
 /*
-FIXME: not implemented yet
+FIXME: do we need this in the SI world?  The only user was the route table collector
 	int state;
 	rmr_mbuf_t*	msg = NULL;		// msg received
 	size_t	rsize;				// nng needs to write back the size received... grrr

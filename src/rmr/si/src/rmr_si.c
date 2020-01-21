@@ -1031,6 +1031,34 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 }
 
 /*
+	Given an existing message buffer, reallocate the payload portion to
+	be at least new_len bytes.  The message header will remain such that
+	the caller may use the rmr_rts_msg() function to return a payload
+	to the sender. 
+
+	The mbuf passed in may or may not be reallocated and the caller must
+	use the returned pointer and should NOT assume that it can use the 
+	pointer passed in with the exceptions based on the clone flag.
+
+	If the clone flag is set, then a duplicated message, with larger payload
+	size, is allocated and returned.  The old_msg pointer in this situation is
+	still valid and must be explicitly freed by the application. If the clone 
+	message is not set (0), then any memory management of the old message is
+	handled by the function.
+
+	If the copy flag is set, the contents of the old message's payload is 
+	copied to the reallocated payload.  If the flag is not set, then the 
+	contents of the payload is undetermined.
+*/
+extern rmr_mbuf_t* rmr_realloc_payload( rmr_mbuf_t* old_msg, int new_len, int copy, int clone ) {
+	if( old_msg == NULL ) {
+		return NULL;
+	}
+
+	return realloc_payload( old_msg, new_len, copy, clone );	// message allocation is transport specific, so this is a passthrough
+}
+
+/*
 	Enable low latency things in the transport (when supported).
 */
 extern void rmr_set_low_latency( void* vctx ) {

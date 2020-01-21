@@ -162,11 +162,11 @@ static void print_stats( tdata_t* td, int out, int hist ) {
 
 	if( hist ) {
 		for( j = 0; j < td->nbins; j++ ) {
-			fprintf( stderr, "%3d %d\n", j, out ? td->out_bins[j] : td->in_bins[j] );
+			fprintf( stderr, "<LCALLER> hist: bin[%03d] %d\n", j, out ? td->out_bins[j] : td->in_bins[j] );
 		}
 	}
 
-	fprintf( stderr, "%s: oor=%d max=%.2fms  mean=%.2fms  95th=%.2fms 99th=%.2f\n", 
+	fprintf( stderr, "<LCALLER> %s: oor=%d max=%.2fms  mean=%.2fms  95th=%.2fms 99th=%.2f\n", 
 		out ? "out" : " in", oor, (double)max/1000000.0, (double)mean/100.0, (double) i95/100.0, i99/100.0 );
 }
 
@@ -293,7 +293,7 @@ static void* mk_calls( void* data ) {
 					break;
 
 				default:
-					fprintf( stderr, "unexpected error: tid=%d rmr-state=%d ernro=%d\n", control->id, sbuf->state, errno );
+					fprintf( stderr, "<LCALLER> unexpected error: tid=%d rmr-state=%d ernro=%d\n", control->id, sbuf->state, errno );
 					sbuf = rmr_alloc_msg( control->mrc, 512 );			// allocate a sendable buffer
 					if( successful ) {
 						fail_count++;							// count failures after first successful message

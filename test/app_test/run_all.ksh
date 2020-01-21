@@ -1,8 +1,8 @@
 #!/usr/bin/env ksh
 # vim: ts=4 sw=4 noet :
 #==================================================================================
-#    Copyright (c) 2019 Nokia
-#    Copyright (c) 2018-2019 AT&T Intellectual Property.
+#    Copyright (c) 2019-2020 Nokia
+#    Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ function run_test {
 
 build=""
 errors=0
+si_flag=""				# eventually we'll default to -S to run SI tests over NNG tests
 
 while [[ $1 == "-"* ]]
 do
@@ -45,6 +46,8 @@ do
 		-B)	build="-B";;
 		-e)	capture_file=$2; >$capture_file; shift;;
 		-i)	installed="-i";;
+		-N)	si_flag="";;			# turn on NNG tests (off si)
+		-S)	si_flag="-S";;			# turn on si based tests
 
 		*)	echo "'$1' is not a recognised option and is ignored";;
 	esac
@@ -53,22 +56,22 @@ do
 done
 
 echo "----- app --------------------"
-run_test run_app_test.ksh -v $installed $build
+run_test run_app_test.ksh $si_flag -v $installed $build
 
 echo "----- multi ------------------"
-run_test run_multi_test.ksh
+run_test run_multi_test.ksh $si_flag
 
 echo "----- round robin -----------"
-run_test run_rr_test.ksh
+run_test run_rr_test.ksh $si_flag
 
 echo "----- rts -------------------"
-run_test run_rts_test.ksh -s 5 -d 100
+run_test run_rts_test.ksh $si_flag -s 5 -d 100
 
 echo "----- extended payload nocopy no clone------"
-run_test run_exrts_test.ksh -d 10 -n 1000
+run_test run_exrts_test.ksh $si_flag -d 10 -n 1000
 
 echo "----- extended payload copy clone------"
-run_test run_exrts_test.ksh -d 10 -n 1000 -c 11
+run_test run_exrts_test.ksh $si_flag -d 10 -n 1000 -c 11
 
 if (( errors == 0 ))
 then

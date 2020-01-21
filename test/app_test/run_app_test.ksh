@@ -1,8 +1,8 @@
 #!/usr/bin/env ksh
 # vim: ts=4 sw=4 noet :
 #==================================================================================
-#    Copyright (c) 2019 Nokia
-#    Copyright (c) 2018-2019 AT&T Intellectual Property.
+#    Copyright (c) 2019-2020 Nokia
+#    Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@
 # file in order for the 'main' to pick them up easily.
 #
 function run_sender {
-	./sender $nmsg $delay
+	./sender${si} $nmsg $delay
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -47,9 +47,9 @@ function run_rcvr {
 	if (( mt_receiver ))
 	then
 		echo "<TEST> testing with mt-receiver" >&2
-		./mt_receiver $nmsg
+		./mt_receiver${si} $nmsg
 	else
-		./receiver $nmsg
+		./receiver${si} $nmsg
 	fi
 	echo $? >/tmp/PID$$.rrc
 }
@@ -108,6 +108,7 @@ my_ip=$(snarf_ip)			# get an ip to insert into the route table
 keep=0
 mt_receiver=0				# -m sets in order to test with multi-threaded receive stuff
 force_make=0
+si=""						# -S sets to build and test SI versions
 
 
 while [[ $1 == -* ]]
@@ -121,6 +122,8 @@ do
 		-M)	force_make=1;;
 		-m)	mt_receiver=1;;
 		-n)	nmsg=$2; shift;;
+		-N)	si="";;							# build and test NNG versions (off si)
+		-S)	si="_si";;						# build and test SI95 versions
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
@@ -188,11 +191,11 @@ fi
 
 export RMR_SEED_RT=${RMR_SEED_RT:-./app_test.rt}		# allow easy testing with different rt
 
-if (( force_make )) || [[ ! -f ./sender || ! -f ./receiver ]]
+if (( force_make )) || [[ ! -f ./sender${si} || ! -f ./receiver${si} ]]
 then
-	if ! make -B >/dev/null 2>&1
+	if ! make -B sender${si} receiver${si} >/dev/null 2>&1
 	then
-		echo "[FAIL] cannot find sender binary, and cannot make it.... humm?"
+		echo "[FAIL] cannot find sender${si} and/or receiver${si}binary, and cannot make them.... humm?"
 		exit 1
 	fi
 fi

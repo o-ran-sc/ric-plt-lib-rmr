@@ -144,7 +144,7 @@ static void* mk_calls( void* data ) {
 			rt_count++;
 		}
 		while( sbuf != NULL && sbuf->state == RMR_ERR_RETRY ) {				// send blocked; keep trying
-			sbuf = rmr_mt_call( control->mrc, sbuf, control->id, 100 );		// call and wait up to 100ms for a response
+			sbuf = rmr_mt_call( control->mrc, sbuf, control->id, 5000 );	// call and wait up to 5s for a response
 		}
 
 		if( sbuf != NULL ) {
@@ -166,7 +166,7 @@ static void* mk_calls( void* data ) {
 					break;
 
 				default:
-					fprintf( stderr, "unexpected error: tid=%d rmr-state=%d ernro=%d\n", control->id, sbuf->state, errno );
+					fprintf( stderr, "<CALLR> unexpected error: tid=%d rmr-state=%d ernro=%d\n", control->id, sbuf->state, errno );
 					sbuf = rmr_alloc_msg( control->mrc, 512 );			// allocate a sendable buffer
 					if( successful ) {
 						fail_count++;							// count failures after first successful message
