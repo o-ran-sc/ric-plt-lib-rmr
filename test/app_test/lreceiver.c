@@ -139,8 +139,8 @@ int main( int argc, char** argv ) {
 		msg = rmr_torcv_msg( mrc, msg, 1000 );				// pop every second or so to timeout if needed
 
 		if( msg ) {
-			active = 1;
 			if( msg->state == RMR_OK ) {
+				active = 1;
 				lmc = (lc_msg_t *) msg->payload;
 				clock_gettime( CLOCK_REALTIME, &lmc->turn_ts );		// mark time that we received it.
 				count++;

@@ -1,8 +1,8 @@
 #!/usr/bin/env ksh
 # vim: ts=4 sw=4 noet :
 #==================================================================================
-#    Copyright (c) 2019 Nokia
-#    Copyright (c) 2018-2019 AT&T Intellectual Property.
+#    Copyright (c) 2019-2020 Nokia
+#    Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@
 function run_sender {
 	export RMR_RTG_SVC=$(( 9991 + $1 ))
 	port=$((  43080 + $1 ))
-	./sender $nmsg $delay 5:6 $port
+	./sender${si} $nmsg $delay 5:6 $port
 	echo $? >/tmp/PID$$.$1.src		# must communicate state back via file b/c asynch
 }
 
@@ -52,7 +52,7 @@ function run_rcvr {
 
 	port=4460
 	export RMR_RTG_SVC=9990
-	./receiver $(( nmsg * nsenders ))  $port
+	./receiver${si} $(( nmsg * nsenders ))  $port
 	echo $? >/tmp/PID$$.rrc
 }
 
@@ -78,6 +78,7 @@ rebuild=0
 nopull=""
 verbose=0
 nsenders=3					# this is sane, but -s allows it to be set up
+si=""
 
 while [[ $1 == -* ]]
 do
@@ -86,12 +87,16 @@ do
 		-b)	rebuild=1; nopull="nopull";;	# build without pulling
 		-d)	delay=$2; shift;;
 		-n)	nmsg=$2; shift;;
+		-N) si="";;							# enable NNG tests (disable si)
 		-s)	nsenders=$2; shift;;
+		-S) si="_si";;						# enable SI95 tests
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
-			echo "usage: $0 [-B] [-d micor-sec-delay] [-n num-msgs] [-s nsenders]"
+			echo "usage: $0 [-B] [-d micor-sec-delay] [-M] [-n num-msgs] [-s nsenders] [-S]"
 			echo "  -B forces a rebuild which will use .build"
+			echo "  -M force test applications to be remade"
+			echo "  -S build/test SI95 based binaries"
 			exit 1
 			;;
 	esac
@@ -132,11 +137,11 @@ export RMR_SEED_RT=./rts.rt
 
 set_rt 		# create the route table
 
-if [[ ! -f ./sender ]]
+if [[ ! -f ./sender${si} || ! -f ./receiver${si} ]]
 then
-	if ! make >/dev/null 2>&1
+	if ! make ./sender${si} ./receiver${si} >/dev/null 2>&1
 	then
-		echo "[FAIL] cannot find sender binary, and cannot make it.... humm?"
+		echo "[FAIL] cannot find sender${si} and/or receiver${si} binary, and cannot make them.... humm?"
 		exit 1
 	fi
 fi

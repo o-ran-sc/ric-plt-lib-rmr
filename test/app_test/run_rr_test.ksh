@@ -1,8 +1,8 @@
 #!/usr/bin/env ksh
 # vim: ts=4 sw=4 noet :
 #==================================================================================
-#    Copyright (c) 2019 Nokia
-#    Copyright (c) 2018-2019 AT&T Intellectual Property.
+#    Copyright (c) 2019-2020 Nokia
+#    Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@
 #
 function run_sender {
 	export RMR_RTG_SVC=8990
-	./sender $(( nmsg * nrcvrs ))  $delay $max_mtype
+	./sender${si} $(( nmsg * nrcvrs ))  $delay $max_mtype
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -53,7 +53,7 @@ function run_rcvr {
 
 	port=$(( 4560 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	./receiver $nmsg $port
+	./receiver${si} $nmsg $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -105,6 +105,8 @@ nopull=""
 verbose=0
 max_mtype=1					# causes all msgs to go with type 1; use -M to set up, but likely harder to validate
 nrcvrs=3					# this is sane, but -r allows it to be set up
+force_make=0
+si=""
 
 while [[ $1 == -* ]]
 do
@@ -114,12 +116,16 @@ do
 		-d)	delay=$2; shift;;
 		-m) max_mtype=$2; shift;;
 		-n)	nmsg=$2; shift;;
+		-N)	si="";;								# build/run NNG binaries
 		-r)	nrcvrs=$2; shift;;
+		-S)	si="_si";;							# build/run SI95 binaries
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
-			echo "usage: $0 [-B] [-d micor-sec-delay] [-n num-msgs]"
+			echo "usage: $0 [-B] [-d micor-sec-delay] [-M] [-n num-msgs] [-S]"
 			echo "  -B forces a rebuild which will use .build"
+			echo "  -M force test applications to be remade"
+			echo "  -S build/test SI95 based binaries"
 			exit 1
 			;;
 	esac
@@ -160,11 +166,11 @@ export RMR_SEED_RT=./rr.rt
 
 set_rt $nrcvrs
 
-if [[ ! -f ./sender ]]
+if (( rebuild || force_make )) || [[ ! -f ./sender${si} || ! -f ./receiver${si} ]]
 then
 	if ! make >/dev/null 2>&1
 	then
-		echo "[FAIL] cannot find sender binary, and cannot make it.... humm?"
+		echo "[FAIL] cannot find sender${si} and/or receiver${si} binary, and cannot make them.... humm?"
 		exit 1
 	fi
 fi

@@ -1,8 +1,8 @@
 #!/usr/bin/env ksh
 # vim: ts=4 sw=4 noet :
 #==================================================================================
-#    Copyright (c) 2019 Nokia
-#    Copyright (c) 2018-2019 AT&T Intellectual Property.
+#    Copyright (c) 2019-2020 Nokia
+#    Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -56,13 +56,13 @@
 # file in order for the 'main' to pick them up easily.
 #
 function run_sender {
-	./caller $nmsg $delay $nthreads
+	./caller${si} $nmsg $delay $nthreads
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
 # start receiver listening for nmsgs from each thread
 function run_rcvr {
-	./mt_receiver $(( nmsg * nthreads ))		# we'll test with the RMr multi threaded receive function
+	./mt_receiver${si} $(( nmsg * nthreads ))		# we'll test with the RMr multi threaded receive function
 	echo $? >/tmp/PID$$.rrc
 }
 
@@ -71,7 +71,7 @@ function run_rcvr {
 # be received concurrently.
 #
 function run_pinger {
-    RMR_RTG_SVC=9999 ./sender 100 100 4 3333 >/dev/NULL 2>&1  # send pings
+    RMR_RTG_SVC=9999 ./sender${si} 100 100 4 3333 >/dev/NULL 2>&1  # send pings
 }
 
 
@@ -85,21 +85,21 @@ cat <<endKat >caller.rt
 # receiver, and all others go to the caller.
 
 newrt | start
-mse | 0 |  0 | localhost:43086
-mse | 1 | 10 | localhost:43086
-mse | 2 | 20 | localhost:43086
-rte | 3 | localhost:43086
-mse | 3 | 100 | localhost:43086	# special test to ensure that this does not affect previous entry
-rte | 4 | localhost:43086
-rte | 5 | localhost:4560
-rte | 6 | localhost:43086
-rte | 7 | localhost:43086
-rte | 8 | localhost:43086
-rte | 9 | localhost:43086
-rte | 10 | localhost:43086
-rte | 11 | localhost:43086
-rte | 12 | localhost:43086
-rte | 13 | localhost:43086
+mse | 0 |  0 | $localhost:43086
+mse | 1 | 10 | $localhost:43086
+mse | 2 | 20 | $localhost:43086
+rte | 3 | $localhost:43086
+mse | 3 | 100 | $localhost:43086	# special test to ensure that this does not affect previous entry
+rte | 4 | $localhost:43086
+rte | 5 | $localhost:4560
+rte | 6 | $localhost:43086
+rte | 7 | $localhost:43086
+rte | 8 | $localhost:43086
+rte | 9 | $localhost:43086
+rte | 10 | $localhost:43086
+rte | 11 | $localhost:43086
+rte | 12 | $localhost:43086
+rte | 13 | $localhost:43086
 
 newrt | end | 16
 endKat
@@ -114,6 +114,9 @@ rebuild=0
 verbose=0
 nthreads=3
 dev_base=1					# -D turns off to allow this to run on installed libs
+force_make=0
+si=""
+localhost="localhost"
 
 
 
@@ -124,12 +127,19 @@ do
 		-d)	delay=$2; shift;;
 		-D)	dev_base=0;;
 		-n)	nmsg=$2; shift;;
+		-M)	force_make=1;;
+		-N) si="";;						# enable NNG testing (off si)
+		-S) si="_si"					# enable SI95 testing
+			localhost="127.0.0.1"
+			;;
 		-t)	nthreads=$2; shift;;
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
-			echo "usage: $0 [-B] [-d micro-sec-delay] [-n num-msgs] [-t num-threads]"
-			echo "  -B forces a rebuild which will use .build"
+			echo "usage: $0 [-B] [-d micro-sec-delay] [-M] [-n num-msgs] [-S] [-t num-threads]"
+			echo "  -B forces an RMR rebuild which will use .build"
+			echo "  -M force test applications to rebuild"
+			echo "  -S build/test SI95 based binaries"
 			exit 1
 			;;
 	esac
@@ -180,11 +190,13 @@ then
 	mk_rt
 fi
 
-if [[ ! -f ./sender ]]
+if (( rebuild || force_make )) || [[ ! -f ./sender${si} || ! -f ./caller${si} || ! -f ./mt_receiver${si} ]]
 then
-	if ! make >/dev/null 2>&1
+	if ! make -B sender${si} caller${si} mt_receiver${si} >/tmp/PID$$.log 2>&1
 	then
-		echo "[FAIL] cannot find sender binary, and cannot make it.... humm?"
+		echo "[FAIL] cannot find caller{$si} and/or mt_receiver${si} binary, and cannot make them.... humm?"
+		cat /tmp/PID$$.log
+		rm -f /tmp/PID$$.*
 		exit 1
 	fi
 fi

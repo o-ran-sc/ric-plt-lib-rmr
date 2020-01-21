@@ -1,8 +1,8 @@
 #!/usr/bin/env ksh
 # vim: ts=4 sw=4 noet :
 #==================================================================================
-#    Copyright (c) 2019 Nokia
-#    Copyright (c) 2018-2019 AT&T Intellectual Property.
+#    Copyright (c) 2019-2020 Nokia
+#    Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@
 # It doesn't happen all of the time, but frequently enough to be annoying. 
 #
 function run_sender {
-	RMR_ASYNC_CONN=0 ./sender $nmsg $delay
+	RMR_ASYNC_CONN=0 ./sender${si} $nmsg $delay
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -55,7 +55,7 @@ function run_rcvr {
 
 	port=$(( 4460 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	./receiver $nmsg $port
+	./receiver${si} $nmsg $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -104,6 +104,8 @@ rebuild=0
 nopull=""
 verbose=0
 nrcvrs=3					# this is sane, but -r allows it to be set up
+force_make=0
+si=""
 
 while [[ $1 == -* ]]
 do
@@ -112,12 +114,17 @@ do
 		-b)	rebuild=1; nopull="nopull";;		# enable build but without pull
 		-d)	delay=$2; shift;;
 		-n)	nmsg=$2; shift;;
+		-N)	si="";;								# buld/run NNG binaries (turn off si)
+		-M)	force_make=1;;
 		-r)	nrcvrs=$2; shift;;
+		-S)	si="_si";;							# buld/run SI95 binaries
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
-			echo "usage: $0 [-B] [-d micor-sec-delay] [-n num-msgs]"
+			echo "usage: $0 [-B] [-d micor-sec-delay] [-M] [-n num-msgs] [-S]"
 			echo "  -B forces an RMR rebuild which will use .build"
+			echo "  -m force test applications to be remade"
+			echo "  -S build/test SI95 based binaries"
 			exit 1
 			;;
 	esac
@@ -158,11 +165,11 @@ export RMR_SEED_RT=./multi.rt
 
 set_rt $nrcvrs						# set up the rt for n receivers
 
-if [[ ! -f ./sender ]]
+if (( rebuild || force_make )) || [[ ! -f ./sender${si} || ! -f ./receiver${si} ]]
 then
 	if ! make >/dev/null 2>&1
 	then
-		echo "[FAIL] cannot find sender binary, and cannot make it.... humm?"
+		echo "[FAIL] cannot find sender${si} and/or receiver${si} binary, and cannot make them.... humm?"
 		exit 1
 	fi
 fi
