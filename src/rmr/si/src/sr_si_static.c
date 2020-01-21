@@ -21,7 +21,7 @@
 /*
 	Mnemonic:	sr_si_static.c
 	Abstract:	These are static send/receive primatives which (sadly)
-				differ based on the underlying protocol (nng vs nanomsg).
+				differ based on the underlying protocol (nng vs SI95).
 				Split from rmr_nng.c  for easier wormhole support.
 
 	Author:		E. Scott Daniels
@@ -30,13 +30,6 @@
 
 #ifndef _sr_si_static_c
 #define _sr_si_static_c
-
-#include <nng/nng.h>
-#include <nng/protocol/pubsub0/pub.h>
-#include <nng/protocol/pubsub0/sub.h>
-#include <nng/protocol/pipeline0/push.h>
-#include <nng/protocol/pipeline0/pull.h>
-
 
 static void dump_40( char *p, char* label ) {
 	int i;

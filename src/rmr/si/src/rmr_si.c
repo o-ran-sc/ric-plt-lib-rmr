@@ -526,7 +526,7 @@ extern int rmr_set_rtimeout( void* vctx, int time ) {
 static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	static	int announced = 0;
 	uta_ctx_t*	ctx = NULL;
-	char	bind_info[NNG_MAXADDRLEN];	// bind info
+	char	bind_info[256];				// bind info
 	char*	proto = "tcp";				// pointer into the proto/port string user supplied
 	char*	port;
 	char*	interface = NULL;			// interface to bind to (from RMR_BIND_IF, 0.0.0.0 if not defined)
