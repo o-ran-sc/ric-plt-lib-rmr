@@ -62,7 +62,10 @@ static int uta_ring_getpfd( void* vr ) {
 }
 
 /*
-	Make a new ring.
+	Make a new ring. The default is to NOT create a lock; if the user 
+	wants read locking then uta_config_ring() can be used to setup the
+	mutex. (We use several rings internally and the assumption is that
+	there is no locking for these.)
 */
 static void* uta_mk_ring( int size ) {
 	ring_t*	r;
@@ -72,6 +75,7 @@ static void* uta_mk_ring( int size ) {
 		return NULL;
 	}
 
+	r->rgate = NULL;
 	r->head = r->tail = 0;
 
 	max = (r->head - 1);
@@ -88,6 +92,49 @@ static void* uta_mk_ring( int size ) {
 	memset( r->data, 0, sizeof( void** ) * r->nelements );
 	r->pfd = eventfd( 0, EFD_SEMAPHORE | EFD_NONBLOCK );		// in semaphore mode counter is maintained with each insert/extract
 	return (void *) r;
+}
+
+/*
+	Allows for configuration of a ring after it has been allocated.
+	Options are RING_* options that allow for things like setting/clearing
+	read locking. Returns 0 for failure 1 on success.
+
+	Options can be ORd together and all made effective at the same time, but
+	it will be impossible to determine a specific failure if invoked this
+	way.  Control is returned on the first error, and no provision is made
+	to "undo" previously set options if an error occurs.
+*/
+static int uta_ring_config( void* vr, int options ) {
+	ring_t*	r;
+
+	if( (r = (ring_t*) vr) == NULL ) {
+		errno = EINVAL;
+		return 0;
+	}
+
+	if( options & RING_WLOCK ) {
+		if( r->wgate == NULL ) {		// don't realloc
+			r->wgate = (pthread_mutex_t *) malloc( sizeof( *r->wgate ) );
+			if( r->wgate == NULL ) {
+				return 0;
+			}
+	
+			pthread_mutex_init( r->wgate, NULL );
+		}
+	}
+
+	if( options & RING_RLOCK ) {
+		if( r->rgate == NULL ) {		// don't realloc
+			r->rgate = (pthread_mutex_t *) malloc( sizeof( *r->rgate ) );
+			if( r->rgate == NULL ) {
+				return 0;
+			}
+	
+			pthread_mutex_init( r->rgate, NULL );
+		}
+	}
+
+	return 1;
 }
 
 /*
@@ -108,6 +155,11 @@ static void uta_ring_free( void* vr ) {
 /*
 	Pull the next data pointer from the ring; null if there isn't
 	anything to be pulled.
+
+	If the read lock exists for the ring, then this will BLOCK until
+	it gets the lock.  There is always a chance that once the lock
+	is obtained that the ring is empty, so the caller MUST handle
+	a nil pointer as the return.
 */
 static inline void* uta_ring_extract( void* vr ) {
 	ring_t*		r;
@@ -122,8 +174,15 @@ static inline void* uta_ring_extract( void* vr ) {
 		r = (ring_t*) vr;
 	}
 
-	if( r->tail == r->head ) {			// empty ring
+	if( r->tail == r->head ) {						// empty ring we can bail out quickly
 		return NULL;
+	}
+
+	if( r->rgate != NULL ) {						// if lock exists we must honour it
+		pthread_mutex_lock( r->rgate );
+		if( r->tail == r->head ) {					// ensure ring didn't go empty while waiting
+			return NULL;
+		}
 	}
 
 	ti = r->tail;
@@ -138,6 +197,10 @@ future -- investigate if it's possible only to set/clear when empty or going to 
 	if( r->tail == r->head ) {								// if this emptied the ring, turn off ready
 	}
 */
+
+	if( r->rgate != NULL ) {							// if locked above...
+		pthread_mutex_unlock( r->rgate );
+	}
 	return r->data[ti];
 }
 
@@ -157,7 +220,14 @@ static inline int uta_ring_insert( void* vr, void* new_data ) {
 		r = (ring_t*) vr;
 	}
 
+	if( r->wgate != NULL ) {						// if lock exists we must honour it
+		pthread_mutex_lock( r->wgate );
+	}
+
 	if( r->head+1 == r->tail || (r->head+1 >= r->nelements && !r->tail) ) {		// ring is full
+		if( r->wgate != NULL ) {					// ensure released if needed
+			pthread_mutex_unlock( r->wgate );
+		}
 		return 0;
 	}
 
@@ -174,6 +244,9 @@ future -- investigate if it's possible only to set/clear when empty or going to 
 		r->head = 0;
 	}
 
+	if( r->wgate != NULL ) {						// if lock exists we must unlock before going
+		pthread_mutex_unlock( r->wgate );
+	}
 	return 1;
 }
 

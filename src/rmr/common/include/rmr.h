@@ -47,6 +47,7 @@ extern "C" {
 #define RMRFL_MTCALL		0x02	// set up multi-threaded call support (rmr_init)
 #define RMRFL_AUTO_ALLOC	0x03	// send auto allocates a zerocopy buffer
 #define RMRFL_NAME_ONLY		0x04	// only the hostname:ip is provided as source information for rts() calls
+#define RMRFL_NOLOCK		0x08	// disable receive ring locking (user app ensures single thread or provides collision protection)
 
 #define RMR_DEF_SIZE		0		// pass as size to have msg allocation use the default msg size
 
