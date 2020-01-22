@@ -238,12 +238,18 @@ typedef struct {
 
 
 // --------------- ring things  -------------------------------------------------
+#define RING_NONE	0			// no options
+#define RING_RLOCK	0x01		// create/destroy the read lock on the ring
+#define RING_WLOCK	0x02		// create/destroy the write lockk on the ring
+
 typedef struct ring {
 	uint16_t head;				// index of the head of the ring (insert point)
 	uint16_t tail;				// index of the tail (extract point)
 	uint16_t nelements;			// number of elements in the ring
 	void**	data;				// the ring data (pointers to blobs of stuff)
 	int		pfd;				// event fd for the ring for epoll
+	pthread_mutex_t*	rgate;	// read lock if used
+	pthread_mutex_t*	wgate;	// write lock if used
 } ring_t;
 
 
@@ -273,6 +279,7 @@ static char* get_default_ip( if_addrs_t* iplist );
 
 // --- message ring --------------------------
 static void* uta_mk_ring( int size );
+static int uta_ring_config( void* vr, int options );
 static void uta_ring_free( void* vr );
 static inline void* uta_ring_extract( void* vr );
 static inline int uta_ring_insert( void* vr, void* new_data );

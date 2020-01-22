@@ -2,6 +2,9 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 January 22; verison 3.0.3
+	Enable thread support for multiple receive threads.
+
 2020 January 21; verison 3.0.2
 	Fix bug in SI95 (missing reallocate payload function).
 

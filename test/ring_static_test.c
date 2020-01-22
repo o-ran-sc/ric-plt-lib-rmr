@@ -78,6 +78,8 @@ static int ring_test( ) {
 	int	data[20];
 	int*	dp;
 	int size = 18;
+	int	pfd = -1;					// pollable file descriptor for the ring
+	int	errors = 0;
 
 	r = uta_mk_ring( 0 );			// should return nil
 	if( r != NULL ) {
@@ -95,6 +97,19 @@ static int ring_test( ) {
 		fprintf( stderr, "<FAIL> unable to make ring with 17 entries\n" );
 		return 1;
 	}
+
+	pfd = uta_ring_getpfd( r );		// get pollable file descriptor
+	if( pfd < 0 ) {
+		fprintf( stderr, "<FAIL> expected a pollable file descriptor >= 0, but got: %d\n", pfd );
+		errors++;
+	}
+
+	pfd = uta_ring_config( r, 0x03 );		// turn on locking for reads and writes
+	if( pfd != 1 ) {
+		fprintf( stderr, "<FAIL> config attempt to enable locking failed\n" );
+		errors++;
+	}
+	
 
 	for( i = 0; i < 20; i++ ) {		// test to ensure it reports full when head/tail start at 0
 		data[i] = i;
@@ -161,5 +176,5 @@ static int ring_test( ) {
 	}
 
 	fprintf( stderr, "<INFO> all ring tests pass\n" );
-	return 0;
+	return errors;
 }

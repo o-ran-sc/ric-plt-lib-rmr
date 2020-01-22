@@ -570,9 +570,16 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	ctx->max_ibm = max_msg_size;					// default to user supplied message size
 
 	ctx->mring = uta_mk_ring( 4096 );				// message ring is always on for si
+	ctx->zcb_mring = uta_mk_ring( 128 );			// zero copy buffer mbuf ring to reduce malloc/free calls
+
+	if( ! (flags & RMRFL_NOLOCK) ) {				// user did not specifically ask that it be off; turn it on
+		uta_ring_config( ctx->mring, RING_RLOCK );			// concurrent rcv calls require read lock
+		uta_ring_config( ctx->zcb_mring, RING_WLOCK );		// concurrent free calls from userland require write lock
+	} else {
+		fprintf( stderr, "[INFO] receive ring locking disabled by user application\n" );
+	}
 	init_mtcall( ctx );								// set up call chutes
 
-	ctx->zcb_mring = uta_mk_ring( 128 );			// zero copy buffer mbuf ring
 
 	ctx->max_plen = RMR_MAX_RCV_BYTES;				// max user payload lengh
 	if( max_msg_size > 0 ) {
