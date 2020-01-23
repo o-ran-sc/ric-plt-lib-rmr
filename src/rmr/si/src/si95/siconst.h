@@ -44,7 +44,6 @@
 								//  general info block flags 
 #define GIF_SHUTDOWN	0x01   //  shutdown in progress 
 #define GIF_NODELAY		0x02   //  set no delay flag on t_opens 
-#define GIF_SESS_CHANGE	0x04	// session list has changed; new poll list needed
 
 								//  transmission provider block flags 
 #define TPF_LISTENFD	0x01   //  set on tp blk that is fd for tcp listens 

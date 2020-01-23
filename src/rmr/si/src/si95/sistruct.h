@@ -71,9 +71,6 @@ struct ginfo_blk {				//  general info block  (context)
 	fd_set readfds;				//  select/poll file des lists
 	fd_set writefds;
 	fd_set execpfds;
-	fd_set readfds_qs;			//  quick set read/write/except fd sets
-	fd_set writefds_qs;
-	fd_set execpfds_qs;
 	char *rbuf;					//  read buffer 
 	struct callback_blk *cbtab; //  pointer at the callback table 
 	int fdcount;				//  largest fd to select on in siwait 

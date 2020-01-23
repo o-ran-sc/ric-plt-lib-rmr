@@ -27,6 +27,7 @@
 *            be added to the write fdset. The fdcount variable will be set to
 *            the highest sid + 1 and it can be passed to the select system
 *            call when it is made.
+*
 *  Parms:    gptr  - Pointer to the general info structure
 *  Returns:  Nothing
 *  Date:     26 March 1995
@@ -42,50 +43,32 @@ extern void SIbldpoll( struct ginfo_blk* gptr  ) {
 	struct tp_blk *nextb;					//  pointer into tp list 
 
 
-// FIX ME?  we don't seem to see this flag set
-	//if( gptr->flags & GIF_SESS_CHANGE ) {	// session changed, must rebuild the poll lists
-		gptr->fdcount = -1;					//  reset largest sid found 
+	gptr->fdcount = -1;					//  reset largest sid found 
 
-		FD_ZERO( &gptr->readfds );			//  reset the read and write sets 
-		FD_ZERO( &gptr->writefds );
-		FD_ZERO( &gptr->execpfds );
-	
-		for( tpptr = gptr->tplist; tpptr != NULL; tpptr = nextb ) {
-			nextb = tpptr->next;
-			if( tpptr->flags & TPF_DELETE ) {
-				SIterm( gptr, tpptr );
-			} else {
-				if( tpptr->fd >= 0 ) {                       //  if valid file descriptor 
-					if( tpptr->fd >= gptr->fdcount ) {	
-						gptr->fdcount = tpptr->fd + 1;     //  save largest fd (+1) for select 
-					}
-	
-					FD_SET( tpptr->fd, &gptr->execpfds );     //  set all fds for execpts 
-	
-					if( !(tpptr->flags & TPF_DRAIN) ) {                  //  if not draining 
-						FD_SET( tpptr->fd, &gptr->readfds );       //  set test for data flag 
-					}
-	
-					if( tpptr->squeue != NULL ) {                  //  stuff pending to send ? 
-						FD_SET( tpptr->fd, &gptr->writefds );   //  set flag to see if writable 
-					}
+	FD_ZERO( &gptr->readfds );			//  reset the read and write sets 
+	FD_ZERO( &gptr->writefds );
+	FD_ZERO( &gptr->execpfds );
+
+	for( tpptr = gptr->tplist; tpptr != NULL; tpptr = nextb ) {
+		nextb = tpptr->next;
+		if( tpptr->flags & TPF_DELETE ) {
+			SIterm( gptr, tpptr );
+		} else {
+			if( tpptr->fd >= 0 ) {                       //  if valid file descriptor 
+				if( tpptr->fd >= gptr->fdcount ) {	
+					gptr->fdcount = tpptr->fd + 1;     //  save largest fd (+1) for select 
+				}
+
+				FD_SET( tpptr->fd, &gptr->execpfds );     //  set all fds for execpts 
+
+				if( !(tpptr->flags & TPF_DRAIN) ) {                  //  if not draining 
+					FD_SET( tpptr->fd, &gptr->readfds );       //  set test for data flag 
+				}
+
+				if( tpptr->squeue != NULL ) {                  //  stuff pending to send ? 
+					FD_SET( tpptr->fd, &gptr->writefds );   //  set flag to see if writable 
 				}
 			}
-
-/*
-			memcpy( &gptr->readfds_qs, &gptr->readfds, sizeof( fd_set ) );		// stash for use until change
-			memcpy( &gptr->writefds_qs, &gptr->writefds, sizeof( fd_set ) );
-			memcpy( &gptr->execpfds_qs, &gptr->execpfds, sizeof( fd_set ) );
-*/
-
-			gptr->flags &= ~GIF_SESS_CHANGE;
 		}
-/*
-	} else {					// sessions are the same we can just dup the quick sets we saved
-		memcpy( &gptr->readfds, &gptr->readfds_qs, sizeof( fd_set ) );
-		memcpy( &gptr->writefds, &gptr->writefds_qs, sizeof( fd_set ) );
-		memcpy( &gptr->execpfds, &gptr->execpfds_qs, sizeof( fd_set ) );
 	}
-*/
-
-}                                 //  SIbldpoll 
+}
