@@ -49,6 +49,12 @@
 #include "sitransport.h"
 #include	<sys/wait.h>
 
+/*
+	The select timeout is about 300 mu-sec. This is fast enough to add a new
+	outbound connection to the poll list before the other side responds,
+	but slow enough so as not to consume excess CPU when idle.
+*/
+#define SI_SELECT_TIMEOUT 300000
 
 extern int SIwait( struct ginfo_blk *gptr ) {
 	int fd;							//  file descriptor for use in this routine 
@@ -68,23 +74,21 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 	gptr->sierr = SI_ERR_SHUTD;
 
 	if( gptr->flags & GIF_SHUTDOWN ) {				//  cannot do if we should shutdown 
-		fprintf( stderr, ">>> wait: shutdown on entry????\n" );
 		return SI_ERROR;							//  so just get out 
 	}
 
 	gptr->sierr = SI_ERR_HANDLE;
 
 	if( gptr->magicnum != MAGICNUM ) {				//  if not a valid ginfo block 
-		fprintf( stderr, ">>> wait: bad magic on entry????\n" );
+		fprintf( stderr, "[CRI] SI95: wait: bad global info struct magic number is wrong\n" );
 		return SI_ERROR;
 	}
 
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 500000;				// pop every 500ms to ensure we pick up new outbound connections in list
+	do {									// spin until a callback says to stop (likely never)
+		timeout.tv_sec = 0;					// must be reset on every call!
+		timeout.tv_usec = SI_SELECT_TIMEOUT;
 
- 	do {									// main wait/process loop 
-
-		SIbldpoll( gptr );					// build the fdlist for poll 
+		SIbldpoll( gptr );					// poll list is trashed on each pop; must rebuild
 		pstat = select( gptr->fdcount, &gptr->readfds, &gptr->writefds, &gptr->execpfds, &timeout );
 
 		if( (pstat < 0 && errno != EINTR)  ) {
@@ -113,7 +117,6 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 								status = SInewsession( gptr, tpptr );			// accept connection
 							} else  {											//  data received on a regular port (we support just tcp now
 								status = RECV( fd, gptr->rbuf, MAX_RBUF, 0 );	//  read data 
-								//fprintf( stderr, ">>>>> wait popped status =%d\n", status );
 								if( status > 0  &&  ! (tpptr->flags & TPF_DRAIN) ) {
 									if( (cbptr = gptr->cbtab[SI_CB_CDATA].cbrtn) != NULL ) {
 										status = (*cbptr)( gptr->cbtab[SI_CB_CDATA].cbdata, fd, gptr->rbuf, status );

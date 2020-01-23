@@ -114,7 +114,6 @@ extern int SInewsession( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 		SIcbstat(  gptr, status, SI_CB_CONN );               //  handle status
 	}
 
-	gptr->flags |= GIF_SESS_CHANGE;			// sessions changed must rebuild the poll list
 	SImap_fd( gptr, newtp->fd, newtp );		// add fd to the map
 
 	return SI_OK;
