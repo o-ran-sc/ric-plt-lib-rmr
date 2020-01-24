@@ -1180,10 +1180,16 @@ which provides the necessary routing information for the RMR
 library to send messages. 
  
 *Port* is used to listen for connection requests from other 
-RMR based applications. The value of *max_msg_size* will be 
-used when allocating zero copy send buffers which must be 
-allocated, possibly, prior to the application knowing the 
-actual size of a specific message. 
+RMR based applications. The *max_msg_size* parameter is used 
+to allocate receive buffers and is the maximum message size 
+which the application expects to receive. This value is the 
+sum of **both** the maximum payload size **and** the maximum 
+trace data size. This value is also used as the default 
+message size when allocating message buffers. Messages 
+arriving which are longer than the given maximum will be 
+dropped without notification to the application. A warning is 
+written to standard error for the first message which is too 
+large on each connection. 
  
 *Flags* allows for selection of some RMr options at the time 
 of initialisation. These are set by ORing RMRFL constants 
@@ -1207,6 +1213,15 @@ RMRFL_NOTHREAD
 RMRFL_MTCALL 
    
   Enable multi-threaded call support. 
+   
+  &ditem Some underlying transport providers (e.g. SI95) 
+  enable locking to be turned off if the user application is 
+  single threaded, or otherwise can guarantee that RMR 
+  functions will not be invoked concurrently from different 
+  threads. Turning off locking can help make message receipt 
+  more efficient. If this flag is set when the underlying 
+  transport does not support disabling locks, it will be 
+  ignored. 
  
  
 Multi-threaded Calling 
@@ -1218,7 +1233,7 @@ applications which were operating in a single thread could
 safely use the function. Further, timeouts were message count 
 based and not time unit based. Multi-threaded call support 
 adds the ability for a user application with multiple threads 
-to invoke a blocking call function with the guarentee that 
+to invoke a blocking call function with the guarantee that 
 the correct response message is delivered to the thread. The 
 additional support is implemented with the *rmr_mt_call()* 
 and *rmr_mt_rcv()* function calls. 
@@ -2463,7 +2478,7 @@ RETURN VALUE
 On success, a new message buffer, with an empty payload, is 
 returned for the application to use for the next send. The 
 state in this buffer will reflect the overall send operation 
-state and should be RMR_OK. 
+state and will be RMR_OK when the send was successful. 
  
 When the message cannot be successfully sent this function 
 will return the unsent (original) message buffer with the 
@@ -2475,6 +2490,15 @@ In the event of extreme failure, a NULL pointer is returned.
 In this case the value of errno might be of some use, for 
 documentation, but there will be little that the user 
 application can do other than to move on. 
+ 
+**CAUTION:** In some cases it is extremely likely that the 
+message returned by the send function does **not** reference 
+the same memory structure. Thus is important for the user 
+programme to capture the new pointer for future use or to be 
+passed to rmr_free(). If you are experiencing either double 
+free errors or segment faults in either rmr_free() or 
+rmr_send_msg(), ensure that the return value from this 
+function is being captured and used. 
  
 ERRORS 
 -------------------------------------------------------------------------------------------- 
@@ -2605,19 +2629,18 @@ cycles.
       }
       // reference payload and fill in message type
      pm = (msg_t*) send_msg->payload;
-     send_msg->mtype = MT_ANSWER;    
-     msg->len = generate_data( pm );         e// something that fills the payload in
-     msg = rmr_send_msg( mr, send_msg );
+     send_msg->mtype = MT_ANSWER;
+     msg->len = generate_data( pm );       // something that fills the payload in
+     msg = rmr_send_msg( mr, send_msg );   // ensure new pointer used after send
      mif( ! msg ) {
      m    !return ERROR;
      m} else {
      m    sif( msg->state != RMR_OK ) {
-     m    s    m// check for eagain, and resend if needed
+     m    s    m// check for RMR_ERR_RETRY, and resend if needed
      m    s    m// else return error
      m    s}
      m}
      mreturn OK;
-     m    r    ;
  
  
  

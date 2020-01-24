@@ -2,6 +2,9 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 January 24; verison 3.0.5
+	Fix bug in SI95 with receive buffer allocation.
+
 2020 January 23; verison 3.0.4
 	Fix bug in SI95 causing excessive CPU usage on poll.
 

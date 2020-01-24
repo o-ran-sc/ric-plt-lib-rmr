@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia 
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -51,9 +51,15 @@ send messages.
 
 &space
 &ital(Port) is used to listen for connection requests from other RMR based applications.
-The value of &ital(max_msg_size) will be used when allocating zero copy send buffers
-which must be allocated, possibly, prior to the application knowing the actual size of
-a specific message. 
+The &ital(max_msg_size) parameter is used to allocate receive buffers and is the
+maximum message size which the application expects to receive. 
+This value is the sum of &bold(both) the maximum payload size &bold(and) the maximum
+trace data size. 
+This value is also used as the default message size when allocating message buffers.
+Messages arriving which are longer than the given maximum will be dropped without 
+notification to the application. 
+A warning is written to standard error for the first message which is too large on
+each connection.
 
 &space
 &ital(Flags) allows for selection of some RMr options at the time of initialisation. 
@@ -73,6 +79,15 @@ following flags are supported:
 &half_space
 &diitem(RMRFL_MTCALL)
 	Enable multi-threaded call support. 
+
+&half_space
+&ditem(RMRFL_NOLOCK)
+	Some underlying transport providers (e.g. SI95) enable locking to be turned off
+	if the user application is single threaded, or otherwise can guarantee that RMR
+	functions will not be invoked concurrently from different threads. Turning off
+	locking can help make message receipt more efficient. 
+	If this flag is set when the underlying transport does not support disabling
+	locks, it will be ignored.
 &end_dlist
 
 &h3(Multi-threaded Calling)
@@ -81,7 +96,7 @@ was limited such that only user applications which were operating in a single th
 could safely use the function.
 Further, timeouts were message count based and not time unit based. 
 Multi-threaded call support adds the ability for a user application with multiple threads
-to invoke a blocking call function with the guarentee that the correct response message 
+to invoke a blocking call function with the guarantee that the correct response message 
 is delivered to the thread.  
 The additional support is implemented with the &ital(rmr_mt_call()) and &ital(rmr_mt_rcv())
 function calls. 

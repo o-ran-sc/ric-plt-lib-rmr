@@ -522,6 +522,10 @@ extern int rmr_set_rtimeout( void* vctx, int time ) {
 	invokes this.  Internal functions (the route table collector) which need additional
 	open ports without starting additional route table collectors, will invoke this
 	directly with the proper flag.
+
+	CAUTION:   The max_ibm (max inbound message) size is the supplied user max plus the lengths
+				that we know about. The _user_ should ensure that the supplied length also
+				includes the trace data length maximum as they are in control of that.
 */
 static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	static	int announced = 0;
@@ -567,7 +571,8 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 
 	ctx->send_retries = 1;							// default is not to sleep at all; RMr will retry about 10K times before returning
 	ctx->d1_len = 4;								// data1 space in header -- 4 bytes for now
-	ctx->max_ibm = max_msg_size;					// default to user supplied message size
+	ctx->max_ibm = max_msg_size < 1024 ? 1024 : max_msg_size;					// larger than their request doesn't hurt
+	ctx->max_ibm += sizeof( uta_mhdr_t ) + ctx->d1_len + ctx->d2_len + 64;		// add in our header size and a bit of fudge
 
 	ctx->mring = uta_mk_ring( 4096 );				// message ring is always on for si
 	ctx->zcb_mring = uta_mk_ring( 128 );			// zero copy buffer mbuf ring to reduce malloc/free calls

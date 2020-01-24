@@ -48,6 +48,9 @@
 #define RS_GOOD		1		// flow is in progress
 #define RS_RESET	2		// flow was interrupted; reset on next receive
 
+#define RF_NOTIFIED	0x01	// notification made about river issue
+#define RF_DROP		0x02	// this message is large and being dropped
+
 #define SI_MAX_ADDR_LEN		512
 
 /*
@@ -58,9 +61,8 @@ typedef struct {
 	char*	accum;		// bytes being accumulated
 	int		nbytes;		// allocated size of accumulator
 	int		ipt;		// insertion point in accumulator
-	//int		max;		// size of accum
-	//int		expected;	// expected for a complete message
 	int		msg_size;	// size of the message being accumulated
+	int		flags;		// RF_* constants
 } river_t;
 
 

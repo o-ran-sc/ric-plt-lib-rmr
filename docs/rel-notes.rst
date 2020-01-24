@@ -15,6 +15,46 @@ file at the repo root; please refer to that file for a
 completely up to date listing of API changes. 
  
  
+2020 January 24; verison 3.0.5 
+-------------------------------------------------------------------------------------------- 
+ 
+Fix bug in SI95 with receive buffer allocation. 
+ 
+ 
+2020 January 23; verison 3.0.4 
+-------------------------------------------------------------------------------------------- 
+ 
+Fix bug in SI95 causing excessive CPU usage on poll. 
+ 
+ 
+2020 January 22; verison 3.0.3 
+-------------------------------------------------------------------------------------------- 
+ 
+Enable thread support for multiple receive threads. 
+ 
+ 
+2020 January 21; verison 3.0.2 
+-------------------------------------------------------------------------------------------- 
+ 
+Fix bug in SI95 (missing reallocate payload function). 
+ 
+ 
+2020 January 20; verison 3.0.1 
+-------------------------------------------------------------------------------------------- 
+ 
+Enable support for dynamic route table updates via RMR 
+session. 
+ 
+ 
+2020 January 16; version 3.0.0 
+-------------------------------------------------------------------------------------------- 
+ 
+Introduce support for SI95 transport library to replace NNG. 
+(RMR library versions will use leading odd numbers to avoid 
+tag collisions with the wrapper tags which will use even 
+numbers.) 
+ 
+ 
 2019 December 9; version 1.13.1 
 -------------------------------------------------------------------------------------------- 
  
