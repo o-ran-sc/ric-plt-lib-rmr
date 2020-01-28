@@ -121,7 +121,7 @@ extern void SItp_stats( void *vgp ) {
 
 	if( (gp = (struct ginfo_blk *) vgp) != NULL ) {
 		for( tp = gp->tplist; tp != NULL; tp = tp->next ) {
-			fprintf( stderr, "[DBUG] si95: tp: fd=%d sent=%lld rcvd=%lld qc=%lld\n", tp->fd, tp->sent, tp->rcvd, tp->qcount );
+			rmr_vlog( RMR_VL_DEBUG, "si95: tp: fd=%d sent=%lld rcvd=%lld qc=%lld\n", tp->fd, tp->sent, tp->rcvd, tp->qcount );
 		}
 	}
 }

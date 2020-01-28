@@ -46,7 +46,7 @@ extern void SImap_fd( struct ginfo_blk *gptr, int fd, struct tp_blk* tpptr ) {
 	if( fd < MAX_FDS ) {
 		gptr->tp_map[fd] = tpptr;
 	} else {
-		fprintf( stderr, "[WRN] fd on connected session is out of range: %d\n", fd );
+		rmr_vlog( RMR_VL_WARN, "fd on connected session is out of range: %d\n", fd );
 	}
 }
 

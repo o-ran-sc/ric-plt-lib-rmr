@@ -68,10 +68,12 @@
 
 #include "rmr.h"					// things the users see
 #include "rmr_symtab.h"
+#include "rmr_logging.h"
 #include "rmr_agnostic.h"			// transport agnostic header
 #include "rmr_nng_private.h"			// transport specific
 
 #include "symtab.c"
+#include "logging.c"
 #include "rmr_nng.c"
 #include "mbuf_api.c"
 

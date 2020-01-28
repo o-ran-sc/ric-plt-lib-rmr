@@ -1,8 +1,8 @@
 // vim: ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@
 #include "rmr_agnostic.h"		// agnostic things (must be included before private)
 #include "rmr_nng_private.h"	// things that we need too
 #include "rmr_symtab.h"
+#include "rmr_logging.h"
 
 #include "ring_static.c"			// message ring support
 #include "rt_generic_static.c"		// route table things not transport specific
@@ -263,7 +264,7 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 
 	errno = 0;														// at this point any bad state is in msg returned
 	if( msg->header == NULL ) {
-		fprintf( stderr, "[ERR] rmr_send_msg: message had no header\n" );
+		rmr_vlog( RMR_VL_ERR, "rmr_send_msg: message had no header\n" );
 		msg->state = RMR_ERR_NOHDR;
 		msg->tp_state = errno;
 		return msg;
@@ -359,7 +360,7 @@ extern rmr_mbuf_t* rmr_call( void* vctx, rmr_mbuf_t* msg ) {
 
 	memcpy( expected_id, msg->xaction, RMR_MAX_XID );
 	expected_id[RMR_MAX_XID] = 0;					// ensure it's a string
-	if( DEBUG > 1 ) fprintf( stderr, "[DBUG] rmr_call is making call, waiting for (%s)\n", expected_id );
+	if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "rmr_call is making call, waiting for (%s)\n", expected_id );
 	errno = 0;
 	msg->flags |= MFL_NOALLOC;						// we don't need a new buffer from send
 
@@ -535,29 +536,29 @@ extern rmr_mbuf_t* rmr_rcv_specific( void* vctx, rmr_mbuf_t* msg, char* expect, 
 	if( exp_len > RMR_MAX_XID ) {
 		exp_len = RMR_MAX_XID;
 	}
-	if( DEBUG ) fprintf( stderr, "[DBUG] rcv_specific waiting for id=%s\n",  expect );
+	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rcv_specific waiting for id=%s\n",  expect );
 
 	while( queued < allow2queue ) {
 		msg = rcv_msg( ctx, msg );					// hard wait for next
 		if( msg->state == RMR_OK ) {
 			if( memcmp( msg->xaction, expect, exp_len ) == 0 ) {			// got it -- return it
-				if( DEBUG ) fprintf( stderr, "[DBUG] rcv-specific matched (%s); %d messages were queued\n", msg->xaction, queued );
+				if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rcv-specific matched (%s); %d messages were queued\n", msg->xaction, queued );
 				return msg;
 			}
 
 			if( ! uta_ring_insert( ctx->mring, msg ) ) {					// just queue, error if ring is full
-				if( DEBUG > 1 ) fprintf( stderr, "[DBUG] rcv_specific ring is full\n" );
+				if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "rcv_specific ring is full\n" );
 				errno = ENOBUFS;
 				return NULL;
 			}
 
-			if( DEBUG ) fprintf( stderr, "[DBUG] rcv_specific queued message type=%d\n", msg->mtype );
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rcv_specific queued message type=%d\n", msg->mtype );
 			queued++;
 			msg = NULL;
 		}
 	}
 
-	if( DEBUG ) fprintf( stderr, "[DBUG] rcv_specific timeout waiting for %s\n", expect );
+	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rcv_specific timeout waiting for %s\n", expect );
 	errno = ETIMEDOUT;
 	return NULL;
 }
@@ -599,7 +600,7 @@ extern int rmr_set_stimeout( void* vctx, int time ) {
 	CAUTION:  this is not supported as they must be set differently (between create and open) in NNG.
 */
 extern int rmr_set_rtimeout( void* vctx, int time ) {
-	fprintf( stderr, "[WRN] Current implementation of RMR ontop of NNG does not support setting a receive timeout\n" );
+	rmr_vlog( RMR_VL_WARN, "Current implementation of RMR ontop of NNG does not support setting a receive timeout\n" );
 	return 0;
 }
 
@@ -623,12 +624,17 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	char*	tok;						// pointer at token in a buffer
 	char*	tok2;
 	int		state;
+	int		old_vlevel = 0;
+
+	old_vlevel = rmr_vlog_init();		// initialise and get the current level
+	rmr_set_vlevel( RMR_VL_INFO );		// we WILL announce our version etc
 
 	if( ! announced ) {
-		fprintf( stderr, "[INFO] ric message routing library on NNG mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
+		rmr_vlog( RMR_VL_INFO, "ric message routing library on NNG mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
 			RMR_MSG_VER, flags, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
 	}
+	rmr_set_vlevel( old_vlevel );		// return logging to the desired state
 
 	errno = 0;
 	if( uproto_port == NULL ) {
@@ -662,7 +668,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	//uta_lookup_rtg( ctx );							// attempt to fill in rtg info; rtc will handle missing values/errors
 
 	if( nng_pull0_open( &ctx->nn_sock )  !=  0 ) {		// and assign the mode
-		fprintf( stderr, "[CRI] rmr_init: unable to initialise nng listen (pull) socket: %d\n", errno );
+		rmr_vlog( RMR_VL_CRIT, "rmr_init: unable to initialise nng listen (pull) socket: %d\n", errno );
 		free_ctx( ctx );
 		return NULL;
 	}
@@ -693,7 +699,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		free( tok );
 	} else {
 		if( (gethostname( wbuf, sizeof( wbuf ) )) != 0 ) {
-			fprintf( stderr, "[CRI] rmr_init: cannot determine localhost name: %s\n", strerror( errno ) );
+			rmr_vlog( RMR_VL_CRIT, "rmr_init: cannot determine localhost name: %s\n", strerror( errno ) );
 			return NULL;
 		}
 		if( (tok = strchr( wbuf, '.' )) != NULL ) {
@@ -703,7 +709,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 
 	ctx->my_name = (char *) malloc( sizeof( char ) * RMR_MAX_SRC );
 	if( snprintf( ctx->my_name, RMR_MAX_SRC, "%s:%s", wbuf, port ) >= RMR_MAX_SRC ) {			// our registered name is host:port
-		fprintf( stderr, "[CRI] rmr_init: hostname + port must be less than %d characters; %s:%s is not\n", RMR_MAX_SRC, wbuf, port );
+		rmr_vlog( RMR_VL_CRIT, "rmr_init: hostname + port must be less than %d characters; %s:%s is not\n", RMR_MAX_SRC, wbuf, port );
 		return NULL;
 	}
 
@@ -719,11 +725,11 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	} else {
 		ctx->my_ip = get_default_ip( ctx->ip_list );	// and (guess) at what should be the default to put into messages as src
 		if( ctx->my_ip == NULL ) {
-			fprintf( stderr, "[WRN] rmr_init: default ip address could not be sussed out, using name\n" );
+			rmr_vlog( RMR_VL_WARN, "rmr_init: default ip address could not be sussed out, using name\n" );
 			strcpy( ctx->my_ip, ctx->my_name );			// if we cannot suss it out, use the name rather than a nil pointer
 		}
 	}
-	if( DEBUG ) fprintf( stderr, "[DBUG] default ip address: %s\n", ctx->my_ip );
+	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "default ip address: %s\n", ctx->my_ip );
 
 	if( (tok = getenv( ENV_WARNINGS )) != NULL ) {
 		if( *tok == '1' ) {
@@ -739,7 +745,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	//       rather than using this generic listen() call.
 	snprintf( bind_info, sizeof( bind_info ), "%s://%s:%s", proto, interface, port );
 	if( (state = nng_listen( ctx->nn_sock, bind_info, NULL, NO_FLAGS )) != 0 ) {
-		fprintf( stderr, "[CRI] rmr_init: unable to start nng listener for %s: %s\n", bind_info, nng_strerror( state ) );
+		rmr_vlog( RMR_VL_CRIT, "rmr_init: unable to start nng listener for %s: %s\n", bind_info, nng_strerror( state ) );
 		nng_close( ctx->nn_sock );
 		free_ctx( ctx );
 		return NULL;
@@ -747,14 +753,14 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 
 	if( !(flags & FL_NOTHREAD) ) {										// skip if internal function that doesnt need an rtc
 		if( pthread_create( &ctx->rtc_th,  NULL, rtc, (void *) ctx ) ) { 	// kick the rt collector thread
-			fprintf( stderr, "[WRN] rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
+			rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
 		}
 	}
 
 	if( (flags & RMRFL_MTCALL) && ! (ctx->flags & CFL_MTC_ENABLED) ) {	// mt call support is on, must start the listener thread if not running
 		ctx->flags |= CFL_MTC_ENABLED;
 		if( pthread_create( &ctx->mtc_th,  NULL, mt_receive, (void *) ctx ) ) { 	// kick the receiver
-			fprintf( stderr, "[WRN] rmr_init: unable to start multi-threaded receiver: %s", strerror( errno ) );
+			rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start multi-threaded receiver: %s", strerror( errno ) );
 		}
 		
 	}
@@ -836,7 +842,7 @@ extern int rmr_get_rcvfd( void* vctx ) {
 	}
 
 	if( (state = nng_getopt_int( ctx->nn_sock, NNG_OPT_RECVFD, &fd )) != 0 ) {
-		fprintf( stderr, "[WRN] rmr cannot get recv fd: %s\n", nng_strerror( state ) );
+		rmr_vlog( RMR_VL_WARN, "rmr cannot get recv fd: %s\n", nng_strerror( state ) );
 		return -1;
 	}
 
@@ -943,7 +949,7 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 		mbuf = ombuf;				// return caller's buffer if they passed one in
 	} else {
 		errno = 0;						// interrupted call state could be left; clear
-		if( DEBUG ) fprintf( stderr, "[DBUG] mt_rcv extracting from normal ring\n" );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "mt_rcv extracting from normal ring\n" );
 		if( (mbuf = (rmr_mbuf_t *) uta_ring_extract( ctx->mring )) != NULL ) {			// pop if queued
 			mbuf->state = RMR_OK;
 

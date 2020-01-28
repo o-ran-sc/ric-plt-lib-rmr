@@ -77,6 +77,7 @@ if( BUILD_DOC )
 		rmr_get_trace.3
 		rmr_init_trace.3
 		rmr_set_trace.3
+		rmr_set_vlevel.3
 		rmr_tralloc_msg.3
 		rmr_get_trlen.3
 		rmr_get_src.3

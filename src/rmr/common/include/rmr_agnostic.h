@@ -29,6 +29,8 @@
 #ifndef _rmr_agnostic_h
 #define _rmr_agnostic_h
 
+#include <semaphore.h>					// needed to support some structs
+
 typedef struct endpoint endpoint_t;		// place holder for structs defined in nano/nng private.h
 typedef struct uta_ctx  uta_ctx_t;
 
@@ -53,15 +55,17 @@ typedef struct uta_ctx  uta_ctx_t;
 #define RMR_MSG_VER	3			// message version this code was designed to handle
 
 											// environment variable names we'll suss out
-#define ENV_BIND_IF "RMR_BIND_IF"			// the interface to bind to for both normal comma and RTG (0.0.0.0 if missing)
-#define ENV_RTG_PORT "RMR_RTG_SVC"			// the port we'll listen on for rtg connections
-#define ENV_SEED_RT	"RMR_SEED_RT"			// where we expect to find the name of the seed route table
+#define ENV_BIND_IF		"RMR_BIND_IF"		// the interface to bind to for both normal comma and RTG (0.0.0.0 if missing)
+#define ENV_RTG_PORT	"RMR_RTG_SVC"		// the port we'll listen on for rtg connections
+#define ENV_SEED_RT		"RMR_SEED_RT"		// where we expect to find the name of the seed route table
 #define ENV_SEED_MEMAP	"RMR_SEED_MEMAP"	// where we expect to find the name of the seed route table
-#define ENV_RTG_RAW "RMR_RTG_ISRAW"			// if > 0 we expect route table gen messages as raw (not sent from an RMr application)
+#define ENV_RTG_RAW		"RMR_RTG_ISRAW"		// if > 0 we expect route table gen messages as raw (not sent from an RMr application)
 #define ENV_VERBOSE_FILE "RMR_VCTL_FILE"	// file where vlevel may be managed for some (non-time critical) functions
-#define ENV_NAME_ONLY "RMR_SRC_NAMEONLY"	// src in message is name only
+#define ENV_NAME_ONLY	"RMR_SRC_NAMEONLY"	// src in message is name only
 #define ENV_WARNINGS	"RMR_WARNINGS"		// if == 1 then we write some, non-performance impacting, warnings
 #define ENV_SRC_ID		"RMR_SRC_ID"		// forces this string (adding :port, max 63 ch) into the source field; host name used if not set
+#define ENV_LOG_HR 		"RMR_HR_LOG"		// set to 0 to turn off human readable logging and write using some formatting
+#define ENV_LOG_VLEVEL	"RMR_LOG_VLEVEL"	// set the verbosity level (0 == 0ff; 1 == crit .... 5 == debug )
 
 #define NO_FLAGS	0				// no flags to pass to a function
 

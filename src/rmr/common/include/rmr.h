@@ -164,6 +164,8 @@ extern int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size )
 extern int rmr_rcv_to( void* vctx, int time );		// DEPRECATED -- replaced with set_rtimeout
 extern int rmr_send_to( void* vctx, int time );		// DEPRECATED -- replaced with set_stimeout
 
+// ---- misc user interface stuff ----------------------------------------------------------------------
+extern void rmr_set_vlevel( int new_level );
 
 // --- uta compatability defs if needed user should define UTA_COMPAT  ----------------------------------
 #ifdef UTA_COMPAT

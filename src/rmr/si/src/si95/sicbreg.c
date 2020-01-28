@@ -39,7 +39,7 @@
 extern void SIcbreg( struct ginfo_blk *gptr, int type, int ((*fptr)()), void * dptr ) {
 
 	if( gptr == NULL ) {
-		fprintf( stderr, "[ERR] SIcbreg -- gptr was nil\n" );
+		rmr_vlog( RMR_VL_ERR, "SIcbreg -- gptr was nil\n" );
 		exit( 1 );
 	}
 

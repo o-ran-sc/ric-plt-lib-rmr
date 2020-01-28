@@ -21,6 +21,7 @@
 
 add_library( common_objects OBJECT 
 	src/symtab.c
+	src/logging.c
 	src/mbuf_api.c
 	src/wrapper.c
 )
@@ -35,6 +36,7 @@ if( DEV_PKG )
 	install( FILES 
 		include/rmr.h
 		include/rmr_symtab.h
+		include/rmr_logging.h
 		include/RIC_message_types.h
 		DESTINATION ${install_root}/${install_inc}
 	)	

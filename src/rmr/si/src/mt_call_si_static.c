@@ -38,7 +38,7 @@ static inline void queue_normal( uta_ctx_t* ctx, rmr_mbuf_t* mbuf ) {
 	if( ! uta_ring_insert( ctx->mring, mbuf ) ) {
 		rmr_free_msg( mbuf );								// drop if ring is full
 		if( !warned ) {
-			fprintf( stderr, "[WARN] rmr_mt_receive: application is not receiving fast enough; messages dropping\n" );
+			rmr_vlog( RMR_VL_WARN, "rmr_mt_receive: application is not receiving fast enough; messages dropping\n" );
 			warned++;
 		}
 
@@ -120,7 +120,7 @@ static int mt_data_cb( void* vctx, int fd, char* buf, int buflen ) {
 		}
 	
 		if( fd >= ctx->nrivers || fd < 0 ) {
-			if( DEBUG ) fprintf( stderr, "[DBUG] callback fd is out of range: %d nrivers=%d\n", fd, ctx->nrivers );
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "callback fd is out of range: %d nrivers=%d\n", fd, ctx->nrivers );
 			return SI_RET_OK;
 		}
 	}
@@ -155,17 +155,17 @@ fprintf( stderr, "\n" );
 
 	remain = buflen;
 	while( remain > 0 ) {								// until we've done something with all bytes passed in
-		if( DEBUG )  fprintf( stderr, "[DBUG] ====== data callback top of loop bidx=%d msize=%d ipt=%d remain=%d\n", bidx, river->msg_size, river->ipt, remain );
+		if( DEBUG )  rmr_vlog( RMR_VL_DEBUG, "====== data callback top of loop bidx=%d msize=%d ipt=%d remain=%d\n", bidx, river->msg_size, river->ipt, remain );
 
 		// FIX ME: size in the message  needs to be network byte order 	
 		if( river->msg_size <= 0 ) {				// don't have a size yet
 													// FIX ME: we need a frame indicator to ensure alignment
 			need = sizeof( int ) - river->ipt;							// what we need from transport buffer
 			if( need > remain ) {										// the whole size isn't there
-				if( DEBUG > 1 ) fprintf( stderr, "[DBUG] need more for size than we have: need=%d rmain=%d ipt=%d\n", need, remain, river->ipt );
+				if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "need more for size than we have: need=%d rmain=%d ipt=%d\n", need, remain, river->ipt );
 				memcpy( &river->accum[river->ipt], buf+bidx, remain );			// grab what we can and depart
 				river->ipt += remain;
-				if( DEBUG > 1 ) fprintf( stderr, "[DBUG] data callback not enough bytes to compute size; need=%d have=%d\n", need, remain );
+				if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "data callback not enough bytes to compute size; need=%d have=%d\n", need, remain );
 				return SI_RET_OK;
 			}
 
@@ -176,7 +176,7 @@ fprintf( stderr, "\n" );
 				remain -= need;
 				river->msg_size = *((int *) river->accum);				
 				if( DEBUG > 1 ) {
-					fprintf( stderr, "[DBUG] size from accumulator =%d\n", river->msg_size );
+					rmr_vlog( RMR_VL_DEBUG, "size from accumulator =%d\n", river->msg_size );
 					if( river->msg_size > 500 ) {
 						dump_40( river->accum, "msg size way too large accum:"  );
 					}
@@ -184,7 +184,7 @@ fprintf( stderr, "\n" );
 			} else {
 				river->msg_size = *((int *) &buf[bidx]);					// snarf directly and copy with rest later
 			}
-			if( DEBUG ) fprintf( stderr, "[DBUG] data callback setting msg size: %d\n", river->msg_size );
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "data callback setting msg size: %d\n", river->msg_size );
 
 			if( river->msg_size > river->nbytes ) {				// message is too big, we will drop it
 				river->flags |= RF_DROP;
@@ -192,7 +192,7 @@ fprintf( stderr, "\n" );
 		}
 
 		if( river->msg_size > (river->ipt + remain) ) {					// need more than is left in buffer
-			if( DEBUG > 1 ) fprintf( stderr, "[DBUG] data callback not enough in the buffer size=%d remain=%d\n", river->msg_size, remain );
+			if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "data callback not enough in the buffer size=%d remain=%d\n", river->msg_size, remain );
 			if( (river->flags & RF_DROP) == 0  ) {
 				memcpy( &river->accum[river->ipt], buf+bidx, remain );		// buffer and go wait for more
 			}
@@ -200,14 +200,14 @@ fprintf( stderr, "\n" );
 			remain = 0;
 		} else {
 			need = river->msg_size - river->ipt;						// bytes from transport we need to have complete message
-			if( DEBUG ) fprintf( stderr, "[DBUG] data callback enough in the buffer size=%d need=%d remain=%d\n", river->msg_size, need, remain );
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "data callback enough in the buffer size=%d need=%d remain=%d\n", river->msg_size, need, remain );
 			if( (river->flags & RF_DROP) == 0  ) {
 				memcpy( &river->accum[river->ipt], buf+bidx, need );				// grab just what is needed (might be more)
 				buf2mbuf( ctx, river->accum, river->msg_size, fd );					// build an RMR mbuf and queue
 				river->accum = (char *) malloc( sizeof( char ) *  river->nbytes );	// fresh accumulator
 			} else {
 				if( !(river->flags & RF_NOTIFIED) ) {	
-					fprintf( stderr, "[WRN] message larger than max (%d) have arrived on fd %d\n", river->nbytes, fd );
+					rmr_vlog( RMR_VL_WARN, "message larger than max (%d) have arrived on fd %d\n", river->nbytes, fd );
 					river->flags |= RF_NOTIFIED;
 				}
 			}
@@ -219,7 +219,7 @@ fprintf( stderr, "\n" );
 		}
 	}
 
-	if( DEBUG >2 ) fprintf( stderr, "[DBUG] ##### data callback finished\n" );
+	if( DEBUG >2 ) rmr_vlog( RMR_VL_DEBUG, "##### data callback finished\n" );
 	return SI_RET_OK;
 }
 
@@ -248,11 +248,11 @@ static void* mt_receive( void* vctx ) {
 	uta_ctx_t*	ctx;
 
 	if( (ctx = (uta_ctx_t*) vctx) == NULL ) {
-		fprintf( stderr, "[CRI], unable to start mt-receive: ctx was nil\n" );
+		rmr_vlog( RMR_VL_CRIT, "unable to start mt-receive: ctx was nil\n" );
 		return NULL;
 	}
 
-	if( DEBUG ) fprintf( stderr, "[DBUG] mt_receive: registering SI95 data callback and waiting\n" );
+	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "mt_receive: registering SI95 data callback and waiting\n" );
 	SIcbreg( ctx->si_ctx, SI_CB_CDATA, mt_data_cb, vctx );			// our callback called only for "cooked" (tcp) data
 	SIwait( ctx->si_ctx );
 

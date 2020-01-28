@@ -76,7 +76,7 @@ static void ep_stats( void* st, void* entry, char const* name, void* thing, void
 		(*counter)++;
 	}
 
-	fprintf( stderr, "[DBUG] RMR rt endpoint: target=%s open=%d\n", ep->name, ep->open );
+	rmr_vlog_force( RMR_VL_DEBUG, "rt endpoint: target=%s open=%d\n", ep->name, ep->open );
 }
 
 /*
@@ -95,7 +95,7 @@ static void meid_stats( void* st, void* entry, char const* name, void* thing, vo
 		(*counter)++;
 	}
 
-	fprintf( stderr, "[DBUG] RMR meid=%s owner=%s open=%d\n", name, ep->name, ep->open );
+	rmr_vlog_force( RMR_VL_DEBUG, "meid=%s owner=%s open=%d\n", name, ep->name, ep->open );
 }
 
 /*
@@ -114,7 +114,7 @@ static void ep_counts( void* st, void* entry, char const* name, void* thing, voi
 		id = "missing";
 	}
 
-	fprintf( stderr, "[INFO] RMR sends: ts=%lld src=%s target=%s open=%d succ=%lld fail=%lld (hard=%lld soft=%lld)\n",
+	rmr_vlog_force( RMR_VL_INFO, "sends: ts=%lld src=%s target=%s open=%d succ=%lld fail=%lld (hard=%lld soft=%lld)\n",
 		(long long) time( NULL ),
 		id,
 		ep->name,
@@ -145,7 +145,7 @@ static void rte_stats( void* st, void* entry, char const* name, void* thing, voi
 	mtype = rte->key & 0xffff;
 	sid = (int) (rte->key >> 32);
 
-	fprintf( stderr, "[DBUG] RMR rte: key=%016lx mtype=%4d sid=%4d nrrg=%2d refs=%d\n", rte->key, mtype, sid, rte->nrrgroups, rte->refs );
+	rmr_vlog_force( RMR_VL_DEBUG, "rte: key=%016lx mtype=%4d sid=%4d nrrg=%2d refs=%d\n", rte->key, mtype, sid, rte->nrrgroups, rte->refs );
 }
 
 /*
@@ -155,26 +155,26 @@ static void  rt_stats( route_table_t* rt ) {
 	int* counter;
 
 	if( rt == NULL ) {
-		fprintf( stderr, "[DBUG] rtstats: nil table\n" );
+		rmr_vlog_force( RMR_VL_DEBUG, "rtstats: nil table\n" );
 		return;
 	}
 
 	counter = (int *) malloc( sizeof( int ) );
 	*counter = 0;
-	fprintf( stderr, "[DBUG] RMR route table stats:\n" );
-	fprintf( stderr, "[DBUG] RMR route table endpoints:\n" );
+	rmr_vlog_force( RMR_VL_DEBUG, "route table stats:\n" );
+	rmr_vlog_force( RMR_VL_DEBUG, "route table endpoints:\n" );
 	rmr_sym_foreach_class( rt->hash, RT_NAME_SPACE, ep_stats, counter );		// run endpoints (names) in the active table
-	fprintf( stderr, "[DBUG] RMR rtable: %d known endpoints\n", *counter );
+	rmr_vlog_force( RMR_VL_DEBUG, "rtable: %d known endpoints\n", *counter );
 
-	fprintf( stderr, "[DBUG] RMR route table entries:\n" );
+	rmr_vlog_force( RMR_VL_DEBUG, "route table entries:\n" );
 	*counter = 0;
 	rmr_sym_foreach_class( rt->hash, RT_MT_SPACE, rte_stats, counter );			// run message type entries
-	fprintf( stderr, "[DBUG] RMR rtable: %d mt entries in table\n", *counter );
+	rmr_vlog_force( RMR_VL_DEBUG, "rtable: %d mt entries in table\n", *counter );
 
-	fprintf( stderr, "[DBUG] RMR route table meid map:\n" );
+	rmr_vlog_force( RMR_VL_DEBUG, "route table meid map:\n" );
 	*counter = 0;
 	rmr_sym_foreach_class( rt->hash, RT_ME_SPACE, meid_stats, counter );		// run meid space
-	fprintf( stderr, "[DBUG] RMR rtable: %d meids in map\n", *counter );
+	rmr_vlog_force( RMR_VL_DEBUG, "rtable: %d meids in map\n", *counter );
 
 	free( counter );
 }
@@ -185,7 +185,7 @@ static void  rt_stats( route_table_t* rt ) {
 */
 static void  rt_epcounts( route_table_t* rt, char* id ) {
 	if( rt == NULL ) {
-		fprintf( stderr, "[INFO] RMR endpoint: no counts: empty table\n" );
+		rmr_vlog_force( RMR_VL_INFO, "endpoint: no counts: empty table\n" );
 		return;
 	}
 
@@ -240,7 +240,7 @@ static char* ensure_nlterm( char* buf ) {
 		}
 	} else {
 		if( buf[len-1] != '\n' ) {
-			fprintf( stderr, "[WRN] rmr buf_check: input buffer was not newline terminated (file missing final \\n?)\n" );
+			rmr_vlog( RMR_VL_WARN, "rmr buf_check: input buffer was not newline terminated (file missing final \\n?)\n" );
 			if( (nb = (char *) malloc( sizeof( char ) * (len + 2) )) != NULL ) {
 				memcpy( nb, buf, len );
 				*(nb+len) = '\n';			// insert \n and nil into the two extra bytes we allocated
@@ -268,7 +268,7 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups
 	}
 
 	if( (rte = (rtable_ent_t *) malloc( sizeof( *rte ) )) == NULL ) {
-		fprintf( stderr, "[ERR] rmr_add_rte: malloc failed for entry\n" );
+		rmr_vlog( RMR_VL_ERR, "rmr_add_rte: malloc failed for entry\n" );
 		return NULL;
 	}
 	memset( rte, 0, sizeof( *rte ) );
@@ -281,7 +281,6 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups
 
 	if( nrrgroups ) {
 		if( (rte->rrgroups = (rrgroup_t **) malloc( sizeof( rrgroup_t * ) * nrrgroups )) == NULL ) {
-			fprintf( stderr, "rmr_add_rte: malloc failed for rrgroup array\n" );
 			free( rte );
 			return NULL;
 		}
@@ -298,7 +297,7 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups
 
 	rmr_sym_map( rt->hash, key, rte );							// add to hash using numeric mtype as key
 
-	if( DEBUG ) fprintf( stderr, "[DBUG] route table entry created: k=%llx groups=%d\n", (long long) key, nrrgroups );
+	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "route table entry created: k=%llx groups=%d\n", (long long) key, nrrgroups );
 	return rte;
 }
 
@@ -337,7 +336,7 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 
 		key = build_rt_key( subid, atoi( ts_field ) );
 
-		if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] create rte for mtype=%s subid=%d key=%lx\n", ts_field, subid, key );
+		if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "create rte for mtype=%s subid=%d key=%lx\n", ts_field, subid, key );
 
 		if( (ngtoks = uta_tokenise( rr_field, gtokens, 64, ';' )) > 0 ) {					// split round robin groups
 			if( strcmp( gtokens[0], "%meid" ) == 0 ) {
@@ -350,7 +349,7 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 				if( (ntoks = uta_rmip_tokenise( gtokens[grp], ctx->ip_list, tokens, 64, ',' )) > 0 ) {		// remove any referneces to our ip addrs
 					for( i = 0; i < ntoks; i++ ) {
 						if( strcmp( tokens[i], ctx->my_name ) != 0 ) {					// don't add if it is us -- cannot send to ourself
-							if( DEBUG > 1  || (vlevel > 1)) fprintf( stderr, "[DBUG] add endpoint  ts=%s %s\n", ts_field, tokens[i] );
+							if( DEBUG > 1  || (vlevel > 1)) rmr_vlog_force( RMR_VL_DEBUG, "add endpoint  ts=%s %s\n", ts_field, tokens[i] );
 							uta_add_ep( ctx->new_rtable, rte, tokens[i], grp );
 						}
 					}
@@ -359,7 +358,7 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 		}
 	} else {
 		if( DEBUG || (vlevel > 2) ) {
-			fprintf( stderr, "entry not included, sender not matched: %s\n", tokens[1] );
+			rmr_vlog_force( RMR_VL_DEBUG, "entry not included, sender not matched: %s\n", tokens[1] );
 		}
 	}
 }
@@ -392,17 +391,17 @@ static void trash_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, int vle
 		rte = rmr_sym_pull( ctx->new_rtable->hash, key );			// get it
 		if( rte != NULL ) {
 			if( DEBUG || (vlevel > 1) ) {
-				 fprintf( stderr, "[DBUG] delete rte for mtype=%s subid=%d key=%08lx\n", ts_field, subid, key );
+				 rmr_vlog_force( RMR_VL_DEBUG, "delete rte for mtype=%s subid=%d key=%08lx\n", ts_field, subid, key );
 			}
 			rmr_sym_ndel( ctx->new_rtable->hash, key );			// clear from the new table
 			del_rte( NULL, NULL, NULL, rte, NULL );				// clean up the memory: reduce ref and free if ref == 0
 		} else {
 			if( DEBUG || (vlevel > 1) ) {
-				fprintf( stderr, "[DBUG] delete could not find rte for mtype=%s subid=%d key=%lx\n", ts_field, subid, key );
+				rmr_vlog_force( RMR_VL_DEBUG, "delete could not find rte for mtype=%s subid=%d key=%lx\n", ts_field, subid, key );
 			}
 		}
 	} else {
-		if( DEBUG ) fprintf( stderr, "[DBUG] delete rte skipped: %s\n", ts_field );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "delete rte skipped: %s\n", ts_field );
 	}
 }
 
@@ -432,10 +431,9 @@ static void parse_meid_ar( route_table_t* rtab, char* owner, char* meid_list, in
 	for( i = 0; i < ntoks; i++ ) {
 		if( (ep = rt_ensure_ep( rtab, owner )) != NULL ) {
 			state = rmr_sym_put( rtab->hash, tokens[i], RT_ME_SPACE, ep );						// slam this one in if new; replace if there
-			if( DEBUG || (vlevel > 1) ) fprintf( stderr, "[DBUG] parse_meid_ar: add/replace meid: %s owned by: %s state=%d\n", tokens[i], owner, state );
-fprintf( stderr, "[DBUG] parse_meid_ar: add/replace meid: %s owned by: %s state=%d\n", tokens[i], owner, state );
+			if( DEBUG || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "parse_meid_ar: add/replace meid: %s owned by: %s state=%d\n", tokens[i], owner, state );
 		} else {
-			fprintf( stderr, "[WRN] rmr parse_meid_ar: unable to create an endpoint for owner: %s", owner );
+			rmr_vlog( RMR_VL_WARN, "rmr parse_meid_ar: unable to create an endpoint for owner: %s", owner );
 		}
 	}
 }
@@ -464,7 +462,7 @@ static void parse_meid_del( route_table_t* rtab, char* meid_list, int vlevel ) {
 	ntoks = uta_tokenise( meid_list, tokens, 128, ' ' );
 	for( i = 0; i < ntoks; i++ ) {
 		rmr_sym_del( rtab->hash, tokens[i], RT_ME_SPACE );						// and it only took my little finger to blow it away!
-		if( DEBUG || (vlevel > 1) ) fprintf( stderr, "[DBUG] parse_meid_del: meid deleted: %s\n", tokens[i] );
+		if( DEBUG || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "parse_meid_del: meid deleted: %s\n", tokens[i] );
 	}
 }
 
@@ -478,7 +476,7 @@ static void meid_parser( uta_ctx_t* ctx, char** tokens, int ntoks, int vlevel ) 
 	}
 
 	if( ntoks < 2 ) {					// must have at least two for any valid request record
-		fprintf( stderr, "[ERR] meid_parse: not enough tokens on %s record\n", tokens[0] );
+		rmr_vlog( RMR_VL_ERR, "meid_parse: not enough tokens on %s record\n", tokens[0] );
 		return;
 	}
 
@@ -486,24 +484,24 @@ static void meid_parser( uta_ctx_t* ctx, char** tokens, int ntoks, int vlevel ) 
 		tokens[1] = clip( tokens[1] );
 		if( *(tokens[1]) == 's' ) {
 			if( ctx->new_rtable != NULL ) {					// one in progress?  this forces it out
-				if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] meid map start: dropping incomplete table\n" );
+				if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "meid map start: dropping incomplete table\n" );
 				uta_rt_drop( ctx->new_rtable );
 			}
 
 			ctx->new_rtable = uta_rt_clone_all( ctx->rtable );		// start with a clone of everything (mtype, endpoint refs and meid)
 			ctx->new_rtable->mupdates = 0;
-			if( DEBUG || (vlevel > 1)  ) fprintf( stderr, "[DBUG] meid_parse: meid map start found\n" );
+			if( DEBUG || (vlevel > 1)  ) rmr_vlog_force( RMR_VL_DEBUG, "meid_parse: meid map start found\n" );
 		} else {
 			if( strcmp( tokens[1], "end" ) == 0 ) {								// wrap up the table we were building
 				if( ntoks > 2 ) {												// meid_map | end | <count> |??? given
 					if( ctx->new_rtable->mupdates != atoi( tokens[2] ) ) {		// count they added didn't match what we received
-						fprintf( stderr, "[ERR] meid_parse: meid map update had wrong number of records: received %d expected %s\n", ctx->new_rtable->mupdates, tokens[2] );
+						rmr_vlog( RMR_VL_ERR, "meid_parse: meid map update had wrong number of records: received %d expected %s\n", ctx->new_rtable->mupdates, tokens[2] );
 						uta_rt_drop( ctx->new_rtable );
 						ctx->new_rtable = NULL;
 						return;
 					}
 
-					if( DEBUG ) fprintf( stderr, "[DBUG] meid_parse: meid map update ended; found expected number of entries: %s\n", tokens[2] );
+					if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "meid_parse: meid map update ended; found expected number of entries: %s\n", tokens[2] );
 				}
 
 				if( ctx->new_rtable ) {
@@ -511,16 +509,16 @@ static void meid_parser( uta_ctx_t* ctx, char** tokens, int ntoks, int vlevel ) 
 					ctx->old_rtable = ctx->rtable;				// currently active becomes old and allowed to 'drain'
 					ctx->rtable = ctx->new_rtable;				// one we've been adding to becomes active
 					ctx->new_rtable = NULL;
-					if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] end of meid map noticed\n" );
+					if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "end of meid map noticed\n" );
 
 					if( vlevel > 0 ) {
-						fprintf( stderr, "[DBUG] old route table:\n" );
+						rmr_vlog_force( RMR_VL_DEBUG, "old route table:\n" );
 						rt_stats( ctx->old_rtable );
-						fprintf( stderr, "[DBUG] new route table:\n" );
+						rmr_vlog_force( RMR_VL_DEBUG, "new route table:\n" );
 						rt_stats( ctx->rtable );
 					}
 				} else {
-					if( DEBUG ) fprintf( stderr, "[DBUG] end of meid map noticed, but one was not started!\n" );
+					if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "end of meid map noticed, but one was not started!\n" );
 					ctx->new_rtable = NULL;
 				}
 			}
@@ -530,13 +528,13 @@ static void meid_parser( uta_ctx_t* ctx, char** tokens, int ntoks, int vlevel ) 
 	}	
 
 	if( ! ctx->new_rtable ) { 			// for any other mmap entries, there must be a table in progress or we punt
-		if( DEBUG ) fprintf( stderr, "[DBUG] meid update/delte (%s) encountered, but table update not started\n", tokens[0] );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "meid update/delte (%s) encountered, but table update not started\n", tokens[0] );
 		return;
 	}
 
 	if( strcmp( tokens[0], "mme_ar" ) == 0 ) {
 		if( ntoks < 3  || tokens[1] == NULL || tokens[2] == NULL ) {
-			fprintf( stderr, "[ERR] meid_parse: mme_ar record didn't have enough tokens found %d\n", ntoks );
+			rmr_vlog( RMR_VL_ERR, "meid_parse: mme_ar record didn't have enough tokens found %d\n", ntoks );
 			return;
 		}
 		parse_meid_ar( ctx->new_rtable,  tokens[1], tokens[2], vlevel );
@@ -545,7 +543,7 @@ static void meid_parser( uta_ctx_t* ctx, char** tokens, int ntoks, int vlevel ) 
 
 	if( strcmp( tokens[0], "mme_del" ) == 0 ) {
 		if( ntoks < 2 ) {
-			fprintf( stderr, "[ERR] meid_parse: mme_del record didn't have enough tokens\n" );
+			rmr_vlog( RMR_VL_ERR, "meid_parse: mme_del record didn't have enough tokens\n" );
 			return;
 		}
 		parse_meid_del( ctx->new_rtable,  tokens[1], vlevel );
@@ -621,7 +619,7 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 				}
 
 				if( ntoks < 3 ) {
-					if( DEBUG ) fprintf( stderr, "[WRN] rmr_rtc: del record had too few fields: %d instead of 3\n", ntoks );
+					if( DEBUG ) rmr_vlog( RMR_VL_WARN, "rmr_rtc: del record had too few fields: %d instead of 3\n", ntoks );
 					break;
 				}
 
@@ -637,27 +635,27 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 						ctx->old_rtable = ctx->rtable;				// currently active becomes old and allowed to 'drain'
 						ctx->rtable = ctx->new_rtable;				// one we've been adding to becomes active
 						ctx->new_rtable = NULL;
-						if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] end of route table noticed\n" );
+						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog( RMR_VL_DEBUG, "end of route table noticed\n" );
 
 						if( vlevel > 0 ) {
-							fprintf( stderr, "[DBUG] old route table:\n" );
+							rmr_vlog_force( RMR_VL_DEBUG, "old route table:\n" );
 							rt_stats( ctx->old_rtable );
-							fprintf( stderr, "[DBUG] new route table:\n" );
+							rmr_vlog_force( RMR_VL_DEBUG, "new route table:\n" );
 							rt_stats( ctx->rtable );
 						}
 					} else {
-						if( DEBUG > 1 ) fprintf( stderr, "[DBUG] end of route table noticed, but one was not started!\n" );
+						if( DEBUG > 1 ) rmr_vlog_force( RMR_VL_DEBUG, "end of route table noticed, but one was not started!\n" );
 						ctx->new_rtable = NULL;
 					}
 				} else {											// start a new table.
 					if( ctx->new_rtable != NULL ) {					// one in progress?  this forces it out
-						if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] new table; dropping incomplete table\n" );
+						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "new table; dropping incomplete table\n" );
 						uta_rt_drop( ctx->new_rtable );
 					}
 
 					ctx->new_rtable = NULL;
 					ctx->new_rtable = uta_rt_clone( ctx->rtable );	// create by cloning endpoint and meidtentries from active table
-					if( DEBUG > 1 || (vlevel > 1)  ) fprintf( stderr, "[DBUG] start of route table noticed\n" );
+					if( DEBUG > 1 || (vlevel > 1)  ) rmr_vlog_force( RMR_VL_DEBUG, "start of route table noticed\n" );
 				}
 				break;
 
@@ -668,7 +666,7 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 					}
 
 					if( ntoks < 4 ) {
-						if( DEBUG ) fprintf( stderr, "[WRN] rmr_rtc: mse record had too few fields: %d instead of 4\n", ntoks );
+						if( DEBUG ) rmr_vlog( RMR_VL_WARN, "rmr_rtc: mse record had too few fields: %d instead of 4\n", ntoks );
 						break;
 					}
 
@@ -701,7 +699,7 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 
 					if( ntoks >2 ) {
 						if( ctx->new_rtable->updates != atoi( tokens[2] ) ) {	// count they added didn't match what we received
-							fprintf( stderr, "[ERR] rmr_rtc: RT update had wrong number of records: received %d expected %s\n",
+							rmr_vlog( RMR_VL_ERR, "rmr_rtc: RT update had wrong number of records: received %d expected %s\n",
 								ctx->new_rtable->updates, tokens[2] );
 							uta_rt_drop( ctx->new_rtable );
 							ctx->new_rtable = NULL;
@@ -714,32 +712,32 @@ static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel ) {
 						ctx->old_rtable = ctx->rtable;				// currently active becomes old and allowed to 'drain'
 						ctx->rtable = ctx->new_rtable;				// one we've been adding to becomes active
 						ctx->new_rtable = NULL;
-						if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] end of rt update noticed\n" );
+						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "end of rt update noticed\n" );
 
 						if( vlevel > 0 ) {
-							fprintf( stderr, "[DBUG] old route table:\n" );
+							rmr_vlog_force( RMR_VL_DEBUG, "old route table:\n" );
 							rt_stats( ctx->old_rtable );
-							fprintf( stderr, "[DBUG] updated route table:\n" );
+							rmr_vlog_force( RMR_VL_DEBUG, "updated route table:\n" );
 							rt_stats( ctx->rtable );
 						}
 					} else {
-						if( DEBUG > 1 ) fprintf( stderr, "[DBUG] end of rt update noticed, but one was not started!\n" );
+						if( DEBUG > 1 ) rmr_vlog_force( RMR_VL_DEBUG, "end of rt update noticed, but one was not started!\n" );
 						ctx->new_rtable = NULL;
 					}
 				} else {											// start a new table.
 					if( ctx->new_rtable != NULL ) {					// one in progress?  this forces it out
-						if( DEBUG > 1 || (vlevel > 1) ) fprintf( stderr, "[DBUG] new table; dropping incomplete table\n" );
+						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "new table; dropping incomplete table\n" );
 						uta_rt_drop( ctx->new_rtable );
 					}
 
 					ctx->new_rtable = uta_rt_clone_all( ctx->rtable );	// start with a clone of everything (endpts and entries)
 					ctx->new_rtable->updates = 0;						// init count of updates received
-					if( DEBUG > 1 || (vlevel > 1)  ) fprintf( stderr, "[DBUG] start of rt update noticed\n" );
+					if( DEBUG > 1 || (vlevel > 1)  ) rmr_vlog_force( RMR_VL_DEBUG, "start of rt update noticed\n" );
 				}
 				break;
 
 			default:
-				if( DEBUG ) fprintf( stderr, "[WRN] rmr_rtc: unrecognised request: %s\n", tokens[0] );
+				if( DEBUG ) rmr_vlog( RMR_VL_WARN, "rmr_rtc: unrecognised request: %s\n", tokens[0] );
 				break;
 		}
 	}
@@ -767,11 +765,11 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 	}
 
 	if( (fbuf = ensure_nlterm( uta_fib( fname ) ) ) == NULL ) {			// read file into a single buffer (nil terminated string)
-		fprintf( stderr, "[WRN] rmr read_static: seed route table could not be opened: %s: %s\n", fname, strerror( errno ) );
+		rmr_vlog( RMR_VL_WARN, "rmr read_static: seed route table could not be opened: %s: %s\n", fname, strerror( errno ) );
 		return;
 	}
 
-	if( DEBUG ) fprintf( stderr, "[DBUG] rmr: seed route table successfully opened: %s\n", fname );
+	if( DEBUG ) rmr_vlog_force( RMR_VL_DEBUG, "seed route table successfully opened: %s\n", fname );
 	for( eor = fbuf; *eor; eor++ ) {					// fix broken systems that use \r or \r\n to terminate records
 		if( *eor == '\r' ) {
 			*eor = '\n';								// will look like a blank line which is ok
@@ -783,8 +781,8 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 		if( (eor = strchr( rec, '\n' )) != NULL ) {
 			*eor = 0;
 		} else {
-			fprintf( stderr, "[WRN] rmr read_static: seed route table had malformed records (missing newline): %s\n", fname );
-			fprintf( stderr, "[WRN] rmr read_static: seed route table not used: %s\n", fname );
+			rmr_vlog( RMR_VL_WARN, "rmr read_static: seed route table had malformed records (missing newline): %s\n", fname );
+			rmr_vlog( RMR_VL_WARN, "rmr read_static: seed route table not used: %s\n", fname );
 			free( fbuf );
 			return;
 		}
@@ -792,7 +790,7 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 		parse_rt_rec( ctx, rec, vlevel );
 	}
 
-	if( DEBUG ) fprintf( stderr, "[DBUG] rmr_read_static:  seed route table successfully parsed: %d records\n", rcount );
+	if( DEBUG ) rmr_vlog_force( RMR_VL_DEBUG, "rmr_read_static:  seed route table successfully parsed: %d records\n", rcount );
 	free( fbuf );
 }
 
@@ -980,7 +978,7 @@ static route_table_t* rt_clone_space( route_table_t* srt, route_table_t* nrt, in
 
 	rmr_sym_foreach_class( sst, space, collect_things, &things );		// collect things from this space
 
-	if( DEBUG ) fprintf( stderr, "[DBUG] clone space cloned %d things in space %d\n",  things.nused, space );
+	if( DEBUG ) rmr_vlog_force( RMR_VL_DEBUG, "clone space cloned %d things in space %d\n",  things.nused, space );
 	for( i = 0; i < things.nused; i++ ) {
 		if( space ) {												// string key, epoint reference
 			ep = (endpoint_t *) things.things[i];
@@ -1074,14 +1072,14 @@ static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name ) {
 	endpoint_t*	ep;
 
 	if( !rt || !ep_name || ! *ep_name ) {
-		fprintf( stderr, "[WRN] rmr: rt_ensure:  internal mishap, something undefined rt=%p ep_name=%p\n", rt, ep_name );
+		rmr_vlog( RMR_VL_WARN, "rt_ensure:  internal mishap, something undefined rt=%p ep_name=%p\n", rt, ep_name );
 		errno = EINVAL;
 		return NULL;
 	}
 
 	if( (ep = uta_get_ep( rt, ep_name )) == NULL ) { 					// not there yet, make
 		if( (ep = (endpoint_t *) malloc( sizeof( *ep ) )) == NULL ) {
-			fprintf( stderr, "[WRN] rmr: rt_ensure:  malloc failed for endpoint creation: %s\n", ep_name );
+			rmr_vlog( RMR_VL_WARN, "rt_ensure:  malloc failed for endpoint creation: %s\n", ep_name );
 			errno = ENOMEM;
 			return NULL;
 		}

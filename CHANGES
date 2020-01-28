@@ -2,6 +2,11 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 January 26; verison 3.1.0
+	First step to allowing the user programme to control messages
+	written to standard error. Introduces the rmr_set_vlevel()
+	function, and related environment variable.
+
 2020 January 24; verison 3.0.5
 	Fix bug in SI95 with receive buffer allocation.
 

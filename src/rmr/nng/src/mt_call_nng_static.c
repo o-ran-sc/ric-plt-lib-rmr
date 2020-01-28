@@ -38,7 +38,7 @@ static inline void queue_normal( uta_ctx_t* ctx, rmr_mbuf_t* mbuf ) {
 	if( ! uta_ring_insert( ctx->mring, mbuf ) ) {
 		rmr_free_msg( mbuf );								// drop if ring is full
 		if( !warned ) {
-			fprintf( stderr, "[WARN] rmr_mt_receive: application is not receiving fast enough; messages dropping\n" );
+			rmr_vlog( RMR_VL_WARN, "rmr_mt_receive: application is not receiving fast enough; messages dropping\n" );
 			warned++;
 		}
 
@@ -80,7 +80,7 @@ static void* mt_receive( void* vctx ) {
 		return NULL;
 	}
 
-	fprintf( stderr, "[INFO] rmr mt_receiver is spinning\n" );
+	rmr_vlog( RMR_VL_INFO, "rmr mt_receiver is spinning\n" );
 
 	while( ! ctx->shutdown ) {
 		mbuf = rcv_msg( ctx, NULL );

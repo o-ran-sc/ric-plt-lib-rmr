@@ -105,7 +105,7 @@ static int wh_init( uta_ctx_t* ctx ) {
 	}
 
 	if( (whm  = malloc( sizeof( *whm ) )) == NULL ) {
-		fprintf( stderr, "mem alloc failed for whm: alloc %d bytes\n", (int) sizeof( *whm ) );
+		rmr_vlog( RMR_VL_ERR, "mem alloc failed for whm: alloc %d bytes\n", (int) sizeof( *whm ) );
 		errno = ENOMEM;
 		return 0;
 	}
@@ -113,7 +113,7 @@ static int wh_init( uta_ctx_t* ctx ) {
 	whm->nalloc = 16;
 	alloc_sz = whm->nalloc * sizeof( endpoint_t );
 	if( (whm->eps = (endpoint_t **) malloc( alloc_sz )) == NULL ) {
-		fprintf( stderr, "mem alloc failed: alloc %d bytes\n", (int) alloc_sz );
+		rmr_vlog( RMR_VL_ERR, "mem alloc failed: alloc %d bytes\n", (int) alloc_sz );
 		free( whm );
 		errno = ENOMEM;
 		return 0;
@@ -209,7 +209,7 @@ extern rmr_whid_t rmr_wh_open( void* vctx, char const* target ) {
 
 
 	if( (ep = rt_ensure_ep( ctx->rtable, target )) == NULL ) {		// get pointer to ep if there, create new if not
-		fprintf( stderr, "ensure ep returned bad; setting no memory error\n" );
+		rmr_vlog( RMR_VL_ERR, "wormhole_open: ensure ep returned bad: target=%s\n", target );
 		return -1;			// ensure sets errno
 	}
 
@@ -275,7 +275,7 @@ extern rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg
 
 	errno = 0;													// nng seems not to set errno any longer, so ensure it's clear
 	if( msg->header == NULL ) {
-		fprintf( stderr, "[ERR] rmr_wh_send_msg: message had no header\n" );
+		rmr_vlog( RMR_VL_ERR, "rmr_wh_send_msg: message had no header\n" );
 		msg->state = RMR_ERR_NOHDR;
 		errno = EBADMSG;										// must ensure it's not eagain
 		return msg;

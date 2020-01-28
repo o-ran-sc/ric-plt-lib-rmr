@@ -53,7 +53,7 @@
 */
 static void uta_ep_failed( endpoint_t* ep ) {
 	if( ep != NULL ) {
-		if( DEBUG ) fprintf( stderr, "[DBUG] connection to %s was closed\n", ep->name );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "connection to %s was closed\n", ep->name );
 		ep->open = 0;
 	}
 }
@@ -79,14 +79,14 @@ static int uta_link2( si_ctx_t* si_ctx, endpoint_t* ep ) {
 	char*		tok;
 
 	if( ep == NULL ) {
-		if( DEBUG ) fprintf( stderr, "[DBUG] link2 ep was nil!\n" );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "link2 ep was nil!\n" );
 		return FALSE;
 	}
 
 	target = ep->name;				// always give name to transport so changing dest IP does not break reconnect
 	if( target == NULL  ||  (addr = strchr( target, ':' )) == NULL ) {		// bad address:port
 		if( ep->notify ) {
-			fprintf( stderr, "[WARN] rmr: link2: unable to create link: bad target: %s\n", target == NULL ? "<nil>" : target );
+			rmr_vlog( RMR_VL_WARN, "rmr: link2: unable to create link: bad target: %s\n", target == NULL ? "<nil>" : target );
 			ep->notify = 0;
 		}
 		return FALSE;
@@ -100,24 +100,24 @@ static int uta_link2( si_ctx_t* si_ctx, endpoint_t* ep ) {
 
 	snprintf( conn_info, sizeof( conn_info ), "%s", target );
 	errno = 0;
-	if( DEBUG > 1 ) fprintf( stderr, "[DBUG] link2 attempting connection with: %s\n", conn_info );
+	if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "link2 attempting connection with: %s\n", conn_info );
 	if( (ep->nn_sock = SIconnect( si_ctx, conn_info )) < 0 ) {
 		pthread_mutex_unlock( &ep->gate );
 
 		if( ep->notify ) {							// need to notify if set
-			fprintf( stderr, "[WRN] rmr: link2: unable to connect  to target: %s: %d %s\n", target, errno, strerror( errno ) );
+			rmr_vlog( RMR_VL_WARN, "rmr: link2: unable to connect  to target: %s: %d %s\n", target, errno, strerror( errno ) );
 			ep->notify = 0;
 		}
 		//nng_close( *nn_sock );
 		return FALSE;
 	}
 
-	if( DEBUG ) fprintf( stderr, "[INFO] rmr_si_link2: connection was successful to: %s\n", target );
+	if( DEBUG ) rmr_vlog( RMR_VL_INFO, "rmr_si_link2: connection was successful to: %s\n", target );
 
 	ep->open = TRUE;						// set open/notify before giving up lock
 
 	if( ! ep->notify ) {						// if we yammered about a failure, indicate finally good
-		fprintf( stderr, "[INFO] rmr: link2: connection finally establisehd with target: %s\n", target );
+		rmr_vlog( RMR_VL_INFO, "rmr: link2: connection finally establisehd with target: %s\n", target );
 		ep->notify = 1;
 	}
 
@@ -161,25 +161,25 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 	rrgroup_t* rrg;				// pointer at group to update
 
 	if( ! rte || ! rt ) {
-		fprintf( stderr, "[WRN] uda_add_ep didn't get a valid rt and/or rte pointer\n" );
+		rmr_vlog( RMR_VL_WARN, "uda_add_ep didn't get a valid rt and/or rte pointer\n" );
 		return NULL;
 	}
 
 	if( rte->nrrgroups <= group || group < 0 ) {
-		fprintf( stderr, "[WRN] uda_add_ep group out of range: %d (max == %d)\n", group, rte->nrrgroups );
+		rmr_vlog( RMR_VL_WARN, "uda_add_ep group out of range: %d (max == %d)\n", group, rte->nrrgroups );
 		return NULL;
 	}
 
 	//fprintf( stderr, ">>>> add ep grp=%d to rte @ 0x%p  rrg=%p\n", group, rte, rte->rrgroups[group] );
 	if( (rrg = rte->rrgroups[group]) == NULL ) {
 		if( (rrg = (rrgroup_t *) malloc( sizeof( *rrg ) )) == NULL ) {
-			fprintf( stderr, "[WRN] rmr_add_ep: malloc failed for round robin group: group=%d\n", group );
+			rmr_vlog( RMR_VL_WARN, "rmr_add_ep: malloc failed for round robin group: group=%d\n", group );
 			return NULL;
 		}
 		memset( rrg, 0, sizeof( *rrg ) );
 
 		if( (rrg->epts = (endpoint_t **) malloc( sizeof( endpoint_t ) * MAX_EP_GROUP )) == NULL ) {
-			fprintf( stderr, "[WRN] rmr_add_ep: malloc failed for group endpoint array: group=%d\n", group );
+			rmr_vlog( RMR_VL_WARN, "rmr_add_ep: malloc failed for group endpoint array: group=%d\n", group );
 			return NULL;
 		}
 		memset( rrg->epts, 0, sizeof( endpoint_t ) * MAX_EP_GROUP );
@@ -191,7 +191,7 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 		rrg->nused = 0;							// number populated
 		rrg->nendpts = MAX_EP_GROUP;			// number allocated
 
-		if( DEBUG > 1 ) fprintf( stderr, "[DBUG] rrg added to rte: mtype=%d group=%d\n", rte->mtype, group );
+		if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "rrg added to rte: mtype=%d group=%d\n", rte->mtype, group );
 	}
 
 	ep = rt_ensure_ep( rt, ep_name ); 			// get the ep and create one if not known
@@ -199,7 +199,7 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 	if( rrg != NULL ) {
 		if( rrg->nused >= rrg->nendpts ) {
 			// future: reallocate
-			fprintf( stderr, "[WRN] endpoint array for mtype/group %d/%d is full!\n", rte->mtype, group );
+			rmr_vlog( RMR_VL_WARN, "endpoint array for mtype/group %d/%d is full!\n", rte->mtype, group );
 			return NULL;
 		}
 
@@ -207,7 +207,7 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 		rrg->nused++;
 	}
 
-	if( DEBUG > 1 ) fprintf( stderr, "[DBUG] endpoint added to mtype/group: %d/%d %s nused=%d\n", rte->mtype, group, ep_name, rrg->nused );
+	if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "endpoint added to mtype/group: %d/%d %s nused=%d\n", rte->mtype, group, ep_name, rrg->nused );
 	return ep;
 }
 
@@ -230,14 +230,14 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, int* nn_sock, en
 		*uepp = ep;
 	}
 	if( ep == NULL ) {
-		if( DEBUG ) fprintf( stderr, "[DBUG] get ep by name for %s not in hash!\n", ep_name );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "get ep by name for %s not in hash!\n", ep_name );
 		if( ! ep_name || (ep = rt_ensure_ep( rt, ep_name)) == NULL ) {				// create one if not in rt (support rts without entry in our table)
 			return FALSE;
 		}
 	}
 
 	if( ! ep->open )  {										// not open -- connect now
-		if( DEBUG ) fprintf( stderr, "[DBUG] get ep by name for %s session not started... starting\n", ep_name );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "get ep by name for %s session not started... starting\n", ep_name );
 		if( ep->addr == NULL ) {					// name didn't resolve before, try again
 			ep->addr = strdup( ep->name );			// use the name directly; if not IP then transport will do dns lookup
 		}
@@ -246,7 +246,7 @@ static int uta_epsock_byname( route_table_t* rt, char* ep_name, int* nn_sock, en
 			ep->open = TRUE;
 			*nn_sock = ep->nn_sock;							// pass socket back to caller
 		}
-		if( DEBUG ) fprintf( stderr, "[DBUG] epsock_bn: connection state: %s %s\n", state ? "[OK]" : "[FAIL]", ep->name );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_bn: connection state: %s %s\n", state ? "[OK]" : "[FAIL]", ep->name );
 	} else {
 		*nn_sock = ep->nn_sock;
 		state = TRUE;
@@ -295,26 +295,26 @@ static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, int* nn_sock,
 	}
 
 	if( ! nn_sock ) {			// user didn't supply a pointer
-		if( DEBUG ) fprintf( stderr, "[DBUG] epsock_rr invalid nnsock pointer\n" );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_rr invalid nnsock pointer\n" );
 		errno = EINVAL;
 		*more = 0;
 		return FALSE;
 	}
 
 	if( rte == NULL ) {
-		if( DEBUG ) fprintf( stderr, "[DBUG] epsock_rr rte was nil; nothing selected\n" );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_rr rte was nil; nothing selected\n" );
 		*more = 0;
 		return FALSE;
 	}
 
 	if( group < 0 || group >= rte->nrrgroups ) {
-		if( DEBUG > 1 ) fprintf( stderr, "[DBUG] group out of range: group=%d max=%d\n", group, rte->nrrgroups );
+		if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "group out of range: group=%d max=%d\n", group, rte->nrrgroups );
 		*more = 0;
 		return FALSE;
 	}
 
 	if( (rrg = rte->rrgroups[group]) == NULL ) {
-		if( DEBUG > 1 ) fprintf( stderr, "[DBUG] rrg not found for group %d (ptr rrgroups[g] == nil)\n", group );
+		if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "rrg not found for group %d (ptr rrgroups[g] == nil)\n", group );
 		*more = 0; 					// groups are inserted contig, so nothing should be after a nil pointer
 		return FALSE;
 	}
@@ -323,19 +323,19 @@ static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, int* nn_sock,
 
 	switch( rrg->nused ) {
 		case 0:				// nothing allocated, just punt
-			if( DEBUG > 1 ) fprintf( stderr, "[DBUG] nothing allocated for the rrg\n" );
+			if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "nothing allocated for the rrg\n" );
 			return FALSE;
 
 		case 1:				// exactly one, no rr to deal with
 			ep = rrg->epts[0];
-			if( DEBUG > 1 ) fprintf( stderr, "[DBUG] _rr returning socket with one choice in group \n" );
+			if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "_rr returning socket with one choice in group \n" );
 			state = TRUE;
 			break;
 
 		default:										// need to pick one and adjust rr counts
 			idx = rrg->ep_idx++ % rrg->nused;			// see note above
 			ep = rrg->epts[idx];						// select next endpoint
-			if( DEBUG > 1 ) fprintf( stderr, "[DBUG] _rr returning socket with multiple choices in group idx=%d \n", rrg->ep_idx );
+			if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "_rr returning socket with multiple choices in group idx=%d \n", rrg->ep_idx );
 			state = idx + 1;							// unit test checks to see that we're cycling through, so must not just be TRUE
 			break;
 	}
@@ -345,7 +345,7 @@ static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, int* nn_sock,
 	}
 	if( state ) {										// end point selected, open if not, get socket either way
 		if( ! ep->open ) {								// not connected
-			if( DEBUG ) fprintf( stderr, "[DBUG] epsock_rr selected endpoint not yet open; opening %s\n", ep->name );
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_rr selected endpoint not yet open; opening %s\n", ep->name );
 			if( ep->addr == NULL ) {					// name didn't resolve before, try again
 				ep->addr = strdup( ep->name );			// use the name directly; if not IP then transport will do dns lookup
 			}
@@ -356,13 +356,13 @@ static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, int* nn_sock,
 			} else {
 				state = FALSE;
 			}
-			if( DEBUG ) fprintf( stderr, "[DBUG] epsock_rr: connection attempted with %s: %s\n", ep->name, state ? "[OK]" : "[FAIL]" );
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_rr: connection attempted with %s: %s\n", ep->name, state ? "[OK]" : "[FAIL]" );
 		} else {
 			*nn_sock = ep->nn_sock;
 		}
 	}
 
-	if( DEBUG > 1 ) fprintf( stderr, "[DBUG] epsock_rr returns state=%d\n", state );
+	if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "epsock_rr returns state=%d\n", state );
 	return state;
 }
 

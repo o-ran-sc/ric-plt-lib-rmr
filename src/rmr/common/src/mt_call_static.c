@@ -68,7 +68,7 @@ static int init_mtcall( uta_ctx_t*	ctx ) {
 	for( i = 0; i < MAX_CALL_ID; i++ ) {				// initialise all of the semaphores
 		chutes[i].mbuf = NULL;
 		if( sem_init( &chutes[i].barrier, 0, 0 ) < 0 ) {
-			fprintf( stderr, "[ERR] rmr: unable to initialise mt call chute [%d]: %s\n", i, strerror( errno ) );
+			rmr_vlog( RMR_VL_ERR, "rmr: unable to initialise mt call chute [%d]: %s\n", i, strerror( errno ) );
 			rc = -1;
 		}
 	}	

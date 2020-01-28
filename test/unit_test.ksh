@@ -337,6 +337,8 @@ run_nano_tests=0
 
 export RMR_WARNING=1		# turn on warnings
 
+ulimit -c unlimited
+
 while [[ $1 == "-"* ]]
 do
 	case $1 in

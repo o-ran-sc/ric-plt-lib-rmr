@@ -150,7 +150,7 @@ static char* uta_h2ip( char const* hname ) {
 
 	hent = gethostbyname( dname );
 	if( hent == NULL || hent->h_addr_list == NULL ) {
-		//fprintf( stderr, "[WRN] h2ip: dns lookup failed for: %s\n", dname );
+		//rmr_vlog( RMR_VL_WARN, "h2ip: dns lookup failed for: %s\n", dname );
 		free( dname );
 		return NULL;
 	}
@@ -314,7 +314,7 @@ if_addrs_t*  mk_ip_list( char* port ) {
 			snprintf( wbuf, sizeof( wbuf ), "%s:%s", envp, port );		// smash port onto the addr as is
 			l->addrs[l->naddrs] = strdup( wbuf );
 			l->naddrs++;
-			if( DEBUG ) fprintf( stderr, "[INFO] rmr: using only specific bind interface when searching specific RT entries: %s\n", wbuf );
+			if( DEBUG ) rmr_vlog( RMR_VL_INFO, "rmr: using only specific bind interface when searching specific RT entries: %s\n", wbuf );
 			return l;
 		}
 
@@ -342,7 +342,7 @@ if_addrs_t*  mk_ip_list( char* port ) {
 					*tok = 0;
 				}
 				if( l->naddrs < 128 ) {
-					if( DEBUG ) fprintf( stderr, "[DBUG] capture address: %s: %s\n", ele->ifa_name, octs );
+					if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "capture address: %s: %s\n", ele->ifa_name, octs );
 
 					snprintf( wbuf, sizeof( wbuf ), fmt, octs, port );		// smash port onto the addr
 					l->addrs[l->naddrs] = strdup( wbuf );

@@ -112,7 +112,7 @@ extern int SIgenaddr( char *target, int proto, int family, int socktype, struct 
 	hint.ai_flags = ga_flags;
 
 	if( DEBUG ) 
-		fprintf( stderr, "[DBUG] siaddress: calling getaddrinfo flags=%x proto=%d family=%d target=%s host=%s port=%s\n", 
+		rmr_vlog( RMR_VL_DEBUG, "siaddress: calling getaddrinfo flags=%x proto=%d family=%d target=%s host=%s port=%s\n", 
 				ga_flags, proto, family, target, dstr, pstr );
 
 	if( (error = getaddrinfo( dstr, pstr, &hint, &list )) ) {

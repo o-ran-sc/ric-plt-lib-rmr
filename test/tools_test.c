@@ -39,6 +39,7 @@
 #include <semaphore.h>
 
 #include "rmr.h"
+#include "rmr_logging.h"
 #include "rmr_agnostic.h"
 #include "test_support.c"		// our private library of test tools
 

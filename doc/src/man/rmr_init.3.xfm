@@ -68,16 +68,16 @@ following flags are supported:
 
 &half_space
 &beg_dlist(1i : &bold_font )
-&diitem(RMRFL_NONE) 
+&ditem(RMRFL_NONE) 
 	No flags are set.
 
 &half_space
-&diitem(RMRFL_NOTHREAD)
+&ditem(RMRFL_NOTHREAD)
 	The route table collector thread is not to be started. This should only be used
 	by the route table generator application if it is based on RMr.
 
 &half_space
-&diitem(RMRFL_MTCALL)
+&ditem(RMRFL_MTCALL)
 	Enable multi-threaded call support. 
 
 &half_space
@@ -117,21 +117,8 @@ environment variables to influence it's setup.
 The following variables will be used when found.
 &half_space 
 
-&beg_dlist(1i : &bold_font )
-&diitem(RMR_SEED_RT) 
-Assumes this is the filename of the seed route table file to use. In normal situations,
-the library will wait for an update from the route table generator (expected within a few seconds
-of initialisation) before being able to send messages.
-However, in some situations where a bootstrap table is necessary, this is the means to 
-supply it to the library.
-&half_space
-
-&diitem(RMR_RTG_SVC) 
-The route table generator assumes that RMr is listening on a well known port (4561) by 
-default, but this environment variable can be used to change the listening port if 
-needed. 
-The value of the variable is expected to be just the port.
-&end_dlist
+.** the list of environment vars supported
+.im &{lib}/man/env_var_list.im
 
 &h2(RETURN VALUE)
 The &cw(rmr_init) function returns a void pointer (a contex if you will) that is passed

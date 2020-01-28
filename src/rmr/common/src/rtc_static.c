@@ -127,7 +127,7 @@ static void* rtc( void* vctx ) {
 
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
-		fprintf( stderr, "[CRI] rmr_rtc: internal mishap: context passed in was nil\n" );
+		rmr_vlog( RMR_VL_CRIT, "rmr_rtc: internal mishap: context passed in was nil\n" );
 		return NULL;
 	}
 
@@ -166,7 +166,7 @@ static void* rtc( void* vctx ) {
 	}
 
 	if( (pvt_cx = init( port, MAX_RTG_MSG_SZ, FL_NOTHREAD )) == NULL ) {				// open a private context
-		fprintf( stderr, "[CRI] rmr_rtc: unable to initialise listen port for RTG (pvt_cx)\n" );
+		rmr_vlog( RMR_VL_CRIT, "rmr_rtc: unable to initialise listen port for RTG (pvt_cx)\n" );
 
 		while( TRUE ) {												// no listen port, just dump counts now and then
 			sleep( count_delay );
@@ -179,24 +179,24 @@ static void* rtc( void* vctx ) {
 
 	if( (rcv_fd = rmr_get_rcvfd( pvt_cx )) >= 0 ) {            // get the epoll fd for the rtg socket
 		if( rcv_fd < 0 ) {
-			fprintf( stderr, "[WARN] cannot get epoll fd for rtg session; stats will generate only after update from rt manager\n" );
+			rmr_vlog( RMR_VL_WARN, "cannot get epoll fd for rtg session; stats will generate only after update from rt manager\n" );
 		} else {
 			if( (epfd = epoll_create1( 0 )) < 0 ) {
-				fprintf( stderr, "[WARN] stats will generate only after rt manager update; unable to create epoll fd for rtg session: %s\n", strerror( errno ) );
+				rmr_vlog( RMR_VL_WARN, "stats will generate only after rt manager update; unable to create epoll fd for rtg session: %s\n", strerror( errno ) );
 				rcv_fd = -1;
 			} else {
 				epe.events = EPOLLIN;
 				epe.data.fd = rcv_fd;
 
 				if( epoll_ctl( epfd, EPOLL_CTL_ADD, rcv_fd, &epe ) != 0 )  {
-					fprintf( stderr, "[WARN] stats will generate only after rt manager update; unable to init epoll_ctl: %s\n", strerror( errno ) );
+					rmr_vlog( RMR_VL_WARN, "stats will generate only after rt manager update; unable to init epoll_ctl: %s\n", strerror( errno ) );
 					rcv_fd = -1;
 				}
 			}
 		}
 	}
 
-	if( DEBUG ) fprintf( stderr, "[DBUG] rtc thread is running and listening; listening for rtg conns on %s\n", port );
+	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rtc thread is running and listening; listening for rtg conns on %s\n", port );
 	free( fport );
 
 	// future:  if we need to register with the rtg, then build a message and send it through a wormhole here
@@ -236,9 +236,9 @@ static void* rtc( void* vctx ) {
 			payload = msg->payload;
 			mlen = msg->len;					// usable bytes in the payload
 			if( vlevel > 1 ) {
-				fprintf( stderr, "[DBUG] rmr_rtc: received rt message; %d bytes (%s)\n", (int) mlen, msg->payload );
+				rmr_vlog( RMR_VL_DEBUG, "rmr_rtc: received rt message; %d bytes (%s)\n", (int) mlen, msg->payload );
 			} else {
-				if( DEBUG > 1 || (vlevel > 0) ) fprintf( stderr, "[DBUG] rmr_rtc: received rt message; %d bytes\n", (int) mlen );
+				if( DEBUG > 1 || (vlevel > 0) ) rmr_vlog( RMR_VL_DEBUG, "rmr_rtc: received rt message; %d bytes\n", (int) mlen );
 			}
 
 			if( pbuf_size <= mlen ) {
@@ -264,7 +264,7 @@ static void* rtc( void* vctx ) {
 				}
 
 				if( vlevel > 1 ) {
-					fprintf( stderr, "[DBUG] rmr_rtc: processing (%s)\n", curr );
+					rmr_vlog( RMR_VL_DEBUG, "rmr_rtc: processing (%s)\n", curr );
 				}
 				parse_rt_rec( ctx, curr, vlevel );		// parse record and add to in progress table
 

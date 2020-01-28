@@ -38,7 +38,7 @@
 &ex_start
 #include <rmr/rmr.h>
 
-int rmr_bytes2payload( rmr_mbuf_t* mbuf, unsigned char* data, int len )
+int rmr_set_trace( rmr_mbuf_t* mbuf, unsigned char* data, int len )
 &ex_end
 
 &uindent

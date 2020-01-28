@@ -80,7 +80,7 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 	gptr->sierr = SI_ERR_HANDLE;
 
 	if( gptr->magicnum != MAGICNUM ) {				//  if not a valid ginfo block 
-		fprintf( stderr, "[CRI] SI95: wait: bad global info struct magic number is wrong\n" );
+		rmr_vlog( RMR_VL_CRIT, "SI95: wait: bad global info struct magic number is wrong\n" );
 		return SI_ERROR;
 	}
 

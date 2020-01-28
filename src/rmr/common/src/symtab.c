@@ -1,8 +1,8 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,6 +33,10 @@ Abstract:	Symbol table -- slightly streamlined from it's original 2000 version
 				  incorporated into the RIC msg routing library and will be
 				  available to user applications.
 
+			There is NO logging from this module!  The caller is asusmed to
+			report any failures as it might handle them making any error messages
+			generated here misleading if not incorrect.
+
 Date:		11 Feb 2000
 Author:		E. Scott Daniels
 
@@ -42,6 +46,7 @@ Mod:		2016 23 Feb - converted Symtab refs so that caller need only a
 ------------------------------------------------------------------------------
 */
 
+#include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -161,7 +166,7 @@ static int putin( Sym_tab *table, const char *name, unsigned int class, void *va
 
 		eptr = (Sym_ele *) malloc( sizeof( Sym_ele) );
 		if( ! eptr ) {
-			fprintf( stderr, "[FAIL] symtab/putin: out of memory\n" );
+			errno = ENOMEM;
 			return -1;
 		}
 
@@ -237,9 +242,9 @@ extern void rmr_sym_dump( void *vtable )
 		for( eptr = sym_tab[i]; eptr; eptr = eptr->next )
 		{
 			if( eptr->val && eptr->class ) {
-				fprintf( stderr, "key=%s val@=%p\n", eptr->name, eptr->val );
+				fprintf( stderr, "symtab dump: key=%s val@=%p\n", eptr->name, eptr->val );
 			} else {
-				fprintf( stderr, "nkey=%lu val@=%p\n", (unsigned long) eptr->nkey, eptr->val );
+				fprintf( stderr, "symtab dump: nkey=%lu val@=%p\n", (unsigned long) eptr->nkey, eptr->val );
 			}
 		}
 	}
@@ -259,7 +264,7 @@ extern void *rmr_sym_alloc( int size )
 
 	if( (table = (Sym_tab *) malloc( sizeof( Sym_tab ))) == NULL )
 	{
-		fprintf( stderr, "rmr_sym_alloc: unable to get memory for symtable (%d elements)", size );
+		errno = ENOMEM;
 		return NULL;
 	}
 
@@ -272,7 +277,7 @@ extern void *rmr_sym_alloc( int size )
 	}
 	else
 	{
-		fprintf( stderr, "sym_alloc: unable to get memory for %d elements", size );
+		errno = ENOMEM;
 		return NULL;
 	}
 
@@ -410,9 +415,9 @@ extern void rmr_sym_stats( void *vtable, int level )
 				ch_count++;
 				if( level > 3 ) {
 					if( eptr->class  ) {					// a string key
-						fprintf( stderr, "sym: (%d) key=%s val@=%p ref=%ld mod=%lu\n", i, eptr->name, eptr->val, eptr->rcount, eptr->mcount );
+						fprintf( stderr, " symtab stats: sym: (%d) key=%s val@=%p ref=%ld mod=%lu\n", i, eptr->name, eptr->val, eptr->rcount, eptr->mcount );
 					} else {
-						fprintf( stderr, "sym: (%d) key=%lu val@=%p ref=%ld mod=%lu\n", i, (unsigned long) eptr->nkey, eptr->val, eptr->rcount, eptr->mcount );
+						fprintf( stderr, "symtab stats: sym: (%d) key=%lu val@=%p ref=%ld mod=%lu\n", i, (unsigned long) eptr->nkey, eptr->val, eptr->rcount, eptr->mcount );
 					}
 				}
 			}
@@ -429,12 +434,12 @@ extern void rmr_sym_stats( void *vtable, int level )
 			twoper++;
 
 		if( level > 2 )
-			fprintf( stderr, "sym: (%d) chained=%ld\n", i, ch_count );
+			fprintf( stderr, "symtab stats: sym: (%d) chained=%ld\n", i, ch_count );
 	}
 
 	if( level > 1 )
 	{
-		fprintf( stderr, "sym: longest chain: idx=%d has %ld elsements):\n", maxi, max_chain );
+		fprintf( stderr, "symtab stats: sym: longest chain: idx=%d has %ld elsements):\n", maxi, max_chain );
 		for( eptr = sym_tab[maxi]; eptr; eptr = eptr->next ) {
 			if( eptr->class ) {
 				fprintf( stderr, "\t%s\n", eptr->name );
@@ -444,7 +449,7 @@ extern void rmr_sym_stats( void *vtable, int level )
 		}
 	}
 
-	fprintf( stderr, "sym:%ld(size)  %ld(inhab) %ld(occupied) %ld(dead) %ld(maxch) %d(>2per)\n",
+	fprintf( stderr, "symtab stats: sym:%ld(size)  %ld(inhab) %ld(occupied) %ld(dead) %ld(maxch) %d(>2per)\n",
 			table->size, table->inhabitants, table->size - empty, table->deaths, max_chain, twoper );
 }
 

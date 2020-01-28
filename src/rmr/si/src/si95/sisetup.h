@@ -40,6 +40,8 @@
 #include <sys/types.h>          //  various system files - types 
 #include <sys/socket.h>         //  socket defs 
 
+#include <rmr_logging.h>
+
 //  pure bsd supports SIGCHLD not SIGCLD as in bastard flavours 
 #ifndef SIGCHLD
 #define SIGCHLD SIGCLD

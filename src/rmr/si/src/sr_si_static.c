@@ -119,7 +119,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 	if( msg == NULL && (msg = (rmr_mbuf_t *) uta_ring_extract( ctx->zcb_mring )) == NULL ) {
 		msg = (rmr_mbuf_t *) malloc( sizeof *msg );
 		if( msg == NULL ) {
-			fprintf( stderr, "[CRI] rmr_alloc_zc: cannot get memory for message\n" );
+			rmr_vlog( RMR_VL_CRIT, "rmr_alloc_zc: cannot get memory for message\n" );
 			return NULL;								// we used to exit -- that seems wrong
 		}
 		memset( msg, 0, sizeof( *msg ) );	// tp_buffer will be allocated below
@@ -137,7 +137,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 	msg->rts_fd = -1;					// must force to be invalid; not a received message that can be returned
 
 	if( !msg->alloc_len && (msg->tp_buf = (void *) malloc( mlen )) == NULL ) {
-		fprintf( stderr, "[CRI] rmr_alloc_zc: cannot get memory for zero copy buffer: %d bytes\n", (int) mlen );
+		rmr_vlog( RMR_VL_CRIT, "rmr_alloc_zc: cannot get memory for zero copy buffer: %d bytes\n", (int) mlen );
 		abort( );											// toss out a core file for this
 	}
 
@@ -170,7 +170,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 	strncpy( (char *) ((uta_mhdr_t *)msg->header)->src, ctx->my_name, RMR_MAX_SRC );
 	strncpy( (char *) ((uta_mhdr_t *)msg->header)->srcip, ctx->my_ip, RMR_MAX_SRC );
 
-	if( DEBUG > 1 ) fprintf( stderr, "[DBUG] alloc_zcmsg mlen=%ld size=%d mpl=%d flags=%02x\n", (long) mlen, size, ctx->max_plen, msg->flags );
+	if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "alloc_zcmsg mlen=%ld size=%d mpl=%d flags=%02x\n", (long) mlen, size, ctx->max_plen, msg->flags );
 
 	return msg;
 }
@@ -190,7 +190,7 @@ static rmr_mbuf_t* alloc_mbuf( uta_ctx_t* ctx, int state ) {
 		}
 	} else {
 		if( (msg = (rmr_mbuf_t *) malloc( sizeof *msg )) == NULL ) {
-			fprintf( stderr, "[CRI] rmr_alloc_mbuf: cannot get memory for message\n" );
+			rmr_vlog( RMR_VL_CRIT, "rmr_alloc_mbuf: cannot get memory for message\n" );
 			return NULL;							// this used to exit, but that seems wrong
 		}
 	}
@@ -294,14 +294,14 @@ static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  ) {
 
 	nm = (rmr_mbuf_t *) malloc( sizeof *nm );
 	if( nm == NULL ) {
-		fprintf( stderr, "[CRI] rmr_clone: cannot get memory for message buffer\n" );
+		rmr_vlog( RMR_VL_CRIT, "rmr_clone: cannot get memory for message buffer\n" );
 		exit( 1 );
 	}
 	memset( nm, 0, sizeof( *nm ) );
 
 	mlen = old_msg->alloc_len;										// length allocated before
 	if( (nm->tp_buf = (void *) malloc( sizeof( char ) * (mlen + TP_HDR_LEN) )) == NULL ) {
-		fprintf( stderr, "[CRI] rmr_si_clone: cannot get memory for zero copy buffer: %d\n", (int) mlen );
+		rmr_vlog( RMR_VL_CRIT, "rmr_si_clone: cannot get memory for zero copy buffer: %d\n", (int) mlen );
 		abort();
 	}
 
@@ -352,7 +352,7 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 
 	nm = (rmr_mbuf_t *) malloc( sizeof *nm );
 	if( nm == NULL ) {
-		fprintf( stderr, "[CRI] rmr_clone: cannot get memory for message buffer\n" );
+		rmr_vlog( RMR_VL_CRIT, "rmr_clone: cannot get memory for message buffer\n" );
 		exit( 1 );
 	}
 	memset( nm, 0, sizeof( *nm ) );
@@ -361,11 +361,11 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 	tr_old_len = RMR_TR_LEN( hdr );				// bytes in old header for trace
 
 	mlen = old_msg->alloc_len + (tr_len - tr_old_len);							// new length with trace adjustment
-	if( DEBUG ) fprintf( stderr, "[DBUG] tr_realloc old size=%d new size=%d new tr_len=%d\n", (int) old_msg->alloc_len, (int) mlen, (int) tr_len );
+	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "tr_realloc old size=%d new size=%d new tr_len=%d\n", (int) old_msg->alloc_len, (int) mlen, (int) tr_len );
 
 	tpb_len = mlen + TP_HDR_LEN;
 	if( (nm->tp_buf = (void *) malloc( tpb_len)) == NULL ) {
-		fprintf( stderr, "[CRI] rmr_clone: cannot get memory for zero copy buffer: %d\n", ENOMEM );
+		rmr_vlog( RMR_VL_CRIT, "rmr_clone: cannot get memory for zero copy buffer: %d\n", ENOMEM );
 		exit( 1 );
 	}
 	memset( nm->tp_buf, 0, tpb_len );
@@ -472,7 +472,7 @@ static inline rmr_mbuf_t* realloc_payload( rmr_mbuf_t* old_msg, int payload_len,
 	old_psize = old_msg->alloc_len - (RMR_HDR_LEN( old_msg->header ) + TP_HDR_LEN);		// user payload size in orig message
 
 	if( !clone  && payload_len <= old_psize ) {										// not cloning and old is large enough; nothing to do
-		if( DEBUG ) fprintf( stderr, "[DBUG] rmr_realloc_payload: old msg payload larger than requested: cur=%d need=%d\n", old_psize, payload_len );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rmr_realloc_payload: old msg payload larger than requested: cur=%d need=%d\n", old_psize, payload_len );
 		return old_msg;
 	}
 
@@ -480,12 +480,12 @@ static inline rmr_mbuf_t* realloc_payload( rmr_mbuf_t* old_msg, int payload_len,
 	old_tp_buf = old_msg->tp_buf;
 
 	if( clone ) {
-		if( DEBUG ) fprintf( stderr, "[DBUG] rmr_realloc_payload: cloning message\n" );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rmr_realloc_payload: cloning message\n" );
 		free_tp = 0;
 
 		nm = (rmr_mbuf_t *) malloc( sizeof( *nm ) );
 		if( nm == NULL ) {
-			fprintf( stderr, "[CRI] rmr_realloc_payload: cannot get memory for message buffer. bytes requested: %d\n", (int) sizeof(*nm) );
+			rmr_vlog( RMR_VL_CRIT, "rmr_realloc_payload: cannot get memory for message buffer. bytes requested: %d\n", (int) sizeof(*nm) );
 			return NULL;
 		}
 		memset( nm, 0, sizeof( *nm ) );
@@ -497,9 +497,9 @@ static inline rmr_mbuf_t* realloc_payload( rmr_mbuf_t* old_msg, int payload_len,
 	omhdr = old_msg->header;
 	mlen = hdr_len + (payload_len > old_psize ? payload_len : old_psize);		// must have larger in case copy is true
 
-	if( DEBUG ) fprintf( stderr, "[DBUG] reallocate for payload increase. new message size: %d\n", (int) mlen );	
+	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "reallocate for payload increase. new message size: %d\n", (int) mlen );	
 	if( (nm->tp_buf = (char *) malloc( sizeof( char ) * mlen )) == NULL ) {
-		fprintf( stderr, "[CRI] rmr_realloc_payload: cannot get memory for zero copy buffer. bytes requested: %d\n", (int) mlen );
+		rmr_vlog( RMR_VL_CRIT, "rmr_realloc_payload: cannot get memory for zero copy buffer. bytes requested: %d\n", (int) mlen );
 		return NULL;
 	}
 
@@ -507,10 +507,10 @@ static inline rmr_mbuf_t* realloc_payload( rmr_mbuf_t* old_msg, int payload_len,
 	SET_HDR_LEN( nm->header );
 
 	if( copy ) {																// if we need to copy the old payload too
-		if( DEBUG ) fprintf( stderr, "[DBUG] rmr_realloc_payload: copy payload into new message: %d bytes\n", old_psize );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rmr_realloc_payload: copy payload into new message: %d bytes\n", old_psize );
 		memcpy( nm->header, omhdr, sizeof( char ) * (old_psize + RMR_HDR_LEN( omhdr )) );
 	} else {																	// just need to copy header
-		if( DEBUG ) fprintf( stderr, "[DBUG] rmr_realloc_payload: copy only header into new message: %d bytes\n", RMR_HDR_LEN( nm->header ) );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rmr_realloc_payload: copy only header into new message: %d bytes\n", RMR_HDR_LEN( nm->header ) );
 		memcpy( nm->header, omhdr, sizeof( char ) * RMR_HDR_LEN( omhdr ) );
 	}
 
@@ -586,7 +586,7 @@ FIXME: do we need this in the SI world?  The only user was the route table colle
 	msg->payload = msg->header;					// payload is the whole thing; no header
 	msg->xaction = NULL;
 
-	if( DEBUG > 1 ) fprintf( stderr, "[DBUG] rcv_payload: got something: type=%d state=%d len=%d\n", msg->mtype, msg->state, msg->len );
+	if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "rcv_payload: got something: type=%d state=%d len=%d\n", msg->mtype, msg->state, msg->len );
 
 	return msg;
 */
@@ -636,11 +636,11 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int nn_sock, int r
 		tot_len = msg->len + PAYLOAD_OFFSET( hdr ) + TP_HDR_LEN;			// we only send what was used + header lengths
 		*((int*) msg->tp_buf) = tot_len;
 
-		if( DEBUG > 1 ) fprintf( stderr, "[DEBUG] send_msg: ending %d (%x) bytes  usr_len=%d alloc=%d retries=%d\n", tot_len, tot_len, msg->len, msg->alloc_len, retries );
+		if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "send_msg: ending %d (%x) bytes  usr_len=%d alloc=%d retries=%d\n", tot_len, tot_len, msg->len, msg->alloc_len, retries );
 		if( DEBUG > 2 ) dump_40( msg->tp_buf, "sending" );
 
 		if( (state = SIsendt( ctx->si_ctx, nn_sock, msg->tp_buf, tot_len )) != SI_OK ) {
-			if( DEBUG > 1 ) fprintf( stderr, "[DBUG] send_msg:  error!! sent state=%d\n", state );
+			if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "send_msg:  error!! sent state=%d\n", state );
 			msg->state = state;
 			if( retries > 0 && state == SI_ERR_BLOCKED ) {
 				if( --spin_retries <= 0 ) {				// don't give up the processor if we don't have to
@@ -654,7 +654,7 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int nn_sock, int r
 				state = 0;			// don't loop
 			}
 		} else {
-			if( DEBUG > 2 ) fprintf( stderr, "[DBUG] sent OK state=%d\n", state );
+			if( DEBUG > 2 ) rmr_vlog( RMR_VL_DEBUG, "sent OK state=%d\n", state );
 			state = 0;
 			msg->state = RMR_OK;
 			hdr = NULL;
@@ -676,7 +676,7 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int nn_sock, int r
 			msg->state = RMR_ERR_SENDFAILED;
 		}
 
-		if( DEBUG ) fprintf( stderr, "[DBUG] send failed: %d %s\n", (int) msg->state, strerror( msg->state ) );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "send failed: %d %s\n", (int) msg->state, strerror( msg->state ) );
 	}
 
 	return msg;
@@ -744,9 +744,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 	}
 
 	if( (rte = uta_get_rte( ctx->rtable, msg->sub_id, msg->mtype, TRUE )) == NULL ) {		// find the entry which matches subid/type allow fallback to type only key
-		if( ctx->flags & CTXFL_WARN ) {
-			fprintf( stderr, "[WARN] no route table entry for mtype=%d sub_id=%d\n", msg->mtype, msg->sub_id );
-		}
+		rmr_vlog( RMR_VL_WARN, "no route table entry for mtype=%d sub_id=%d\n", msg->mtype, msg->sub_id );
 		msg->state = RMR_ERR_NOENDPT;
 		errno = ENXIO;										// must ensure it's not eagain
 		msg->tp_state = errno;
@@ -758,7 +756,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 	while( send_again ) {
 		sock_ok = uta_epsock_rr( rte, group, &send_again, &nn_sock, &ep, ctx->si_ctx );		// select endpt from rr group and set again if more groups
 
-		if( DEBUG ) fprintf( stderr, "[DBUG] mtosend_msg: flgs=0x%04x type=%d again=%d group=%d len=%d sock_ok=%d\n",
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "mtosend_msg: flgs=0x%04x type=%d again=%d group=%d len=%d sock_ok=%d\n",
 				msg->flags, msg->mtype, send_again, group, msg->len, sock_ok );
 
 		group++;
@@ -770,13 +768,11 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 					msg->state = RMR_ERR_SENDFAILED;
 					errno = ENOMEM;
 					msg->tp_state = errno;
-					if( ctx->flags & CTXFL_WARN ) {
-						fprintf( stderr, "[WARN] unable to clone message for multiple rr-group send\n" );
-					}
+					rmr_vlog( RMR_VL_WARN, "unable to clone message for multiple rr-group send\n" );
 					return msg;
 				}
 
-				if( DEBUG ) fprintf( stderr, "[DBUG] msg cloned: type=%d len=%d\n", msg->mtype, msg->len );
+				if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "msg cloned: type=%d len=%d\n", msg->mtype, msg->len );
 				msg->flags |= MFL_NOALLOC;								// keep send from allocating a new message; we have a clone to use
 				msg = send_msg( ctx, msg, nn_sock, max_to );			// do the hard work, msg should be nil on success
 	
@@ -791,7 +787,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 				msg = send_msg( ctx, msg, nn_sock, max_to );			// send the last, and allocate a new buffer; drops the clone if it was
 				if( DEBUG ) {
 					if( msg == NULL ) {
-						fprintf( stderr, "[DBUG] mtosend_msg:  send returned nil message!\n" );		
+						rmr_vlog( RMR_VL_DEBUG, "mtosend_msg:  send returned nil message!\n" );		
 					}
 				}
 			}
@@ -813,11 +809,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 				}
 			}
 		} else {
-/*
-			if( ctx->flags & CTXFL_WARN ) {
-				fprintf( stderr, "[WARN] invalid socket for rte, setting no endpoint err: mtype=%d sub_id=%d\n", msg->mtype, msg->sub_id );
-			}
-*/
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "invalid socket for rte, setting no endpoint err: mtype=%d sub_id=%d\n", msg->mtype, msg->sub_id );
 			msg->state = RMR_ERR_NOENDPT;
 			errno = ENXIO;
 		}
@@ -829,7 +821,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 			msg->state = RMR_OK;
 		}
 	
-		if( DEBUG ) fprintf( stderr, "[DBUG] final send stats: ok=%d group=%d state=%d\n\n", ok_sends, group, msg->state );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "final send stats: ok=%d group=%d state=%d\n", ok_sends, group, msg->state );
 	
 		msg->tp_state = errno;
 	}
