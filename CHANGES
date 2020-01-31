@@ -2,6 +2,10 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 January 31; verison 3.1.1
+	Allow route table thread logging to be completely disabled
+	when logging is turned off.	
+
 2020 January 26; verison 3.1.0
 	First step to allowing the user programme to control messages
 	written to standard error. Introduces the rmr_set_vlevel()

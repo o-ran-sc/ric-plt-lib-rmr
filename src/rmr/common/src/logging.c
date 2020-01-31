@@ -171,6 +171,10 @@ extern void rmr_vlog_force( int write_level, char* fmt, ... ) {
 		rmr_vlog_init();
 	}
 
+	if( log_vlevel <= 0 ) {			// cant force if off completely to allow for total silience
+		return;
+	}
+
 	if( write_level > RMR_VL_DEBUG || write_level < 0 ) {
 		write_level = RMR_VL_DEBUG;
 	}
