@@ -286,14 +286,14 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 */
 	if( (nn_sock = msg->rts_fd) < 0 ) {
 		if( HDR_VERSION( msg->header ) > 2 ) {							// with ver2 the ip is there, try if src name not known
-			sock_ok = uta_epsock_byname( ctx->rtable, (char *) ((uta_mhdr_t *)msg->header)->srcip, &nn_sock, &ep, ctx->si_ctx );
+			//sock_ok = uta_epsock_byname( ctx->rtable, (char *) ((uta_mhdr_t *)msg->header)->srcip, &nn_sock, &ep, ctx->si_ctx );
+			sock_ok = uta_epsock_byname( ctx, (char *) ((uta_mhdr_t *)msg->header)->srcip, &nn_sock, &ep  );
 		}
 		if( ! sock_ok ) {
 			msg->state = RMR_ERR_NOENDPT;
 			return msg;																// preallocated msg can be reused since not given back to nn
 		}
 	}
-
 
 	msg->state = RMR_OK;																// ensure it is clear before send
 	hold_src = strdup( (char *) ((uta_mhdr_t *)msg->header)->src );						// the dest where we're returning the message to
@@ -548,7 +548,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	rmr_set_vlevel( RMR_VL_INFO );		// we WILL announce our version etc
 
 	if( ! announced ) {
-		rmr_vlog( RMR_VL_INFO, "ric message routing library on SI95/b mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
+		rmr_vlog( RMR_VL_INFO, "ric message routing library on SI95/c mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
 			RMR_MSG_VER, flags, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
 	}
@@ -590,6 +590,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		rmr_vlog( RMR_VL_INFO, "receive ring locking disabled by user application\n" );
 	}
 	init_mtcall( ctx );								// set up call chutes
+	fd2ep_init( ctx );								// initialise the fd to endpoint sym tab
 
 
 	ctx->max_plen = RMR_MAX_RCV_BYTES;				// max user payload lengh

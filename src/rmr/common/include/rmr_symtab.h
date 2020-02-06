@@ -41,7 +41,7 @@ extern void rmr_sym_clear( void *s );
 extern void rmr_sym_dump( void *s );
 extern void *rmr_sym_alloc( int size );
 extern void rmr_sym_del( void *s, const char *name, unsigned int class );
-extern void *rmr_sym_ndel( void *vtable, uint64_t key );
+extern void rmr_sym_ndel( void *vtable, uint64_t key );
 extern void rmr_sym_free( void *vtable );
 extern void *rmr_sym_get( void *s,  const char *name, unsigned int class );
 extern int rmr_sym_put( void *s,  const char *name, unsigned int class, void *val );

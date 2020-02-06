@@ -1114,5 +1114,4 @@ static inline uint64_t build_rt_key( int32_t sub_id, int32_t mtype ) {
 	return key;
 }
 
-
 #endif

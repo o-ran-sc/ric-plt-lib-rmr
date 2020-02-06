@@ -313,7 +313,7 @@ extern void rmr_sym_del( void *vtable, const char *name, unsigned int class )
 /*
 	Delete element by numberic key.
 */
-extern void *rmr_sym_ndel(  void *vtable, uint64_t key ) {
+extern void rmr_sym_ndel(  void *vtable, uint64_t key ) {
 	rmr_sym_del( vtable, (const char *) &key, 0 );
 }
 

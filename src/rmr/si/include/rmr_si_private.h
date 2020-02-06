@@ -146,6 +146,7 @@ struct uta_ctx {
 	river_t*	rivers;			// inbound flows (index is the socket fd)
 	int			max_ibm;		// max size of an inbound message (river accum alloc size)
 	void*		zcb_mring;		// zero copy buffer mbuf ring
+	void*		fd2ep;			// the symtab mapping file des to endpoints for cleanup on disconnect
 };
 
 typedef uta_ctx_t uta_ctx;
@@ -168,8 +169,9 @@ static rtable_ent_t* uta_get_rte( route_table_t *rt, int sid, int mtype, int try
 static inline int xlate_si_state( int state, int def_state );
 
 // --- these have changes for si
-static int uta_epsock_byname( route_table_t* rt, char* ep_name, int* nn_sock, endpoint_t** uepp, si_ctx_t* si_ctx );
-static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, int* nn_sock, endpoint_t** uepp, si_ctx_t* si_ctx );
+static int uta_epsock_byname( uta_ctx_t* ctx, char* ep_name, int* nn_sock, endpoint_t** uepp );
+//static int uta_epsock_rr( rtable_ent_t *rte, int group, int* more, int* nn_sock, endpoint_t** uepp, si_ctx_t* si_ctx );
+static int uta_epsock_rr( uta_ctx_t* ctx, rtable_ent_t *rte, int group, int* more, int* nn_sock, endpoint_t** uepp );
 
 
 // --- msg ---------------------------------------
@@ -184,5 +186,10 @@ static rmr_mbuf_t* send2ep( uta_ctx_t* ctx, endpoint_t* ep, rmr_mbuf_t* msg );
 
 static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int nn_sock, int retries );
 
+// ---- fd to endpoint translation ------------------------------
+static endpoint_t*  fd2ep_del( uta_ctx_t* ctx, int fd );
+static endpoint_t*  fd2ep_get( uta_ctx_t* ctx, int fd );
+static void fd2ep_init( uta_ctx_t* ctx );
+static void fd2ep_add( uta_ctx_t* ctx, int fd, endpoint_t* ep );
 
 #endif

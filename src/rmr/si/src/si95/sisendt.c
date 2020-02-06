@@ -100,6 +100,8 @@ extern int SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 			errno = EBUSY;
 			status = SI_ERR_BLOCKED;
 		}
+	} else {
+		errno = EBADFD;  		// fd in a bad state (probably losed)
 	}
 
 	return status;
