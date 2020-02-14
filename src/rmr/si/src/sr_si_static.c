@@ -547,6 +547,10 @@ exit( 1 );
 }
 
 /*
+	DEPRECATED -- this function serves no purpose once Rt Mgr shifts to SI95
+		and sends messages via RMR.
+
+
 	Receives a 'raw' message from a non-RMr sender (no header expected). The returned
 	message buffer cannot be used to send, and the length information may or may
 	not be correct (it is set to the length received which might be more than the
@@ -554,11 +558,11 @@ exit( 1 );
 
 	Mostly this supports the route table collector, but could be extended with an
 	API external function.
-*/
 static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
 	return NULL;
+*/
 /*
-FIXME: do we need this in the SI world?  The only user was the route table collector
+
 	int state;
 	rmr_mbuf_t*	msg = NULL;		// msg received
 	size_t	rsize;				// nng needs to write back the size received... grrr
@@ -589,8 +593,8 @@ FIXME: do we need this in the SI world?  The only user was the route table colle
 	if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "rcv_payload: got something: type=%d state=%d len=%d\n", msg->mtype, msg->state, msg->len );
 
 	return msg;
-*/
 }
+*/
 
 /*
 	This does the hard work of actually sending the message to the given socket. On success,

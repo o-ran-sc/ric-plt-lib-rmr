@@ -140,6 +140,10 @@ struct uta_ctx {
 	pthread_t	rtc_th;			// thread info for the rtc listener
 	pthread_t	mtc_th;			// thread info for the multi-thread call receive process
 
+								// added for route manager request/states
+	rmr_whid_t	rtg_whid;		// wormhole id to the route manager for acks/requests
+	char*		table_id;		// table ID of the route table load in progress
+
 								// added for SI95 support
 	si_ctx_t*	si_ctx;			// the socket context
 	int			nrivers;		// allocated rivers
@@ -180,7 +184,7 @@ static rmr_mbuf_t* alloc_mbuf( uta_ctx_t* ctx, int state );
 static void ref_tpbuf( rmr_mbuf_t* msg, size_t alen ) ;
 static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  );
 static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg );
-static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg );
+//static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg );
 static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  );
 static rmr_mbuf_t* send2ep( uta_ctx_t* ctx, endpoint_t* ep, rmr_mbuf_t* msg );
 

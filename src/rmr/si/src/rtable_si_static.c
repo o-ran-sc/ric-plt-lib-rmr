@@ -108,7 +108,6 @@ static int uta_link2( si_ctx_t* si_ctx, endpoint_t* ep ) {
 			rmr_vlog( RMR_VL_WARN, "rmr: link2: unable to connect  to target: %s: %d %s\n", target, errno, strerror( errno ) );
 			ep->notify = 0;
 		}
-		//nng_close( *nn_sock );
 		return FALSE;
 	}
 

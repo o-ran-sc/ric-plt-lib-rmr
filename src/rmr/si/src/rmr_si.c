@@ -56,6 +56,7 @@
 #include "si95/socket_if.h"
 #include "si95/siproto.h"
 
+#define SI95_BUILD	1			// we drop some common functions for si
 
 #include "rmr.h"				// things the users see
 #include "rmr_agnostic.h"		// agnostic things (must be included before private)
@@ -66,7 +67,7 @@
 #include "ring_static.c"			// message ring support
 #include "rt_generic_static.c"		// route table things not transport specific
 #include "rtable_si_static.c"		// route table things -- transport specific
-#include "rtc_si_static.c"			// specific RMR only route table collector (SI only for now)
+#include "rtc_static.c"				// route table collector (thread code)
 #include "tools_static.c"
 #include "sr_si_static.c"			// send/receive static functions
 #include "wormholes.c"				// wormhole api externals and related static functions (must be LAST!)
@@ -548,7 +549,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	rmr_set_vlevel( RMR_VL_INFO );		// we WILL announce our version etc
 
 	if( ! announced ) {
-		rmr_vlog( RMR_VL_INFO, "ric message routing library on SI95/c mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
+		rmr_vlog( RMR_VL_INFO, "ric message routing library on SI95/e mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
 			RMR_MSG_VER, flags, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
 	}
@@ -690,7 +691,9 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		return NULL;
 	}
 
-	if( !(flags & FL_NOTHREAD) ) {												// skip if internal function that doesnt need a RTC
+	if( flags & FL_NOTHREAD ) {					// thread set to off; no rout table collector started (could be called by the rtc thread itself)
+		ctx->rtable = rt_clone_space( NULL, NULL, 0 );		// creates an empty route table so that wormholes still can be used
+	} else {
 		if( static_rtc ) {
 			if( pthread_create( &ctx->rtc_th,  NULL, rtc_file, (void *) ctx ) ) { 	// kick the rt collector thread as just file reader
 				rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start static route table collector thread: %s", strerror( errno ) );

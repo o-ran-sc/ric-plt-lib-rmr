@@ -1,4 +1,4 @@
-.** vim: ts=4 noet sw=4:
+).** vim: ts=4 noet sw=42
 .if false
 ==================================================================================
 	Copyright (c) 2019 Nokia
@@ -23,7 +23,7 @@
 	Abstract:	This is a list of environment variables which are recognised
 				by RMR. This is an embed file as it is referenced by both 
 				manual pages and the 'read the docs' source (allowing a single
-				point of maintenence).
+				point of maintenance).
 
 	Date:		6 November 2019 (broken from the main manual page)
 	Author:		E. Scott Daniels
@@ -31,24 +31,72 @@
 
 
 &beg_dlist(.75i : ^&bold_font )
-&ditem(RMR_ASYNC_CONN) Allows the asynch connection mode to be turned off (by setting the
+&ditem(RMR_ASYNC_CONN) Allows the async connection mode to be turned off (by setting the
 	value to 0. When set to 1, or missing from the environment, RMR will invoke the
-	connection interface in the transport mechanism using the non-blocking (asynch)
+	connection interface in the transport mechanism using the non-blocking (async)
 	mode.  This will likely result in many "soft failures" (retry) until the connection
 	is established, but allows the application to continue unimpeeded should the
 	connection be slow to set up.
 	&half_space
 
-&ditem(RMR_BIND_IF) This provides the interface that RMr will bind listen ports to allowing
+&ditem(RMR_BIND_IF) This provides the interface that RMR will bind listen ports to allowing
 	for a single interface to be used rather than listening across all interfaces.
-	This should be the IP address assigned to the interface that RMr should listen
-	on, and if not defined RMr will listen on all interfaces.
+	This should be the IP address assigned to the interface that RMR should listen
+	on, and if not defined RMR will listen on all interfaces.
 	&half_space
 
-&ditem(RMR_RTG_SVC) RMr opens a TCP listen socket using the port defined by this
-	environment variable and expects that the route table generator process
-	will connect to this port.
-	If not supplied the port 4561 is used.
+&ditem(RMR_CTL_PORT) 
+	This variable defines the port that RMR should open for communications
+	with Route Manager, and other RMR control applications. 
+	If not defined, the port 4561 is assumed.
+
+	&space
+	Previously, the &cw(RMR_RTG_SVC) (route table generator service port)
+	was used to define this port.
+	However, a future version of Route Manager will require RMR to connect
+	and request tables, thus that variable is now used to supply the Route
+	Manager well known address and port.
+
+	&space
+	To maintain backwards compatablibility with the older Route Manager versions,
+	the presence of this variable in the environment will shift RMR's behaviour
+	with respect to the default value used when &cw(RMR_RTG_SVC) is &bold(not) defined.
+
+	&space
+	When &cw(RMR_CTL_PORT) is &bold(defined^:)
+	RMR assumes that Route Manager requires RMR to connect and request table
+	updates is made, and the default well known address for Route manager
+	is used (routemgr:4561).
+
+	&space
+	When &cw(RMR_CTL_PORT) is &bold(undefined^:)
+	RMR assumes that Route Manager will connect and push table updates, thus the
+	default listen port (4561) is used.
+
+	&space
+	To avoid any possible misinterpretation and/or incorrect assumptions on the part
+	of RMR, it is recommended that both the  &cw(RMR_CTL_PORT) and &cw(RMR_RTG_SVC)
+	be defined.
+	In the case where both variables are defined, RMR will behave exactly as is
+	communicated with the variable's values.
+	&half_space
+
+&ditem(RMR_RTG_SVC) 
+	The value of this variable depends on the Route Manager in use.
+	&space
+	When the Route Manager is expecting to connect to an xAPP and push
+	route tables, this variable must indicate the &cw(port) which RMR should
+	use to listen for these connections. 
+
+	&space
+	When the Route Manager is expecting RMR to connect and request a
+	table update during initialisation, the variable should be the 
+	&cw(host:port) of the Route Manager process. 
+	
+	&space
+	The &cw(RMR_CTL_PORT) variable (added with the support of sending table update
+	requests to Route manager), controls the behaviour if this variable is not set.
+	See the description of that variable for details.
 	&half_space
 
 &ditem(RMR_HR_LOG) 
@@ -75,20 +123,29 @@
 		&half_space
 		&ditem(3)	Warnings and all messages written with a lower value.
 		&half_space
-		&ditem(4)	Informationional and all messages written with a lower value.
+		&ditem(4)	Informational and all messages written with a lower value.
 		&half_space
 		&ditem(5)	Debugging mode -- all messages written, however this requires RMR to have been compiled with debugging support enabled.
 	&end_dlist
 	&half_space
 
-&ditem(RMR_RTG_ISRAW) Is set to 1 if the route table generator is sending "plain" messages
-	(not using RMr to send messages, 0 if the rtg is using RMr to send. The default
-	is 1 as we don't expect the rtg to use RMr.
+&ditem(RMR_RTG_ISRAW) 
+	&bold(Deprecated.)
+	Should be set to 1 if the route table generator is sending "plain" messages
+	(not using RMR to send messages, 0 if the rtg is using RMR to send. The default
+	is 1 as we don't expect the rtg to use RMR.
+	&half_space
+	This variable is only recognised when using the NNG transport library as 
+	it is not possible to support NNG "raw" communications with other transport
+	libraries.  It is also necessary to match the value of this variable
+	with the capabilities of the Route Manager; at some point in the future
+	RMR will assume that all Route Manager messages will arrive via an RMR
+	connection and will ignore this variable.
 
 &ditem(RMR_SEED_RT) This is used to supply a static route table which can be used for
 	debugging, testing, or if no route table generator process is being used to
 	supply the route table.
-	If not defined, no static table is used and RMr will not report &ital(ready)
+	If not defined, no static table is used and RMR will not report &ital(ready)
 	until a table is received.
 	The static route table may contain both the route table (between newrt start
 	and end records), and the MEID map (between meid_map start and end records)
@@ -98,6 +155,9 @@
 	the rmr_rts_msg() function to return a response to the sender. If not supplied
 	RMR will use the hostname which in some container environments might not be
 	routable.
+	&half_space
+	The value of this variable is also used for Route Manager messages which are
+	sent via an RMR connection.
 
 &ditem(RMR_VCTL_FILE) This supplies the name of a verbosity control file. The core
 	RMR functions do not produce messages unless there is a critical failure. However,

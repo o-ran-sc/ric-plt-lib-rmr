@@ -93,6 +93,10 @@ struct uta_ctx {
 
 	pthread_t	rtc_th;			// thread info for the rtc listener
 	pthread_t	mtc_th;			// thread info for the multi-thread call receive process
+
+								// added for route manager request/states
+	rmr_whid_t	rtg_whid;		// wormhole id to the route manager for acks/requests
+	char*		table_id;		// table ID of the route table load in progress
 };
 
 
