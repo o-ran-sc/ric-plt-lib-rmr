@@ -2,6 +2,11 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 February 14; version 3.1.3
+	Fix bug in SIsend which was causing a core dump in some cases
+	where the application attempted to send on a connection that
+	had disconnected. (RIC-207).
+
 2020 February 6; version 3.1.2
 	Fix disconnection detection bug in interface to SI95.
 
