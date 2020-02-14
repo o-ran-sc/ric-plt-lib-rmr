@@ -630,7 +630,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	rmr_set_vlevel( RMR_VL_INFO );		// we WILL announce our version etc
 
 	if( ! announced ) {
-		rmr_vlog( RMR_VL_INFO, "ric message routing library on NNG mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
+		rmr_vlog( RMR_VL_INFO, "ric message routing library on NNG/d mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
 			RMR_MSG_VER, flags, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
 	}
@@ -751,9 +751,17 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		return NULL;
 	}
 
-	if( !(flags & FL_NOTHREAD) ) {										// skip if internal function that doesnt need an rtc
-		if( pthread_create( &ctx->rtc_th,  NULL, rtc, (void *) ctx ) ) { 	// kick the rt collector thread
-			rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
+	if( flags & FL_NOTHREAD ) {								// if no rtc thread, we still need an empty route table for wormholes
+		ctx->rtable = rt_clone_space( NULL, NULL, 0 );		// so create one
+	} else {
+		if( (tok = getenv( ENV_RTG_RAW )) != NULL  && *tok == '0' ) {			// use RMR for Rmgr comm only when specifically off
+			if( pthread_create( &ctx->rtc_th,  NULL, rtc, (void *) ctx ) ) { 	// kick the rmr based rt collector thread
+				rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
+			}
+		} else {
+			if( pthread_create( &ctx->rtc_th,  NULL, raw_rtc, (void *) ctx ) ) { 	// kick the raw msg rt collector thread
+				rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
+			}
 		}
 	}
 

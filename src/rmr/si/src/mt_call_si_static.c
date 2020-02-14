@@ -144,15 +144,6 @@ static int mt_data_cb( void* vctx, int fd, char* buf, int buflen ) {
 	}
 
 	river->state = RS_GOOD;
-
-/*
-fprintf( stderr, "\n>>>>> data callback for %d bytes from %d\n", buflen, fd );
-for( i = 0; i < 40; i++ ) {
-	fprintf( stderr, "%02x ", (unsigned char) *(buf+i) );
-}
-fprintf( stderr, "\n" );
-*/
-
 	remain = buflen;
 	while( remain > 0 ) {								// until we've done something with all bytes passed in
 		if( DEBUG )  rmr_vlog( RMR_VL_DEBUG, "====== data callback top of loop bidx=%d msize=%d ipt=%d remain=%d\n", bidx, river->msg_size, river->ipt, remain );

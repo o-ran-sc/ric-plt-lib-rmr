@@ -20,21 +20,23 @@
 
 
 
-/* Header  file defining  message types
-   for various RMR messages
-
-
-    ------------------
-    WORK IN PROGRESS
-    ------------------
-
+/* 
+	Header  file defining  message types for various RMR messages
 */
 
 #define RIC_UNDEFINED				-1
 
-// ---- RESERVED -------------------------------------------
-// all message types 0 - 99 are reserved for RMR
-// ---------------------------------------------------------
+/* 
+---------------------------------------------------------
+	RMR Reserved types
+		All message types 0 - 99 are reserved for RMM.
+---------------------------------------------------------
+*/
+		
+#define RMRRM_TABLE_DATA			20		// table data from route manger
+#define	RMRRM_REQ_TABLE				21		// request for table update to route mangager
+#define RMRRM_TABLE_STATE			22		// state of table to route mgr
+
 
 // --- please keep additions in numerical order ------
 

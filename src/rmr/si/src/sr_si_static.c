@@ -547,52 +547,6 @@ exit( 1 );
 }
 
 /*
-	Receives a 'raw' message from a non-RMr sender (no header expected). The returned
-	message buffer cannot be used to send, and the length information may or may
-	not be correct (it is set to the length received which might be more than the
-	bytes actually in the payload).
-
-	Mostly this supports the route table collector, but could be extended with an
-	API external function.
-*/
-static void* rcv_payload( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
-	return NULL;
-/*
-FIXME: do we need this in the SI world?  The only user was the route table collector
-	int state;
-	rmr_mbuf_t*	msg = NULL;		// msg received
-	size_t	rsize;				// nng needs to write back the size received... grrr
-
-	if( old_msg ) {
-		msg = old_msg;
-	} else {
-		msg = alloc_zcmsg( ctx, NULL, RMR_MAX_RCV_BYTES, RMR_OK, DEF_TR_LEN );			// will abort on failure, no need to check
-	}
-
-	//msg->state = nng_recvmsg( ctx->nn_sock, (nng_msg **) &msg->tp_buf, NO_FLAGS );			// blocks hard until received
-	if( (msg->state = xlate_si_state( msg->state, RMR_ERR_RCVFAILED )) != RMR_OK ) {
-		return msg;
-	}
-	rsize = nng_msg_len( msg->tp_buf );
-
-	// do NOT use ref_tpbuf() here! Must fill these in manually.
-	msg->header = nng_msg_body( msg->tp_buf );
-	msg->len = rsize;							// len is the number of bytes received
-	msg->alloc_len = rsize;
-	msg->mtype = UNSET_MSGTYPE;					// raw message has no type
-	msg->sub_id = UNSET_SUBID;					// nor a subscription id
-	msg->state = RMR_OK;
-	msg->flags = MFL_RAW;
-	msg->payload = msg->header;					// payload is the whole thing; no header
-	msg->xaction = NULL;
-
-	if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "rcv_payload: got something: type=%d state=%d len=%d\n", msg->mtype, msg->state, msg->len );
-
-	return msg;
-*/
-}
-
-/*
 	This does the hard work of actually sending the message to the given socket. On success,
 	a new message struct is returned. On error, the original msg is returned with the state
 	set to a reasonable value. If the message being sent as MFL_NOALLOC set, then a new

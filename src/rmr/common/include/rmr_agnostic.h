@@ -56,7 +56,8 @@ typedef struct uta_ctx  uta_ctx_t;
 
 											// environment variable names we'll suss out
 #define ENV_BIND_IF		"RMR_BIND_IF"		// the interface to bind to for both normal comma and RTG (0.0.0.0 if missing)
-#define ENV_RTG_PORT	"RMR_RTG_SVC"		// the port we'll listen on for rtg connections
+#define ENV_RTG_PORT	"RMR_RTG_SVC"		// the port we'll listen on for rtg connections (deprecated; see RTG_SVC and CTL_PORT)
+#define ENV_RTG_ADDR	"RMR_RTG_SVC"		// the address we will connect to for route manager updates
 #define ENV_SEED_RT		"RMR_SEED_RT"		// where we expect to find the name of the seed route table
 #define ENV_SEED_MEMAP	"RMR_SEED_MEMAP"	// where we expect to find the name of the seed route table
 #define ENV_RTG_RAW		"RMR_RTG_ISRAW"		// if > 0 we expect route table gen messages as raw (not sent from an RMr application)
@@ -66,6 +67,7 @@ typedef struct uta_ctx  uta_ctx_t;
 #define ENV_SRC_ID		"RMR_SRC_ID"		// forces this string (adding :port, max 63 ch) into the source field; host name used if not set
 #define ENV_LOG_HR 		"RMR_HR_LOG"		// set to 0 to turn off human readable logging and write using some formatting
 #define ENV_LOG_VLEVEL	"RMR_LOG_VLEVEL"	// set the verbosity level (0 == 0ff; 1 == crit .... 5 == debug )
+#define ENV_CTL_PORT	"RMR_CTL_PORT"		// route collector will listen here for control messages (4561 default)
 
 #define NO_FLAGS	0				// no flags to pass to a function
 
@@ -75,6 +77,7 @@ typedef struct uta_ctx  uta_ctx_t;
 //#define IFL_....
 
 #define CFL_MTC_ENABLED	0x01		// multi-threaded call is enabled
+#define CFL_NO_RTACK	0x02		// no route table ack needed when end received
 
 									// context flags
 #define CTXFL_WARN		0x01		// ok to warn on stderr for some things that shouldn't happen
@@ -90,8 +93,10 @@ typedef struct uta_ctx  uta_ctx_t;
 #define MAX_CALL_ID		255			// largest call ID that is supported
 
 //#define DEF_RTG_MSGID	""				// default to pick up all messages from rtg
-#define DEF_RTG_PORT	"tcp:4561"		// default port that we accept rtg connections on
+#define DEF_CTL_PORT	"4561"			// default control port that rtc listens on
+#define DEF_RTG_PORT	"tcp:4561"		// default port that we accept rtg connections on (deprecated)
 #define DEF_COMM_PORT	"tcp:4560"		// default port we use for normal communications
+#define DEF_RTG_WK_ADDR	"routemgr:4561"	// well known address for the route manager
 #define DEF_TR_LEN		(-1)			// use default trace data len from context
 
 #define UNSET_SUBID		(-1)			// initial value on msg allocation indicating not set
@@ -305,9 +310,13 @@ static endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups );
 static endpoint_t* uta_get_ep( route_table_t* rt, char const* ep_name );
 static void read_static_rt( uta_ctx_t* ctx, int vlevel );
-static void parse_rt_rec( uta_ctx_t* ctx, char* buf, int vlevel );
+static void parse_rt_rec( uta_ctx_t* ctx, uta_ctx_t* pctx, char* buf, int vlevel );
 static rmr_mbuf_t* realloc_msg( rmr_mbuf_t* msg, int size );
 static void* rtc( void* vctx );
 static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name );
+
+// --------- route manager communications -----------------
+static void send_rt_ack( uta_ctx_t* ctx, int state, char* reason );
+static int send_update_req( uta_ctx_t* pctx, uta_ctx_t* ctx );
 
 #endif

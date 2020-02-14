@@ -209,7 +209,7 @@ extern rmr_whid_t rmr_wh_open( void* vctx, char const* target ) {
 
 
 	if( (ep = rt_ensure_ep( ctx->rtable, target )) == NULL ) {		// get pointer to ep if there, create new if not
-		rmr_vlog( RMR_VL_ERR, "wormhole_open: ensure ep returned bad: target=%s\n", target );
+		rmr_vlog( RMR_VL_ERR, "wormhole_open: ensure ep returned bad: target=(%s)\n", target );
 		return -1;			// ensure sets errno
 	}
 
@@ -220,7 +220,12 @@ extern rmr_whid_t rmr_wh_open( void* vctx, char const* target ) {
 		}
 
 		if( whm->eps[i] == ep ) {
-			return i;							// we're already pointing to it, just send it back again
+			if(  whm->eps[i]->open ) {					// we know about it and it's open
+				return i;								// just send back the reference
+			}
+
+			whid = i;									// have it, but not open, reopen
+			break;
 		}
 	}
 
@@ -249,6 +254,7 @@ extern rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg
 	uta_ctx_t*	ctx;
 	endpoint_t*	ep;				// enpoint that wormhole ID references
 	wh_mgt_t *whm;
+	char* d1;					// point at the call-id in the header
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL || msg == NULL ) {		// bad stuff, bail fast
 		errno = EINVAL;												// if msg is null, this is their clue
@@ -273,7 +279,7 @@ extern rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg
 		return msg;
 	}
 
-	errno = 0;													// nng seems not to set errno any longer, so ensure it's clear
+	errno = 0;
 	if( msg->header == NULL ) {
 		rmr_vlog( RMR_VL_ERR, "rmr_wh_send_msg: message had no header\n" );
 		msg->state = RMR_ERR_NOHDR;
@@ -281,7 +287,13 @@ extern rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg
 		return msg;
 	}
 
+	d1 = DATA1_ADDR( msg->header );
+	d1[D1_CALLID_IDX] = NO_CALL_ID;								// must blot out so it doesn't queue on a chute at the other end
+
 	ep = whm->eps[whid];
+	if( ! ep->open ) {
+		rmr_wh_open( ctx, ep->name );
+	}
 	return send2ep( ctx, ep, msg );							// send directly to the endpoint
 }
 
