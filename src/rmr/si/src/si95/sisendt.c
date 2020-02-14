@@ -25,10 +25,11 @@
 *  Abstract: This module contains various send functions:
 *				SIsendt -- send tcp with queuing if would block
 *				SIsendt_nq - send tcp without queuing if blocking
-
+*
 *  Date:     27 March 1995
 *  Author:   E. Scott Daniels
 *  Mod:		22 Feb 2002 - To better process queued data 
+*			14 Feb 2020 - To fix index bug if fd < 0.
 *
 *****************************************************************************
 */
@@ -56,6 +57,10 @@ extern int SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 
 	errno = EINVAL;
 	gptr->sierr = SI_ERR_SESSID;
+
+	if( fd < 0 ) {
+		return SI_ERROR;					// bad form trying to use this fd
+	}
 
 	if( fd < MAX_FDS ) {					// straight from map if possible
 		tpptr = gptr->tp_map[fd];
