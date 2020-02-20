@@ -106,6 +106,8 @@ typedef struct {
 
 	void*	ring;				// ring this buffer should be queued back to
 	int		rts_fd;				// SI fd for return to sender
+
+	int		cookie;				// cookie to detect user misuse of free'd msg
 } rmr_mbuf_t;
 
 

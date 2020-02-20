@@ -134,7 +134,8 @@ static int mt_data_cb( void* vctx, int fd, char* buf, int buflen ) {
 		if( river->state == RS_NEW ) {
 			memset( river, 0, sizeof( *river ) );
 			//river->nbytes = sizeof( char ) * (8 * 1024);
-			river->nbytes = sizeof( char ) * ctx->max_ibm;			// max inbound message size
+			river->nbytes = sizeof( char ) * (ctx->max_ibm + 1024);		// max inbound message size
+fprintf( stderr, ">>>> allocating river with accum size of %d\n", river->nbytes );
 			river->accum = (char *) malloc( river->nbytes );
 			river->ipt = 0;
 		} else {
@@ -194,7 +195,7 @@ static int mt_data_cb( void* vctx, int fd, char* buf, int buflen ) {
 			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "data callback enough in the buffer size=%d need=%d remain=%d\n", river->msg_size, need, remain );
 			if( (river->flags & RF_DROP) == 0  ) {
 				memcpy( &river->accum[river->ipt], buf+bidx, need );				// grab just what is needed (might be more)
-				buf2mbuf( ctx, river->accum, river->msg_size, fd );					// build an RMR mbuf and queue
+				buf2mbuf( ctx, river->accum, river->nbytes, fd );					// build an RMR mbuf and queue
 				river->accum = (char *) malloc( sizeof( char ) *  river->nbytes );	// fresh accumulator
 			} else {
 				if( !(river->flags & RF_NOTIFIED) ) {	

@@ -143,7 +143,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 
 /*
 	memset( msg->tp_buf, 0, mlen );    // NOT for production (debug only)	valgrind will complain about uninitalised use if we don't set
-	memcpy( msg->tp_buf, "@@!!@@!!@@!!@@!!@@!!@@!!@@!!@@!!**", 34 );		// NOT for production -- debugging eyecatcher
+	memcpy( msg->tp_buf, "@@!!@@!!@@!!@@!!@@!!@@!!@@!!@@!!**", TPHDR_LEN );		// NOT for production -- debugging eyecatcher
 */
 	alen = (int *) msg->tp_buf;
 	*alen = mlen;						// FIX ME: need a stuct to go in these first bytes, not just dummy len
@@ -159,6 +159,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 		//SET_HDR_D2_LEN( hdr, ctx->d2_len );				// future
 	}
 	msg->len = 0;											// length of data in the payload
+	msg->cookie = 0x4942;
 	msg->alloc_len = mlen;									// length of allocated transport buffer (caller size + rmr header)
 	msg->sub_id = UNSET_SUBID;
 	msg->mtype = UNSET_MSGTYPE;
@@ -197,6 +198,7 @@ static rmr_mbuf_t* alloc_mbuf( uta_ctx_t* ctx, int state ) {
 
 	memset( msg, 0, sizeof( *msg ) );
 
+	msg->cookie = 0x4942;
 	msg->sub_id = UNSET_SUBID;
 	msg->mtype = UNSET_MSGTYPE;
 	msg->tp_buf = NULL;
@@ -588,6 +590,9 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int nn_sock, int r
 	msg->state = RMR_OK;
 	do {
 		tot_len = msg->len + PAYLOAD_OFFSET( hdr ) + TP_HDR_LEN;			// we only send what was used + header lengths
+		if( tot_len > msg->alloc_len ) {
+			tot_len = msg->alloc_len;									// likely bad length from user :(
+		}
 		*((int*) msg->tp_buf) = tot_len;
 
 		if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "send_msg: ending %d (%x) bytes  usr_len=%d alloc=%d retries=%d\n", tot_len, tot_len, msg->len, msg->alloc_len, retries );

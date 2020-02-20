@@ -166,6 +166,7 @@ static inline void* uta_ring_extract( void* vr ) {
 	ring_t*		r;
 	uint16_t	ti;		// real index in data
 	int64_t	ctr;		// pfd counter
+	void*		data;
 
 	if( !RING_FAST ) {								// compiler should drop the conditional when always false
 		if( (r = (ring_t*) vr) == NULL ) {
@@ -199,10 +200,14 @@ future -- investigate if it's possible only to set/clear when empty or going to 
 	}
 */
 
+	data = r->data[ti];						// secure data and clear before letting go of the lock
+	r->data[ti] = NULL;
+
 	if( r->rgate != NULL ) {							// if locked above...
 		pthread_mutex_unlock( r->rgate );
 	}
-	return r->data[ti];
+
+	return data;
 }
 
 /*
@@ -232,18 +237,18 @@ static inline int uta_ring_insert( void* vr, void* new_data ) {
 		return 0;
 	}
 
+	r->data[r->head] = new_data;
+	r->head++;
+	if( r->head >= r->nelements ) {
+		r->head = 0;
+	}
+
 	write( r->pfd, &inc, sizeof( inc ) );
 /*
 future -- investigate if it's possible only to set/clear when empty or going to empty
 	if( r->tail == r->head ) {								// turn on ready if ring was empty
 	}
 */
-
-	r->data[r->head] = new_data;
-	r->head++;
-	if( r->head >= r->nelements ) {
-		r->head = 0;
-	}
 
 	if( r->wgate != NULL ) {						// if lock exists we must unlock before going
 		pthread_mutex_unlock( r->wgate );
