@@ -185,7 +185,10 @@ extern void rmr_free_msg( rmr_mbuf_t* mbuf ) {
 	if( !mbuf->ring || ! uta_ring_insert( mbuf->ring, mbuf ) ) {			// just queue, free if ring is full
 		if( mbuf->tp_buf ) {
 			free( mbuf->tp_buf );
+			mbuf->tp_buf = NULL;		// just in case user tries to reuse this mbuf; this will be an NPE
 		}
+
+		mbuf->cookie = 0;			// should signal a bad mbuf (if not reallocated)
 		free( mbuf );
 	}
 }
@@ -549,7 +552,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	rmr_set_vlevel( RMR_VL_INFO );		// we WILL announce our version etc
 
 	if( ! announced ) {
-		rmr_vlog( RMR_VL_INFO, "ric message routing library on SI95/e mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
+		rmr_vlog( RMR_VL_INFO, "ric message routing library on SI95/f mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
 			RMR_MSG_VER, flags, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
 	}
@@ -579,7 +582,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	ctx->send_retries = 1;							// default is not to sleep at all; RMr will retry about 10K times before returning
 	ctx->d1_len = 4;								// data1 space in header -- 4 bytes for now
 	ctx->max_ibm = max_msg_size < 1024 ? 1024 : max_msg_size;					// larger than their request doesn't hurt
-	ctx->max_ibm += sizeof( uta_mhdr_t ) + ctx->d1_len + ctx->d2_len + 64;		// add in our header size and a bit of fudge
+	ctx->max_ibm += sizeof( uta_mhdr_t ) + ctx->d1_len + ctx->d2_len + TP_HDR_LEN + 64;		// add in header size, transport hdr, and a bit of fudge
 
 	ctx->mring = uta_mk_ring( 4096 );				// message ring is always on for si
 	ctx->zcb_mring = uta_mk_ring( 128 );			// zero copy buffer mbuf ring to reduce malloc/free calls
