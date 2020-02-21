@@ -166,10 +166,13 @@ static int mt_data_cb( void* vctx, int fd, char* buf, int buflen ) {
 				bidx += need;
 				remain -= need;
 				river->msg_size = *((int *) river->accum);		
-				if( DEBUG > 1 ) {
+				if( DEBUG ) {
 					rmr_vlog( RMR_VL_DEBUG, "size from accumulator =%d\n", river->msg_size );
-					if( river->msg_size > 500 ) {
-						dump_40( river->accum, "msg size way too large accum:"  );
+					if( DEBUG > 1 ) {
+						dump_40( river->accum, "from accumulator:"  );
+						if( river->msg_size > 100 ) {
+							dump_40( river->accum + 50, "from rmr buf:"  );
+						}
 					}
 				}
 			} else {

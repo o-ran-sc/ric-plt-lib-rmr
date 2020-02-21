@@ -103,6 +103,7 @@ static int rt_test( ) {
 	rtable_ent_t*	rte;	// route table entries from table
 	rtable_ent_t*	rte2;
 	endpoint_t*	ep;			// endpoint added
+	endpoint_t*	ep2;
 	int more = 0;			// more flag from round robin
 	int errors = 0;			// number errors found
 	int	i;
@@ -122,8 +123,13 @@ static int rt_test( ) {
 	int		state;
 	char	*buf;
 	char*	seed_fname;		// seed file
-	nng_socket nn_sock;		// this is a struct in nng, so difficult to validate
+	//nng_socket nn_sock;		// this is a struct in nng, so difficult to validate
+	SOCKET_TYPE	nn_sock;	// differnt in each transport (nng == struct, SI/Nano == int)
 	rmr_mbuf_t*	mbuf;		// message for meid route testing
+
+	#ifndef NNG_UNDER_TEST
+		si_ctx_t* si_ctx = NULL;
+	#endif
 
 	setenv( "ENV_VERBOSE_FILE", ".ut_rmr_verbose", 1 );			// allow for verbose code in rtc to be driven
 	i = open( ".ut_rmr_verbose", O_RDWR | O_CREAT, 0644 );
@@ -245,6 +251,19 @@ static int rt_test( ) {
 		uta_rt_drop( crt );
 	}
 	
+	#ifdef NNG_UNDER_TEST
+		if( (ctx = (uta_ctx_t *) malloc( sizeof( uta_ctx_t ) )) != NULL ) {		// get a "context" needed for si testing
+			memset( ctx, 0, sizeof( *ctx ) );
+			ctx->rtable = rt;
+		} else {
+			fprintf( stderr, "<FAIL> cannot acllocate a context, cannot continue rtable tests\n" );
+			return errors;
+		}
+	#else
+		ctx = mk_dummy_ctx();
+	#endif
+
+	ctx->rtable = rt;
 
 	ep = uta_get_ep( rt, "localhost:4561" );
 	errors += fail_if_nil( ep, "end point (fetch by name)" );
@@ -252,11 +271,30 @@ static int rt_test( ) {
 	errors += fail_not_nil( ep, "end point (fetch by name with bad name)" );
 
 	ep = NULL;
-	state = uta_epsock_byname( rt, "localhost:4561", &nn_sock, &ep );		// this should be found
+	#ifdef NNG_UNDER_TEST
+		state = uta_epsock_byname( rt, "localhost:4561", &nn_sock, &ep );		// this should be found
+	#else
+		state = uta_epsock_byname( ctx, "localhost:4561", &nn_sock, &ep );	// this should be found
+	#endif
 	errors += fail_if_equal( state, 0, "socket (by name)" );
 	errors += fail_if_nil( ep, "epsock_byname did not populate endpoint pointer when expected to" );
 	//alt_value = uta_epsock_byname( rt, "localhost:4562" );			// we might do a memcmp on the two structs, but for now nothing
 	//errors += fail_if_equal( value, alt_value, "app1/app2 sockets" );
+
+	#if  NNG_UNDER_TEST
+		state = uta_epsock_byname( NULL, "localhost:4561", &nn_sock, &ep );		// test coverage on nil checks
+	#else
+		state = uta_epsock_byname( NULL, "localhost:4561", &nn_sock, &ep );
+	#endif
+	errors += fail_not_equal( state, 0, "socket (by name) nil check returned true" );
+
+	ep->open = 1;
+	#if  NNG_UNDER_TEST
+		state = uta_epsock_byname( rt, "localhost:4561", &nn_sock, NULL );		// test coverage on nil checks
+	#else
+		state = uta_epsock_byname( ctx, "localhost:4561", &nn_sock, NULL );
+	#endif
+	errors += fail_if_equal( state, 0, "socket (by name) open ep check returned false" );
 
 
 	// --- test that the get_rte function finds expected keys, and retries to find 'bad' sid attempts for valid mtypes with no sid
@@ -289,11 +327,17 @@ static int rt_test( ) {
 	rte = uta_get_rte( rt, 12, 3, TRUE );			// this should return the entry for the 3/-1 combination 
 	errors += fail_if_nil( rte, "get_rte did not return a pointer for s=12, m=3, true" );
 
+
 	alt_value = -1;
 	rte = uta_get_rte( rt, 0, 1, FALSE );			// get an rte for the next loop
 	if( rte ) {
 		for( i = 0; i < 10; i++ ) {									// round robin return value should be different each time
-			value = uta_epsock_rr( rte, 0, &more, &nn_sock, &ep );		// msg type 1, group 1
+			#ifdef NNG_UNDER_TEST
+				value = uta_epsock_rr( rte, 0, &more, &nn_sock, &ep );		// msg type 1, group 1
+			#else
+				value = uta_epsock_rr( ctx, rte, 0, &more, &nn_sock, &ep );
+			#endif
+
 			errors += fail_if_equal( value, alt_value, "round robiin sockets with multiple end points" );
 			errors += fail_if_false( more, "more for mtype==1" );
 			alt_value = value;
@@ -304,7 +348,12 @@ static int rt_test( ) {
 	rte = uta_get_rte( rt, 0, 3, FALSE );				// get an rte for the next loop
 	if( rte ) {
 		for( i = 0; i < 10; i++ ) {								// this mtype has only one endpoint, so rr should be same each time
-			value = uta_epsock_rr( rte, 0, NULL, &nn_sock, &ep );		// also test ability to deal properly with nil more pointer
+			#ifdef NNG_UNDER_TEST
+				value = uta_epsock_rr( rte, 0, NULL, &nn_sock, &ep );		// also test ability to deal properly with nil more pointer
+			#else
+				value = uta_epsock_rr( ctx, rte, 0, NULL, &nn_sock, &ep );
+			#endif
+
 			if( i ) {
 				errors += fail_not_equal( value, alt_value, "round robin sockets with one endpoint" );
 				errors += fail_not_equal( more, -1, "more value changed in single group instance" );
@@ -314,13 +363,29 @@ static int rt_test( ) {
 	}
 
 	rte = uta_get_rte( rt, 11, 3, TRUE );
-	state = uta_epsock_rr( rte, 22, NULL, NULL, &ep );
+	#ifdef NNG_UNDER_TEST
+		state = uta_epsock_rr( rte, 22, NULL, NULL, &ep );
+	#else
+		state = uta_epsock_rr( ctx, rte, 22, NULL, NULL, &ep );
+	#endif
 	errors += fail_if_true( state, "uta_epsock_rr returned bad (non-zero) state when given nil socket pointer" );
 
 
 	uta_rt_clone( NULL );								// verify null parms don't crash things
 	uta_rt_drop( NULL );
-	uta_epsock_rr( NULL, 0,  &more, &nn_sock, &ep );			// drive null case for coverage
+	#ifdef NNG_UNDER_TEST
+		uta_epsock_rr( NULL, 0,  &more, &nn_sock, &ep );			// drive null case for coverage
+		state = uta_epsock_rr( rte, 22, NULL, NULL, &ep );
+	#else
+		state = uta_epsock_rr( NULL, NULL, 0,  &more, &nn_sock, &ep );			// drive null case for coverage
+		errors += fail_not_equal( state, 0, "uta_epsock_rr did not return false when given nil ctx" );
+
+		state = uta_epsock_rr( ctx, NULL, 0,  &more, &nn_sock, &ep );
+		errors += fail_not_equal( state, 0, "uta_epsock_rr did not return false when given nil rte" );
+
+		state = uta_epsock_rr( ctx, rte, 10000,  &more, &nn_sock, &ep );
+		errors += fail_not_equal( state, 0, "uta_epsock_rr did not return false when given invalid group number" );
+	#endif
 	uta_add_rte( NULL, 99, 1 );
 	uta_get_rte( NULL, 0, 1000, TRUE );
 
@@ -342,9 +407,8 @@ static int rt_test( ) {
 	uta_rt_drop( rt );
 	rt = NULL;
 
-	if( (ctx = (uta_ctx_t *) malloc( sizeof( uta_ctx_t ) )) != NULL ) {
-		memset( ctx, 0, sizeof( *ctx ) );
 
+	if( ctx ) {
 		if( (seed_fname = getenv( "RMR_SEED_RT" )) != NULL ) {
 			read_static_rt( ctx, 0 );
 			rt = ctx->rtable;
@@ -366,11 +430,58 @@ static int rt_test( ) {
 	pthread_mutex_init( &ep->gate, NULL );
 	ep->name = strdup( "worm" );
 	ep->addr = NULL;
-	state = uta_link2( ep );
-	errors += fail_if_true( state, "link2 did not return false when given nil pointers" );
+	#ifdef NNG_UNDER_TEST
+		state = uta_link2( ep );
+	#else
+		state = uta_link2( ctx, ep );
+	#endif
+	errors += fail_if_true( state, "link2 did not return false when given a bad target name" );
+
+	#ifdef NNG_UNDER_TEST
+		state = uta_link2( NULL );
+	#else
+		state = uta_link2( ctx, NULL );
+		errors += fail_if_true( state, "link2 did not return false when given nil ep pointer" );
+
+		state = uta_link2( NULL, ep );
+	#endif
+	errors += fail_if_true( state, "link2 did not return false when given nil pointer" );
+
+	ep->name = strdup( "localhost:5512" );
+	ep->open = 1;
+	#ifdef NNG_UNDER_TEST
+		state = uta_link2( ep );			// drive for coverage
+	#else
+		state = uta_link2( ctx, ep );
+	#endif
+	errors += fail_if_false( state, "link2 did returned false when given open ep" );
+
+	#ifndef NNG_UNDER_TEST
+		ep->open = 0;							// context is used only if ep not open, so to check this test close the ep
+		state = rt_link2_ep( NULL, ep );
+		errors += fail_if_true( state, "rt_link2_ep returned true when given bad context" );
+
+		state = rt_link2_ep( ctx, NULL );
+		errors += fail_if_true( state, "rt_link2_ep returned true when given bad ep" );
+
+		ep->open = 1;
+		state = rt_link2_ep( ctx, ep );
+		errors += fail_if_false( state, "rt_link2_ep returned false when given an open ep" );
+
+		ep->open = 0;
+		state = rt_link2_ep( ctx, ep );
+		errors += fail_if_false( state, "rt_link2_ep returned false when given a closed ep" );
+
+		ep->open = 1;
+		uta_ep_failed( ep );
+		errors += fail_if_true( ep->open, "uta_ep_failed didn't set open flag to false" );
+
+	#endif
+
 
 	// ----------------- test the meid support for looking up an endpoint based on the meid in the message -----
 
+	ctx->rtable = NULL;
 	ctx->my_name = strdup( "my_host_name" );		// set up to load a rtable
 	ctx->my_ip = strdup( "192.168.1.30" );
 	gen_rt( ctx );									// generate a route table with meid entries and hang off ctx
@@ -379,15 +490,60 @@ static int rt_test( ) {
 	mbuf->len = 100;
 	rmr_str2meid( mbuf, "meid1" );					// id that we know is in the map
 
-	ep = NULL;										// force to nil so we see it go non-nil
-	state = epsock_meid( ctx->rtable, mbuf, &nn_sock, &ep );
-	errors += fail_if_nil( ep, "ep was nil when looking up ep with known meid in message" );
-	errors += fail_not_equal( state, 1, "state was not true when looking up ep with known meid in message" );
+	#ifdef NNG_UNDER_TEST
+		ep = NULL;										// force to nil so we see it go non-nil
+		state = epsock_meid( ctx->rtable, mbuf, &nn_sock, &ep );
+		errors += fail_if_nil( ep, "ep was nil when looking up ep with known meid in message" );
+		errors += fail_not_equal( state, 1, "state was not true when looking up ep with known meid in message" );
 
-	rmr_str2meid( mbuf, "XXXmeid1" );				// id that we know is NOT in the map
-	state = epsock_meid( ctx->rtable, mbuf, &nn_sock, &ep );
-	// it is NOT a valid check to test ep for nil -- epsock_mied doesn't guarentee ep is set/cleared when state is false
-	errors += fail_not_equal( state, 0, "state was not false when looking up ep with unknown meid in message" );
+		rmr_str2meid( mbuf, "XXXmeid1" );				// id that we know is NOT in the map
+		state = epsock_meid( ctx->rtable, mbuf, &nn_sock, &ep );
+		// it is NOT a valid check to test ep for nil -- epsock_mied doesn't guarentee ep is set/cleared when state is false
+		errors += fail_not_equal( state, 0, "state was not false when looking up ep with unknown meid in message" );
+	#else
+		ep = NULL;										// force to nil so we see it go non-nil
+		state = epsock_meid( ctx, ctx->rtable,  mbuf, &nn_sock, &ep );
+		errors += fail_if_nil( ep, "ep was nil when looking up ep with known meid in message" );
+		errors += fail_not_equal( state, 1, "state was not true when looking up ep with known meid in message" );
+
+		state = epsock_meid( ctx, ctx->rtable,  mbuf, &nn_sock, &ep );		// a second call to drive open == true check for coverage
+		errors += fail_if_nil( ep, "ep was nil when looking up ep with known meid in message; on open ep" );
+		errors += fail_not_equal( state, 1, "state was not true when looking up ep with known meid in message; on open ep" );
+
+		rmr_str2meid( mbuf, "XXXmeid1" );				// id that we know is NOT in the map
+		state = epsock_meid( ctx, ctx->rtable, mbuf, &nn_sock, &ep );
+		// it is NOT a valid check to test ep for nil -- epsock_mied doesn't guarentee ep is set/cleared when state is false
+		errors += fail_not_equal( state, 0, "state was not false when looking up ep with unknown meid in message" );
+
+		state = epsock_meid( NULL, ctx->rtable,  mbuf, &nn_sock, &ep );
+		errors += fail_not_equal( state, 0, "epsock_meid returned true when given nil context" );
+
+		state = epsock_meid( ctx, ctx->rtable,  mbuf, NULL, &ep );
+		errors += fail_not_equal( state, 0, "epsock_meid returned true when given nil socket pointer" );
+	#endif
+
+
+	// ------------- si only; fd to ep conversion functions ---------------------------------------------------------
+	#ifndef NNG_UNDER_TEST
+		ep2 = (endpoint_t *) malloc( sizeof( *ep ) );
+
+		fd2ep_init( ctx );
+		fd2ep_add( ctx, 10, ep2 );
+
+		ep = fd2ep_get( ctx, 10 );
+		errors += fail_if_nil( ep, "fd2ep did not return pointer for known mapping" );
+		errors += fail_if_false( ep == ep2,  "fd2ep did not return same pointer that was added" );
+	
+		ep = fd2ep_get( ctx, 20 );
+		errors += fail_not_nil( ep, "fd2ep did returned a pointer for unknown mapping" );
+
+		ep = fd2ep_del( ctx, 10 );
+		errors += fail_if_nil( ep, "fd2ep delete did not return pointer for known mapping" );
+		errors += fail_if_false( ep == ep2,  "fd2ep delete did not return same pointer that was added" );
+
+		ep = fd2ep_del( ctx, 20 );
+		errors += fail_not_nil( ep, "fd2ep delete returned a pointer for unknown mapping" );
+	#endif
 
 	return !!errors;			// 1 or 0 regardless of count
 }

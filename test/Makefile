@@ -23,7 +23,10 @@ CC = gcc
 coverage_opts = -ftest-coverage -fprofile-arcs
 
 libs =   -lnng -lpthread -lm
-ipaths = -I ../src/rmr/common/src/ -I ../src/rmr/common/include -I ../src/rmr/nng/include/ -I ../src/rmr/nng/src/ -I ../src/rmr/nanomsg/include/ -I ../src/rmr/nanomsg/src/ 
+ipaths =	-I ../src/rmr/common/src/ -I ../src/rmr/common/include  \
+			-I ../src/rmr/nng/include/ -I ../src/rmr/nng/src/  \
+			-I ../src/rmr/nanomsg/include/ -I ../src/rmr/nanomsg/src/  \
+			-I ../src/rmr/si/include -I ../src/rmr/si/src -I ../src/rmr/si/si95
 
 #sa_tests = sa_tools_test.o
 
@@ -33,9 +36,9 @@ ipaths = -I ../src/rmr/common/src/ -I ../src/rmr/common/include -I ../src/rmr/nn
 %:: %.c
 	$(CC)  $(ipaths) $(coverage_opts) -fPIC -g $< -o $@  $(libs)
 
-# catch all
+# run all tests; generates .gcov and .dcov files.
 all:
-	echo "run unit_test.ksh to make and run things here"
+	unit_test.ksh
 
 
 # remove intermediates

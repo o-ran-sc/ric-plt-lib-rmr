@@ -143,7 +143,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 
 /*
 	memset( msg->tp_buf, 0, mlen );    // NOT for production (debug only)	valgrind will complain about uninitalised use if we don't set
-	memcpy( msg->tp_buf, "@@!!@@!!@@!!@@!!@@!!@@!!@@!!@@!!**", TPHDR_LEN );		// NOT for production -- debugging eyecatcher
+	memcpy( msg->tp_buf, "@@!!@@!!@@!!@@!!@@!!@@!!@@!!@@!!**", TP_HDR_LEN );		// NOT for production -- debugging eyecatcher
 */
 	alen = (int *) msg->tp_buf;
 	*alen = mlen;						// FIX ME: need a stuct to go in these first bytes, not just dummy len
