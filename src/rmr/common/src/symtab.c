@@ -470,11 +470,13 @@ extern void rmr_sym_foreach_class( void *vst, unsigned int class, void (* user_f
 
 	if( st && (list = st->symlist) != NULL && user_fun != NULL )
 		for( i = 0; i < st->size; i++ )
-			for( se = list[i]; se; se = next )		/* using next allows user to delet via this */
+			for( se = list[i]; se; se = next )		/* using next allows user to delete via this */
 			{
-				next = se->next;
-				if( class == se->class ) {
-					user_fun( st, se, se->name, se->val, user_data );
+				if( se ) {
+					next = se->next;
+					if( class == se->class ) {
+						user_fun( st, se, se->name, se->val, user_data );
+					}
 				}
 			}
 }
