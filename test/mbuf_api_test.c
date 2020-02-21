@@ -31,6 +31,8 @@
 */
 
 
+#define NO_EMULATION
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <netdb.h>

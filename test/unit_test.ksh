@@ -1,5 +1,5 @@
 #!/usr/bin/env ksh
-# this will fail if run with bash!
+# this has been hacked to work with bash; ksh is preferred
 
 #==================================================================================
 #        Copyright (c) 2019 Nokia
@@ -63,10 +63,11 @@
 # -------------------------------------------------------------------------
 
 function usage {
-	echo "usage: $0 [-G|-M|-C custom-command-string] [-c cov-target]  [-f] [-F] [-v] [-x]  [files]"
+	echo "usage: $0 [-G|-M|-C custom-command-string] [-a] [-c cov-target]  [-f] [-F] [-v] [-x]  [files]"
 	echo "  if -C is used to provide a custom build command then it must "
 	echo "  contain a %s which will be replaced with the unit test file name."
 	echo '  e.g.:  -C "mk -a %s"'
+	echo "  -a always run coverage (even on failed modules)"
 	echo "  -c allows user to set the target coverage for a module to pass; default is 80"
 	echo "  -f forces a discount check (normally done only if coverage < target)"
 	echo "  -F show only failures at the function level"
@@ -81,19 +82,25 @@ function usage {
 function add_ignored_func {
 	if [[ ! -r $1 ]]
 	then
+		echo ">>>> can't find file to ignore: $1" 
 		return
 	fi
 
 	typeset f=""
-	grep "^static.*(.*).*{" $1 | awk '		# get list of test functions to ignore
-		{
-			gsub( "[(].*", "" )
-			print $3
-		}
-	' | while read f
-	do
-		iflist="${iflist}$f "
-	done
+	goop=$(
+		grep "^static.*(.*).*{" $1 | awk '		# get list of test functions to ignore
+			{
+				gsub( "[(].*", "" )
+				gsub( "[*]", "" )
+				if( $2 == "struct" ) {			# static struct goober function
+					printf( "%s ", $4 )
+				} else {
+					printf( "%s ", $3 )			# static goober-type funct
+				}
+			}
+		' )
+
+	iflist="$iflist $goop"			# this goop hack because bash can't read from a loop
 }
 
 
@@ -285,7 +292,8 @@ function get_mct {
 
 	if [[ -f ./.targets ]]
 	then
-		grep "^$1 " ./.targets | head -1 | read junk tv
+		grep "^$1 " ./.targets | head -1 | read stuff
+		tv="${stuff##* }"					# assume junk tv; ditch junk
 	fi
 
 	echo ${tv:-$v}
@@ -323,20 +331,24 @@ fi
 
 export LIBRARY_PATH=$LD_LIBRARY_PATH
 
-export C_INCLUDE_PATH="../src/rmr/common/include:$C_INCLUDE_PATH"
+# The Makefile sets specific includes for things
+#export C_INCLUDE_PATH="../src/rmr/common/include:../src/rmr/si/include:$C_INCLUDE_PATH"
 
 module_cov_target=80
-builder="make -B %s"		# default to plain ole make
+builder="make -B %s"							# default to plain ole make
 verbose=0
-show_all=1					# show all things -F sets to show failures only
-strict=0					# -s (strict) will set; when off, coverage state ignored in final pass/fail
-show_output=0				# show output from each test execution (-S)
+show_all=1										# show all things -F sets to show failures only
+strict=0										# -s (strict) will set; when off, coverage state ignored in final pass/fail
+show_output=0									# show output from each test execution (-S)
 quiet=0
 gen_xml=0
-replace_flags=1				# replace ##### in gcov for discounted lines
+replace_flags=1									# replace ##### in gcov for discounted lines
 run_nano_tests=0
+always_gcov=0									# -a sets to always run gcov even if failure
+save_gcov=1										# -o turns this off
+out_dir=${UT_COVERAGE_DIR:-/tmp/rmr_gcov}		# -O changes output directory
 
-export RMR_WARNING=1		# turn on warnings
+export RMR_WARNING=1							# turn on warnings
 
 ulimit -c unlimited
 
@@ -347,7 +359,9 @@ do
 		-G)	builder="gmake %s";;
 		-M)	builder="mk -a %s";;		# use plan-9 mk (better, but sadly not widly used)
 		-N)	run_nano_tests=1;;
+		-O)	out_dir=$2; shift;;
 
+		-a)	always_gcov=1;;
 		-c)	module_cov_target=$2; shift;;
 		-e)	capture_file=$2; >$capture_file; shift;;		# capture errors from failed tests rather than spewing on tty
 		-f)	force_discounting=1;
@@ -356,6 +370,8 @@ do
 
 		-F)	show_all=0;;
 
+		-n)	noexec=1;;
+		-o)	save_gcov=0;;
 		-s)	strict=1;;					# coverage counts toward pass/fail state
 		-S)	show_output=1;;				# test output shown even on success
 		-v)	(( verbose++ ));;
@@ -365,6 +381,7 @@ do
 			trigger_discount_str="WARN|FAIL|PASS"		# check all outcomes for each module
 			rm -fr *cov.xml
 			;;
+
 
 		-h) 	usage; exit 0;;
 		--help) usage; exit 0;;
@@ -412,6 +429,16 @@ else
 fi
 
 
+if (( noexec ))
+then
+	echo "no exec mode; would test these:"
+	for tf in $flist
+	do
+		echo "	$tf"
+	done
+	exit 0
+fi
+
 rm -fr *.gcov			# ditch the previous coverage files
 ut_errors=0			# unit test errors (not coverage errors)
 errors=0
@@ -426,192 +453,205 @@ do
 		fi
 	done
 
-	echo "$tfile --------------------------------------"
-	bcmd=$( printf "$builder" "${tfile%.c}" )
-	if ! $bcmd >/tmp/PID$$.log 2>&1
-	then
-		echo "[FAIL] cannot build $tfile"
-		cat /tmp/PID$$.log
-		rm -f /tmp/PID$$
-		exit 1
-	fi
-
-	iflist="main sig_clean_exit "		# ignore external functions from our tools
-	add_ignored_func $tfile				# ignore all static functions in our test driver
-	add_ignored_func test_support.c		# ignore all static functions in our test tools
-	add_ignored_func test_nng_em.c		# the nng/nano emulated things
-	for f in *_static_test.c			# all static modules here
-	do
-		if(( ! run_nano_tests )) && [[ $f == *"nano"* ]]
+	(	# all noise is now captured into a tmp file to support quiet mode
+		echo "$tfile --------------------------------------"
+		bcmd=$( printf "$builder" "${tfile%.c}" )
+		if ! $bcmd >/tmp/PID$$.log 2>&1
 		then
-			continue
+			echo "[FAIL] cannot build $tfile"
+			cat /tmp/PID$$.log
+			rm -f /tmp/PID$$
+			exit 1
 		fi
 
-		add_ignored_func $f
-	done
-
-	if ! ./${tfile%.c} >/tmp/PID$$.log 2>&1
-	then
-		echo "[FAIL] unit test failed for: $tfile"
-		if [[ -n $capture_file ]] 
-		then
-			echo "all errors captured in $capture_file, listing only fail message on tty"
-			echo "$tfile --------------------------------------" >>$capture_file
-			cat /tmp/PID$$.log >>$capture_file
-			grep "^<FAIL>" /tmp/PID$$.log
-			echo ""
-		else
-			if (( quiet ))
+		iflist="main sig_clean_exit "		# ignore external functions from our tools
+		add_ignored_func $tfile				# ignore all static functions in our test driver
+		add_ignored_func test_support.c		# ignore all static functions in our test tools
+		add_ignored_func test_nng_em.c		# the nng/nano emulated things
+		add_ignored_func test_si95_em.c		# the si emulated things
+		add_ignored_func test_common_em.c	# the common emulation functions
+		for f in *_static_test.c			# all static modules here
+		do
+			if(( ! run_nano_tests )) && [[ $f == *"nano"* ]]
 			then
-				grep "^<" /tmp/PID$$.log|grep -v "^<EM>"	# in quiet mode just dump <...> messages which are assumed from the test programme not appl
+				continue
+			fi
+
+			add_ignored_func $f
+		done
+
+		if ! ./${tfile%.c} >/tmp/PID$$.log 2>&1
+		then
+			echo "[FAIL] unit test failed for: $tfile"
+			if [[ -n $capture_file ]] 
+			then
+				echo "all errors captured in $capture_file, listing only fail message on tty"
+				echo "$tfile --------------------------------------" >>$capture_file
+				cat /tmp/PID$$.log >>$capture_file
+				grep "^<FAIL>" /tmp/PID$$.log
+				echo ""
 			else
+				if (( quiet ))
+				then
+					grep "^<" /tmp/PID$$.log|grep -v "^<EM>"	# in quiet mode just dump <...> messages which are assumed from the test programme not appl
+				else
+					cat /tmp/PID$$.log
+				fi
+			fi
+			(( ut_errors++ ))				# cause failure even if not in strict mode
+			if (( ! always_gcov ))
+			then
+				continue						# skip coverage tests for this
+			fi
+		else
+			if (( show_output ))
+			then
+				printf "\n============= test programme output =======================\n"
 				cat /tmp/PID$$.log
+				printf "===========================================================\n"
 			fi
 		fi
-		(( ut_errors++ ))				# cause failure even if not in strict mode
-		continue						# skip coverage tests for this
-	else
-		if (( show_output ))
-		then
-			printf "\n============= test programme output =======================\n"
-			cat /tmp/PID$$.log
-			printf "===========================================================\n"
-		fi
-	fi
 
-	(
-		touch ./.targets
-		sed '/^#/ d; /^$/ d; s/^/TARGET: /' ./.targets
-		gcov -f ${tfile%.c} | sed "s/'//g"
-	) | awk \
-		-v cfail=$cfail \
-		-v show_all=$show_all \
-		-v ignore_list="$iflist" \
-		-v module_cov_target=$module_cov_target \
-		-v chatty=$verbose \
-		'
-		BEGIN {
-			announce_target = 1;
-			nignore = split( ignore_list, ignore, " " )
-			for( i = 1; i <= nignore; i++ ) {
-				imap[ignore[i]] = 1
+		(
+			touch ./.targets
+			sed '/^#/ d; /^$/ d; s/^/TARGET: /' ./.targets
+			gcov -f ${tfile%.c} | sed "s/'//g"
+		) | awk \
+			-v cfail=$cfail \
+			-v show_all=$show_all \
+			-v ignore_list="$iflist" \
+			-v module_cov_target=$module_cov_target \
+			-v chatty=$verbose \
+			'
+			BEGIN {
+				announce_target = 1;
+				nignore = split( ignore_list, ignore, " " )
+				for( i = 1; i <= nignore; i++ ) {
+					imap[ignore[i]] = 1
+				}
+
+				exit_code = 0		# assume good
 			}
 
-			exit_code = 0		# assume good
-		}
-
-		/^TARGET:/ {
-			if( NF > 1 ) {
-				target[$2] = $NF
+			/^TARGET:/ {
+				if( NF > 1 ) {
+					target[$2] = $NF
+				}
+				next;
 			}
-			next;
-		}
 
-		/File.*_test/ || /File.*test_/ {		# dont report on test files
-			skip = 1
-			file = 1
-			fname = $2
-			next
-		}
-
-		/File/ {
-			skip = 0
-			file = 1
-			fname = $2
-			next
-		}
-
-		/Function/ {
-			fname = $2
-			file = 0
-			if( imap[fname] ) {
-				fname = "skipped: " fname		# should never see and make it smell if we do
+			/File.*_test/ || /File.*test_/ {		# dont report on test files
 				skip = 1
-			} else {
-				skip = 0
+				file = 1
+				fname = $2
+				next
 			}
-			next
-		}
 
-		skip { next }
+			/File/ {
+				skip = 0
+				file = 1
+				fname = $2
+				next
+			}
 
-		/Lines executed/ {
-			split( $0, a, ":" )
-			pct = a[2]+0
-
-			if( file ) {
-				if( announce_target ) {				# announce default once at start
-					announce_target = 0;
-					printf( "\n[INFO] default target coverage for modules is %d%%\n", module_cov_target )
-				}
-
-				if( target[fname] ) {
-					mct = target[fname]
-					announce_target = 1;
+			/Function/ {
+				fname = $2
+				file = 0
+				if( imap[fname] ) {
+					fname = "skipped: " fname		# should never see and make it smell if we do
+					skip = 1
 				} else {
-					mct = module_cov_target
+					skip = 0
 				}
+				next
+			}
 
-				if( announce_target ) {					# annoucne for module if different from default
-					printf( "[INFO] target coverage for %s is %d%%\n", fname, mct )
-				}
+			skip { next }
 
-				if( pct < mct ) {
-					printf( "[%s] %3d%% %s\n", cfail, pct, fname )	# CAUTION: write only 3 things  here
-					exit_code = 1
-				} else {
-					printf( "[PASS] %3d%% %s\n", pct, fname )
-				}
+			/Lines executed/ {
+				split( $0, a, ":" )
+				pct = a[2]+0
 
-				announce_target = 0;
-			} else {
-				if( pct < 70 ) {
-					printf( "[LOW]  %3d%% %s\n", pct, fname )
-				} else {
-					if( pct < 80 ) {
-						printf( "[MARG] %3d%% %s\n", pct, fname )
+				if( file ) {
+					if( announce_target ) {				# announce default once at start
+						announce_target = 0;
+						printf( "\n[INFO] default target coverage for modules is %d%%\n", module_cov_target )
+					}
+
+					if( target[fname] ) {
+						mct = target[fname]
+						announce_target = 1;
 					} else {
-						if( show_all ) {
-							printf( "[OK]   %3d%% %s\n", pct, fname )
+						mct = module_cov_target
+					}
+
+					if( announce_target ) {					# annoucne for module if different from default
+						printf( "[INFO] target coverage for %s is %d%%\n", fname, mct )
+					}
+
+					if( pct < mct ) {
+						printf( "[%s] %3d%% %s\n", cfail, pct, fname )	# CAUTION: write only 3 things  here
+						exit_code = 1
+					} else {
+						printf( "[PASS] %3d%% %s\n", pct, fname )
+					}
+
+					announce_target = 0;
+				} else {
+					if( pct < 70 ) {
+						printf( "[LOW]  %3d%% %s\n", pct, fname )
+					} else {
+						if( pct < 80 ) {
+							printf( "[MARG] %3d%% %s\n", pct, fname )
+						} else {
+							if( show_all ) {
+								printf( "[OK]   %3d%% %s\n", pct, fname )
+							}
 						}
 					}
 				}
+
 			}
 
-		}
+			END {
+				printf( "\n" );
+				exit( exit_code )
+			}
+		' >/tmp/PID$$.log					# capture output to run discount on failures
+		rc=$?
+		cat /tmp/PID$$.log
 
-		END {
-			printf( "\n" );
-			exit( exit_code )
-		}
-	' >/tmp/PID$$.log					# capture output to run discount on failures
-	rc=$?
-	cat /tmp/PID$$.log
-
-	if (( rc  || force_discounting )) 	# didn't pass, or forcing, see if discounting helps
-	then
-		if (( ! verbose ))
+		if (( rc  || force_discounting )) 	# didn't pass, or forcing, see if discounting helps
 		then
-			echo "[INFO] checking to see if discounting improves coverage for failures listed above"
+			if (( ! verbose ))
+			then
+				echo "[INFO] checking to see if discounting improves coverage for failures listed above"
+			fi
+
+			# preferred, but breaks under bash
+			#egrep "$trigger_discount_str"  /tmp/PID$$.log | while read state junk  name
+			egrep "$trigger_discount_str"  /tmp/PID$$.log | while read stuff
+			do
+				set stuff			# this hack required because bash cant read into mult vars
+				state="$1"
+				name="$3"
+
+				if ! discount_an_checks $name.gcov >/tmp/PID$$.disc
+				then
+					(( errors++ ))
+				fi
+
+				tail -1 /tmp/PID$$.disc | grep '\['
+
+				if (( verbose > 1 )) 			# updated file was generated, keep here
+				then
+					echo "[INFO] discounted coverage info in: ${tfile##*/}.dcov"
+				fi
+
+				mv /tmp/PID$$.disc ${name##*/}.dcov
+			done
 		fi
-
-		egrep "$trigger_discount_str"  /tmp/PID$$.log | while read state junk  name
-		do
-			if ! discount_an_checks $name.gcov >/tmp/PID$$.disc
-			then
-				(( errors++ ))
-			fi
-
-			tail -1 /tmp/PID$$.disc | grep '\['
-
-			if (( verbose > 1 )) 			# updated file was generated, keep here
-			then
-				echo "[INFO] discounted coverage info in: ${tfile##*/}.dcov"
-			fi
-
-			mv /tmp/PID$$.disc ${name##*/}.dcov
-		done
-	fi
+ 	)>/tmp/PID$$.noise 2>&1
 
 	for x in *.gcov							# merge any previous coverage file with this one
 	do
@@ -622,7 +662,12 @@ do
 			rm $x-
 		fi
 	done
-done
+
+	if (( ! quiet ))
+	then
+		cat /tmp/PID$$.noise
+	fi
+done 
 
 echo ""
 echo "[INFO] final discount checks on merged gcov files"
@@ -633,9 +678,36 @@ do
 	then
 		of=${xx%.gcov}.dcov
 	 	discount_an_checks $xx  >$of
-		tail -1 $of |  grep '\['
+		if [[ -n $of ]]
+		then
+			tail -1 $of |  grep '\['
+		fi
 	fi
 done
+
+if (( save_gcov ))
+then
+	echo ""
+	ok=1
+	if [[ ! -d $outdir ]]
+	then
+		if ! mkdir -p $out_dir
+		then
+			echo "[WARN] unable to save .gcov files in $out_dir"
+			ok=0
+		fi
+	fi
+
+	if (( ok ))
+	then
+		rm -fr $out_dir/*
+		echo "[INFO] gcov files saved in $out_dir for push to remote system(s)"
+		cp *.gcov $out_dir/
+		rm -f $out_dir/*_test.c.gcov $out_dir/test_*.c.gcov
+	fi
+else
+	echo "[INFO] .gcov files were not saved for remote system"
+fi
 
 state=0						# final state
 rm -f /tmp/PID$$.*
@@ -663,5 +735,6 @@ else
 		mk_xml
 	fi
 fi
+
 exit $state
 

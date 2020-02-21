@@ -56,7 +56,10 @@ do
 done
 
 echo "----- app --------------------"
-run_test run_app_test.ksh $si_flag -v $installed $build
+if which ip >/dev/null 2>&1
+then
+	run_test run_app_test.ksh $si_flag -v $installed $build
+fi
 
 echo "----- multi ------------------"
 run_test run_multi_test.ksh $si_flag
