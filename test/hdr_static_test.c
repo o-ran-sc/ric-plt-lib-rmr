@@ -45,10 +45,9 @@
 
 #include "rmr.h"
 #include "rmr_agnostic.h"
-#include "rmr_nng_private.h"
 
 #define EMULATE_NNG
-#include "test_nng_em.c"
+#define NNG_UNDER_TEST
 #include "sr_nng_static.c"
 
 #include "test_support.c"

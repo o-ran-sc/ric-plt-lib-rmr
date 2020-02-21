@@ -40,6 +40,17 @@ build=""
 errors=0
 si_flag=""				# eventually we'll default to -S to run SI tests over NNG tests
 
+src_root="../.."
+if [[ -d $src_root/.build ]]			# look for build directory in expected places
+then									# run scripts will honour this
+	export BUILD_PATH=$src_root/.build
+else
+	if [[ -d $src_root/build ]]
+	then
+		export BUILD_PATH=$src_root/build
+	fi
+fi
+
 while [[ $1 == "-"* ]]
 do
 	case $1 in
@@ -56,7 +67,10 @@ do
 done
 
 echo "----- app --------------------"
-run_test run_app_test.ksh $si_flag -v $installed $build
+if which ip >/dev/null 2>&1
+then
+	run_test run_app_test.ksh $si_flag -v $installed $build
+fi
 
 echo "----- multi ------------------"
 run_test run_multi_test.ksh $si_flag

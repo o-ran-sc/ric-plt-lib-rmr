@@ -38,8 +38,9 @@ ex_cflags = $(shell echo $$EX_CFLAGS )
 build_path ?= ../../.build
 header_path := $(shell find $(build_path) -name 'rmr.h' |head -1 | sed 's!/rmr/.*!!' )
 
-C_INCLUDE_PATH := $(header_path)
-LD_LIBRARY_PATH=$(build_path):$(build_path)/lib
+# use from environment if there so as to allow build to reference installed base
+C_INCLUDE_PATH ?= $(header_path)
+LD_LIBRARY_PATH ?= $(build_path):$(build_path)/lib
 LIBRARY_PATH = $(LD_LIBRARY_PATH)
 
 # These programmes are designed to test some basic application level functions
