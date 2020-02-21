@@ -23,13 +23,13 @@
 function run_test {
 	if [[ -n $capture_file ]]
 	then
-		if ! ksh $@ >>$capture_file 2>&1
+		if ! $shell $@ >>$capture_file 2>&1
 		then
 			echo "[FAIL] test failed; see $capture_file"
 			(( errors++ ))
 		fi
 	else
-		if ! ksh $@
+		if ! $shell $@
 		then
 			(( errors++ ))
 		fi
@@ -40,6 +40,23 @@ build=""
 errors=0
 si_flag=""				# eventually we'll default to -S to run SI tests over NNG tests
 
+src_root="../.."
+if [[ -d $src_root/.build ]]			# look for build directory in expected places
+then									# run scripts will honour this
+	export BUILD_PATH=$src_root/.build
+else
+	if [[ -d $src_root/build ]]
+	then
+		export BUILD_PATH=$src_root/build
+	fi
+fi
+
+if whence ksh >/dev/null 2>&1
+then
+	shell=ksh
+else
+	shell=bash
+fi
 while [[ $1 == "-"* ]]
 do
 	case $1 in
@@ -48,6 +65,7 @@ do
 		-i)	installed="-i";;
 		-N)	si_flag="";;			# turn on NNG tests (off si)
 		-S)	si_flag="-S";;			# turn on si based tests
+		-s) shell=$2; shift;;
 
 		*)	echo "'$1' is not a recognised option and is ignored";;
 	esac
@@ -55,8 +73,13 @@ do
 	shift
 done
 
+export SHELL=$shell
+
 echo "----- app --------------------"
-run_test run_app_test.ksh $si_flag -v $installed $build
+if which ip >/dev/null 2>&1
+then
+	run_test run_app_test.ksh $si_flag -v $installed $build
+fi
 
 echo "----- multi ------------------"
 run_test run_multi_test.ksh $si_flag

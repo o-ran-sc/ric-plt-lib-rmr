@@ -150,14 +150,13 @@ fi
 
 if (( use_installed ))			# point at installed library
 then
-	export LD_LIBRARY_PATH=/usr/local/lib
-	export LIBRARY_PATH=$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=${LD_LIBRARY_PATH-:/usr/local/lib}	# use caller's or set sane default
 else
 	if (( rebuild ))
 	then
 		build_path=../../.build		# if we rebuild we can insist that it is in .build :)
 		set -e
-		ksh ./rebuild.ksh
+		$SHELL ./rebuild.ksh
 		set +e
 	else
 		build_path=${BUILD_PATH:-"../../.build"}	# we prefer .build at the root level, but allow user option
@@ -172,9 +171,9 @@ else
 
 	if [[ -d $build_path/lib64 ]]
 	then
-		export LD_LIBRARY_PATH=$build_path:$build_path/lib64
+		export LD_LIBRARY_PATH=$build_path:$build_path/lib64:$LD_LIBRARY_PATH
 	else
-		export LD_LIBRARY_PATH=$build_path:$build_path/lib
+		export LD_LIBRARY_PATH=$build_path:$build_path/lib:$LD_LIBRARY_PATH
 	fi
 fi
 
@@ -183,9 +182,12 @@ export RMR_SEED_RT=./ex_rts.rt
 
 set_rt $nrcvrs														# set up the rt for n receivers
 
-if ! make -B $mt_call_flag v_sender${si} ex_rts_receiver${si} >/tmp/PID$$.log 2>&1			# for sanity, always rebuild test binaries
+if ! build_path=$build_path make -B $mt_call_flag v_sender${si} ex_rts_receiver${si} >/tmp/PID$$.log 2>&1			# for sanity, always rebuild test binaries
 then
 	echo "[FAIL] cannot make binaries"
+	echo "====="
+	env
+	echo "====="
 	cat /tmp/PID$$.log
 	rm -f /tmp/PID$$*
 	exit 1

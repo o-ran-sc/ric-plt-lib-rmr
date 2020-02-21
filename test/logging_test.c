@@ -29,6 +29,7 @@
 */
 
 #define NO_DUMMY_RMR 1			// no dummy rmr functions; we don't pull in rmr.h or agnostic.h
+#define NO_EMULATION
 
 #include "rmr_logging.h"
 #include "logging.c"

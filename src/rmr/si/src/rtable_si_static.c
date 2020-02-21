@@ -225,6 +225,7 @@ static int uta_epsock_byname( uta_ctx_t* ctx, char* ep_name, int* nn_sock, endpo
 
 	if( PARINOID_CHECKS ) {
 		if( ctx == NULL || (rt = ctx->rtable) == NULL || (si_ctx = ctx->si_ctx) == NULL  ) {
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: parinoia check pop ctx=%p rt=%p\n", ctx, rt );
 			return FALSE;
 		}
 	} else {
@@ -233,6 +234,7 @@ static int uta_epsock_byname( uta_ctx_t* ctx, char* ep_name, int* nn_sock, endpo
 	}
 
 	ep =  rmr_sym_get( rt->hash, ep_name, 1 );
+	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: ep not found: %s\n", ep_name );
 	if( uepp != NULL ) {							// caller needs endpoint too, give it back
 		*uepp = ep;
 	}
