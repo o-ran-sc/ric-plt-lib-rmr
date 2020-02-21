@@ -37,6 +37,33 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+/*
+	This is ugly, but needed to allow for component testing.
+
+	The test code (e.g. foo_test.c and not foo_static_test.c) can include these
+	constants to turn off the import of test support files:
+		NO_EMULATION		-- the transport emulation will not be included
+		NO_PRIVATE_HEADERS	-- the private headers for the transport component of RMR
+								(e.g. si) will not be included.
+*/
+#ifndef NO_EMULATION				// assume emulation unless specifically put off (love double negatives)
+	#ifdef NNG_UNDER_TEST
+		#define TP_HDR_LEN 0				// needed for support functions but nonexistant in nng world
+		#include "test_nng_em.c"			// nano/ngg emulation functions
+	#else
+		#include "test_si95_em.c"			// si emulation functions
+	#endif
+#endif
+
+#ifndef NO_PRIVATE_HEADERS					// include transport headers unless specifically turned off
+	#ifdef NNG_UNDER_TEST
+		#include <rmr_nng_private.h>		// context things are type sensitive
+	#else
+		#include "si95/socket_if.h"			// need to have the si context more than anything else
+		#include <rmr_si_private.h>
+	#endif
+#endif
+
 #ifndef BAD
 #define BAD 1			// these are exit codes unless user overrides
 #define GOOD 0
@@ -162,12 +189,16 @@ static int fail_if_equalp( void* a, void* b, char* what ) {
 #define MSG_VER 3
 #endif
 
+//#ifndef TP_HDR_LEN
+	//#define TP_HDR_LEN	0				// for nng there is no such beast
+//#endif
+
 static rmr_mbuf_t* test_mk_msg( int len, int tr_len ) {
 	rmr_mbuf_t*	new_msg;
 	uta_mhdr_t* hdr;
 	size_t	alen;
 
-	alen = sizeof( *hdr ) + tr_len + len;	// this does no support allocating len2 and len3 data fields
+	alen = sizeof( *hdr ) + tr_len + len + TP_HDR_LEN;	// this does no support allocating len2 and len3 data fields
 
 	new_msg = (rmr_mbuf_t *) malloc( sizeof *new_msg );
 	new_msg->tp_buf = (void *) malloc( alen );

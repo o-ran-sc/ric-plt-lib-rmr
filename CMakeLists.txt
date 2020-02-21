@@ -33,12 +33,14 @@
 #	-DSKIP_EXTERNALS=1	Do not use NNG submodule when building; uee installed packages
 #	-DMAN_PREFIX=<path>	Supply a path where man pages are installed (default: /usr/share/man)
 
+#	See ci/build_all for an example of how to build and test
+
 project( rmr LANGUAGES C )
 cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "3" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
-set( minor_version "2" )
-set( patch_level "6" )
+set( minor_version "3" )
+set( patch_level "0" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_inc "include/rmr" )
@@ -292,6 +294,28 @@ if( need_ext )
 		add_dependencies( rmr_nng_shared ext_nng )
 	endif()
 endif()
+
+# ------------- testing -------------------------------------------------------
+enable_testing()
+add_test(
+		NAME drive_unit_tests
+		COMMAND bash ../test/unit_test.ksh -q 
+		WORKING_DIRECTORY ../test
+)
+
+# cmake seems unable to start test/app_test/run_all.ksh, so we have to lump
+# a dummy script in ./test that does the obvious thing.
+add_test(
+		NAME drive_app
+		COMMAND bash ./run_app_tests
+		WORKING_DIRECTORY ../test
+)
+
+
+# --- support binaries that depend on the libs identified above ---------------
+add_subdirectory( src/support )
+
+# ------------- packaging -----------------------------------------------------
 
 #
 if( APPLE  )
