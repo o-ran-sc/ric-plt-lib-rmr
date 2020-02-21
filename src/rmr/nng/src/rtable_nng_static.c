@@ -391,20 +391,6 @@ static inline rtable_ent_t*  uta_get_rte( route_table_t *rt, int sid, int mtype,
 }
 
 /*
-	Given a route table and meid string, find the owner (if known). Returns a pointer to
-	the endpoint struct or nil.
-*/
-static inline endpoint_t*  get_meid_owner( route_table_t *rt, char* meid ) {
-	endpoint_t* ep;		// the ep we found in the hash
-
-	if( rt == NULL || rt->hash == NULL || meid == NULL || *meid == 0 ) {
-		return NULL;
-	}
-
-	return (endpoint_t *) rmr_sym_get( rt->hash, meid, RT_ME_SPACE ); 
-}
-
-/*
 	Return a string of count information. E.g.:
 		<ep-name>:<port> <good> <hard-fail> <soft-fail>
 

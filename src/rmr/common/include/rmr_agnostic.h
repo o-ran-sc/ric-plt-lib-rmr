@@ -301,6 +301,7 @@ static int ie_test( void* r, int i_factor, long inserts );
 static inline uint64_t build_rt_key( int32_t sub_id, int32_t mtype );
 static void collect_things( void* st, void* entry, char const* name, void* thing, void* vthing_list );
 static void del_rte( void* st, void* entry, char const* name, void* thing, void* data );
+static endpoint_t*  get_meid_owner( route_table_t *rt, char* meid );
 static char* uta_fib( char* fname );
 static route_table_t* uta_rt_init( );
 static route_table_t* uta_rt_clone( route_table_t* srt );

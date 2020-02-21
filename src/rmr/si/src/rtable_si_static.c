@@ -387,6 +387,66 @@ static int uta_epsock_rr( uta_ctx_t* ctx, rtable_ent_t* rte, int group, int* mor
 }
 
 /*
+	Given a message, use the meid field to find the owner endpoint for the meid.
+	The owner ep is then used to extract the socket through which the message
+	is sent. This returns TRUE if we found a socket and it was written to the
+	nn_sock pointer; false if we didn't.
+
+	We've been told that the meid is a string, thus we count on it being a nil
+	terminated set of bytes.
+*/
+static int epsock_meid( uta_ctx_t* ctx, route_table_t *rtable, rmr_mbuf_t* msg, int* nn_sock, endpoint_t** uepp ) {
+	endpoint_t*	ep;				// seected end point
+	int  	state = FALSE;			// processing state
+	char*	meid;
+	si_ctx_t*	si_ctx;
+
+	if( PARINOID_CHECKS ) {
+		if( ctx == NULL || (si_ctx = ctx->si_ctx) == NULL  ) {
+			return FALSE;
+		}
+	} else {
+		si_ctx = ctx->si_ctx;
+	}
+
+	errno = 0;
+	if( ! nn_sock || msg == NULL || rtable == NULL ) {			// missing stuff; bail fast
+		errno = EINVAL;
+		return FALSE;
+	}
+
+	meid = ((uta_mhdr_t *) msg->header)->meid;
+
+	if( (ep = get_meid_owner( rtable, meid )) == NULL ) {
+		if( uepp != NULL ) {								// caller needs refernce to endpoint too
+			*uepp = NULL;
+		}
+
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_meid: no ep in hash for (%s)\n", meid );
+		return FALSE;
+	}
+
+	state = TRUE;
+	if( ! ep->open ) {								// not connected
+		if( ep->addr == NULL ) {					// name didn't resolve before, try again
+			ep->addr = strdup( ep->name );			// use the name directly; if not IP then transport will do dns lookup
+		}
+
+		if( uta_link2( si_ctx, ep ) ) {				// find entry in table and create link
+			ep->open = TRUE;
+			*nn_sock = ep->nn_sock;					// pass socket back to caller
+		} else {
+			state = FALSE;
+		}
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_meid: connection attempted with %s: %s\n", ep->name, state ? "[OK]" : "[FAIL]" );
+	} else {
+		*nn_sock = ep->nn_sock;
+	}
+
+	return state;
+}
+
+/*
 	Finds the rtable entry which matches the key. Returns a nil pointer if
 	no entry is found. If try_alternate is set, then we will attempt 
 	to find the entry with a key based only on the message type.

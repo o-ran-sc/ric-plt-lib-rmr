@@ -1235,4 +1235,18 @@ static inline uint64_t build_rt_key( int32_t sub_id, int32_t mtype ) {
 	return key;
 }
 
+/*
+	Given a route table and meid string, find the owner (if known). Returns a pointer to
+	the endpoint struct or nil.
+*/
+static inline endpoint_t*  get_meid_owner( route_table_t *rt, char* meid ) {
+	endpoint_t* ep;		// the ep we found in the hash
+
+	if( rt == NULL || rt->hash == NULL || meid == NULL || *meid == 0 ) {
+		return NULL;
+	}
+
+	return (endpoint_t *) rmr_sym_get( rt->hash, meid, RT_ME_SPACE ); 
+}
+
 #endif

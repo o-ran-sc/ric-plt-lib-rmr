@@ -2,6 +2,9 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 February 21; version 3.2.3
+	Add meid routing support to the SI95 interface.
+
 2020 February 20; version 3.2.2
 	Fix receive thread related core dump (ring early unlock).
 
