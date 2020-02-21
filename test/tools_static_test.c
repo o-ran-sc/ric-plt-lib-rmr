@@ -139,20 +139,7 @@ static int tools_test( ) {
 	i = uta_lookup_rtg( &ctx );
 	errors += fail_if_true( i, "rtg lookup returned that it found something when not expected to" );
 
-/*
-//==== moved out of generic tools ==========
-	// -------------- test link2 stuff ----------------------------------------------------------
-	i = uta_link2( "bad" );					// should fail
-	errors += fail_if_true( i >= 0, "uta_link2 didn't fail when given bad address" );
-
-	i = uta_link2( "nohost:-1234" );
-	errors += fail_if_true( i >= 0, "uta_link2 did not failed when given a bad (negative) port " );
-
-	i = uta_link2( "nohost:1234" );					// nn should go off and set things up, but it will never successd, but uta_ call should
-	errors += fail_if_true( i < 0, "uta_link2 failed when not expected to" );
-*/
-
-	// ------------ my ip stuff -----------------------------------------------------------------
+	// ------------ my_ip stuff -----------------------------------------------------------------
 
 	if_list = mk_ip_list( "1235" );
 	errors += fail_if_nil( if_list, "mk_ip_list returned nil pointer" );

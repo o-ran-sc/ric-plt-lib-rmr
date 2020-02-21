@@ -56,12 +56,7 @@ static int worm_test( ) {
 	int		whid = -1;
 	int		last_whid;
 
-	ctx = (uta_ctx_t *) malloc( sizeof( uta_ctx_t ) );
-	if( ctx == NULL ) {
-		fail_if_nil( ctx, "could not allocate dummy context" );
-		return 1;
-	}
-	memset( ctx, 0, sizeof( *ctx ) );
+	ctx = mk_dummy_ctx();
 	ctx->my_name = strdup( "tester" );
 	ctx->my_ip = strdup( "30.4.19.86:1111" );
 
