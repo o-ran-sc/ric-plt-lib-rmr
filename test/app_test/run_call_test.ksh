@@ -157,7 +157,7 @@ if (( rebuild ))
 then
 	build_path=../../.build
 	set -e
-	ksh ./rebuild.ksh
+	$SHELL ./rebuild.ksh
 	set +e
 else
 	build_path=${BUILD_PATH:-"../../.build"}	# we prefer .build at the root level, but allow user option
@@ -174,12 +174,13 @@ if (( dev_base ))							# assume we are testing against what we've built, not wh
 then
 	if [[ -d $build_path/lib64 ]]
 	then
-		export LD_LIBRARY_PATH=$build_path:$build_path/lib64
+		export LD_LIBRARY_PATH=$build_path:$build_path/lib64:$LD_LIBRARY_PATH
 	else
-		export LD_LIBRARY_PATH=$build_path:$build_path/lib
+		export LD_LIBRARY_PATH=$build_path:$build_path/lib:$LD_LIBRARY_PATH
 	fi
+	export LIBRARY_PATH=$LD_LIBRARY_PATH
 else										# -D option gets us here to test an installed library
-	export LD_LIBRARY_PATH=/usr/local/lib
+	export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 	export LIBRARY_PATH=$LD_LIBRARY_PATH
 fi
 

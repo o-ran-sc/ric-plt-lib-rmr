@@ -28,11 +28,16 @@
 */
 
 #define NO_DUMMY_RMR 1			// no dummy rmr functions; we don't pull in rmr.h or agnostic.h
+#define NO_EMULATION
+#define NO_PRIVATE_HEADERS
 
-#include "rmr_symtab.h"
-#include "symtab.c"
-
+#include <rmr.h>
+#include <rmr_agnostic.h>
 #include "test_support.c"
+#include "rmr_symtab.h"
+
+#include "symtab.c"							// module under test
+
 
 int state = GOOD;							// overall pass/fail state 0==fail
 int counter;								// global counter for for-each tests

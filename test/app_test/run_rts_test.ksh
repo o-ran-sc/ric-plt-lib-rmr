@@ -113,7 +113,7 @@ fi
 if (( rebuild ))
 then
 	set -e
-	ksh ./rebuild.ksh $nopull | read build_path
+	$SHELL ./rebuild.ksh $nopull | read build_path
 	set +e
 else
 	build_path=${BUILD_PATH:-"../../.build"}	# we prefer .build at the root level, but allow user option
@@ -128,9 +128,9 @@ fi
 
 if [[ -d $build_path/lib64 ]]
 then
-	export LD_LIBRARY_PATH=$build_path:$build_path/lib64
+	export LD_LIBRARY_PATH=$build_path:$build_path/lib64:$LD_LIBRARY_PATH
 else
-	export LD_LIBRARY_PATH=$build_path:$build_path/lib
+	export LD_LIBRARY_PATH=$build_path:$build_path/lib:$LD_LIBRARY_PATH
 fi
 export LIBRARY_PATH=$LD_LIBRARY_PATH
 export RMR_SEED_RT=./rts.rt
