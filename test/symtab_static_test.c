@@ -31,7 +31,6 @@
 #include "rmr_symtab.h"
 //  -- parent must include if needed #include "../src/common/src/symtab.c"
 
-#include "test_support.c"
 
 #ifndef GOOD
 #define GOOD 0
