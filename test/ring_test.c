@@ -28,6 +28,8 @@
 	Date:		3 April 2019
 */
 
+#define NO_EMULATION
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>

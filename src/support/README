@@ -1,0 +1,16 @@
+
+This directory contains the source for any support tools which
+are distributed with the RMR runtime package.  Support tools
+might provide means to query information about an RMR based
+application using the RMR_CTL_PORT.
+
+Support tools:
+	health_ck	-- A generic health check application which
+				sends n messages to the application running
+				at the indicated host:port and expects to
+				receive n responses. Exit code is a simple
+				binary: 0 == received responses, 1 == failure.
+
+
+Support tools are automatically built and included in the 
+runtime package (deb or rpm).
