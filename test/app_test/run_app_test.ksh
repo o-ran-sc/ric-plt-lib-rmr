@@ -194,9 +194,11 @@ export RMR_SEED_RT=${RMR_SEED_RT:-./app_test.rt}		# allow easy testing with diff
 
 if (( force_make )) || [[ ! -f ./sender${si} || ! -f ./receiver${si} ]]
 then
-	if ! make -B sender${si} receiver${si} >/dev/null 2>&1
+	if ! make -B sender${si} receiver${si} >/tmp/PID$$.clog 2>&1
 	then
 		echo "[FAIL] cannot find sender${si} and/or receiver${si}binary, and cannot make them.... humm?"
+		head -50 /tmp/PID$$.clog
+		rm -fr /tmp/PID$$.*
 		exit 1
 	fi
 fi
