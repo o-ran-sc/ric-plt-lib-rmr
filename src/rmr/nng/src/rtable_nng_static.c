@@ -429,12 +429,15 @@ static inline char* get_ep_counts( endpoint_t* ep, char* ubuf, int ubuf_len ) {
 
 	We've been told that the meid is a string, thus we count on it being a nil
 	terminated set of bytes.
+
+	If we return false there is no guarentee that the caller's reference to the
+	ep is valid or nil. Caller can trus the ep reference only when the return is
+	true.
 */
 static int epsock_meid( route_table_t *rtable, rmr_mbuf_t* msg, nng_socket* nn_sock, endpoint_t** uepp ) {
 	endpoint_t*	ep;				// seected end point
 	int  	state = FALSE;			// processing state
 	char*	meid;
-
 
 	errno = 0;
 	if( ! nn_sock || msg == NULL || rtable == NULL ) {			// missing stuff; bail fast
@@ -445,12 +448,12 @@ static int epsock_meid( route_table_t *rtable, rmr_mbuf_t* msg, nng_socket* nn_s
 	meid = ((uta_mhdr_t *) msg->header)->meid;
 
 	if( (ep = get_meid_owner( rtable, meid )) == NULL ) {
-		if( uepp != NULL ) {								// caller needs refernce to endpoint too
-			*uepp = NULL;
-		}
-
 		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_meid: no ep in hash for (%s)\n", meid );
 		return FALSE;
+	}
+
+	if( uepp != NULL ) {	// ensure ep is returned to the caller
+		*uepp = ep;
 	}
 
 	state = TRUE;

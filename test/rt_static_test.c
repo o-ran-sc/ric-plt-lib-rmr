@@ -379,13 +379,14 @@ static int rt_test( ) {
 	mbuf->len = 100;
 	rmr_str2meid( mbuf, "meid1" );					// id that we know is in the map
 
+	ep = NULL;										// force to nil so we see it go non-nil
 	state = epsock_meid( ctx->rtable, mbuf, &nn_sock, &ep );
 	errors += fail_if_nil( ep, "ep was nil when looking up ep with known meid in message" );
 	errors += fail_not_equal( state, 1, "state was not true when looking up ep with known meid in message" );
 
 	rmr_str2meid( mbuf, "XXXmeid1" );				// id that we know is NOT in the map
 	state = epsock_meid( ctx->rtable, mbuf, &nn_sock, &ep );
-	errors += fail_not_nil( ep, "ep was NOT nil when looking ep up with unknown meid in message" );
+	// it is NOT a valid check to test ep for nil -- epsock_mied doesn't guarentee ep is set/cleared when state is false
 	errors += fail_not_equal( state, 0, "state was not false when looking up ep with unknown meid in message" );
 
 	return !!errors;			// 1 or 0 regardless of count

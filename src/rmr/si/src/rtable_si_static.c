@@ -394,6 +394,8 @@ static int uta_epsock_rr( uta_ctx_t* ctx, rtable_ent_t* rte, int group, int* mor
 
 	We've been told that the meid is a string, thus we count on it being a nil
 	terminated set of bytes.
+
+	If we return false the caller's ep reference may NOT be valid or even nil.
 */
 static int epsock_meid( uta_ctx_t* ctx, route_table_t *rtable, rmr_mbuf_t* msg, int* nn_sock, endpoint_t** uepp ) {
 	endpoint_t*	ep;				// seected end point
@@ -417,11 +419,12 @@ static int epsock_meid( uta_ctx_t* ctx, route_table_t *rtable, rmr_mbuf_t* msg, 
 
 	meid = ((uta_mhdr_t *) msg->header)->meid;
 
-	if( (ep = get_meid_owner( rtable, meid )) == NULL ) {
-		if( uepp != NULL ) {								// caller needs refernce to endpoint too
-			*uepp = NULL;
-		}
+	ep = get_meid_owner( rtable, meid );
+	if( uepp != NULL ) {								// caller needs refernce to endpoint too
+		*uepp = ep;
+	}
 
+	if( ep == NULL ) {
 		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_meid: no ep in hash for (%s)\n", meid );
 		return FALSE;
 	}
