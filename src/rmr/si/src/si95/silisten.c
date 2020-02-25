@@ -49,12 +49,10 @@ extern int SIlistener( struct ginfo_blk *gptr, int type, char *abuf ) {
 		if( gptr == NULL ) {
 			return status;
 		}
-		gptr->sierr = SI_ERR_HANDLE;
 		if( gptr->magicnum != MAGICNUM )   			//  good cookie at the gptr address?
 			return status;
 	}
 
-	gptr->sierr = SI_ERR_TP;
 	tpptr = SIlisten_prep( gptr, type, abuf, 0 );
 
 	if( tpptr != NULL )                          //  established a fd bound to the port ok

@@ -62,8 +62,6 @@ extern struct ginfo_blk* SIinitialise( int opts )
 		}
 		memset( gptr->tp_map, 0, sizeof( struct tp_blk *) * MAX_FDS );
 
-		gptr->sierr = SI_ERR_TPORT;
-	
 		gptr->cbtab = (struct callback_blk *) malloc(
 			(sizeof( struct callback_blk ) * MAX_CBS ) );
 		if( gptr->cbtab != NULL ) {
@@ -76,8 +74,6 @@ extern struct ginfo_blk* SIinitialise( int opts )
 			free( gptr );
 			gptr = NULL;       //  dont allow them to continue 
 		}
-
-		gptr->sierr = SI_OK;
 	}                     //  end if gen infor block allocated successfully 
 
 	

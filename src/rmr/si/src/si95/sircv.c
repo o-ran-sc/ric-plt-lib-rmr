@@ -58,11 +58,9 @@ extern int SIrcv( struct ginfo_blk *gptr, int sid, char *buf, int buflen, char *
 	char 	*acbuf;		//  pointer to converted address 
  int addrlen;
 
- gptr->sierr = SI_ERR_HANDLE;              //  set errno before we fail 
  if( gptr->magicnum != MAGICNUM )     //  if not a valid ginfo block 
   return SI_ERROR;
 
- gptr->sierr = SI_ERR_SESSID;             //  set errno before we fail 
  for( tpptr = gptr->tplist; tpptr != NULL && tpptr->fd != sid;
       tpptr = tpptr->next );      //  find transport block 
  if( tpptr == NULL )
@@ -71,7 +69,6 @@ extern int SIrcv( struct ginfo_blk *gptr, int sid, char *buf, int buflen, char *
  uaddr = (struct sockaddr *) malloc( sizeof( struct sockaddr ) );
  addrlen = sizeof( *uaddr );
 
- gptr->sierr = SI_ERR_SHUTD;               //  set errno before we fail 
  if( ! (gptr->flags & GIF_SHUTDOWN) )
   {                        //  if not in shutdown and no signal flags  
    FD_ZERO( &readfds );               //  clear select info 
@@ -87,22 +84,18 @@ extern int SIrcv( struct ginfo_blk *gptr, int sid, char *buf, int buflen, char *
      tptr->tv_usec = delay;
     }
 
-   gptr->sierr = SI_ERR_TP;
    if( (select( tpptr->fd + 1, &readfds, NULL, &execpfds, tptr ) < 0 ) )
     gptr->flags |= GIF_SHUTDOWN;     //  we must shut on error or signal 
    else
     {                                //  poll was successful - see if data ? 
-     gptr->sierr = SI_ERR_TIMEOUT;
      if( FD_ISSET( tpptr->fd, &execpfds ) )   //  session error? 
       {
        SIterm( gptr, tpptr );                 //  clean up our end of things 
-       gptr->sierr = SI_ERR_SESSID;               //  set errno before we fail 
       }
      else
       {
        if( (FD_ISSET( tpptr->fd, &readfds )) )
         {                                       //  process data if no signal 
-		gptr->sierr = SI_ERR_TP;
 		if( tpptr->type == SOCK_DGRAM )        //  raw data received 
 		{
 			status = RECVFROM( sid, buf, buflen, 0, uaddr, &addrlen );

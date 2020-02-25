@@ -20,23 +20,26 @@
 
 /*
 **************************************************************************
-*  Mnemonic: SIterm
-*  Abstract: This routine will terminate a session based on the tp_blk
-*            that is passed into the routine. The transport session block
-*            is released and removed from the ginfo list. The session is
-*            terminated by issuing a t_unbind call (if the unbind flag is
-*            on in the tpptr block), and then issuing a t_close.
-*  Parms:    gptr - Pointer to the global information block
-*            tpptr - Pointer to tp block that defines the open fd.
-*  Returns:  Nothing.
-*  Date:     18 January 1995
-*  Author:   E. Scott Daniels
+*  Mnemonic:	SIterm
+*  Abstract:	Manage the transport provider block information relating to
+*				the need to terminate the session. The block is left in the
+*				list; it is unsafe to clean the lsit up outside of the SIwait 
+*				thread.  When safe, the SIrm_tpb() function can be called to
+*				do the rest of the work that was originally done by SIterm.
+*
+*  Date:     	18 January 1995
+*  Author:		E. Scott Daniels
 *
 **************************************************************************
 */
 #include "sisetup.h"     //  get the setup stuff 
 #include "sitransport.h"
 
+/*
+	Close the FD and mark the transport block as unusable/closed.
+	Removal of the block from the list is safe only from the siwait
+	thread.
+*/
 extern void SIterm( struct ginfo_blk* gptr, struct tp_blk *tpptr ) {
 
 	if( tpptr != NULL ) {
@@ -47,14 +50,28 @@ extern void SIterm( struct ginfo_blk* gptr, struct tp_blk *tpptr ) {
 			}
 		}
 
-		if( tpptr->prev != NULL ) {            //  remove from the list 
-			tpptr->prev->next = tpptr->next;    //  point previous at the next 
-		} else {
-			gptr->tplist = tpptr->next;        //  this was head, make next new head 
-		}
+		tpptr->fd = -1;								// prevent future sends etc.
+		tpptr->flags |= TPF_DELETE;					// signal block deletion needed when safe
+	}
+}
 
-		if( tpptr->next != NULL ) {
-			tpptr->next->prev = tpptr->prev;  //  point next one back behind this one 
+/*
+	It is safe to remove the block from the list; if it was in the list
+	in the first place. 
+*/
+extern void SIrm_tpb( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
+
+	if( tpptr != NULL ) {
+		if( tpptr->prev != NULL || tpptr->next != NULL ) {	// in the list
+			if( tpptr->prev != NULL ) {            //  remove from the list 
+				tpptr->prev->next = tpptr->next;    //  point previous at the next 
+			} else {
+				gptr->tplist = tpptr->next;        //  this was head, make next new head 
+			}
+	
+			if( tpptr->next != NULL ) {
+				tpptr->next->prev = tpptr->prev;  //  point next one back behind this one 
+			}
 		}
 
 		free( tpptr->addr );             //  release the address bufers 

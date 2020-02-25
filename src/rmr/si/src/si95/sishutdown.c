@@ -35,7 +35,6 @@
 #include "sisetup.h"                   //  get includes and defines 
 
 extern void SIshutdown( struct ginfo_blk *gptr ) {
-	gptr->sierr = SI_ERR_HANDLE;
 	if( gptr != NULL && gptr->magicnum == MAGICNUM )
 	{
  		gptr->flags |=  GIF_SHUTDOWN;    //  signal shutdown 
@@ -43,7 +42,6 @@ extern void SIshutdown( struct ginfo_blk *gptr ) {
 		{
 			gptr->tplist->flags |= TPF_UNBIND;    //  force unbind on session 
 			SIterm( gptr, gptr->tplist );         //  and drop the session 
-		}                                      //  end while 
-		gptr->sierr = 0;
+		}
 	}
 }            

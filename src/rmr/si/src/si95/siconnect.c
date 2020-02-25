@@ -62,24 +62,20 @@ extern int SIconnect( struct ginfo_blk *gptr, char *abuf ) {
 			return SI_ERROR;
 		}
 
-		gptr->sierr = SI_ERR_HANDLE;
 		if( gptr->magicnum != MAGICNUM ) {		// no cookie -- no connection
 			return SI_ERROR;
 		}
 	}
 
-	gptr->sierr = SI_ERR_TPORT;
 	tpptr = SIconn_prep( gptr, TCP_DEVICE, abuf, 0 );			// create tp struct, and socket. get peer address 0 == any family that suits the addr
 	if( tpptr != NULL ) {
 		taddr = tpptr->paddr;
-		gptr->sierr = SI_ERR_TP;
 		errno = 0;
 		if( connect( tpptr->fd, taddr, tpptr->palen ) != 0 ) {
 			close( tpptr->fd );     			//  clean up fd and tp_block 
 			SItrash( TP_BLK, tpptr );       	//  free the trasnsport block 
 			fd = SI_ERROR;             			//  send bad session id num back 
 		} else  {                      			//  connect ok 
-			gptr->sierr = 0;
 			tpptr->flags |= TPF_SESSION;    		//  indicate we have a session here 
 			tpptr->next = gptr->tplist;     		//  add block to the list 
 			if( tpptr->next != NULL ) {

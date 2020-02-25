@@ -56,19 +56,25 @@ extern int SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 	int	sidx = 0;				// send index
 
 	errno = EINVAL;
-	gptr->sierr = SI_ERR_SESSID;
 
 	if( fd < 0 ) {
+		errno = EBADFD;
 		return SI_ERROR;					// bad form trying to use this fd
 	}
 
 	if( fd < MAX_FDS ) {					// straight from map if possible
 		tpptr = gptr->tp_map[fd];
 	} else {
+		// list should be locked before traversing
 		for( tpptr = gptr->tplist; tpptr != NULL && tpptr->fd != fd; tpptr = tpptr->next ); //  find the block if out of map's range
 	}
 
 	if( tpptr != NULL ) {
+		if( (fd = tpptr->fd) < 0 ) {			// fd user given might not be real, and this might be closed already
+			errno = EBADFD;
+			return SI_ERROR;
+		}
+
 		tpptr->sent++;				// investigate: this may over count
 
 		FD_ZERO( &writefds );       //  clear for select call 
@@ -80,10 +86,9 @@ extern int SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 		time.tv_usec = 1;			// small pause on check to help drain things
 
 		if( select( fd + 1, NULL, &writefds, &execpfds, &time ) > 0 ) {		//  would block if <= 0
-			gptr->sierr = SI_ERR_TP;
 			if( FD_ISSET( fd, &execpfds ) ) {   	//  error? 
 				errno = EBADFD;
-				SIterm( gptr, tpptr );   			//  clean up our portion of the session 
+				SIterm( gptr, tpptr );   			// mark block for deletion when safe
 				return SI_ERROR;					// and bail from this sinking ship
 			} else {
 				errno = 0;
@@ -112,91 +117,3 @@ extern int SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 	return status;
 }
 
-/*
-	This routine will send a datagram to the TCP session partner
-	that is connected via the FD number that is passed in.
-	If the send would cause the process to block, the send is
-	queued on the tp_blk for the session and is sent later as
-	a function of the SIwait process.  If the buffer must be
-	queued, a copy of the buffer is created such that the
-	user program may free, or reuse, the buffer upon return.
-
-	Parms:i		gptr - The pointer to the global info structure (context)
-	            fd   - File descriptor (session number)
-	            ubuf - User buffer to send.
-	            ulen - Lenght of the user buffer.
-
-	Returns:  SI_OK if sent, SI_QUEUED if queued for later, SI_ERROR if error.
-*/
-#ifdef KEEP
-extern int new_SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
-	int status = SI_OK;         //  status of processing 
-	fd_set writefds;            //  local write fdset to check blockage 
-	fd_set execpfds;            //  exception fdset to check errors 
-	struct tp_blk *tpptr;       //  pointer at the tp_blk for the session 
-	struct ioq_blk *qptr;       //  pointer at i/o queue block 
-	struct timeval time;        //  delay time parameter for select call 
-
-	gptr->sierr = SI_ERR_HANDLE;
-
-	//if( gptr->magicnum == MAGICNUM ) {     //  ensure cookie is good  -- we need to be too performant for this
-	//{                                   //  mmmm oatmeal, my favorite 
-		gptr->sierr = SI_ERR_SESSID;
-
-		if( fd < MAX_FDS ) {					// straight from map if possible
-			tpptr = gptr->tp_map[fd];
-		} else {
-			for( tpptr = gptr->tplist; tpptr != NULL && tpptr->fd != fd; tpptr = tpptr->next ); //  find the block if out of map's range
-		}
-
-		if( tpptr != NULL ) {
-			tpptr->sent++;
-
-			FD_ZERO( &writefds );       //  clear for select call 
-			FD_SET( fd, &writefds );    //  set to see if this one was writable 
-			FD_ZERO( &execpfds );       //  clear and set execptions fdset 
-			FD_SET( fd, &execpfds );
-
-			time.tv_sec = 0;			//  set both to 0 if we just want a poll, else we block at max this amount
-			time.tv_usec = 1;			// small pause on check to help drain things
-
-			if( select( fd + 1, NULL, &writefds, &execpfds, &time ) > 0 ) {		//  see if it would block
-				gptr->sierr = SI_ERR_TP;
-				if( FD_ISSET( fd, &execpfds ) ) {   //  error? 
-					SIterm( gptr, tpptr );   			//  clean up our portion of the session 
-					return SI_ERROR;					// and bail from this sinking ship
-				} else {
-					if( tpptr->squeue ) {
-						SIsend( gptr, tpptr );			//  something queued; send off queue and queue this
-					} else {
-						return SEND( tpptr->fd, ubuf, (unsigned int) ulen, 0 );   //  done after send 
-					}
-				}
-			}
-
-			gptr->sierr = SI_ERR_NOMEM;
-
-			tpptr->qcount++;
-			if( (qptr = SInew( IOQ_BLK )) != NULL ) {		//  alloc a queue block 
-				if( tpptr->sqtail == NULL ) {				//  if nothing on the queue 
-					tpptr->squeue = qptr;         //  simple add to the tp blk q 
-					tpptr->sqtail = qptr;
-	 			} else  {                          		//  else - add at end of the q 
-	 				tpptr->sqtail->next = qptr;		
-					tpptr->sqtail = qptr;	
-					qptr->next = NULL;		//  new block is the last one now 
-				}    		                       //  end add block at end of queue 
-
-				qptr->dlen = ulen;           //  copy info to queue block 
-				qptr->data = (char *) malloc( ulen );  //  get buffer 
-				memcpy( qptr->data, (const char*) ubuf, ulen );
-	
-				gptr->sierr = SI_QUEUED;                //  indicate queued to caller 
-				status = SI_QUEUED;						// for return
-			}
-		}							//  end if tpptr was not found 
-	//}								//  ginfo pointer was corrupted 
-
-	return status;
-}
-#endif

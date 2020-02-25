@@ -46,7 +46,6 @@ extern void SIsend( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 	struct t_unitdata *udata;      //  pointer at UDP unit data 
 	struct ioq_blk *qptr;          //  pointer at qio block for free 
 	int status;
-//static int announced = 0;	// TESTING
 
 	if( tpptr->squeue == NULL )    //  who knows why we were called 
 		return;                        //  nothing queued - just leave 
@@ -64,14 +63,6 @@ extern void SIsend( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 	}
 */
 
-
-/*
-//TESTING
-if( !announced && status < tpptr->squeue->dlen ) {
-announced = 1;
-fprintf( stderr, ">>>>>>> !!!!!! SIsend: short send: %d != %d\n", status, tpptr->squeue->dlen );
-}
-*/
 	free( tpptr->squeue->data );           //  trash buffer or the udp block 
 	qptr = tpptr->squeue;                  //  hold pointer for free 
 	tpptr->squeue = tpptr->squeue->next;   //  next in queue becommes head 
@@ -82,6 +73,6 @@ fprintf( stderr, ">>>>>>> !!!!!! SIsend: short send: %d != %d\n", status, tpptr-
 
 	if( (tpptr->flags & TPF_DRAIN) && tpptr->squeue == NULL )  //  done w/ drain? 
 	{
-		SIterm( gptr, tpptr );     //  trash the tp block 
+		SIterm( gptr, tpptr );     //  close the session and mark the block for delte
 	}
 }                      //  SIsend 

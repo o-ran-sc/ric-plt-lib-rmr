@@ -109,12 +109,12 @@ extern struct tp_blk *SIlisten_prep( struct ginfo_blk *gptr, int type, char* abu
 			if( status == SI_OK ) {
 				tptr->addr = addr;         	//  save address 
 			} else {
-				//fprintf( stderr, ">>>>> siestablish: bind failed: fam=%d type=%d pro=%d %s\n", tptr->family, tptr->type, protocol, strerror( errno ) );
+				fprintf( stderr, ">>>>> siestablish: bind failed: fam=%d type=%d pro=%d %s\n", tptr->family, tptr->type, protocol, strerror( errno ) );
 				close( tptr->fd );
 			}
 		} else {
 			status = ! SI_OK;       		//  force bad return later 
-			//fprintf( stderr, ">>>>> siestablish: socket not esablished: fam=%d type=%d pro=%d %s\n", tptr->family, tptr->type, protocol, strerror( errno ) );
+			fprintf( stderr, ">>>>> siestablish: socket not esablished: fam=%d type=%d pro=%d %s\n", tptr->family, tptr->type, protocol, strerror( errno ) );
 		}
 
 		if( status != SI_OK ) {    			//  socket or bind call failed - clean up stuff 

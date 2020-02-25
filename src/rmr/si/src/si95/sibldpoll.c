@@ -52,7 +52,10 @@ extern void SIbldpoll( struct ginfo_blk* gptr  ) {
 	for( tpptr = gptr->tplist; tpptr != NULL; tpptr = nextb ) {
 		nextb = tpptr->next;
 		if( tpptr->flags & TPF_DELETE ) {
-			SIterm( gptr, tpptr );
+			if( tpptr->fd >= 0 ) {						// wasn't closed for some reason
+				SIterm( gptr, tpptr );
+			}
+			SIrm_tpb( gptr, tpptr );					// safe to remove the block from the list in this thread
 		} else {
 			if( tpptr->fd >= 0 ) {                       //  if valid file descriptor 
 				if( tpptr->fd >= gptr->fdcount ) {	

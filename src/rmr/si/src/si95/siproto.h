@@ -48,6 +48,7 @@ extern void SImap_fd( struct ginfo_blk *gptr, int fd, struct tp_blk* tpptr );
 extern int SInewsession( struct ginfo_blk *gptr, struct tp_blk *tpptr );
 extern int SIpoll( struct ginfo_blk *gptr, int msdelay );
 extern int SIrcv( struct ginfo_blk *gptr, int sid, char *buf, int buflen, char *abuf, int delay );
+extern void SIrm_tpb( struct ginfo_blk *gptr, struct tp_blk *tpptr );
 extern void SIsend( struct ginfo_blk *gptr, struct tp_blk *tpptr );
 extern int SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen );
 extern void SIset_tflags( struct ginfo_blk* gp, int flags );

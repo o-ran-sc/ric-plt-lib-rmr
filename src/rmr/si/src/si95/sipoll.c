@@ -59,13 +59,9 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
  struct timeval  delay;        //  delay to use on select call
  struct sockaddr *uaddr;       //  pointer to udp address
 
- gptr->sierr = SI_ERR_SHUTD;
-
  if( gptr->flags & GIF_SHUTDOWN )     //  cannot do if we should shutdown
   return( SI_ERROR );                    //  so just get out
 
-
- gptr->sierr = SI_ERR_HANDLE;
 
  if( gptr->magicnum != MAGICNUM )     //  if not a valid ginfo block
   return( SI_ERROR );
@@ -156,7 +152,7 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
                 SIaddress( uaddr, (void **) &buf, AC_TODOT );
                 status = (*cbptr)( gptr->cbtab[SI_CB_RDATA].cbdata, gptr->rbuf, status, buf );
                 SIcbstat( gptr, status, SI_CB_RDATA );    //  handle status
-		free( buf );
+				free( buf );
                }                              //  end if call back was defined
              }                                //  end if status was ok
             free( uaddr );
@@ -190,7 +186,6 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
 
  if( gptr->flags & GIF_SHUTDOWN )      //  we need to stop for some reason
   {
-   gptr->sierr = SI_ERR_SHUTD;        //  indicate error exit status
    status = SI_ERROR;                //  status should indicate to user to die
    SIshutdown( gptr );            //  clean things up
   }

@@ -71,13 +71,9 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 
 	ibuf = (char *) malloc( 2048 );
 
-	gptr->sierr = SI_ERR_SHUTD;
-
 	if( gptr->flags & GIF_SHUTDOWN ) {				//  cannot do if we should shutdown 
 		return SI_ERROR;							//  so just get out 
 	}
-
-	gptr->sierr = SI_ERR_HANDLE;
 
 	if( gptr->magicnum != MAGICNUM ) {				//  if not a valid ginfo block 
 		rmr_vlog( RMR_VL_CRIT, "SI95: wait: bad global info struct magic number is wrong\n" );
@@ -127,7 +123,7 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 										status = (*cbptr)( gptr->cbtab[SI_CB_DISC].cbdata, tpptr->fd );
 										SIcbstat( gptr, status, SI_CB_DISC );	//  handle status 
 									}
-									SIterm( gptr, tpptr );
+									SIterm( gptr, tpptr );			// close FD and mark block for deletion
 								}
 							}
 						}
@@ -139,10 +135,8 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 
 	free( ibuf );
 	if( gptr->tplist == NULL )					//  indicate all fds closed 
-		gptr->sierr = SI_ERR_NOFDS;
 
 	if( gptr->flags & GIF_SHUTDOWN ) {			//  we need to stop for some reason 
-		gptr->sierr = SI_ERR_SHUTD;				//  indicate error exit status 
 		status = SI_ERROR;						//  status should indicate to user to die 
 		SIshutdown( gptr );						//  clean things up 
 	} else {
