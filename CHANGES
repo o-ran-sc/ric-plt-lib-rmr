@@ -2,6 +2,9 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 February 26; version 3.2.5
+	Fix source address bug in SI95 receive/send funcitons.
+
 2020 February 24; version 3.2.4
 	Fix meid bug (RIC-220) causing core dump.
 
