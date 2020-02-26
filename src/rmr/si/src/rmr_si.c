@@ -700,7 +700,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 												// finish all flag setting before threads to keep helgrind quiet
 	ctx->flags |= CFL_MTC_ENABLED;				// for SI threaded receiver is the only way
 
-	if( flags & FL_NOTHREAD ) {					// thread set to off; no rout table collector started (could be called by the rtc thread itself)
+	if( flags & RMRFL_NOTHREAD ) {				// thread set to off; no route table collector started (could be called by the rtc thread itself)
 		ctx->rtable = rt_clone_space( NULL, NULL, 0 );		// creates an empty route table so that wormholes still can be used
 	} else {
 		if( static_rtc ) {
@@ -875,6 +875,7 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 			}
 		}
 
+		mbuf->flags |= MFL_ADDSRC;               // turn on so if user app tries to send this buffer we reset src
 		return mbuf;
 	}
 
@@ -919,6 +920,7 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, " mt_rcv extracting from normal ring\n" );
 		if( (mbuf = (rmr_mbuf_t *) uta_ring_extract( ctx->mring )) != NULL ) {			// pop if queued
 			mbuf->state = RMR_OK;
+			mbuf->flags |= MFL_ADDSRC;               // turn on so if user app tries to send this buffer we reset src
 
 			if( ombuf ) {
 				rmr_free_msg( ombuf );					// we cannot reuse as mbufs are queued on the ring
