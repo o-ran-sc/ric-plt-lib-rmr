@@ -1,0 +1,7 @@
+Verified+1: ORAN Jobbuilder <releng+oran-jobbuilder@linuxfoundation.org>
+Code-Review+2: Matti Hiltunen <hiltunen@att.com>
+Submitted-by: Matti Hiltunen <hiltunen@att.com>
+Submitted-at: Wed, 26 Feb 2020 21:25:03 +0000
+Reviewed-on: https://gerrit.o-ran-sc.org/r/c/ric-plt/lib/rmr/+/2602
+Project: ric-plt/lib/rmr
+Branch: refs/heads/master
