@@ -150,7 +150,8 @@ struct uta_ctx {
 	river_t*	rivers;			// inbound flows (index is the socket fd)
 	int			max_ibm;		// max size of an inbound message (river accum alloc size)
 	void*		zcb_mring;		// zero copy buffer mbuf ring
-	void*		fd2ep;			// the symtab mapping file des to endpoints for cleanup on disconnect
+	void*		fd2ep;				// the symtab mapping file des to endpoints for cleanup on disconnect
+	pthread_mutex_t	*fd2ep_gate;	// we must gate add/deletes to the fd2 symtab
 };
 
 typedef uta_ctx_t uta_ctx;
@@ -167,7 +168,8 @@ static void free_ctx( uta_ctx_t* ctx );
 
 // --- rt table things ---------------------------
 static void uta_ep_failed( endpoint_t* ep );
-static int uta_link2( si_ctx_t* si_ctx, endpoint_t* ep );
+static int uta_link2( uta_ctx_t *ctx, endpoint_t* ep );
+
 static int rt_link2_ep( void* vctx, endpoint_t* ep );
 static rtable_ent_t* uta_get_rte( route_table_t *rt, int sid, int mtype, int try_alt );
 static inline int xlate_si_state( int state, int def_state );

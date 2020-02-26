@@ -555,7 +555,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 	rmr_set_vlevel( RMR_VL_INFO );		// we WILL announce our version etc
 
 	if( ! announced ) {
-		rmr_vlog( RMR_VL_INFO, "ric message routing library on SI95/f mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
+		rmr_vlog( RMR_VL_INFO, "ric message routing library on SI95/g mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
 			RMR_MSG_VER, flags, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
 	}
@@ -697,6 +697,9 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		return NULL;
 	}
 
+												// finish all flag setting before threads to keep helgrind quiet
+	ctx->flags |= CFL_MTC_ENABLED;				// for SI threaded receiver is the only way
+
 	if( flags & FL_NOTHREAD ) {					// thread set to off; no rout table collector started (could be called by the rtc thread itself)
 		ctx->rtable = rt_clone_space( NULL, NULL, 0 );		// creates an empty route table so that wormholes still can be used
 	} else {
@@ -711,7 +714,6 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		}
 	}
 
-	ctx->flags |= CFL_MTC_ENABLED;												// for SI threaded receiver is the only way
 	if( pthread_create( &ctx->mtc_th,  NULL, mt_receive, (void *) ctx ) ) { 	// so kick it
 		rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start multi-threaded receiver: %s", strerror( errno ) );
 	}
