@@ -2,6 +2,10 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 February 28; Version 2.3.6
+	Fix bug in Rt. Mgr comm which prevented table ID from being
+	sent on ack message (RIC-232).
+
 2020 February 26; version 3.2.5
 	Fix source address bug in SI95 receive/send funcitons.
 	Fix threading issues involving session disconnection in SI95

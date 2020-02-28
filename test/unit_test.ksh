@@ -308,6 +308,7 @@ function mk_xml {
 if [[ -d ../build ]]
 then
 	export LD_LIBRARY_PATH=../build/lib:../build/lib64
+	export C_INCLUDE_PATH=../build/include
 else
 	if [[ -d ../.build ]]
 	then

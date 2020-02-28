@@ -242,7 +242,7 @@ static int send_update_req( uta_ctx_t* pctx, uta_ctx_t* ctx ) {
 	Context should be the PRIVATE context that we use for messages
 	to route manger and NOT the user's context.
 */
-static void send_rt_ack( uta_ctx_t* ctx, int state, char* reason ) {
+static void send_rt_ack( uta_ctx_t* ctx, char* table_id, int state, char* reason ) {
 	rmr_mbuf_t*	smsg;
 	
 	if( ctx == NULL || ctx->rtg_whid < 0 ) {
@@ -258,7 +258,7 @@ static void send_rt_ack( uta_ctx_t* ctx, int state, char* reason ) {
 		smsg->mtype = RMRRM_TABLE_STATE;
 		smsg->sub_id = 0;
 		snprintf( smsg->payload, 1024, "%s %s %s\n", state == RMR_OK ? "OK" : "ERR", 
-			ctx->table_id == NULL ? "<id-missing>" : ctx->table_id, reason == NULL ? "" : reason );
+			table_id == NULL ? "<id-missing>" : table_id, reason == NULL ? "" : reason );
 
 		smsg->len = strlen( smsg->payload ) + 1;
 	
@@ -723,7 +723,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 							rmr_vlog( RMR_VL_ERR, "rmr_rtc: RT update had wrong number of records: received %d expected %s\n",
 								ctx->new_rtable->updates, tokens[2] );
 							snprintf( wbuf, sizeof( wbuf ), "missing table records: expected %s got %d\n", tokens[2], ctx->new_rtable->updates );
-							send_rt_ack( pctx, RMR_OK, wbuf );
+							send_rt_ack( pctx, ctx->table_id, !RMR_OK, wbuf );
 							uta_rt_drop( ctx->new_rtable );
 							ctx->new_rtable = NULL;
 							break;
@@ -744,14 +744,14 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 							rt_stats( ctx->rtable );
 						}
 
-						send_rt_ack( pctx, RMR_OK, NULL );
+						send_rt_ack( pctx, ctx->table_id, RMR_OK, NULL );
 					} else {
 						if( DEBUG > 1 ) rmr_vlog_force( RMR_VL_DEBUG, "end of route table noticed, but one was not started!\n" );
 						ctx->new_rtable = NULL;
 					}
 				} else {															// start a new table.
 					if( ctx->new_rtable != NULL ) {									// one in progress?  this forces it out
-						send_rt_ack( pctx, !RMR_OK, "table not complete" );			// nack the one that was pending as end never made it
+						send_rt_ack( pctx, ctx->table_id, !RMR_OK, "table not complete" );			// nack the one that was pending as end never made it
 
 						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "new table; dropping incomplete table\n" );
 						uta_rt_drop( ctx->new_rtable );
@@ -761,7 +761,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 						free( ctx->table_id );
 					}
 					if( ntoks >2 ) {
-						ctx->table_id = strdup( tokens[2] );
+						ctx->table_id = strdup( clip( tokens[2] ) );
 					} else {
 						ctx->table_id = NULL;
 					}
@@ -848,7 +848,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 						if( ctx->table_id != NULL ) {
 							free( ctx->table_id );
 						}
-						ctx->table_id = strdup( tokens[2] );
+						ctx->table_id = strdup( clip( tokens[2] ) );
 					}
 
 					ctx->new_rtable = uta_rt_clone_all( ctx->rtable );	// start with a clone of everything (endpts and entries)

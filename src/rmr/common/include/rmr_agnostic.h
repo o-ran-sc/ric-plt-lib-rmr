@@ -317,7 +317,7 @@ static void* rtc( void* vctx );
 static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name );
 
 // --------- route manager communications -----------------
-static void send_rt_ack( uta_ctx_t* ctx, int state, char* reason );
+static void send_rt_ack( uta_ctx_t* ctx, char* table_id, int state, char* reason );
 static int send_update_req( uta_ctx_t* pctx, uta_ctx_t* ctx );
 
 #endif
