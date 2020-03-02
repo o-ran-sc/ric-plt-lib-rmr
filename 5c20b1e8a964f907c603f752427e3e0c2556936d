@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5822b5f2_26659eef",
+        "filename": "CHANGES",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T17:06:52Z",
+      "side": 1,
+      "message": "Reasoning?  Traditionally these are not suffixed.",
+      "parentUuid": "de2416fa_48af37b4",
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6bd40256_8aa07ecd",
         "filename": "ci/build_all.sh",
         "patchSetId": 5
@@ -30,6 +48,30 @@
       "writtenOn": "2020-03-02T16:16:49Z",
       "side": 1,
       "message": "2020 is correct on an added file, please check other newly added files and make consistent",
+      "range": {
+        "startLine": 4,
+        "startChar": 19,
+        "endLine": 5,
+        "endChar": 28
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e80e50d6_ecdc8566",
+        "filename": "ci/build_all.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T17:06:52Z",
+      "side": 1,
+      "message": "In this case yes, but if the new file is based on an existing file, then I\u0027d say the original copyright statement is augmented with -xxxx.   There are quite a few files in this change set that were heavily reused even though they appear as new files.",
+      "parentUuid": "6bd40256_8aa07ecd",
       "range": {
         "startLine": 4,
         "startChar": 19,
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "cc8fbaf4_b62f05af",
+        "filename": "src/support/README",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T17:06:52Z",
+      "side": 1,
+      "message": "Again, I don\u0027t see the need. Traditionally README, BUILD, and friends have not been given suffixes unless they contain formatting that needs to be parsed to be displayed. That said, I also abhor CMake\u0027s use of a .txt extension when the file contains more than just plain text.   \n\nI tend to reserve the addition of .txt to text files which have been generated and should not be hand edited.",
+      "parentUuid": "28cd206d_bc4d700b",
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "338c4fb9_5c3857d6",
         "filename": "test/Makefile",
         "patchSetId": 5
@@ -70,6 +130,30 @@
       "writtenOn": "2020-03-02T16:16:49Z",
       "side": 1,
       "message": "do you really want all these tab chars here?",
+      "range": {
+        "startLine": 26,
+        "startChar": 8,
+        "endLine": 26,
+        "endChar": 9
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1010307_5c06d22d",
+        "filename": "test/Makefile",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T17:06:52Z",
+      "side": 1,
+      "message": "Matches indention of following lines, but not specifically necessary no, and not needed in the libs\u003d line either.",
+      "parentUuid": "338c4fb9_5c3857d6",
       "range": {
         "startLine": 26,
         "startChar": 8,
@@ -105,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "77e96cd7_107b7e0a",
+        "filename": "test/ring_test.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T17:06:52Z",
+      "side": 1,
+      "message": "It is an on/off switch which affects whether or not test_support.c sets up the emulation of NNG/SI.  The files which include it are main() functions which drive tests where messaging/emulation of message transport is not needed, so it must be set off in their declarations.",
+      "parentUuid": "c6e22511_fbcb41bf",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 1
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7e0b044c_06cc2a0b",
         "filename": "test/rt_static_test.c",
         "patchSetId": 5
@@ -116,6 +224,30 @@
       "writtenOn": "2020-03-02T16:16:49Z",
       "side": 1,
       "message": "maybe remove instead of commenting out?",
+      "range": {
+        "startLine": 126,
+        "startChar": 1,
+        "endLine": 126,
+        "endChar": 3
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c0e3925_0caff861",
+        "filename": "test/rt_static_test.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T17:06:52Z",
+      "side": 1,
+      "message": "Yes, that was the intent in the long term; missed removing it after validating the next line.",
+      "parentUuid": "7e0b044c_06cc2a0b",
       "range": {
         "startLine": 126,
         "startChar": 1,
@@ -145,6 +277,24 @@
     },
     {
       "key": {
+        "uuid": "4f07ec7f_d9759011",
+        "filename": "test/run_app_tests",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T17:06:52Z",
+      "side": 1,
+      "message": "Not needed, but it can\u0027t hurt.   The CMake stuff specifically invokes bash on it",
+      "parentUuid": "5dac4471_e811cce3",
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "dec076e8_e0d90831",
         "filename": "test/run_app_tests",
         "patchSetId": 5
@@ -168,6 +318,30 @@
     },
     {
       "key": {
+        "uuid": "af833924_a57a5492",
+        "filename": "test/run_app_tests",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T17:06:52Z",
+      "side": 1,
+      "message": "It should, Ksh is a better shell. \nSpelling will be corrected.",
+      "parentUuid": "dec076e8_e0d90831",
+      "range": {
+        "startLine": 26,
+        "startChar": 22,
+        "endLine": 26,
+        "endChar": 54
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8c50b657_bd511f73",
         "filename": "test/test_support.c",
         "patchSetId": 5
@@ -179,6 +353,30 @@
       "writtenOn": "2020-03-02T16:16:49Z",
       "side": 1,
       "message": "remove instead of commenting out?",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 8
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cfc255d0_cb9f3b05",
+        "filename": "test/test_support.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T17:06:52Z",
+      "side": 1,
+      "message": "Yep; another missed set during testing.",
+      "parentUuid": "8c50b657_bd511f73",
       "range": {
         "startLine": 192,
         "startChar": 0,
