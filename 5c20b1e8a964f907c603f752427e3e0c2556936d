@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "e8c0c8a3_5d74a74f",
+        "filename": "CHANGES",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T21:12:03Z",
+      "side": 1,
+      "message": "Leaving filenames alone this change; prefer to do rm/mv changes in a standalone change when possible.",
+      "parentUuid": "5822b5f2_26659eef",
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6bd40256_8aa07ecd",
         "filename": "ci/build_all.sh",
         "patchSetId": 5
@@ -84,6 +102,30 @@
     },
     {
       "key": {
+        "uuid": "b44703dd_21f485fb",
+        "filename": "ci/build_all.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T21:12:03Z",
+      "side": 1,
+      "message": "Copyright statements on new files have been fixed.",
+      "parentUuid": "e80e50d6_ecdc8566",
+      "range": {
+        "startLine": 4,
+        "startChar": 19,
+        "endLine": 5,
+        "endChar": 28
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "28cd206d_bc4d700b",
         "filename": "src/support/README",
         "patchSetId": 5
@@ -116,6 +158,24 @@
       "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b89385b2_06f1f39f",
+        "filename": "src/support/README",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T21:12:03Z",
+      "side": 1,
+      "message": "Leaving filenames as is for now.  Prefer to do mv/rm in a standalone change.",
+      "parentUuid": "cc8fbaf4_b62f05af",
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -166,6 +226,30 @@
     },
     {
       "key": {
+        "uuid": "d978cfdc_38e21c62",
+        "filename": "test/Makefile",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T21:12:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f1010307_5c06d22d",
+      "range": {
+        "startLine": 26,
+        "startChar": 8,
+        "endLine": 26,
+        "endChar": 9
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c6e22511_fbcb41bf",
         "filename": "test/ring_test.c",
         "patchSetId": 5
@@ -210,6 +294,30 @@
       "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a890d2f7_cb1044c9",
+        "filename": "test/ring_test.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T21:12:03Z",
+      "side": 1,
+      "message": "Leaving this alone for now.  I have more unit test work to do for SI and might find a better/different way of doing things.",
+      "parentUuid": "77e96cd7_107b7e0a",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 1
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -260,6 +368,30 @@
     },
     {
       "key": {
+        "uuid": "3aabfdb7_5bcfe52c",
+        "filename": "test/rt_static_test.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T21:12:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0c0e3925_0caff861",
+      "range": {
+        "startLine": 126,
+        "startChar": 1,
+        "endLine": 126,
+        "endChar": 3
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5dac4471_e811cce3",
         "filename": "test/run_app_tests",
         "patchSetId": 5
@@ -292,6 +424,24 @@
       "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "96b8ca53_443cd0d1",
+        "filename": "test/run_app_tests",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T21:12:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f07ec7f_d9759011",
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -342,6 +492,30 @@
     },
     {
       "key": {
+        "uuid": "282720b3_81b36144",
+        "filename": "test/run_app_tests",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T21:12:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af833924_a57a5492",
+      "range": {
+        "startLine": 26,
+        "startChar": 22,
+        "endLine": 26,
+        "endChar": 54
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8c50b657_bd511f73",
         "filename": "test/test_support.c",
         "patchSetId": 5
@@ -386,6 +560,30 @@
       "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "466d8f86_a9969465",
+        "filename": "test/test_support.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-02T21:12:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cfc255d0_cb9f3b05",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 8
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
