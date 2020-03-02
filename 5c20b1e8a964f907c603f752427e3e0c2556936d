@@ -1,0 +1,193 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de2416fa_48af37b4",
+        "filename": "CHANGES",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-03-02T16:16:49Z",
+      "side": 1,
+      "message": "May I suggest a .txt suffix on this file?",
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6bd40256_8aa07ecd",
+        "filename": "ci/build_all.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-03-02T16:16:49Z",
+      "side": 1,
+      "message": "2020 is correct on an added file, please check other newly added files and make consistent",
+      "range": {
+        "startLine": 4,
+        "startChar": 19,
+        "endLine": 5,
+        "endChar": 28
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "28cd206d_bc4d700b",
+        "filename": "src/support/README",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-03-02T16:16:49Z",
+      "side": 1,
+      "message": "Here too, maybe add a .txt or (if it\u0027s markdown) .md suffix?",
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "338c4fb9_5c3857d6",
+        "filename": "test/Makefile",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-03-02T16:16:49Z",
+      "side": 1,
+      "message": "do you really want all these tab chars here?",
+      "range": {
+        "startLine": 26,
+        "startChar": 8,
+        "endLine": 26,
+        "endChar": 9
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c6e22511_fbcb41bf",
+        "filename": "test/ring_test.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-03-02T16:16:49Z",
+      "side": 1,
+      "message": "why is this #define repeated in so many files?  could it be in a common header file so you can turn it on/off in just one place?",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 1
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e0b044c_06cc2a0b",
+        "filename": "test/rt_static_test.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-03-02T16:16:49Z",
+      "side": 1,
+      "message": "maybe remove instead of commenting out?",
+      "range": {
+        "startLine": 126,
+        "startChar": 1,
+        "endLine": 126,
+        "endChar": 3
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5dac4471_e811cce3",
+        "filename": "test/run_app_tests",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-03-02T16:16:49Z",
+      "side": 1,
+      "message": "does this need a shebang line at the top?",
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dec076e8_e0d90831",
+        "filename": "test/run_app_tests",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-03-02T16:16:49Z",
+      "side": 1,
+      "message": "correct!\n\n(likely)",
+      "range": {
+        "startLine": 26,
+        "startChar": 22,
+        "endLine": 26,
+        "endChar": 54
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c50b657_bd511f73",
+        "filename": "test/test_support.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-03-02T16:16:49Z",
+      "side": 1,
+      "message": "remove instead of commenting out?",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 8
+      },
+      "revId": "5c20b1e8a964f907c603f752427e3e0c2556936d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
