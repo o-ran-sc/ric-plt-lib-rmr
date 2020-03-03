@@ -1,7 +1,7 @@
 # vim: expandtab ts=4 sw=4:
 # ==================================================================================
-#       Copyright (c) 2019 Nokia
-#       Copyright (c) 2018-2019 AT&T Intellectual Property.
+#       Copyright (c) 2019-2020 Nokia
+#       Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import json
 from ctypes import RTLD_GLOBAL, Structure, c_int, POINTER, c_char, c_char_p, c_void_p, memmove, cast
 from ctypes import CDLL
 from ctypes import create_string_buffer
-from rmr.exceptions import BadBufferAllocation
+from rmr.exceptions import BadBufferAllocation, MeidSizeOutOfRange, InitFailed
 
 # https://docs.python.org/3.7/library/ctypes.html
 # https://stackoverflow.com/questions/2327344/ctypes-loading-a-c-shared-library-that-has-dependencies/30845750#30845750
@@ -169,8 +169,14 @@ def rmr_init(uproto_port, max_msg_size, flags):
     """
     Refer to rmr C documentation for rmr_init
     extern void* rmr_init(char* uproto_port, int max_msg_size, int flags)
+
+    This python function checks that the context is not None and raises
+    an excption if it is.
     """
-    return _rmr_init(uproto_port, max_msg_size, flags)
+    mrc = _rmr_init(uproto_port, max_msg_size, flags)
+    if mrc is None:
+        raise InitFailed()
+    return mrc
 
 
 _rmr_ready = rmr_c_lib.rmr_ready
@@ -391,7 +397,16 @@ def rmr_set_meid(ptr_mbuf, byte_str):
     """
     Refer to the rmr C documentation for rmr_bytes2meid
     extern int rmr_bytes2meid(rmr_mbuf_t* mbuf, unsigned char const* src, int len);
+
+    Caution:  the meid length supported in an RMR message is 32 bytes, but C applications
+    expect this to be a nil terminated string and thus only 31 bytes are actually available.
+
+    Raises: exceptions.MeidSizeOutOfRang
     """
+    max = _get_constants().get("RMR_MAX_MEID", 32)
+    if len(byte_str) >= max:
+        raise MeidSizeOutOfRange
+
     return _rmr_bytes2meid(ptr_mbuf, byte_str, len(byte_str))
 
 
@@ -421,7 +436,7 @@ def rmr_get_meid(ptr_mbuf):
     string:
         meid
     """
-    sz = _get_constants().get("RMR_MAX_MEID", 64)  # size for buffer to fill
+    sz = _get_constants().get("RMR_MAX_MEID", 32)  # size for buffer to fill
     buf = create_string_buffer(sz)
     _rmr_get_meid(ptr_mbuf, buf)
     return buf.value
