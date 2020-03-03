@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b406fcea_1c25fbff",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2020-03-03T20:58:02Z",
+      "side": 1,
+      "message": "please see my earlier comments here as I accidentally commented on changeset1 instead of 4\n\nthis can be cleaned up",
+      "revId": "14f2cfa93a363cae2475ddc5e3e98a13435a12b8",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
