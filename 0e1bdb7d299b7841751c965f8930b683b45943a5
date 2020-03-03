@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78886bcb_2f138502",
+        "filename": "src/bindings/rmr-python/tests/test_rmr.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2020-03-03T20:56:49Z",
+      "side": 1,
+      "message": "i said this over email but you may have missed it\n\nuse \n\nwith pytest.Raises(exceptions.MeidSizeOutOfRange):\n     rmr.rmr_set_meid(sbuf, b\"8\" * 32)\n\ninstead of all this ex_raised stuff",
+      "revId": "0e1bdb7d299b7841751c965f8930b683b45943a5",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
