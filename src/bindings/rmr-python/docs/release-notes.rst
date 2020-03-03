@@ -8,6 +8,15 @@ and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
 
+[2.2.1] - 3/3/2020
+--------------------
+
+::
+
+    * Correct the MEID unit test (broken by RMR commit 190665fe)
+    * Change rmr_init to catch init failure reported by RMR
+
+
 [2.2.0] - 12/5/2019
 --------------------
 
