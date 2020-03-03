@@ -1,7 +1,7 @@
 # vim: ts=4 sw=4 expandtab:
 # =================================================================================2
-#       Copyright (c) 2019 Nokia
-#       Copyright (c) 2018-2019 AT&T Intellectual Property.
+#       Copyright (c) 2019-2020 Nokia
+#       Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -110,17 +110,23 @@ def test_meid():
     assert rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == b"\x01\x02"
     assert len(rmr.rmr_get_meid(sbuf)) == 2
 
-    rmr.rmr_set_meid(sbuf, b"\x00" * 32)
+    rmr.rmr_set_meid(sbuf, b"\x00" * 31)
     assert rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == b""  # NULL bytes get truncated
 
-    rmr.rmr_set_meid(sbuf, b"6" * 32)
-    assert rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == b"6" * 32  # string in string out
+    rmr.rmr_set_meid(sbuf, b"6" * 31)
+    assert rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == b"6" * 31  # string in string out
 
     rmr.rmr_set_meid(sbuf, b"\x01\x02")
     assert (
-        rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == b"\x01\x02" + b"6" * 30
-    )  # bytes in string out, 6s left over
-    assert len(rmr.rmr_get_meid(sbuf)) == 32
+        rmr.rmr_get_meid(sbuf) == rmr.message_summary(sbuf)["meid"] == b"\x01\x02"
+    )  # Ctypes will chop at first nil, so expect only 2 bytes back
+
+    assert len(rmr.rmr_get_meid(sbuf)) == 2
+
+    # test that an exception is raised for buffers which are too long
+    with pytest.raises(exceptions.MeidSizeOutOfRange):
+        rmr.rmr_set_meid(sbuf, b"8" * 32)
+
 
 
 def test_rmr_set_get():
