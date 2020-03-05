@@ -96,7 +96,10 @@ static int sym_hash( const char *n, long size )
 	return (int ) (t % size);
 }
 
-/* delete element pointed to by eptr at hash loc hv */
+/* 
+	Delete element pointed to by eptr which is assumed to be
+	a member of the list at symtab[i].
+*/
 static void del_ele( Sym_tab *table, int hv, Sym_ele *eptr )
 {
 	Sym_ele **sym_tab;
@@ -115,6 +118,39 @@ static void del_ele( Sym_tab *table, int hv, Sym_ele *eptr )
 
 		if( eptr->class && eptr->name ) {				// class 0 entries are numeric, so name is NOT a pointer
 			free( (void *) eptr->name );			// and if free fails, what?  panic?
+		}
+
+		free( eptr );
+
+		table->deaths++;
+		table->inhabitants--;
+	}
+}
+
+/*
+	Delete the head element from table[i]. This isn't really
+	needed, but keeps code analysers from claiming that memory
+	is being used after it is freed.
+*/
+static void del_head_ele( Sym_tab *table, int hv ) {
+	Sym_ele **sym_tab;
+	Sym_ele *eptr;		// first in list
+
+
+	if( hv < 0 || hv >= table->size ) {
+		return;
+	}
+
+	sym_tab = table->symlist;
+	if( (eptr = sym_tab[hv]) != NULL )					// not an empty element; yank it off
+	{
+		if( (sym_tab[hv] = eptr->next) != NULL ) {		// bump list to next if not the only thing here
+			sym_tab[hv]->prev = NULL;					// new head
+		}
+		eptr->next = NULL;								// take no chances
+			
+		if( eptr->class && eptr->name ) {				// class 0 entries are numeric, so name is NOT a pointer
+			free( (void *) eptr->name );
 		}
 
 		free( eptr );
@@ -205,9 +241,11 @@ extern void rmr_sym_clear( void *vtable )
 	table = (Sym_tab *) vtable;
 	sym_tab = table->symlist;
 
-	for( i = 0; i < table->size; i++ )
-		while( sym_tab[i] )
-			del_ele( table, i, sym_tab[i] );
+	for( i = 0; i < table->size; i++ ) {
+		while( sym_tab[i] ) {
+			del_head_ele( table, i );			// delete the head element (and keep bloody sonar from claiming use after free)
+		}
+	}
 }
 
 /*
@@ -468,15 +506,16 @@ extern void rmr_sym_foreach_class( void *vst, unsigned int class, void (* user_f
 
 	st = (Sym_tab *) vst;
 
-	if( st && (list = st->symlist) != NULL && user_fun != NULL )
-		for( i = 0; i < st->size; i++ )
-			for( se = list[i]; se; se = next )		/* using next allows user to delete via this */
-			{
-				if( se ) {
-					next = se->next;
-					if( class == se->class ) {
-						user_fun( st, se, se->name, se->val, user_data );
-					}
+	if( st && (list = st->symlist) != NULL && user_fun != NULL ) {
+		for( i = 0; i < st->size; i++ ) {
+			se = list[i]; 
+			while( se ) {
+				next = se->next;			// allow callback to delete from the list w/o borking us
+				if( class == se->class ) {
+					user_fun( st, se, se->name, se->val, user_data );
 				}
+				se = next;
 			}
+		}
+	}
 }

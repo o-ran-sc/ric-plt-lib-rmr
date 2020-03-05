@@ -63,8 +63,9 @@ static char* build_sval( char* name, char* val, int add_sep ) {
 	strcat src is freed as a convenience. Max is the max amount
 	that target can accept; we don't bang on if src len is
 	larger than max.  Return is the size of src; 0 if the
-	target was not modified.  If target is not modified, then
-	src is NOT released.
+	target was not modified.
+
+	Source is ALWAYS freed!
 */
 static int bang_on( char* target, char* src, int max ) {
 	int		len;
@@ -74,10 +75,12 @@ static int bang_on( char* target, char* src, int max ) {
 		len = strlen( src );
 		if( (rc = len <= max ? len : 0 ) > 0 ) {	// if it fits, add it.
 			strcat( target, src );
-			free( src );
 		}
 	}
 
+	if( src ) {
+		free( src );
+	}
 	return rc;
 }
 

@@ -897,7 +897,8 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 		}
 	}
 
-	for( rec = fbuf; rec && *rec; rec = eor+1 ) {
+	rec = fbuf;
+	while( rec && *rec ) {
 		rcount++;
 		if( (eor = strchr( rec, '\n' )) != NULL ) {
 			*eor = 0;
@@ -909,6 +910,8 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 		}
 
 		parse_rt_rec( ctx, NULL, rec, vlevel );			// no pvt context as we can't ack
+
+		rec = eor+1;
 	}
 
 	if( DEBUG ) rmr_vlog_force( RMR_VL_DEBUG, "rmr_read_static:  seed route table successfully parsed: %d records\n", rcount );

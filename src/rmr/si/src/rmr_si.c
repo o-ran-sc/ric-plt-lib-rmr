@@ -875,7 +875,9 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 			}
 		}
 
-		mbuf->flags |= MFL_ADDSRC;               // turn on so if user app tries to send this buffer we reset src
+		if( mbuf != NULL ) {
+			mbuf->flags |= MFL_ADDSRC;               // turn on so if user app tries to send this buffer we reset src
+		}
 		return mbuf;
 	}
 
@@ -1056,7 +1058,9 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 	}
 
 	mbuf = chute->mbuf;
-	mbuf->state = RMR_OK;
+	if( mbuf != NULL ) {
+		mbuf->state = RMR_OK;
+	}
 	chute->mbuf = NULL;
 
 	return mbuf;

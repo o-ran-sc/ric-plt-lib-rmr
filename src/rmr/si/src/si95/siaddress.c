@@ -87,6 +87,7 @@ extern int SIgenaddr( char *target, int proto, int family, int socktype, struct 
 			dstr++;
 			pstr = strchr( dstr, ']' );
 			if( *pstr != ']' ) {
+				free( fptr );
 				return -1;
 			}
 
@@ -126,7 +127,7 @@ extern int SIgenaddr( char *target, int proto, int family, int socktype, struct 
 		freeaddrinfo( list );		//  ditch system allocated memory 
 	}
 
-	free( dstr );
+	free( fptr );
 	return rlen;
 }
 
@@ -139,7 +140,9 @@ extern int SIgenaddr( char *target, int proto, int family, int socktype, struct 
 */
 extern int SIaddress( void *src, void **dest, int type ) {
 	struct sockaddr_in *addr;       //  pointer to the address 
+	struct sockaddr_in6 *addr6;		// ip6 has a different layout
 	unsigned char *num;             //  pointer at the address number 
+	uint8_t*	byte;				//  pointer at the ipv6 address byte values
 	char wbuf[256];                 //  work buffer 
 	int i;         
 	int	rlen = 0;					//  return len - len of address struct or string
@@ -147,14 +150,16 @@ extern int SIaddress( void *src, void **dest, int type ) {
 	switch( type ) {
 		case AC_TODOT:					//  convert from a struct to human readable "dotted decimal"
    			addr = (struct sockaddr_in *) src;
-   			num = (char *) &addr->sin_addr.s_addr;    //  point at the long 
 
 			if( addr->sin_family == AF_INET6 ) {
-     				sprintf( wbuf, "[%u:%u:%u:%u:%u:%u]:%d", 
-						*(num+0), *(num+1), *(num+2), 
-						*(num+3), *(num+4), *(num+5) , 
-						(int) ntohs( addr->sin_port ) );
+				addr6 = (struct sockaddr_in6 *) src;				// really an ip6 struct
+				byte = (uint8_t *) &addr6->sin6_addr;
+     			sprintf( wbuf, "[%u:%u:%u:%u:%u:%u]:%d", 
+						*(byte+0), *(byte+1), *(byte+2), 
+						*(byte+3), *(byte+4), *(byte+5) , 
+						(int) ntohs( addr6->sin6_port ) );
 			} else {
+   				num = (char *) &addr->sin_addr.s_addr;    //  point at the long 
 				sprintf( wbuf, "%u.%u.%u.%u;%d", *(num+0), *(num+1), *(num+2), *(num+3), (int) ntohs(addr->sin_port) );
 			}
 
@@ -164,11 +169,9 @@ extern int SIaddress( void *src, void **dest, int type ) {
 
   		case AC_TOADDR6:         		//  from hostname;port string to address for send etc 
 			return SIgenaddr( src, PF_INET6, IPPROTO_TCP, SOCK_STREAM, (struct sockaddr **) dest );
-			break; 
 
   		case AC_TOADDR:         		//  from dotted decimal to address struct ip4 
 			return SIgenaddr( src, PF_INET, IPPROTO_TCP, SOCK_STREAM, (struct sockaddr **) dest );
-			break;
 	}
 
 	return rlen;

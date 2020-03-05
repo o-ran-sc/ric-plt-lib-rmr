@@ -308,7 +308,7 @@ static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  ) {
 	nm->alloc_len = mlen;									// length of allocated payload
 	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "clone values: mty=%d sid=%d len=%d alloc=%d\n", nm->mtype, nm->sub_id, nm->len, nm->alloc_len );
 
-	nm->xaction = hdr->xid;									// reference xaction
+	nm->xaction = &hdr->xid[0];							// point at transaction id in header area
 	nm->state = old_msg->state;								// fill in caller's state (likely the state of the last operation)
 	nm->flags = old_msg->flags | MFL_ZEROCOPY;				// this is a zerocopy sendable message
 	memcpy( nm->payload, old_msg->payload, old_msg->len );
@@ -377,7 +377,7 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 	nm->len = old_msg->len;									// length of data in the payload
 	nm->alloc_len = mlen;									// length of allocated payload
 
-	nm->xaction = hdr->xid;									// reference xaction
+	nm->xaction = &hdr->xid[0];							// point at transaction id in header area
 	nm->state = old_msg->state;								// fill in caller's state (likely the state of the last operation)
 	nm->flags = old_msg->flags | MFL_ZEROCOPY;				// this is a zerocopy sendable message
 	memcpy( nm->payload, old_msg->payload, old_msg->len );
