@@ -93,7 +93,8 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 		}
 
 		if( pstat > 0  &&  (! (gptr->flags & GIF_SHUTDOWN)) ) {
-			for( tpptr = gptr->tplist; tpptr != NULL; tpptr = nextone ) {
+			tpptr = gptr->tplist; 
+			while( tpptr != NULL ) { 
 				nextone = tpptr->next;				//  prevent issues if we delete the block during loop 
 
 				if( tpptr->fd >= 0 ) {
@@ -129,6 +130,8 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 						}
 					}
 				}								//  if still good fd 
+
+				tpptr = nextone;
 			}
 		}
 	} while( gptr->tplist != NULL && !(gptr->flags & GIF_SHUTDOWN) );

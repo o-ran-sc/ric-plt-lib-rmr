@@ -121,8 +121,9 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
 
      // for( tpptr = gptr->tplist; tpptr != NULL; tpptr = tpptr->next )
      for( tpptr = gptr->tplist; tpptr != NULL; tpptr = nextone )
-      {
-	nextone = tpptr->next;					//  prevent coredump if we delete the session
+	tpptr = gptr->tplist; 
+	while( tpptr != NULL ) {
+		nextone = tpptr->next;					//  allow for a delete in loop
 
        if( tpptr->squeue != NULL && (FD_ISSET( tpptr->fd, &gptr->writefds )) )
         SIsend( gptr, tpptr );              //  send if clear to send
@@ -180,6 +181,8 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
             }
            }                                                //  end tcp read
         }                    //  end if event on this fd
+
+		tpptr = nextone;
       }                      //  end for each fd in the list
     }                        //  end if not in shutdown
 

@@ -51,12 +51,15 @@ extern void SItrash( int type, void *bp )
             
                 case TP_BLK:                                            //  we assume its off the list 
                         tp = (struct tp_blk *) bp;
-                        for( iptr = tp->squeue; iptr; iptr = inext )            //  trash any pending send buffers 
-                        {
+						iptr = tp->squeue; 
+						while( iptr != NULL ) {
                                 inext = iptr->next;
+
                                 free( iptr->data );          //  we could recurse, but that seems silly 
                                 free( iptr->addr );
                                 free( iptr );
+
+								iptr = inext;
                         }
 
 						if( tp->fd >= 0 ) {

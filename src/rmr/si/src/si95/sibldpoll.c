@@ -49,8 +49,10 @@ extern void SIbldpoll( struct ginfo_blk* gptr  ) {
 	FD_ZERO( &gptr->writefds );
 	FD_ZERO( &gptr->execpfds );
 
-	for( tpptr = gptr->tplist; tpptr != NULL; tpptr = nextb ) {
-		nextb = tpptr->next;
+	tpptr = gptr->tplist; 
+	while( tpptr != NULL ) {
+		nextb = tpptr->next;							// point past allowing for a delete
+
 		if( tpptr->flags & TPF_DELETE ) {
 			if( tpptr->fd >= 0 ) {						// wasn't closed for some reason
 				SIterm( gptr, tpptr );
@@ -73,5 +75,7 @@ extern void SIbldpoll( struct ginfo_blk* gptr  ) {
 				}
 			}
 		}
+
+ 		tpptr = nextb;
 	}
 }

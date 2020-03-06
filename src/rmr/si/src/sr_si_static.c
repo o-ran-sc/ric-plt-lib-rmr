@@ -328,7 +328,7 @@ static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  ) {
 	nm->len = old_msg->len;									// length of data in the payload
 	nm->alloc_len = mlen;									// length of allocated payload
 
-	nm->xaction = hdr->xid;									// reference xaction
+	nm->xaction = &hdr->xid[0];								// reference xaction
 	nm->state = old_msg->state;								// fill in caller's state (likely the state of the last operation)
 	nm->flags = old_msg->flags | MFL_ZEROCOPY;				// this is a zerocopy sendable message
 	memcpy( nm->payload, old_msg->payload, old_msg->len );
@@ -406,7 +406,7 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 	nm->len = old_msg->len;									// length of data in the payload
 	nm->alloc_len = mlen;									// length of allocated payload
 
-	nm->xaction = hdr->xid;									// reference xaction
+	nm->xaction = &hdr->xid[0];								// reference xaction
 	nm->state = old_msg->state;								// fill in caller's state (likely the state of the last operation)
 	nm->flags = old_msg->flags | MFL_ZEROCOPY;				// this is a zerocopy sendable message
 	memcpy( nm->payload, old_msg->payload, old_msg->len );
@@ -502,6 +502,7 @@ static inline rmr_mbuf_t* realloc_payload( rmr_mbuf_t* old_msg, int payload_len,
 	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "reallocate for payload increase. new message size: %d\n", (int) mlen );	
 	if( (nm->tp_buf = (char *) malloc( sizeof( char ) * mlen )) == NULL ) {
 		rmr_vlog( RMR_VL_CRIT, "rmr_realloc_payload: cannot get memory for zero copy buffer. bytes requested: %d\n", (int) mlen );
+		free( nm );
 		return NULL;
 	}
 
