@@ -22,24 +22,28 @@
 # {X}fm is required to compile the source. 
 
 
-%.rst:: %.xfm
+%.rst:: %.xfm	man_list.im
 	OUTPUT_TYPE=rst tfm $< | sed 's/^ //' >$@
 
-%.ps:: %.xfm
+%.ps:: %.xfm	man_list.im
 	OUTPUT_TYPE=ps pfm $< $@
 
-%.txt:: %.xfm
+%.txt:: %.xfm	man_list.im
 	OUTPUT_TYPE=txt tfm $< $@
 
-%.md:: %.xfm
+%.md:: %.xfm	man_list.im
 	OUTPUT_TYPE=markdown tfm $<  | sed 's/^ //' >$@
 
 docs = config-deploy developer-guide user-guide rel-notes overview
 
 all:: $(docs:%=%.rst) $(docs:%=%.txt) $(docs:%=%.md)
 
+man_list.im:: always
+	bash gen_man_list.sh >man_list.im
+
 rel-notes.xfm: ../../../CHANGES
 	ksh fmt_changes.ksh >rel-notes.xfm
+
 
 # we force the docs to always be out of date so that we don't have to
 # manage the list of man pages and other files that are read to generate the

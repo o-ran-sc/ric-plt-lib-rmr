@@ -15,6 +15,107 @@ file at the repo root; please refer to that file for a
 completely up to date listing of API changes. 
  
  
+2020 March 6; version 3.4.0 
+-------------------------------------------------------------------------------------------- 
+ 
+Add new wormhole state function: rmr_wh_state(). 
+ 
+ 
+2020 March 5; Version 3.3.1 
+-------------------------------------------------------------------------------------------- 
+ 
+Correct several "bugs" identified by automatic code analysis. 
+ 
+ 
+2020 March 4; Version 3.3.0 
+-------------------------------------------------------------------------------------------- 
+ 
+Add SI95 based unit testing Health check support binary added 
+(reason for minor bump) 
+ 
+ 
+2020 February 29; Version 2.4.0 
+-------------------------------------------------------------------------------------------- 
+ 
+Add consolidated testing under CMake Add support binary for 
+health check (SI95 only) 
+ 
+ 
+2020 February 28; Version 2.3.6 
+-------------------------------------------------------------------------------------------- 
+ 
+Fix bug in Rt. Mgr comm which prevented table ID from being 
+sent on ack message (RIC-232). 
+ 
+ 
+2020 February 26; version 3.2.5 
+-------------------------------------------------------------------------------------------- 
+ 
+Fix source address bug in SI95 receive/send funcitons. Fix 
+threading issues involving session disconnection in SI95 
+Remove unused SI95 status variable. 
+ 
+ 
+2020 February 24; version 3.2.4 
+-------------------------------------------------------------------------------------------- 
+ 
+Fix meid bug (RIC-220) causing core dump. 
+ 
+ 
+2020 February 21; version 3.2.3 
+-------------------------------------------------------------------------------------------- 
+ 
+Add meid routing support to the SI95 interface. 
+ 
+ 
+2020 February 20; version 3.2.2 
+-------------------------------------------------------------------------------------------- 
+ 
+Fix receive thread related core dump (ring early unlock). 
+ 
+ 
+2020 February 19; version 3.2.1 
+-------------------------------------------------------------------------------------------- 
+ 
+Added missing message types (E2-Setup) 
+ 
+ 
+2020 February 18; version 3.2.0 
+-------------------------------------------------------------------------------------------- 
+ 
+Added support for new Route Manager and it's ability to 
+accept a request for table update. 
+ 
+ 
+2020 February 14; version 3.1.3 
+-------------------------------------------------------------------------------------------- 
+ 
+Fix bug in SIsend which was causing a core dump in some cases 
+where the application attempted to send on a connection that 
+had disconnected. (RIC-207). 
+ 
+ 
+2020 February 6; version 3.1.2 
+-------------------------------------------------------------------------------------------- 
+ 
+Fix disconnection detection bug in interface to SI95. 
+ 
+ 
+2020 January 31; verison 3.1.1 
+-------------------------------------------------------------------------------------------- 
+ 
+Allow route table thread logging to be completely disabled 
+when logging is turned off. 
+ 
+ 
+2020 January 26; verison 3.1.0 
+-------------------------------------------------------------------------------------------- 
+ 
+First step to allowing the user programme to control messages 
+written to standard error. Introduces the rmr_set_vlevel() 
+function, and related environment variable. 
+ 
+ 
 2020 January 24; verison 3.0.5 
 -------------------------------------------------------------------------------------------- 
  

@@ -30,6 +30,9 @@
 ******************************************************************************
 */
 
+#ifndef	_sistruct_h
+#define _sistruct_h
+
 struct ioq_blk              //  block to queue on session when i/o waiting 
 {
 	struct ioq_blk *next;     //  next block in the queue 
@@ -80,3 +83,5 @@ struct ginfo_blk {				//  general info block  (context)
 	int	sierr;					// our internal error number (SI_ERR_* constants)
 	struct tp_blk**	tp_map;		// direct fd -> tp block map
 };
+
+#endif

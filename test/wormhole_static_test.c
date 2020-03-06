@@ -49,6 +49,7 @@ static int worm_test( ) {
 	uta_ctx_t* ctx;			// context needed to test load static rt
 	char	wbuf[1024];
 	int errors = 0;			// number errors found
+	int		state = 0;
 	int	i;
 	void* p;
 
@@ -115,6 +116,7 @@ static int worm_test( ) {
 	}
 	fail_if_nil( mbuf, "wh_send_msg returned a nil message buffer when given a nil context"  );
 
+
 	while( mbuf ) {
 		if( !(mbuf = rmr_wh_send_msg( ctx, 50, mbuf )) ) {		// test for coverage
 			errors += fail_if_nil( mbuf, "send didn't return an mbuf (skip rest of send tests)" );
@@ -133,7 +135,25 @@ static int worm_test( ) {
 		break;
 	}
 
+	// ---- wormhole state -----------
+	state = rmr_wh_state( NULL, 0 );
+	errors += fail_if_equal( state, RMR_OK, "wh_state with bad context did not return error" );
 
+	state = rmr_wh_state( ctx, -1 );
+	errors += fail_if_equal( state, RMR_OK, "wh_state with bad whid did not return error" );
+
+	whid = rmr_wh_open( ctx, "localhost:9219" );
+	if( ! fail_if_equal( whid, -1, "skipping some wh_state tests: no whid returned" ) ) {
+		state = rmr_wh_state( ctx, whid );
+		errors += fail_not_equal( state, RMR_OK, "wh_state on an open wh did not return OK" );
+
+		rmr_wh_close( ctx, whid );
+		state = rmr_wh_state( ctx, whid );
+		errors += fail_if_equal( state, RMR_OK, "wh_state on a closed wh returned OK" );
+		whid = -1;
+	}
+
+	// -----------------------------------------------------------------------
 	// WARNING:  these tests destroy the context, so they MUST be last
 	if( mbuf ) {			// only if we got an mbuf
 		errno = 0;

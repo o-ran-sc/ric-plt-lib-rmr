@@ -113,6 +113,7 @@ rmr_has_str(3),
 rmr_tokenise(3),
 rmr_mk_ring(3),
 rmr_ring_free(3),
+rmr_wh_close(3),
 rmr_wh_send_msg(3),
-rmr_wh_close(3)
+rmr_wh_state(3)
 .ju on

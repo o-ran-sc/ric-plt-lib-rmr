@@ -2,6 +2,9 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 March 6; version 3.4.0
+	Add new wormhole state function: rmr_wh_state().
+
 2020 March 5; Version 3.3.1
 	Correct several "bugs" identified by automatic code analysis.
 
