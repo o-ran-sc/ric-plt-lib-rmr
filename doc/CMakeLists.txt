@@ -88,7 +88,7 @@ if( BUILD_DOC )
 		rmr_trace_ref.3
 		rmr_set_stimeout.3
 		rmr_get_xact.3
-		rmr_wh_state.3.xfm
+		rmr_wh_state.3
 	)
 
 	# initialise lists of files we generated
