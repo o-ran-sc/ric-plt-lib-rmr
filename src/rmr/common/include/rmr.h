@@ -136,6 +136,7 @@ extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to );
 extern rmr_mbuf_t*  rmr_tralloc_msg( void* context, int msize, int trsize, unsigned const char* data );
 extern rmr_whid_t rmr_wh_open( void* vctx, char const* target );
 extern rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg );
+extern int rmr_wh_state( void* vctx, rmr_whid_t whid );
 extern void rmr_wh_close( void* vctx, int whid );
 
 // ----- mt call support --------------------------------------------------------------------------------

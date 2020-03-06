@@ -40,6 +40,10 @@ extern void SItrash( int type, void *bp )
         struct ioq_blk *iptr;
         struct ioq_blk *inext;
 
+		if( bp == NULL ) {
+			return;
+		}
+
         switch( type )
         {
                 case IOQ_BLK:

@@ -109,7 +109,6 @@ The ID is optional with the exception of when the user application uses the &cw(
 function to send a message and wait for the reply; the underlying RMR processing
 expects that the matching reply message will also contain the same data in the
 &ital(xaction) field.
-&end_dlist
 
 &half_space
 &diitem(sub_id)

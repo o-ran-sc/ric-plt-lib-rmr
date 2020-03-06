@@ -10,6 +10,10 @@ rtd documentation. Follow that with 'make publish' to actually move
 the .rst files into the docs directory at the root; only the changed
 files are moved.
 
+Adding A New Man Page
+WHen a new manual page is added to the source (../man), it must be 
+added to the list in the user's guide source in this directory.
+
 Rationale
 Documentation is just code, and by maintaining the documentation as
 source is is possible to generate various forms of output with a 

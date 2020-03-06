@@ -28,6 +28,9 @@
 *****************************************************************************
 */
  
+#ifndef	_sisetup_h
+#define _sisetup_h
+
 #include <stdio.h>              //  standard io 
 #include <stdlib.h>
 #include <unistd.h>
@@ -51,3 +54,5 @@
 #include "siconst.h"			//  internal constants  and prototypes 
 #include "sistruct.h"			//  real structure defs
 #include "siproto.h"
+
+#endif

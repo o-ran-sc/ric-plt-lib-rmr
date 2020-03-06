@@ -75,7 +75,8 @@
 
 	.** for now we allow only a single layer of defitems
 	.dv di     .in 0i .br  $1 .br .in +3
-	.** .dv diitem .in 0i .br  $1 .br .in +.25i
+	.dv ditem .in 0i .br  $1 .br .in +3
+	.** diitem is odd and deprecated
 	.dv diitem .in 0i .br  $1 .br .in +3
 	.dv item .br &lic
 	.dv li .br &lic

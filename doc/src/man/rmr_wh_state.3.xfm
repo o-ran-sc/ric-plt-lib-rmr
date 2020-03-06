@@ -1,0 +1,90 @@
+.if false
+==================================================================================
+	Copyright (c) 2020 Nokia 
+	Copyright (c) 2020 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+.if false
+	Mnemonic	rmr_wh_state.xfm
+	Abstract	The manual page for the rmr_wh_state function.
+	Author		E. Scott Daniels
+	Date		6 March 2020
+.fi
+
+.gv e LIB lib
+.im &{lib}/man/setup.im 
+
+&line_len(6i)
+
+&h1(RMR Library Functions)
+&h2(NAME)
+	rmr_wh_state
+
+&h2(SYNOPSIS)
+&indent
+&ex_start
+#include <rmr/rmr.h>
+
+int rmr_wh_state( void* vctx, rmr_whid_t whid )
+&ex_end
+
+&uindent
+
+&h2(DESCRIPTION)
+The &cw(rmr_wh_state) function will return the current state of the connection
+associated with the given wormhole (whid). 
+The return value indicates whether the connection is open (RMR_OK), or closed
+(any other return value).
+
+&space
+When using some transport mechanisms (e.g. NNG), it may not be possible for
+RMR to know the actual state and the connection may always be reported as
+"open."
+
+&h2(RETURN)
+The following values are potential return values.
+
+&space
+&beg_dlist(.75i : ^&bold_font )
+&di(RMR_OK) 	
+	The wormhole ID is valid and the connection is "open."
+	&half_space
+
+&di(RMR_ERR_WHID)
+	THe wormhole ID passed into the function was not valid.
+	&half_space
+
+&di(RMR_ERR_NOENDPT)
+	The wormhole is not open (not connected).
+	&half_space
+
+&di(RMR_ERR_BADARG)
+	The context passed to the function was nil or invalid.
+	&half_space
+
+&di(RMR_ERR_NOWHOPEN)
+	Wormholes have not been initialised (no wormhole open call has been made).
+	&half_space
+&end_dlist
+
+
+&h2(SEE ALSO )
+.ju off
+rmr_wh_open(3),
+rmr_wh_send_msg(3),
+rmr_wh_close(3)
+
+.ju on

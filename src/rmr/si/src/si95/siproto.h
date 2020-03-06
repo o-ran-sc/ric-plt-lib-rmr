@@ -29,6 +29,8 @@
 -----------------------------------------------------------------------------------
 */
 
+#ifndef _si_proto_h
+#define _si_proto_h
 
 extern void *SInew( int type );
 extern char *sigetname( int sid );
@@ -59,3 +61,5 @@ extern void SIterm( struct ginfo_blk* gptr, struct tp_blk *tpptr );
 extern void SItrash( int type, void *bp );
 extern int SIwait( struct ginfo_blk *gptr );
 extern struct ginfo_blk* SIinitialise( int opts );
+
+#endif
