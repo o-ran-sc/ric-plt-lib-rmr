@@ -323,3 +323,43 @@ extern void rmr_wh_close( void* vctx, int whid ) {
 
 	whm->eps[whid] = NULL;
 }
+
+/*
+	Check the state of an endpoint that is associated with the wormhold ID
+	passed in. If the state is "open" then we return RMR_OK. Other possible
+	return codes:
+
+		RMR_ERR_WHID        // wormhole id was invalid
+		RMR_ERR_NOENDPT     // the endpoint connection is not open
+		RMR_ERR_BADARG		// context or other arg was invalid
+		RMR_ERR_NOWHOPEN	// wormhole(s) have not been initalised
+
+*/
+extern int rmr_wh_state( void* vctx, rmr_whid_t whid ) {
+	uta_ctx_t*	ctx;
+	wh_mgt_t*	whm;			// easy reference to wh mgt stuff
+	endpoint_t*	ep;				// enpoint that wormhole ID references
+
+	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {		// bad stuff, bail fast
+		errno = EINVAL;
+		return RMR_ERR_BADARG;
+	}
+
+	if( (whm = ctx->wormholes) == NULL ) {
+		errno = EINVAL;												// no wormholes open
+		return RMR_ERR_NOWHOPEN;
+	}
+
+	if( whid < 0 || whid >= whm->nalloc || whm->eps[whid] == NULL ) {
+		errno = EINVAL;
+		return RMR_ERR_WHID;
+	}
+
+	errno = 0;
+
+	if( (ep = whm->eps[whid]) != NULL ) {
+		return ep->open ? RMR_OK : RMR_ERR_NOENDPT;
+	}
+
+	return RMR_ERR_NOENDPT;
+}
