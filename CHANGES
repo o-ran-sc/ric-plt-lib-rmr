@@ -2,6 +2,13 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 March 5; Version 3.3.1
+	Correct several "bugs" identified by automatic code analysis.
+
+2020 March 4; Version 3.3.0
+	Add SI95 based unit testing
+	Health check support binary added (reason for minor bump)
+
 2020 February 29; Version 2.4.0
 	Add consolidated testing under CMake
 	Add support binary for health check (SI95 only)
