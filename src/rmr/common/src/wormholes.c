@@ -298,6 +298,60 @@ extern rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg
 }
 
 /*
+	Send a message directly to an open wormhole and then block until a response has
+	been received.  The return is the same as for rmr_call(); the received buffer
+	or nil if no response was received.
+*/
+extern rmr_mbuf_t* rmr_wh_call( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg, int call_id, int max_wait ) {
+	uta_ctx_t*	ctx;
+	endpoint_t*	ep;				// enpoint that wormhole ID references
+	wh_mgt_t *whm;
+	char* d1;					// point at the call-id in the header
+
+	if( (ctx = (uta_ctx_t *) vctx) == NULL || msg == NULL ) {		// bad stuff, bail fast
+		errno = EINVAL;												// if msg is null, this is their clue
+		if( msg != NULL ) {
+			msg->state = RMR_ERR_BADARG;
+			errno = EINVAL;											// must ensure it's not eagain
+		}
+		return msg;
+	}
+
+	msg->state = RMR_OK;
+
+	if( (whm = ctx->wormholes) == NULL ) {
+		errno = EINVAL;												// no wormholes open
+		msg->state = RMR_ERR_NOWHOPEN;
+		return msg;
+	}
+
+	if( whid < 0 || whid >= whm->nalloc || whm->eps[whid] == NULL ) {
+		errno = EINVAL;
+		msg->state = RMR_ERR_WHID;
+		return msg;
+	}
+
+	errno = 0;
+	if( msg->header == NULL ) {
+		rmr_vlog( RMR_VL_ERR, "rmr_wh_call: message had no header\n" );
+		msg->state = RMR_ERR_NOHDR;
+		errno = EBADMSG;										// must ensure it's not eagain
+		return msg;
+	}
+
+	ep = whm->eps[whid];
+	if( ep != NULL ) {
+		if( ! ep->open ) {
+			rmr_wh_open( ctx, ep->name );
+		}
+		return mt_call( vctx, msg, call_id, max_wait, ep );			// use main (internal) call to setup and block
+	}
+
+	msg->state = RMR_ERR_NOENDPT;
+	return msg;
+}
+
+/*
 	This will "close" a wormhole.  We don't actually drop the session as that might be needed
 	by others, but we do pull the ep reference from the list.
 */

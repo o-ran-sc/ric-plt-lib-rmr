@@ -31,16 +31,35 @@
 #ifndef _sr_si_static_c
 #define _sr_si_static_c
 
-static void dump_40( char *p, char* label ) {
+static void dump_n( char *p, char* label, int n ) {
 	int i;
+	int j;
+	int t = 0;
+	int	rows;
 
-	if( label )
-		fprintf( stderr, ">>>>> %s p=%p\n", label, p );
 
-	for( i = 0; i < 40; i++ ) {
-		fprintf( stderr, "%02x ", (unsigned char) *(p+i) );
+	if( label ) {
+		fprintf( stderr, ">>>>> %s p=%p %d bytes\n", label, p, n );
 	}
-	fprintf( stderr, "\n" );
+	
+	rows = (n/16) + ((n % 16) ? 1 : 0);
+	
+	for( j = 0; j < rows; j++ ) {
+		fprintf( stderr, "%04x: ", j * 16 );
+
+		for( i = 0; t < n && i < 16; i++, t++ ) {
+			fprintf( stderr, "%02x ", (unsigned char) *p );
+			p++;
+		}
+		fprintf( stderr, "\n" );
+	}
+}
+
+/*
+	backwards compatability.
+*/
+static void dump_40( char *p, char* label ) {
+	dump_n( p, label, 40 ); 
 }
 
 /*

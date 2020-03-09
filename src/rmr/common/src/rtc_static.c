@@ -291,6 +291,18 @@ static void* rtc( void* vctx ) {
 				if( DEBUG > 1 || (vlevel > 0) ) rmr_vlog( RMR_VL_DEBUG, "rmr_rtc: received rt message type=%d len=%d\n", msg->mtype, (int) mlen );
 			}
 
+
+
+
+if( DEBUG ) {
+	int* debug_d1;
+	uta_mhdr_t*	hdr;
+	hdr = (uta_mhdr_t *) msg->header;
+	debug_d1 = DATA1_ADDR( hdr );
+	rmr_vlog( RMR_VL_DEBUG, "rtc: received message call_id = %u\n", (unsigned int) debug_d1[D1_CALLID_IDX] );
+}
+
+
 			switch( msg->mtype ) {
 				case RMRRM_TABLE_DATA:
 					if( (flags & RTCFL_HAVE_UPDATE) == 0 ) {
@@ -323,7 +335,7 @@ static void* rtc( void* vctx ) {
 						if( vlevel > 1 ) {
 							rmr_vlog_force( RMR_VL_DEBUG, "rmr_rtc: processing (%s)\n", curr );
 						}
-						parse_rt_rec( ctx, pvt_cx, curr, vlevel );		// parse record and add to in progress table
+						parse_rt_rec( ctx, pvt_cx, curr, vlevel, msg );		// parse record and add to in progress table; ack using rts to msg
 
 						curr = nextr;
 					}
@@ -570,9 +582,9 @@ static void* raw_rtc( void* vctx ) {
 					rmr_vlog_force( RMR_VL_DEBUG, "rmr_rtc: processing (%s)\n", curr );
 				}
 				if( raw_interface ) {
-					parse_rt_rec( ctx, NULL, curr, vlevel );		// nil pvt to parser as we can't ack messages
+					parse_rt_rec( ctx, NULL, curr, vlevel, NULL );		// nil pvt to parser as we can't ack messages
 				} else {
-					parse_rt_rec( ctx, pvt_cx, curr, vlevel );		// parse record and add to in progress table
+					parse_rt_rec( ctx, pvt_cx, curr, vlevel, msg );		// parse record and add to in progress table
 				}
 
 				curr = nextr;

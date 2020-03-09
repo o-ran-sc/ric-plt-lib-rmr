@@ -311,13 +311,17 @@ static endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups );
 static endpoint_t* uta_get_ep( route_table_t* rt, char const* ep_name );
 static void read_static_rt( uta_ctx_t* ctx, int vlevel );
-static void parse_rt_rec( uta_ctx_t* ctx, uta_ctx_t* pctx, char* buf, int vlevel );
+static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vlevel, rmr_mbuf_t* mbuf );
 static rmr_mbuf_t* realloc_msg( rmr_mbuf_t* msg, int size );
 static void* rtc( void* vctx );
 static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name );
 
 // --------- route manager communications -----------------
-static void send_rt_ack( uta_ctx_t* ctx, char* table_id, int state, char* reason );
+static void send_rt_ack( uta_ctx_t* ctx, rmr_mbuf_t* mbuf, char* table_id, int state, char* reason );
 static int send_update_req( uta_ctx_t* pctx, uta_ctx_t* ctx );
+
+// -------- internal functions that can be referenced by common functions -------
+static rmr_mbuf_t* mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int max_wait, endpoint_t* ep );
+
 
 #endif

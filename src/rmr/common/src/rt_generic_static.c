@@ -241,9 +241,15 @@ static int send_update_req( uta_ctx_t* pctx, uta_ctx_t* ctx ) {
 
 	Context should be the PRIVATE context that we use for messages
 	to route manger and NOT the user's context.
+
+	If a message buffere is passed we use that and use return to sender
+	assuming that this might be a response to a call and that is needed
+	to send back to the proper calling thread. If msg is nil, we allocate
+	and use it.
 */
-static void send_rt_ack( uta_ctx_t* ctx, char* table_id, int state, char* reason ) {
-	rmr_mbuf_t*	smsg;
+static void send_rt_ack( uta_ctx_t* ctx, rmr_mbuf_t* smsg, char* table_id, int state, char* reason ) {
+	int		use_rts = 1;
+	int		payload_size = 1024;
 	
 	if( ctx == NULL || ctx->rtg_whid < 0 ) {
 		return;
@@ -253,24 +259,38 @@ static void send_rt_ack( uta_ctx_t* ctx, char* table_id, int state, char* reason
 		return;
 	}
 
-	smsg = rmr_alloc_msg( ctx, 1024 );
+	if( smsg != NULL ) {
+		smsg = rmr_realloc_payload( smsg, payload_size, FALSE, FALSE );		// ensure it's large enough to send a response
+	} else {
+		use_rts = 0;
+		smsg = rmr_alloc_msg( ctx, payload_size );
+	}
+
 	if( smsg != NULL ) {
 		smsg->mtype = RMRRM_TABLE_STATE;
-		smsg->sub_id = 0;
-		snprintf( smsg->payload, 1024, "%s %s %s\n", state == RMR_OK ? "OK" : "ERR", 
+		smsg->sub_id = -1;
+		snprintf( smsg->payload, payload_size-1, "%s %s %s\n", state == RMR_OK ? "OK" : "ERR", 
 			table_id == NULL ? "<id-missing>" : table_id, reason == NULL ? "" : reason );
 
 		smsg->len = strlen( smsg->payload ) + 1;
 	
 		rmr_vlog( RMR_VL_INFO, "rmr_rtc: sending table state: (%s) state=%d whid=%d\n", smsg->payload, smsg->state, ctx->rtg_whid );
-		smsg = rmr_wh_send_msg( ctx, ctx->rtg_whid, smsg );
+		if( use_rts ) {
+			rmr_vlog( RMR_VL_INFO, "rmr_rtc: sending table state via RTS\n" );
+			smsg = rmr_rts_msg( ctx, smsg );
+		} else {
+			rmr_vlog( RMR_VL_INFO, "rmr_rtc: sending table state via plain send\n" );
+			smsg = rmr_wh_send_msg( ctx, ctx->rtg_whid, smsg );
+		}
 		if( (state = smsg->state) != RMR_OK ) {
 			rmr_vlog( RMR_VL_WARN, "unable to send table state: %d\n", smsg->state );
 			rmr_wh_close( ctx, ctx->rtg_whid );					// send failed, assume connection lost
 			ctx->rtg_whid = -1;
 		}
 
-		rmr_free_msg( smsg );
+		if( ! use_rts ) {
+			rmr_free_msg( smsg );			// if not our message we must free the leftovers
+		}
 	}
 }
 
@@ -672,8 +692,14 @@ static void meid_parser( uta_ctx_t* ctx, char** tokens, int ntoks, int vlevel ) 
 	messages back to the route manager.  The regular ctx is the ctx that
 	the user has been given and thus that's where we have to hang the route
 	table we're working with.
+
+	If mbuf is given, and we need to ack, then we ack using the mbuf and a
+	return to sender call (allows route manager to use wh_call() to send
+	an update and rts is required to get that back to the right thread).
+	If mbuf is nil, then one will be allocated (in ack) and a normal wh_send
+	will be used.
 */
-static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vlevel ) {
+static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vlevel, rmr_mbuf_t* mbuf ) {
 	int i;
 	int ntoks;							// number of tokens found in something
 	int ngtoks;
@@ -723,7 +749,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 							rmr_vlog( RMR_VL_ERR, "rmr_rtc: RT update had wrong number of records: received %d expected %s\n",
 								ctx->new_rtable->updates, tokens[2] );
 							snprintf( wbuf, sizeof( wbuf ), "missing table records: expected %s got %d\n", tokens[2], ctx->new_rtable->updates );
-							send_rt_ack( pctx, ctx->table_id, !RMR_OK, wbuf );
+							send_rt_ack( pctx, mbuf, ctx->table_id, !RMR_OK, wbuf );
 							uta_rt_drop( ctx->new_rtable );
 							ctx->new_rtable = NULL;
 							break;
@@ -744,14 +770,14 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 							rt_stats( ctx->rtable );
 						}
 
-						send_rt_ack( pctx, ctx->table_id, RMR_OK, NULL );
+						send_rt_ack( pctx, mbuf, ctx->table_id, RMR_OK, NULL );
 					} else {
 						if( DEBUG > 1 ) rmr_vlog_force( RMR_VL_DEBUG, "end of route table noticed, but one was not started!\n" );
 						ctx->new_rtable = NULL;
 					}
 				} else {															// start a new table.
 					if( ctx->new_rtable != NULL ) {									// one in progress?  this forces it out
-						send_rt_ack( pctx, ctx->table_id, !RMR_OK, "table not complete" );			// nack the one that was pending as end never made it
+						send_rt_ack( pctx, mbuf, ctx->table_id, !RMR_OK, "table not complete" );			// nack the one that was pending as end never made it
 
 						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "new table; dropping incomplete table\n" );
 						uta_rt_drop( ctx->new_rtable );
@@ -909,7 +935,7 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 			return;
 		}
 
-		parse_rt_rec( ctx, NULL, rec, vlevel );			// no pvt context as we can't ack
+		parse_rt_rec( ctx, NULL, rec, vlevel, NULL );		// no pvt context as we can't ack
 
 		rec = eor+1;
 	}
