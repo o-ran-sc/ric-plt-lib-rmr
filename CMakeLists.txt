@@ -39,7 +39,7 @@ project( rmr LANGUAGES C )
 cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "3" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
-set( minor_version "4" )
+set( minor_version "5" )
 set( patch_level "0" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )

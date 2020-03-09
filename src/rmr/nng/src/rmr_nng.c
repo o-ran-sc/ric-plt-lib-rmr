@@ -978,23 +978,15 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 	return mbuf;
 }
 
+
 /*
-	Accept a message buffer and caller ID, send the message and then wait
-	for the receiver to tickle the semaphore letting us know that a message
-	has been received. The call_id is a value between 2 and 255, inclusive; if
-	it's not in this range an error will be returned. Max wait is the amount
-	of time in millaseconds that the call should block for. If 0 is given
-	then no timeout is set.
+	This does the real work behind both of the outward facing call functions. See 
+	the rmr_mt_call() description for details modulo the comments blow.
 
-	If the mt_call feature has not been initialised, then the attempt to use this
-	funciton will fail with RMR_ERR_NOTSUPP
-
-	If no matching message is received before the max_wait period expires, a
-	nil pointer is returned, and errno is set to ETIMEOUT. If any other error
-	occurs after the message has been sent, then a nil pointer is returned
-	with errno set to some other value.
+	If ep is given, then we skip the normal route table endpoint selection. This is
+	likely a wormhole call.
 */
-extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int max_wait ) {
+static rmr_mbuf_t* mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int max_wait, endpoint_t* ep ) {
 	rmr_mbuf_t* ombuf;			// original mbuf passed in
 	uta_ctx_t*	ctx;
 	uta_mhdr_t*	hdr;			// header in the transport buffer
@@ -1062,7 +1054,11 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 		seconds = 1;										// use as flag later to invoked timed wait
 	}
 
-	mbuf = mtosend_msg( ctx, mbuf, 0 );						// use internal function so as not to strip call-id; should be nil on success!
+	if( ep != NULL ) {
+		mbuf = mtosend_msg( ctx, mbuf, 0 );					// use internal function so as not to strip call-id; should be nil on success!
+	} else {
+		mbuf = send_msg( ctx, mbuf, ep->nn_sock, -1 );
+	}
 	if( mbuf ) {
 		if( mbuf->state != RMR_OK ) {
 			mbuf->tp_state = errno;
@@ -1102,6 +1098,30 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 	chute->mbuf = NULL;
 
 	return mbuf;
+}
+
+/*
+	Accept a message buffer and caller ID, send the message and then wait
+	for the receiver to tickle the semaphore letting us know that a message
+	has been received. The call_id is a value between 2 and 255, inclusive; if
+	it's not in this range an error will be returned. Max wait is the amount
+	of time in millaseconds that the call should block for. If 0 is given
+	then no timeout is set.
+
+	If the mt_call feature has not been initialised, then the attempt to use this
+	funciton will fail with RMR_ERR_NOTSUPP
+
+	If no matching message is received before the max_wait period expires, a
+	nil pointer is returned, and errno is set to ETIMEOUT. If any other error
+	occurs after the message has been sent, then a nil pointer is returned
+	with errno set to some other value.
+
+	This is now just a wrapper to the real work horse so that we can provide
+	this and wormhole call functions without duplicating code.
+
+*/
+extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int max_wait ) {
+	return mt_call( vctx, mbuf, call_id, max_wait, NULL );
 }
 
 /*

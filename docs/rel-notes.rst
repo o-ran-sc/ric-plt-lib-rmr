@@ -15,6 +15,12 @@ file at the repo root; please refer to that file for a
 completely up to date listing of API changes. 
  
  
+2020 March 9; version 3.5.0 
+-------------------------------------------------------------------------------------------- 
+ 
+Added new wormhole send function: rmr_wh_call(). 
+ 
+ 
 2020 March 6; version 3.4.0 
 -------------------------------------------------------------------------------------------- 
  

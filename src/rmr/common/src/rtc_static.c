@@ -1,8 +1,8 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -323,7 +323,7 @@ static void* rtc( void* vctx ) {
 						if( vlevel > 1 ) {
 							rmr_vlog_force( RMR_VL_DEBUG, "rmr_rtc: processing (%s)\n", curr );
 						}
-						parse_rt_rec( ctx, pvt_cx, curr, vlevel );		// parse record and add to in progress table
+						parse_rt_rec( ctx, pvt_cx, curr, vlevel, msg );		// parse record and add to in progress table; ack using rts to msg
 
 						curr = nextr;
 					}
@@ -570,9 +570,9 @@ static void* raw_rtc( void* vctx ) {
 					rmr_vlog_force( RMR_VL_DEBUG, "rmr_rtc: processing (%s)\n", curr );
 				}
 				if( raw_interface ) {
-					parse_rt_rec( ctx, NULL, curr, vlevel );		// nil pvt to parser as we can't ack messages
+					parse_rt_rec( ctx, NULL, curr, vlevel, NULL );		// nil pvt to parser as we can't ack messages
 				} else {
-					parse_rt_rec( ctx, pvt_cx, curr, vlevel );		// parse record and add to in progress table
+					parse_rt_rec( ctx, pvt_cx, curr, vlevel, msg );		// parse record and add to in progress table
 				}
 
 				curr = nextr;
