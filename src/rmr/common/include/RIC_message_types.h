@@ -38,6 +38,10 @@
 #define RMRRM_TABLE_STATE			22		// state of table to route mgr
 
 
+// --- system support messages -----------------------
+#define RIC_HEALTH_CHECK_REQ    100
+#define RIC_HEALTH_CHECK_RESP   101
+
 // --- please keep additions in numerical order ------
 
 #define RIC_SCTP_CONNECTION_FAILURE 1080

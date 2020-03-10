@@ -2,6 +2,9 @@
 API and build change  and fix summaries. Doc correctsions
 and/or changes are not mentioned here; see the commit messages.
 
+2020 March 10; version 3.5.1
+	Add missing health check message types.
+	
 2020 March 9; version 3.5.0
 	Added new wormhole send function: rmr_wh_call().
 

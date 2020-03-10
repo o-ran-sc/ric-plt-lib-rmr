@@ -73,12 +73,6 @@
 #include <rmr.h>
 #include <RIC_message_types.h>
 
-#ifndef RIC_HEALTH_CHECK_REQ
-#define RIC_HEALTH_CHECK_REQ	100
-#define RIC_HEALTH_CHECK_RESP	101
-#endif
-
-
 #define MAX_MSG_SZ	2048		// max size we'll expect back
 #define PAYLOAD_SZ	1024		// size of payload we will send
 
