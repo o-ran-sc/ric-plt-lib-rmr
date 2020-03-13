@@ -41,7 +41,7 @@ all:: $(docs:%=%.rst) $(docs:%=%.txt) $(docs:%=%.md)
 man_list.im:: always
 	bash gen_man_list.sh >man_list.im
 
-rel-notes.xfm: ../../../CHANGES
+rel-notes.xfm:: always
 	ksh fmt_changes.ksh >rel-notes.xfm
 
 

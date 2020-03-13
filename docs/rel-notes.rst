@@ -10,52 +10,56 @@ RMR Release Notes
 ============================================================================================ 
  
 The following is a list of release highlights for the core 
-RMR library. These are extracted directly from the CHANGES 
-file at the repo root; please refer to that file for a 
-completely up to date listing of API changes. 
+RMR library and wrappers which are housed in the same 
+repository. These are extracted directly from the 
+CHANGES_*.txt files at the repo root; please refer to those 
+files for a completely up to date listing of API changes (as 
+generated documents may lag). 
  
+The RMR repo houses two distinct release entities: the core 
+RMR package and the python wrapper package. To avoid naming 
+conflicts (tags mostly) The core package uses odd major 
+version numbers (e.g. 3.2.1) and the wrapper package uses 
+even major version numbers. The release notes are split into 
+two sections; please be sure to scroll to the section that is 
+appropriate. 
+ 
+Core RMR Changes 
+-------------------------------------------------------------------------------------------- 
+ 
+ 
+2020 March 10; version 3.5.1 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Add missing health check message types. 
  
 2020 March 9; version 3.5.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Added new wormhole send function: rmr_wh_call(). 
  
  
 2020 March 6; version 3.4.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Add new wormhole state function: rmr_wh_state(). 
  
  
 2020 March 5; Version 3.3.1 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Correct several "bugs" identified by automatic code analysis. 
  
  
 2020 March 4; Version 3.3.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Add SI95 based unit testing Health check support binary added 
 (reason for minor bump) 
  
  
-2020 February 29; Version 2.4.0 
--------------------------------------------------------------------------------------------- 
- 
-Add consolidated testing under CMake Add support binary for 
-health check (SI95 only) 
- 
- 
-2020 February 28; Version 2.3.6 
--------------------------------------------------------------------------------------------- 
- 
-Fix bug in Rt. Mgr comm which prevented table ID from being 
-sent on ack message (RIC-232). 
- 
- 
 2020 February 26; version 3.2.5 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Fix source address bug in SI95 receive/send funcitons. Fix 
 threading issues involving session disconnection in SI95 
@@ -63,38 +67,38 @@ Remove unused SI95 status variable.
  
  
 2020 February 24; version 3.2.4 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Fix meid bug (RIC-220) causing core dump. 
  
  
 2020 February 21; version 3.2.3 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Add meid routing support to the SI95 interface. 
  
  
 2020 February 20; version 3.2.2 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Fix receive thread related core dump (ring early unlock). 
  
  
 2020 February 19; version 3.2.1 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Added missing message types (E2-Setup) 
  
  
 2020 February 18; version 3.2.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Added support for new Route Manager and it's ability to 
 accept a request for table update. 
  
  
 2020 February 14; version 3.1.3 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Fix bug in SIsend which was causing a core dump in some cases 
 where the application attempted to send on a connection that 
@@ -102,20 +106,20 @@ had disconnected. (RIC-207).
  
  
 2020 February 6; version 3.1.2 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Fix disconnection detection bug in interface to SI95. 
  
  
 2020 January 31; verison 3.1.1 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Allow route table thread logging to be completely disabled 
 when logging is turned off. 
  
  
 2020 January 26; verison 3.1.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 First step to allowing the user programme to control messages 
 written to standard error. Introduces the rmr_set_vlevel() 
@@ -123,38 +127,38 @@ function, and related environment variable.
  
  
 2020 January 24; verison 3.0.5 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Fix bug in SI95 with receive buffer allocation. 
  
  
 2020 January 23; verison 3.0.4 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Fix bug in SI95 causing excessive CPU usage on poll. 
  
  
 2020 January 22; verison 3.0.3 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Enable thread support for multiple receive threads. 
  
  
 2020 January 21; verison 3.0.2 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Fix bug in SI95 (missing reallocate payload function). 
  
  
 2020 January 20; verison 3.0.1 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Enable support for dynamic route table updates via RMR 
 session. 
  
  
 2020 January 16; version 3.0.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Introduce support for SI95 transport library to replace NNG. 
 (RMR library versions will use leading odd numbers to avoid 
@@ -163,41 +167,40 @@ numbers.)
  
  
 2019 December 9; version 1.13.1 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Correct documentation and missing rel-notes update for RTD. 
  
  
 2019 December 6; version 1.13.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Add ability to route messages based on the MEID in a message 
 combined with the message type/subscription-ID. 
  
  
- 
 2019 November 14; version 1.11.1 (Amber) 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Fix bug in payload reallocation function; correct length of 
 payload was not always copied. 
  
  
 2019 November 13; version 1.12.1 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 New message type constants added to support A1. 
  
  
 2019 November 4; version 1.11.0 (Amber) 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Version bump to move away from the 1.10.* to distinguish 
 between release A and the trial. 
  
  
 2019 November 7; version 1.12.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Version cut to support continued development for next release 
 preserving the 1.11.* versions for release 1 (Amber) and 
@@ -205,7 +208,7 @@ related fixes.
  
  
 2019 October 31; version 1.10.2 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Provide the means to increase the payload size of a received 
 message without losing the data needed to use the 
@@ -213,7 +216,7 @@ rmr_rts_msg() funciton.
  
  
 2019 October 21; version 1.10.1 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Fix to prevent null message buffer from being returned by the 
 timeout receive function if the function is passed one to 
@@ -221,20 +224,20 @@ reuse.
  
  
 2019 October 21; version 1.10.1 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Add periodic dump of send count info to stderr. 
  
  
 2019 September 27; version 1.9.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Python bindings added receive all queued function and 
 corrected a unit test 
  
  
 2019 September 25; version 1.8.3 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Correct application level test issue causing timing problems 
 during jenkins verification testing at command and merge 
@@ -244,26 +247,26 @@ generated when a connection throug a proxy is reset.
  
  
 2019 September 25; version 1.8.2 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Correct bug in rmr_torcv_msg() when timeout set to zero (0). 
  
  
 2019 September 19; version 1.8.1 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Correct missing constant for wrappers. 
  
  
 2019 September 19; version 1.8.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 New message types added: RAN_CONNECTED, RAN_RESTARTED, 
 RAN_RECONFIGURED 
  
  
 2019 September 17; version 1.7.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Initial connection mode now defaults to asynchronous. Set 
 RMR_ASYNC_CONN=0 in the environment before rmr_init() is 
@@ -272,7 +275,7 @@ invoked to revert to synchronous first TCP connections.
  
  
 2019 September 3; version 1.6.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Fix bug in the rmr_rts_msg() function. If a return to sender 
 message failed, the source IP address was not correctly 
@@ -288,26 +291,26 @@ is not present, the host name (original behaviour) is used.
  
  
 2019 August 26; version 1.4.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 New message types were added. 
  
  
 2019 August 16; version 1.3.0 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 New mesage types added. 
  
  
 2019 August 13; version 1.2.0 (API change, non-breaking) 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The function rmr_get_xact() was added to proide a convenient 
 way to extract the transaction field from a message. 
  
  
 2019 August 8; version 1.1.0 (API change) 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 This change should be backward compatable/non-breaking A new 
 field has been added to the message buffer (rmr_mbuf_t). This 
@@ -320,7 +323,7 @@ rmr_alloc_msg manual page for more details.
  
  
 2019 August 6; version 1.0.45 (build changes) 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Support for the Nanomsg transport library has been dropped. 
 The library librmr.* will no longer be included in packages. 
@@ -336,28 +339,45 @@ preference than the one where the package is installed.
  
  
 2019 August 6; version 1.0.44 (API change) 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Added a new message type constant. 
  
  
 2019 July 15; Version 1.0.39 (bug fix) 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Prevent unnecessary usleep in retry loop. 
  
  
 2019 July 12; Version 1.0.38 (API change) 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Added new message types to RIC_message_types.h. 
  
  
 2019 July 11; Version 1.0.37 
--------------------------------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
  
 librmr and librmr_nng - Add message buffer API function 
 rmr_trace_ref() (see rmr_trace_ref.3 manual page in dev 
 package). 
  
+ 
+Wrapper Changes 
+-------------------------------------------------------------------------------------------- 
+ 
+ 
+2020 February 29; Version 2.4.0 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Add consolidated testing under CMake Add support binary for 
+health check (SI95 only) 
+ 
+ 
+2020 February 28; Version 2.3.6 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Fix bug in Rt. Mgr comm which prevented table ID from being 
+sent on ack message (RIC-232). 

@@ -1,6 +1,9 @@
+# this file should contain ONLY the changes related to the 
+# core RMR code and doc.  Other change files exist for other
+# things.
 
-API and build change  and fix summaries. Doc correctsions
-and/or changes are not mentioned here; see the commit messages.
+# API and build change  and fix summaries. Doc correctsions
+# and/or changes are not mentioned here; see the commit messages.
 
 2020 March 10; version 3.5.1
 	Add missing health check message types.
@@ -17,14 +20,6 @@ and/or changes are not mentioned here; see the commit messages.
 2020 March 4; Version 3.3.0
 	Add SI95 based unit testing
 	Health check support binary added (reason for minor bump)
-
-2020 February 29; Version 2.4.0
-	Add consolidated testing under CMake
-	Add support binary for health check (SI95 only)
-
-2020 February 28; Version 2.3.6
-	Fix bug in Rt. Mgr comm which prevented table ID from being
-	sent on ack message (RIC-232).
 
 2020 February 26; version 3.2.5
 	Fix source address bug in SI95 receive/send funcitons.
@@ -90,7 +85,6 @@ and/or changes are not mentioned here; see the commit messages.
 2019 December 6; version 1.13.0
 	Add ability to route messages based on the MEID in a message combined
 	with the message type/subscription-ID.
-
 
 2019 November 14; version 1.11.1 (Amber)
 	Fix bug in payload reallocation function; correct length of payload

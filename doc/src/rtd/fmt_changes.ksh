@@ -16,32 +16,52 @@
 #   limitations under the License.
 #==================================================================================
 
-# format the changes file at the top level into xfm input
+#	Mnemonic:	fmt_changes.ksh
+#	Abstract:	This script looks for CHANGES*.txt files at the top level
+#				and builds one {X}fm source file from which the release notes
+#				RTD file is created.
+
 cat <<endKat
 .im setup.im
 &h1(RMR Release Notes)
-The following is a list of release highlights for the core RMR library.
-These are extracted directly from the CHANGES file at the repo root; 
-please refer to that file for a completely up to date listing of
-API changes.  
+The following is a list of release highlights for the core RMR library and 
+wrappers which are housed in the same repository.
+These are extracted directly from the CHANGES_*.txt files at the repo root; 
+please refer to those files for a completely up to date listing of
+API changes (as generated documents may lag).  
 &space
+
+The RMR repo houses two distinct release entities: the core RMR package
+and the python wrapper package.
+To avoid naming conflicts (tags mostly) The core package uses odd 
+major version numbers (e.g. 3.2.1) and the wrapper package uses even
+major version numbers. 
+The release notes are split into two sections; please be sure to 
+scroll to the section that is appropriate.
 
 endKat
 
-sed 's/^/!/' ../../../CH*|awk ' 
+for x in ../../../CHANGES*.txt
+do
+	case $x in 
+		*CORE*) printf "&h2(Core RMR Changes)\n" ;;
+		*)	printf "&h2(Wrapper Changes)\n" ;;
+	esac
 
-	print_raw && /^!$/ { 
-		printf( "&space\n\n" ); 
-		next 
-	} 
-
-	{ gsub ( "!", "", $1 ) }
-
-	$1 + 0 >= 2019 {
-		print_raw = 1
-		printf( "&h2(%s)\n", $0 )
-		next 
-	}
-
-	print_raw { print } 
-	'
+	sed 's/^/!/' $x | awk ' 
+		print_raw && /^!$/ { 
+			printf( "&space\n\n" ); 
+			next 
+		} 
+	
+		{ gsub ( "!", "", $1 ) }
+	
+		$1 + 0 >= 2019 {
+			print_raw = 1
+			printf( "&h3(%s)\n", $0 )
+			next 
+		}
+	
+		print_raw { print } 
+		' ###
+done
