@@ -1,8 +1,8 @@
 // :vi sw=4 ts=4 noet:
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -568,8 +568,13 @@ static void parse_meid_del( route_table_t* rtab, char* meid_list, int vlevel ) {
 /*
 	Parse a partially parsed meid record. Tokens[0] should be one of:
 		meid_map, mme_ar, mme_del.
+
+	pctx is the private context needed to return an ack/nack using the provided
+	message buffer with the route managers address info.
 */
-static void meid_parser( uta_ctx_t* ctx, char** tokens, int ntoks, int vlevel ) {
+static void meid_parser( uta_ctx_t* ctx, uta_ctx_t* pctx, rmr_mbuf_t* mbuf, char** tokens, int ntoks, int vlevel ) {
+	char wbuf[1024];
+
 	if( tokens == NULL || ntoks < 1 ) {
 		return;							// silent but should never happen
 	}
@@ -585,8 +590,17 @@ static void meid_parser( uta_ctx_t* ctx, char** tokens, int ntoks, int vlevel ) 
 			if( ctx->new_rtable != NULL ) {					// one in progress?  this forces it out
 				if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "meid map start: dropping incomplete table\n" );
 				uta_rt_drop( ctx->new_rtable );
+				send_rt_ack( pctx, mbuf, ctx->table_id, !RMR_OK, "table not complete" );	// nack the one that was pending as end never made it
 			}
 
+			if( ctx->table_id != NULL ) {
+				free( ctx->table_id );
+			}
+			if( ntoks >2 ) {
+				ctx->table_id = strdup( clip( tokens[2] ) );
+			} else {
+				ctx->table_id = NULL;
+			}
 			ctx->new_rtable = uta_rt_clone_all( ctx->rtable );		// start with a clone of everything (mtype, endpoint refs and meid)
 			ctx->new_rtable->mupdates = 0;
 			if( DEBUG || (vlevel > 1)  ) rmr_vlog_force( RMR_VL_DEBUG, "meid_parse: meid map start found\n" );
@@ -595,6 +609,8 @@ static void meid_parser( uta_ctx_t* ctx, char** tokens, int ntoks, int vlevel ) 
 				if( ntoks > 2 ) {												// meid_map | end | <count> |??? given
 					if( ctx->new_rtable->mupdates != atoi( tokens[2] ) ) {		// count they added didn't match what we received
 						rmr_vlog( RMR_VL_ERR, "meid_parse: meid map update had wrong number of records: received %d expected %s\n", ctx->new_rtable->mupdates, tokens[2] );
+						snprintf( wbuf, sizeof( wbuf ), "missing table records: expected %s got %d\n", tokens[2], ctx->new_rtable->updates );
+						send_rt_ack( pctx, mbuf, ctx->table_id, !RMR_OK, wbuf );
 						uta_rt_drop( ctx->new_rtable );
 						ctx->new_rtable = NULL;
 						return;
@@ -609,6 +625,7 @@ static void meid_parser( uta_ctx_t* ctx, char** tokens, int ntoks, int vlevel ) 
 					ctx->rtable = ctx->new_rtable;				// one we've been adding to becomes active
 					ctx->new_rtable = NULL;
 					if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "end of meid map noticed\n" );
+					send_rt_ack( pctx, mbuf, ctx->table_id, RMR_OK, NULL );
 
 					if( vlevel > 0 ) {
 						rmr_vlog_force( RMR_VL_DEBUG, "old route table:\n" );
@@ -797,7 +814,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 				}
 				break;
 
-			case 'm':								// mse entry or one of the meid_ records
+			case 'm':									// mse entry or one of the meid_ records
 				if( strcmp( tokens[0], "mse" ) == 0 ) {
 					if( ! ctx->new_rtable ) {			// bad sequence, or malloc issue earlier; ignore siliently
 						break;
@@ -811,7 +828,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 					build_entry( ctx, tokens[1], atoi( tokens[2] ), tokens[3], vlevel );
 					ctx->new_rtable->updates++;
 				} else {
-					meid_parser( ctx, tokens, ntoks, vlevel );
+					meid_parser( ctx, pctx, mbuf, tokens, ntoks, vlevel );
 				}
 				break;
 
