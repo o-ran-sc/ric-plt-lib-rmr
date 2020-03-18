@@ -7,6 +7,14 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
 and this project adheres to `Semantic
 Versioning <http://semver.org/>`__.
 
+[4.0.0] - 3/18/2020
+-------------------
+
+::
+
+    * Switch to SI95 instead of NNG. This is a breaking change. SI95 rmr users cannot talk to NNG rmr users.
+    * The version bump from 2 to 4 is due to the "roommate" issue in the rmr repo.
+
 
 [2.2.1] - 3/3/2020
 --------------------

@@ -27,8 +27,7 @@ from rmr.exceptions import BadBufferAllocation, MeidSizeOutOfRange, InitFailed
 # make sure you do a set -x LD_LIBRARY_PATH /usr/local/lib/;
 
 # even though we don't use these directly, they contain symbols we need
-_ = CDLL("libnng.so", mode=RTLD_GLOBAL)
-rmr_c_lib = CDLL("librmr_nng.so", mode=RTLD_GLOBAL)
+rmr_c_lib = CDLL("librmr_si.so", mode=RTLD_GLOBAL)
 
 
 # Internal Helpers (not a part of public api)
