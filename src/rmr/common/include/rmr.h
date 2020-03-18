@@ -72,6 +72,11 @@ extern "C" {
 #define RMR_ERR_INITFAILED	15		// initialisation of something (probably message) failed
 #define RMR_ERR_NOTSUPP		16		// the request is not supported, or RMr was not initialised for the request
 
+#define RMR_NO_CLONE		0		// parm constants for better readability
+#define RMR_CLONE			1
+#define RMR_NO_COPY			0
+#define RMR_COPY			1
+
 #define RMR_WH_CONNECTED(a) (a>=0)	// for now whid is integer; it could be pointer at some future date
 
 /*
