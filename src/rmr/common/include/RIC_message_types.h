@@ -116,6 +116,11 @@
 #define RIC_E2_SETUP_REQ			12001
 #define RIC_E2_SETUP_RESP			12002
 #define RIC_E2_SETUP_FAILURE		12003
+#define RIC_E2_RESET_REQ			12004
+#define RIC_E2_RESET_RESP			12005
+#define RIC_E2_RAN_ERROR_INDICATION	12006
+#define RIC_E2_RIC_ERROR_INDICATION	12007
+
 
 #define RIC_SUB_REQ					12010
 #define RIC_SUB_RESP				12011
@@ -146,6 +151,12 @@
 #define A1_POLICY_RESP    			20011
 #define A1_POLICY_QUERY				20012
 
+
+// --- application specific message numbers 30000 - 39999
+    
+#define TS_UE_LIST					30000		// traffic steering
+#define TS_QOE_PRED_REQ				30001
+#define TS_QUE_PREDICTION			30002
 
 
 
