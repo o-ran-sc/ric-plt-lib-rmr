@@ -40,7 +40,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "3" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "6" )
-set( patch_level "0" )
+set( patch_level "1" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_inc "include/rmr" )
@@ -276,15 +276,15 @@ set_target_properties( rmr_si_shared
 	SOVERSION ${major_version}
 	VERSION ${major_version}.${minor_version}.${patch_level} )
 
-# we only build/export the static archive (.a) if generating a dev package
-if( DEV_PKG )
-	add_library( rmr_si_static STATIC "$<TARGET_OBJECTS:rmr_si_objects>;$<TARGET_OBJECTS:common_objects>" )
-	set_target_properties( rmr_si_static
-		PROPERTIES
-		OUTPUT_NAME "rmr_si"
-		SOVERSION ${major_version}
-		VERSION ${major_version}.${minor_version}.${patch_level} )
-endif()
+# even if not generating a development package we still need to generate the .a so that health check 
+# can link against it to avoid RPM install issues.
+#
+add_library( rmr_si_static STATIC "$<TARGET_OBJECTS:rmr_si_objects>;$<TARGET_OBJECTS:common_objects>" )
+set_target_properties( rmr_si_static
+	PROPERTIES
+	OUTPUT_NAME "rmr_si"
+	SOVERSION ${major_version}
+	VERSION ${major_version}.${minor_version}.${patch_level} )
 
 # if externals need to be built, then we must force them to be built first by depending on them
 if( need_ext )
@@ -364,6 +364,9 @@ IF( EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake" )
 
 	set( CPACK_DEBIAN_PACKAGE_NAME ${deb_pkg_name} )
 	set( CPACK_RPM_PACKAGE_NAME ${rpm_pkg_name} )
+
+	# auto dependency checking makes the RPM install fail, see NOTES
+	set( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION="/usr/local /usr/local/bin /usr/local/lib" )
 
 	set( CPACK_set_DESTDIR "on" )
 	set( CPACK_PACKAGING_INSTALL_PREFIX "${install_root}" )

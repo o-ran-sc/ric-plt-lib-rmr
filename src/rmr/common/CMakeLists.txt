@@ -38,6 +38,6 @@ if( DEV_PKG )
 		include/rmr_symtab.h
 		include/rmr_logging.h
 		include/RIC_message_types.h
-		DESTINATION ${install_root}/${install_inc}
+		DESTINATION ${install_inc}
 	)	
 endif()

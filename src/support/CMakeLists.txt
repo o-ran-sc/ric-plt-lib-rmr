@@ -19,7 +19,8 @@
 
 # build support tools and setup for their install
 add_executable( health_ck health_ck.c )
-target_link_libraries( health_ck rmr_si_shared;pthread;m )
+add_dependencies( health_ck rmr_si_static )
+target_link_libraries( health_ck rmr_si_static;pthread;m )
 
 include_directories( ${CMAKE_SOURCE_DIR}/src/rmr/common/include )
 
@@ -28,7 +29,7 @@ include_directories( ${CMAKE_SOURCE_DIR}/src/rmr/common/include )
 if( NOT DEV_PKG )
 	install(
     	TARGETS health_ck
-    	DESTINATION ${install_root}/bin
+    	DESTINATION bin
 	)
 endif()
 
