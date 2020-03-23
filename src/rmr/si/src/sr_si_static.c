@@ -147,6 +147,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 			msg->alloc_len = 0;				// force tp_buffer realloc below
 			if( msg->tp_buf ) {
 				free( msg->tp_buf );
+				msg->tp_buf = NULL;
 			}
 		} else {
 			mlen = msg->alloc_len;							// msg given, allocate the same size as before
@@ -160,10 +161,11 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 		abort( );											// toss out a core file for this
 	}
 
-/*
+#ifdef DEBUG
 	memset( msg->tp_buf, 0, mlen );    // NOT for production (debug only)	valgrind will complain about uninitalised use if we don't set
 	memcpy( msg->tp_buf, "@@!!@@!!@@!!@@!!@@!!@@!!@@!!@@!!**", TP_HDR_LEN );		// NOT for production -- debugging eyecatcher
-*/
+#endif
+
 	alen = (int *) msg->tp_buf;
 	*alen = mlen;						// FIX ME: need a stuct to go in these first bytes, not just dummy len
 
@@ -185,7 +187,7 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 	msg->payload = PAYLOAD_ADDR( hdr );						// point to payload (past all header junk)
 	msg->xaction = ((uta_mhdr_t *)msg->header)->xid;		// point at transaction id in header area
 	msg->state = state;										// fill in caller's state (likely the state of the last operation)
-	msg->flags |= MFL_ZEROCOPY;								// this is a zerocopy sendable message
+	msg->flags = MFL_ZEROCOPY;								// this is a zerocopy sendable message
 	msg->ring = ctx->zcb_mring;								// original msg_free() api doesn't get context so must dup on eaach :(
 	strncpy( (char *) ((uta_mhdr_t *)msg->header)->src, ctx->my_name, RMR_MAX_SRC );
 	strncpy( (char *) ((uta_mhdr_t *)msg->header)->srcip, ctx->my_ip, RMR_MAX_SRC );
