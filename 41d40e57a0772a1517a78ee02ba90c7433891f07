@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d75bbf92_d152f704",
+        "filename": "releases/packagecloud-3.6.2-rmr.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-03-25T16:06:58Z",
+      "side": 1,
+      "message": "There are two schools of thought on the file name - some put the version number here and add a file for each release.  Others omit the version number and reuse the file for each release.  All depends on whether you want to get history by lists of files, or commit messages (or both).  Originally I was in the former camp (lots of files) but now I tend to prefer keeping things simple, just reuse the same file.",
+      "revId": "41d40e57a0772a1517a78ee02ba90c7433891f07",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8e65871_3fe151be",
+        "filename": "releases/packagecloud-3.6.2-rmr.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-03-25T16:06:58Z",
+      "side": 1,
+      "message": "you don\u0027t need to surround this with double quotes",
+      "range": {
+        "startLine": 3,
+        "startChar": 9,
+        "endLine": 3,
+        "endChar": 10
+      },
+      "revId": "41d40e57a0772a1517a78ee02ba90c7433891f07",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
