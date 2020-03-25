@@ -1,0 +1,6 @@
+---
+package_name:
+    - name: rmr_3.6.2_amd64.deb
+    - name: rmr-dev_3.6.2_amd64.deb
+    - name: rmr-devel-3.6.2-1.x86_64.rpm
+    - name: rmr-3.6.2-1.x86_64.rpm
