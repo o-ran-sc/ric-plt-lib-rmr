@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2c792c85_9b854269",
+        "filename": "releases/packagecloud-3.6.2-rmr.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-25T16:26:33Z",
+      "side": 1,
+      "message": "Ack, thanks.  I wasn\u0027t sure if it would find a dup name somewhere; the python stuff was spewing different names so I assumed it did.  I\u0027m with you; I don\u0027t like the pollution of the repo for this kind of stuff, so I\u0027m apt to keep it to a single file from here on out.",
+      "parentUuid": "d75bbf92_d152f704",
+      "revId": "41d40e57a0772a1517a78ee02ba90c7433891f07",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b8e65871_3fe151be",
         "filename": "releases/packagecloud-3.6.2-rmr.yaml",
         "patchSetId": 2
@@ -30,6 +48,30 @@
       "writtenOn": "2020-03-25T16:06:58Z",
       "side": 1,
       "message": "you don\u0027t need to surround this with double quotes",
+      "range": {
+        "startLine": 3,
+        "startChar": 9,
+        "endLine": 3,
+        "endChar": 10
+      },
+      "revId": "41d40e57a0772a1517a78ee02ba90c7433891f07",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc86f930_a0e7e9a0",
+        "filename": "releases/packagecloud-3.6.2-rmr.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-25T16:26:33Z",
+      "side": 1,
+      "message": "Thanks.  Never sure what is considered a special character in these config languages so I tend to quote everything.",
+      "parentUuid": "b8e65871_3fe151be",
       "range": {
         "startLine": 3,
         "startChar": 9,
