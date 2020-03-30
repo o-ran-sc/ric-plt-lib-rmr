@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c01385e4_7df5788d",
+        "filename": "src/rmr/common/include/rmr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000074
+      },
+      "writtenOn": "2020-03-30T15:25:32Z",
+      "side": 0,
+      "message": "yep this would be the problem\n\nI assume aall these other constants were checked too?",
+      "revId": "41d40e57a0772a1517a78ee02ba90c7433891f07",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
