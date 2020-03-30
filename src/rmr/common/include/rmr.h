@@ -39,7 +39,7 @@ extern "C" {
 #define RMR_MAX_MEID		32		// spece in header reserved for managed element id
 #define RMR_MAX_SRC			64		// max length of hostname (which could be IPv6 addr with [...]:port so more than the 39 bytes of a plain addr
 #define RMR_MAX_SID			32		// misc sender info/data (reserved)
-#define RMR_MAX_RCV_BYTES	4096	// max bytes we support in a receive message
+#define RMR_MAX_RCV_BYTES	(1024 * 64)		// max bytes we support in a receive message
 
 									// various flags for function calls
 #define RMRFL_NONE			0x00	// no flags

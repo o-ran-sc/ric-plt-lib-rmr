@@ -5,6 +5,9 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 March 30; version 3.6.3
+	Correct the max receive message size constant in rmr.h (RIC-301)
+
 2020 March 23; version 3.6.2
 	Fix message initialisation bug when pulling a message from 
 	the pool (RIC-295)
