@@ -170,18 +170,21 @@ else
 	fi
 fi
 
-if (( dev_base ))							# assume we are testing against what we've built, not what is installed
+if [[ -z $LD_LIBRARY_PATH ]]					# cmake test will set and it must be honoured
 then
-	if [[ -d $build_path/lib64 ]]
+	if (( dev_base ))							# assume we are testing against what we've built, not what is installed
 	then
-		export LD_LIBRARY_PATH=$build_path:$build_path/lib64:$LD_LIBRARY_PATH
-	else
-		export LD_LIBRARY_PATH=$build_path:$build_path/lib:$LD_LIBRARY_PATH
+		if [[ -d $build_path/lib64 ]]
+		then
+			export LD_LIBRARY_PATH=$build_path:$build_path/lib64:$LD_LIBRARY_PATH
+		else
+			export LD_LIBRARY_PATH=$build_path:$build_path/lib:$LD_LIBRARY_PATH
+		fi
+		export LIBRARY_PATH=$LD_LIBRARY_PATH
+	else										# -D option gets us here to test an installed library
+		export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+		export LIBRARY_PATH=$LD_LIBRARY_PATH
 	fi
-	export LIBRARY_PATH=$LD_LIBRARY_PATH
-else										# -D option gets us here to test an installed library
-	export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-	export LIBRARY_PATH=$LD_LIBRARY_PATH
 fi
 
 export RMR_SEED_RT=${RMR_SEED_RT:-./caller.rt}		# allow easy testing with different rt
