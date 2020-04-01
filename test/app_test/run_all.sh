@@ -157,24 +157,24 @@ fi
 echo "----- app --------------------"
 if which ip >/dev/null 2>&1					# ip command rquired for the app test; skip if not found
 then
-	run_test run_app_test.ksh $si_flag -v $installed $build
+	run_test run_app_test.sh $si_flag -v $installed $build
 	build=""
 fi
 
 echo "----- multi ------------------"
-run_test run_multi_test.ksh $si_flag $build
+run_test run_multi_test.sh $si_flag $build
 
 echo "----- round robin -----------"
-run_test run_rr_test.ksh $si_flag
+run_test run_rr_test.sh $si_flag
 
 echo "----- rts -------------------"
-run_test run_rts_test.ksh $si_flag -s 5 -d 100
+run_test run_rts_test.sh $si_flag -s 5 -d 100
 
 echo "----- extended payload nocopy no clone------"
-run_test run_exrts_test.ksh $si_flag -d 10 -n 1000
+run_test run_exrts_test.sh $si_flag -d 10 -n 1000
 
 echo "----- extended payload copy clone------"
-run_test run_exrts_test.ksh $si_flag -d 10 -n 1000 -c 11
+run_test run_exrts_test.sh $si_flag -d 10 -n 1000 -c 11
 
 if (( errors == 0 ))
 then
