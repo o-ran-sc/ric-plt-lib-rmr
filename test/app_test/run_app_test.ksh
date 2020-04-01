@@ -98,7 +98,7 @@ endKat
 
 nmsg=20						# total number of messages to be exchanged (-n value changes)
 							# need two sent to each receiver to ensure hairpin entries were removed (will fail if they were not)
-delay=500000				# microsec sleep between msg 1,000,000 == 1s
+delay=100000				# microsec sleep between msg 1,000,000 == 1s
 wait=1
 rebuild=0
 nopull=""					# -b sets so that build does not pull
@@ -181,11 +181,14 @@ else
 		fi
 	fi
 
-	if [[ -d $build_path/lib64 ]]
+	if [[ -z $LD_LIBRARY_PATH ]]		# the cmake test environment will set this; we must use if set
 	then
-		export LD_LIBRARY_PATH=$build_path:$build_path/lib64
-	else
-		export LD_LIBRARY_PATH=$build_path:$build_path/lib
+		if [[ -d $build_path/lib64 ]]
+		then
+			export LD_LIBRARY_PATH=$build_path:$build_path/lib64
+		else
+			export LD_LIBRARY_PATH=$build_path:$build_path/lib
+		fi
 	fi
 	export LIBRARY_PATH=$LD_LIBRARY_PATH
 fi
@@ -196,7 +199,10 @@ if (( force_make )) || [[ ! -f ./sender${si} || ! -f ./receiver${si} ]]
 then
 	if ! make -B sender${si} receiver${si} >/tmp/PID$$.clog 2>&1
 	then
-		echo "[FAIL] cannot find sender${si} and/or receiver${si}binary, and cannot make them.... humm?"
+		echo "[FAIL] cannot find sender${si} and/or receiver${si} binary, and cannot make them.... humm?"
+		echo "[INFO] ------------- PATH settings -----------------"
+		env | grep PATH
+		echo "[INFO] ------------- compiler output (head) -----------------"
 		head -50 /tmp/PID$$.clog
 		rm -fr /tmp/PID$$.*
 		exit 1
