@@ -82,7 +82,7 @@ function usage {
 function add_ignored_func {
 	if [[ ! -r $1 ]]
 	then
-		echo ">>>> can't find file to ignore: $1" 
+		echo ">>>> can't find file to ignore: $1"
 		return
 	fi
 
@@ -215,7 +215,6 @@ function discount_an_checks {
 				#printf( "allow discount: %s\n", $0 )
 				if( replace_flags ) {
 					gsub( "#####", "    1", $0 )
-					//gsub( "#####", "=====", $0 )
 				}
 				discount++;
 			}
@@ -312,23 +311,26 @@ function mk_xml {
 
 # -----------------------------------------------------------------------------------------------------------------
 
-# we assume that the project has been built in the ../[.]build directory
-if [[ -d ../build ]]
+if [[ -z $BUILD_PATH ]]
 then
-	export LD_LIBRARY_PATH=../build/lib:../build/lib64
-	export C_INCLUDE_PATH=../build/include
-else
-	if [[ -d ../.build ]]
-	then
-		export LD_LIBRARY_PATH=../.build/lib:../.build/lib64
-		export C_INCLUDE_PATH=../.build/include
 
+	# we assume that the project has been built in the ../[.]build directory
+	if [[ -d ../build ]]
+	then
+		export BUILD_PATH=../build
 	else
-		echo "[WARN] cannot find build directory (tried ../build and ../.build); things might not work"
-		echo ""
+		if [[ -d ../.build ]]
+		then
+			export BUILD_PATH=../.build
+		else
+			echo "[WARN] cannot find build directory (tried ../build and ../.build); things might not work"
+			echo ""
+		fi
 	fi
 fi
 
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BUILD_PATH/lib:$BUILD_PATH/lib64
+export C_INCLUDE_PATH=$C_INCLUDE_PATH:$BUILD_PATH/include
 export LIBRARY_PATH=$LD_LIBRARY_PATH
 
 # The Makefile sets specific includes for things
@@ -420,7 +422,7 @@ then
 			then
 				continue
 			fi
-	
+
 			flist="${flist}$tfile "
 		fi
 	done
@@ -483,7 +485,7 @@ do
 		if ! ./${tfile%.c} >/tmp/PID$$.log 2>&1
 		then
 			echo "[FAIL] unit test failed for: $tfile"
-			if [[ -n $capture_file ]] 
+			if [[ -n $capture_file ]]
 			then
 				echo "all errors captured in $capture_file, listing only fail message on tty"
 				echo "$tfile --------------------------------------" >>$capture_file
@@ -493,7 +495,7 @@ do
 			else
 				if (( quiet ))
 				then
-					grep "^<" /tmp/PID$$.log|grep -v "^<EM>"	# in quiet mode just dump <...> messages which are assumed from the test programme not appl
+					grep "^<" /tmp/PID$$.log|egrep -v "^<SIEM>|^<EM>"	# in quiet mode just dump <...> messages which are assumed from the test programme not appl
 				else
 					cat /tmp/PID$$.log
 				fi
@@ -501,7 +503,7 @@ do
 			(( ut_errors++ ))				# cause failure even if not in strict mode
 			if (( ! always_gcov ))
 			then
-				continue						# skip coverage tests for this
+				exit 1						# we are in a subshell, must exit bad
 			fi
 		else
 			if (( show_output ))
@@ -652,6 +654,12 @@ do
 			done
 		fi
  	)>/tmp/PID$$.noise 2>&1
+	if (( $? != 0 ))
+	then
+		(( ut_errors++ ))
+		cat /tmp/PID$$.noise
+		continue
+	fi
 
 	for x in *.gcov							# merge any previous coverage file with this one
 	do
@@ -667,7 +675,7 @@ do
 	then
 		cat /tmp/PID$$.noise
 	fi
-done 
+done
 
 echo ""
 echo "[INFO] final discount checks on merged gcov files"

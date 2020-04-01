@@ -36,7 +36,7 @@ SHELL ?= /bin/ksh
 ex_cflags = $(shell echo $$EX_CFLAGS )
 
 build_path ?= ../../.build
-header_path := $(shell find $(build_path) -name 'rmr.h' |head -1 | sed 's!/rmr/.*!!' )
+header_path := $(shell find $(build_path) -name 'rmr.h' 2>/dev/null |head -1 | sed 's!/rmr/.*!!' )
 
 # use from environment if there so as to allow build to reference installed base
 C_INCLUDE_PATH ?= $(header_path)
