@@ -29,6 +29,14 @@
 # To deal with this, all leading positional parms of the form foo=bar are
 # looked at and if we like it we'll export it before starting the test.
 
+# It is also impossible for us to know what the build directory the user
+# created for their build and test. We will auto discover if they used
+# .build or build in the parent to this directory (in that order). If a
+# different directory is desired, then the build directory must be supplied
+# as an environment variable to the make:
+#	cd rmr/.bld
+#	BUILD_PATH=$PWD make test ARGS=-v
+
 while [[ $1 == *"="* ]]
 do
 	case ${1%%=*} in
@@ -51,4 +59,4 @@ done
 
 set -e
 cd app_test
-bash ./run_all.ksh -S	# build CI likely doesn't have ksh; Run SI tests
+bash ./run_all.ksh  -S	# build CI likely doesn't have ksh; Run SI tests

@@ -1054,7 +1054,7 @@ static rmr_mbuf_t* mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int max_w
 		seconds = 1;										// use as flag later to invoked timed wait
 	}
 
-	if( ep != NULL ) {
+	if( ep == NULL ) {
 		mbuf = mtosend_msg( ctx, mbuf, 0 );					// use internal function so as not to strip call-id; should be nil on success!
 	} else {
 		mbuf = send_msg( ctx, mbuf, ep->nn_sock, -1 );

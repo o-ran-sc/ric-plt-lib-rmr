@@ -126,12 +126,16 @@ else
 	fi
 fi
 
-if [[ -d $build_path/lib64 ]]
+if [[ -z LD_LIBRARY_PATH ]]			# honour if cmake test sets it
 then
-	export LD_LIBRARY_PATH=$build_path:$build_path/lib64:$LD_LIBRARY_PATH
-else
-	export LD_LIBRARY_PATH=$build_path:$build_path/lib:$LD_LIBRARY_PATH
+	if [[ -d $build_path/lib64 ]]
+	then
+		export LD_LIBRARY_PATH=$build_path:$build_path/lib64:$LD_LIBRARY_PATH
+	else
+		export LD_LIBRARY_PATH=$build_path:$build_path/lib:$LD_LIBRARY_PATH
+	fi
 fi
+
 export LIBRARY_PATH=$LD_LIBRARY_PATH
 export RMR_SEED_RT=./rts.rt
 
