@@ -1,0 +1,118 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36206897_fbc92adb",
+        "filename": "test/app_test/rebuild.ksh",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-01T17:56:52Z",
+      "side": 1,
+      "message": "is this one bash compatible?  If yes, pls consider suffix .sh",
+      "revId": "e4103c2d828aacafe43904fd3b1b6ecf7f2a8fde",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "22b0c79d_38c21aa2",
+        "filename": "test/app_test/run_all.ksh",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-01T17:56:52Z",
+      "side": 1,
+      "message": "if this is actually bash compatible, may I suggest suffix .sh?",
+      "revId": "e4103c2d828aacafe43904fd3b1b6ecf7f2a8fde",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb66bde1_7905dea6",
+        "filename": "test/run_app_tests",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-01T17:56:52Z",
+      "side": 1,
+      "message": "pls use suffix .sh, if you can possibly live with that",
+      "revId": "e4103c2d828aacafe43904fd3b1b6ecf7f2a8fde",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a8362ea_b6a6a413",
+        "filename": "test/run_unit_tests",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-01T17:56:52Z",
+      "side": 1,
+      "message": "since this is a new file, please consider suffix .sh",
+      "revId": "e4103c2d828aacafe43904fd3b1b6ecf7f2a8fde",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af966e19_72dcd4ae",
+        "filename": "test/unit_test.ksh",
+        "patchSetId": 3
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-01T17:56:52Z",
+      "side": 1,
+      "message": "is this supposed to be commented out?",
+      "range": {
+        "startLine": 507,
+        "startChar": 0,
+        "endLine": 507,
+        "endChar": 15
+      },
+      "revId": "e4103c2d828aacafe43904fd3b1b6ecf7f2a8fde",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "14fb0daa_871e8d8b",
+        "filename": "test/unit_test.ksh",
+        "patchSetId": 3
+      },
+      "lineNbr": 659,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-01T17:56:52Z",
+      "side": 1,
+      "message": "pls trim trailing ws",
+      "range": {
+        "startLine": 659,
+        "startChar": 17,
+        "endLine": 659,
+        "endChar": 18
+      },
+      "revId": "e4103c2d828aacafe43904fd3b1b6ecf7f2a8fde",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
