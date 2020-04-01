@@ -40,7 +40,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "3" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "6" )
-set( patch_level "3" )
+set( patch_level "4" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_inc "include/rmr" )
@@ -297,9 +297,10 @@ endif()
 
 # ------------- testing -------------------------------------------------------
 enable_testing()
+# cmake cannot set env vars, so we have to passed desired vars on the wrapper command
 add_test(
 		NAME drive_unit_tests
-		COMMAND bash ../test/unit_test.ksh -q 
+		COMMAND bash ../test/run_unit_tests CMBUILD=${CMAKE_CURRENT_BINARY_DIR}
 		WORKING_DIRECTORY ../test
 )
 
@@ -307,7 +308,7 @@ add_test(
 # a dummy script in ./test that does the obvious thing.
 add_test(
 		NAME drive_app
-		COMMAND bash  ./run_app_tests LD_LIBRARY_PATH=${install_root}/lib C_INCLUDE_PATH=${install_root}/include
+		COMMAND bash  ./run_app_tests LD_LIBRARY_PATH=${install_root}/lib C_INCLUDE_PATH=${install_root}/include CMBUILD=${CMAKE_CURRENT_BINARY_DIR}
 		WORKING_DIRECTORY ../test
 )
 
@@ -343,7 +344,7 @@ install( TARGETS ${target_list} EXPORT LibraryConfig
 unset( DEV_PKG  CACHE )			# prevent from being a hidden setting if user redoes things
 
 # install any nano/nng libraries in to the deb as well, but ONLY if asked for on the 'cmake ..' command
-# (sure would be nice if FILEs allowed for globbing; sadlyy it does not.)
+# (sure would be nice if FILEs allowed for globbing; sadly it does not.)
 #
 if( PACK_EXTERNALS )
 	message( "+++ including nano and nng libraries in the deb" )

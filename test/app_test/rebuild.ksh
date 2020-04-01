@@ -20,7 +20,7 @@
 
 # ---------------------------------------------------------------------------------
 #	Mnemonic:	rebuild.ksh
-#	Abstract:	This is a simple script that will cause RMr to be rebuilt. It
+#	Abstract:	This is a simple script that will cause RMR to be rebuilt. It
 #				may be invoked by any of the run_* scripts in this directory.
 #
 #				NOTE:
@@ -35,7 +35,7 @@
 
 parent=${PWD%/*}					# allow us to step up gracefully
 gparent=${parent%/*}
-build_path=${gparent}/.build		# where we'll build
+build_path=${BUILD_PATH:-${gparent}/.build} 	# where we should build; .build by default
 
 echo "$(date) build starts" >&2
 (
@@ -47,8 +47,7 @@ echo "$(date) build starts" >&2
 		git pull						# get the up to date code so if run from an old image it's a good test
 	fi
 	cd $build_path
-	cmake .. -DDEV_PKG=1
-	make package
+	make package install
 ) >/tmp/PID$$.log
 if (( $? != 0 ))
 then
