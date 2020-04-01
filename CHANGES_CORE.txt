@@ -5,6 +5,10 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 April 1; version 3.6.4
+	Correct potential nil pointer use in the NNG interface (RIC-303)
+	Correct issue preventing CI build without a container
+
 2020 March 30; version 3.6.3
 	Correct the max receive message size constant in rmr.h (RIC-301)
 
