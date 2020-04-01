@@ -18,20 +18,29 @@
 #==================================================================================
 #
 
-# this is a simple wrapper until we figure out why CMake seems unable to start
-# the run_all script in the app test directory. Even after that it will likely
-# be needed because it seems impossible to set environment vars from CMake for
-# the test script which makes testing alternate install locations impossible.
-# So, we must jump some hoops to allow for that...
+# This is a wrappter to the unit test script which is needed because CMake test
+# is unable to set environment variables before executing the test command.
+# this script assumes that env variables are passed on the command line in x=y
+# format. We will set all that are given; the only exception to this is that
+# we will NOT override the BUILD_PATH variable which allows it to be set 
+# from the script that invokes 'make test'
 
-# Hoop:
-# It seems that we cannot supply env vars on the CMake generated command :(
-# To deal with this, all leading positional parms of the form foo=bar are
-# looked at and if we like it we'll export it before starting the test.
+# We assume that the CMBUILD variable has a good build directory (e.g. .build)
+# but the user can be sure by hard setting BUILD_PATH which will NOT be
+# changed.  For example:
+#	cd rmr/.bld
+#	BUILD_PATH=$PWD make test ARGS="-V"
 
 while [[ $1 == *"="* ]]
 do
 	case ${1%%=*} in
+		CMBUILD)						# should be cmake build dir
+			if [[ -z $BUILD_PATH ]]		# still allow user to override
+			then
+				export BUILD_PATH=${1##*=}
+			fi
+			;;
+
 		LD_LIBRARY_PATH)
 			export LD_LIBRARY_PATH=${1##*=}
 			;;
@@ -48,7 +57,4 @@ do
 	shift
 done
 
-
-set -e
-cd app_test
-bash ./run_all.ksh -S	# build CI likely doesn't have ksh; Run SI tests
+bash ./unit_test.ksh -q

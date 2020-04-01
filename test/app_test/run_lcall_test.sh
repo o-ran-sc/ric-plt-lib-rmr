@@ -168,11 +168,14 @@ else
 		fi
 	fi
 
-	if [[ -d $build_path/lib64 ]]
+	if [[ -z $LD_LIBRARY_PATH ]]			# cmake test will set this; we must honour it
 	then
-		export LD_LIBRARY_PATH=$build_path:$build_path/lib64:$LD_LIBRARY_PATH
-	else
-		export LD_LIBRARY_PATH=$build_path:$build_path/lib:$LD_LIBRARY_PATH
+		if [[ -d $build_path/lib64 ]]
+		then
+			export LD_LIBRARY_PATH=$build_path:$build_path/lib64:$LD_LIBRARY_PATH
+		else
+			export LD_LIBRARY_PATH=$build_path:$build_path/lib:$LD_LIBRARY_PATH
+		fi
 	fi
 fi
 
