@@ -1,9 +1,13 @@
-# this file should contain ONLY the changes related to the 
+# this file should contain ONLY the changes related to the
 # core RMR code and doc.  Other change files exist for other
 # things.
 
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
+
+2020 April 2; version 3.6.5
+	Correct potential nil pointer use when examining interfaces for
+	use as a listen target (RIC-307)
 
 2020 April 1; version 3.6.4
 	Correct potential nil pointer use in the NNG interface (RIC-303)
@@ -13,7 +17,7 @@
 	Correct the max receive message size constant in rmr.h (RIC-301)
 
 2020 March 23; version 3.6.2
-	Fix message initialisation bug when pulling a message from 
+	Fix message initialisation bug when pulling a message from
 	the pool (RIC-295)
 
 2020 March 19; version 3.6.1
@@ -28,7 +32,7 @@
 
 2020 March 10; version 3.5.1
 	Add missing health check message types.
-	
+
 2020 March 9; version 3.5.0
 	Added new wormhole send function: rmr_wh_call().
 
@@ -73,7 +77,7 @@
 
 2020 January 31; verison 3.1.1
 	Allow route table thread logging to be completely disabled
-	when logging is turned off.	
+	when logging is turned off.
 
 2020 January 26; verison 3.1.0
 	First step to allowing the user programme to control messages
@@ -120,7 +124,7 @@
 
 2019 November 7; version 1.12.0
 	Version cut to support continued development for next release
-	preserving the 1.11.* versions for release 1 (Amber) and 
+	preserving the 1.11.* versions for release 1 (Amber) and
 	related fixes.
 
 2019 October 31; version 1.10.2

@@ -106,19 +106,19 @@ static int memory( ) {
 
 	iptr = SInew( IOQ_BLK );
 	errors += fail_if_nil( iptr, "memory: sinew returned nil when given ioq request" );
-	iptr = SInew( IOQ_BLK );
 	SItrash(  IOQ_BLK, iptr );
 
 	ptr = SInew( TP_BLK );
 	errors += fail_if_nil( ptr, "memory: sinew returned nil when given tpblk request" );
 	if( ptr ) {
+		iptr = SInew( IOQ_BLK );
 		((struct tp_blk *)ptr)->squeue = iptr;
 		SItrash(  TP_BLK, ptr );
 	}
 	
 	ptr = SInew( GI_BLK );
 	errors += fail_if_nil( ptr, "memory: sinew returned nil when given giblk request" );
-	SItrash(  GI_BLK, ptr );
+	SItrash(  GI_BLK, ptr );		// GI block cannot be trashed, ensure this (valgind will complain about a leak)
 
 
 	return errors;

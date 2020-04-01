@@ -327,13 +327,15 @@ if_addrs_t*  mk_ip_list( char* port ) {
 		if( ele && strcmp( ele->ifa_name, "lo" ) &&									// do NOT capture the loopback interface address
 			(target_if == NULL || strcmp( ele->ifa_name, target_if ) == 0 ) ) {		// no target, or matches ENV_BIND_IF target
 
-			if( ele->ifa_addr->sa_family == AF_INET ) {
-				getnameinfo( ele->ifa_addr, sizeof( struct sockaddr_in ),  octs, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
-				fmt = "%s:%s";
-			} else {
-				if( ele->ifa_addr->sa_family == AF_INET6 ) {
-					getnameinfo( ele->ifa_addr, sizeof( struct sockaddr_in6 ),  octs, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
-					fmt = "[%s]:%s";
+			if( ele->ifa_addr != NULL ) {						// possible for some interfaces to not have an address
+				if( ele->ifa_addr->sa_family == AF_INET ) {
+					getnameinfo( ele->ifa_addr, sizeof( struct sockaddr_in ),  octs, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
+					fmt = "%s:%s";
+				} else {
+					if( ele->ifa_addr->sa_family == AF_INET6 ) {
+						getnameinfo( ele->ifa_addr, sizeof( struct sockaddr_in6 ),  octs, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
+						fmt = "[%s]:%s";
+					}
 				}
 			}
 
