@@ -23,12 +23,17 @@ might provide means to query information about an RMR based
 application using the RMR_CTL_PORT.
 
 Support tools:
-	health_ck	-- A generic health check application which
+	rmr_probe	-- A generic health check application which
 				sends n messages to the application running
 				at the indicated host:port and expects to
 				receive n responses. Exit code is a simple
 				binary: 0 == received responses, 1 == failure.
 
-
 Support tools are automatically built and included in the 
 runtime package (deb or rpm).
+
+
+The original name of rmr_probe was health_ck. This was deemed too
+generic and thus is replaced by rmr_probe. We continue to build
+and package health_ck for a few versions allowing any containers
+which use that to avoid breakage.

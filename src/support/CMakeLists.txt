@@ -18,9 +18,16 @@
 #
 
 # build support tools and setup for their install
-add_executable( health_ck health_ck.c )
+
+# The health_ck binary is deprecated. We will stop building it soon. It is 
+# replaced with the rmr_probe binary.
+add_executable( health_ck rmr_probe.c )
 add_dependencies( health_ck rmr_si_static )
 target_link_libraries( health_ck rmr_si_static;pthread;m )
+
+add_executable( rmr_probe rmr_probe.c )
+add_dependencies( rmr_probe rmr_si_static )
+target_link_libraries( rmr_probe  rmr_si_static;pthread;m )
 
 include_directories( ${CMAKE_SOURCE_DIR}/src/rmr/common/include )
 
@@ -28,7 +35,7 @@ include_directories( ${CMAKE_SOURCE_DIR}/src/rmr/common/include )
 # install only into the runtime package
 if( NOT DEV_PKG )
 	install(
-    	TARGETS health_ck
+    	TARGETS health_ck rmr_probe
     	DESTINATION bin
 	)
 endif()

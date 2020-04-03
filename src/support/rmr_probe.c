@@ -19,8 +19,15 @@
 */
 
 /*
-	Mnemonic:	health_ck.c
-	Abstract:	This is a generic, and very simplistic, health check application
+	Mnemonic:	rmr_probe.c
+	Abstract:	This sends probe messages to the indicated applications. The only
+				use currently is to send health check messages and wait for a 
+				response. It might be extended later and would cause a bit of
+				a redesign, but from the outside the switch to the name rmr_probe
+				makes sense. 
+
+				Original abstract which stands until the probe does more:
+				This is a generic, and very simplistic, health check application
 				which will send n RMR messages to an application (localhost:4560
 				by default) and expect to receive n responses.  Messages are sent
 				with the message type RIC_HEALTH_CHECK_REQ and responses are 
@@ -106,6 +113,16 @@ static int elapsed( struct timespec* start_ts, struct timespec* end_ts ) {
 	return bin;
 }
 
+static void usage( char* arg0 ) {
+	
+	fprintf( stderr,	"version 1.0.0\n"
+						"usage: %s [-h host:port] [-n msg-count] [-r] [-t seconds] [-v]\n"
+						"\thost:port may be ip-address:port or name:port of the application\n"
+						"\tmsg-count is the number of health check requests sent; default is 1\n"
+						"\t-r causes a random listen port NOT to be used; 43086 is used instead\n"
+						"\t-v enables some amount of extra verbose output to stderr\n", arg0 );
+}
+
 int main( int argc, char** argv ) {
 	int		ai = 1;							// arg index
 	int		i;
@@ -163,8 +180,12 @@ int main( int argc, char** argv ) {
 					verbose = 1;
 					break;
 
+				case '?':	usage( argv[0] );
+							exit( 0 );
+
 				default:
 					fprintf( stderr, "[FAIL] unrecognised option: %s\n", argv[ai] );
+					usage( argv[0] );
 					exit( 1 );
 			}
 

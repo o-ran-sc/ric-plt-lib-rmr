@@ -5,6 +5,9 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 April 7; version 3.7.0
+	The health check support programme was renamed to rmr_probe (RIC-308).
+
 2020 April 6; version 3.6.6
 	Correct bug in SI95 address conversion module (RIC-327)
 	Correct bug in SI initialisation module
