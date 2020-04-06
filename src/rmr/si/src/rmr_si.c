@@ -674,7 +674,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		ctx->my_ip = get_default_ip( ctx->ip_list );	// and (guess) at what should be the default to put into messages as src
 		if( ctx->my_ip == NULL ) {
 			rmr_vlog( RMR_VL_WARN, "rmr_init: default ip address could not be sussed out, using name\n" );
-			strcpy( ctx->my_ip, ctx->my_name );			// if we cannot suss it out, use the name rather than a nil pointer
+			ctx->my_ip = strdup( ctx->my_name );		// if we cannot suss it out, use the name rather than a nil pointer
 		}
 	}
 	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, " default ip address: %s\n", ctx->my_ip );

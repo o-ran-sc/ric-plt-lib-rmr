@@ -54,6 +54,7 @@ static int worm_test( ) {
 	void* p;
 
 	rmr_mbuf_t*	mbuf;		// mbuf to send to peer
+	rmr_mbuf_t*	resp;		// response message from a wormhole call
 	int		whid = -1;
 	int		last_whid;
 
@@ -62,6 +63,20 @@ static int worm_test( ) {
 	ctx->my_ip = strdup( "30.4.19.86:1111" );
 
 	gen_rt( ctx );
+
+	// ---- must run these checks before wormhole(s) are opened --------------------------
+	mbuf = rmr_alloc_msg( ctx, 2048 );			// get an muf to pass round, no need to init for first test
+	resp = rmr_wh_call( ctx, 0, mbuf, 1, 10 );
+	errors += fail_if_nil( resp, "wormhole call given valid context and msg, before wormholes open  didn't return message pointer" );
+	if( resp ) {
+    	errors += fail_if_equal( resp->state, RMR_OK, "wormhole call given valid context and msg, before wormholes open returned ok state" );
+	}
+
+	rmr_wh_close( NULL, 0 );			// drive for coverage; nothing to vet
+	rmr_wh_close( ctx, 0 );
+	wh_init( NULL );
+
+	// ----- end must run before opening wormholes ---------------------------------------
 
 	whid = rmr_wh_open( NULL, NULL );
 	errors += fail_not_equal( whid, -1, "call to wh_open with invalid values did not return bad whid" );
@@ -75,6 +90,9 @@ static int worm_test( ) {
 
 	whid = rmr_wh_open( ctx, "localhost:89219" );
 	errors += fail_if_equal( whid, -1, "call to wh_open with valid target failed" );
+
+	i = wh_init( ctx );					// already initialised, ensure no harm
+	errors += fail_not_equal( i, 1, "second call to wh_init() didn't return true" );
 
 	rmr_wh_close( ctx, 4 );					// test for coverage only; [5] should have nil pointer
 	rmr_wh_close( ctx, 50 );					// test for coverage only; more than allocated reference
@@ -153,6 +171,28 @@ static int worm_test( ) {
 		whid = -1;
 	}
 
+	// ----- wormhole call --------------------------------------------------
+	mbuf = rmr_alloc_msg( ctx, 2048 );				// ensure we have a buffer to pass
+	resp = rmr_wh_call( NULL, 0, NULL, 1, 10 );     // ensure no msg when msg is nil
+	errors += fail_not_nil( resp, "wormhole call given nil context and msg didn't return nil message" );
+
+	resp = rmr_wh_call( NULL, 0, mbuf, 1, 10 );      // ensure invalid state when context is bad
+	errors += fail_if_nil( resp, "wormhole call given nil context and valid msg didn't return message pointer" );
+	if( resp != NULL ) {
+		errors += fail_if_equal( resp->state, RMR_OK, "wormhole call given nil context and valid message returned OK state" );
+	}
+
+	resp = rmr_wh_call( ctx, 2000, mbuf, 1, 10 );        // invalid wormhole id
+	errors += fail_if_nil( resp, "wormhole call given bad whid returned no msg" );
+	if( resp ) {
+		errors += fail_if_equal( resp->state, RMR_OK, "wormhole call given bad whid returned good state" );
+	}   
+
+	whid = rmr_wh_open( ctx, "localhost:9219" );	// ensure one is open
+	resp = rmr_wh_call( ctx, whid, mbuf, 1, 1 );
+	errors += fail_if_nil( resp, "wormhole call given valid info returned nil response" );
+
+
 	// -----------------------------------------------------------------------
 	// WARNING:  these tests destroy the context, so they MUST be last
 	if( mbuf ) {			// only if we got an mbuf
@@ -163,6 +203,7 @@ static int worm_test( ) {
 		errors += fail_not_equal( mbuf->state, RMR_ERR_NOHDR, "send with bad header did now set msg state correctly" );
 
 		errno = 0;
+		wh_nuke( NULL );				// coverage only
 		wh_nuke( ctx );
 		ctx->wormholes = NULL;
 		mbuf = rmr_wh_send_msg( ctx, 4, mbuf );		// coverage test on mbuf header check
