@@ -22,366 +22,376 @@
 	Abstract:	A quick reference to all external function calls
 	Date:		2 August, 2019
 	Author:		E. Scott Daniels
-.fi 
+.fi
 
 &h1(Appendix &qr_appendix -- Quick Reference)
-The prototype for each of the externally available functions which comprise the RMR API is listed 
-in alphabetical order below. 
-For each prototype a brief description of the function is given. 
-The developer is encouraged to install the RMR development package which contains the manual pages.
-The manual pages completely describe each function in a level of detail consistent with UNIX man pages.
+
+The prototypes for all externally available functions which comprise
+the RMR API are listed in alphabetical order below.  For each
+prototype a brief description of the function is given.  The developer
+is encouraged to install the RMR development package which contains
+the manual pages.  The manual pages completely describe each function
+in a level of detail consistent with UNIX man pages.
 
 &h2(Context Specific Functions)
-These functions require that the RMR context (provided as the result of an &func(rmr_init:) call, be 
-passed as the first argument (vctx).
+These functions require that the RMR context (provided as the result
+of an &func(rmr_init:) call, be passed as the first argument (vctx).
 
 &proto_start
 rmr_mbuf_t* rmr_alloc_msg( void* vctx, int size );
 &proto_end
-This function allocates a &ital(zero copy) message buffer. 
-The payload portion is allocated from the underlying transport space such that on send the buffer 
-does not require a second copy.
-The size parameter is the size of the payload portion of the buffer; if the recipient of the 
-message is expected to send a response, this should be large enough to accomodate the response
-which will enable the remote application to reuse the message for the response and avoid a costly
-reallocation.
+This function allocates a &ital(zero copy) message buffer.  The
+payload portion is allocated from the underlying transport space such
+that on send the buffer does not require a second copy.  The size
+parameter is the size of the payload portion of the buffer. If the
+recipient of the message is expected to send a response, this should
+be large enough to accomodate the response which will enable the
+remote application to reuse the message for the response and avoid a
+costly reallocation.
 
 &proto_start
 rmr_mbuf_t* rmr_call( void* vctx, rmr_mbuf_t* msg );
 &proto_end
-The call function accepts a message, selects an endpoint to receive the message and sends the message.
-RMR will block the return to the application until a matching response is received, or a timeout period
-is reached.  
-The transaction ID in the outbound message is used to match a response, so it is imperative that
-the application making the response reuse the received message, or copy the transaction ID to the new
-message before sending.
-Messages arriving which do not match the expected response are queued and will be delivered to the 
-application on subsequent calls to &func(rmr_rcv_msg:.)
+The call function accepts a message, selects an endpoint to receive
+the message and sends the message.  RMR will block the return to the
+application until a matching response is received, or a timeout period
+is reached.  The transaction ID in the outbound message is used to
+match a response, so it is imperative that the application making the
+response reuse the received message, or copy the transaction ID to the
+new message before sending.  Messages arriving which do not match the
+expected response are queued and will be delivered to the application
+on subsequent calls to &func(rmr_rcv_msg:.)
 
 &proto_start
 void rmr_close( void* vctx );
 &proto_end
-This function terminates all sessions with the underlying transport mechanism.  
-Buffers pending may or may not be flushed (depending on the underlying mechanism), thus it is 
-recommended that before using this function the application pause for a second or two to 
-ensure that the pending transmissions have completed.
+This function terminates all sessions with the underlying transport
+mechanism.  Buffers pending may or may not be flushed (depending on
+the underlying mechanism), thus it is recommended that before using
+this function the application pause for a second or two to ensure that
+the pending transmissions have completed.
 
 &proto_start
 int rmr_get_rcvfd( void* vctx );
 &proto_end
-When the underlying transport mechanism supports this, a file descriptor suitable for use with
-the &cw(select, poll) and &cw(epoll) system calls is returned. 
-The file descriptor may not be used for read or write operations; doing so will have unpredictable
-results.
+When the underlying transport mechanism supports this, a file
+descriptor suitable for use with the &cw(select, poll) and &cw(epoll)
+system calls is returned.  The file descriptor may not be used for
+read or write operations; doing so will have unpredictable results.
 
 &proto_start
 void* rmr_init( char* proto_port, int max_msg_size, int flags );
 &proto_end
-This function must be used before all other RMR functions to initialise the environment.  
-The &cw(max_msg_size) parameter defines the maximum receive buffer size which will be 
-used if required by the underlying transport mechanism. 
-The value is also used as the default payload size if a zero length is given to &func(rmr_alloc_msg:.)
+This function must be used before all other RMR functions to
+initialize the environment.  The &cw(max_msg_size) parameter defines
+the maximum receive buffer size which will be used if required by the
+underlying transport mechanism.  The value is also used as the default
+payload size if a zero length is given to &func(rmr_alloc_msg:.)
 
 &proto_start
 rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int max_wait );
 &proto_end
-Similar to the &func(rmr_call:) function, the message is sent to an endpoint and a response message
-is waited for. 
-This call is thread safe, and while the thread that invokes this function blocks on the response, 
-it is possible for other application threads to continue to receive messages via the &func(rmr_rcv_msg:) 
-function.
+Similar to the &func(rmr_call:) function, the message is sent to an
+endpoint and a response message is waited for.  This call is thread
+safe, and while the thread that invokes this function blocks on the
+response, it is possible for other application threads to continue to
+receive messages via the &func(rmr_rcv_msg:) function.
 &space
-In order to use the multi-threaded call functions, the option to enable threaded receive support
-must be set on the call to &func(rmr_init:.)
+In order to use the multi-threaded call functions, the option to
+enable threaded receive support must be set on the call to
+&func(rmr_init:.)
 
 &proto_start
 rmr_mbuf_t* rmr_mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to );
 &proto_end
-This function sends the provided message allowing RMR to retry soft failures for approximately
-&ccw(max_to) milliseconds.
-When a value of zero (0) is given for the maximum timeout, RMR will not attempt any retires
-and will return the state after the first attempt.
-It is unlikely that a user application will use this function as it is possible (and recommended)
-to set the max timeout via the specific, one time, function call, and then to allow that value
-to be used as the default when &func(rmr_send_msg:) is invoked.
+This function sends the provided message allowing RMR to retry soft
+failures for approximately &ccw(max_to) milliseconds.  When a value of
+zero (0) is given for the maximum timeout, RMR will not attempt any
+retries and will return the state after the first attempt.  It is
+unlikely that a user application will use this function as it is
+possible (and recommended) to set the max timeout via the specific,
+one time, function call, and then to allow that value to be used as
+the default when &func(rmr_send_msg:) is invoked.
 
 &proto_start
 rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait );
 &proto_end
-This function waits for a message to arrive and returns a message buffer with the received
-message.
-The function will timeout after &cw(max_wait) milliseconds (approximately) if no message is
-received.
+This function waits for a message to arrive and returns a message
+buffer with the received message.  The function will timeout after
+&cw(max_wait) milliseconds (approximately) if no message is received.
 
 &proto_start
 rmr_mbuf_t* rmr_send_msg( void* vctx, rmr_mbuf_t* msg );
 &proto_end
-This function accepts a message, selects a destination endpoint using the message type and subscription ID,
-and then attempts to send the message to the destination. 
-The function returns a message buffer to the caller with the state set to indicate the state of the 
-send operation. 
-On success, the message buffer is a new buffer that the application can "fill in," and send without the
-need to overtly allocate a new buffer.
-On failure, the message buffer is the buffer that the application attempted to send. 
+This function accepts a message, selects a destination endpoint using
+the message type and subscription ID, and then attempts to send the
+message to the destination.  The function returns a message buffer to
+the caller with the state set to indicate the state of the send
+operation.  On success, the message buffer is a new buffer that the
+application can "fill in," and send without the need to overtly
+allocate a new buffer.  On failure, the message buffer is the buffer
+that the application attempted to send.
 
 &proto_start
 int rmr_init_trace( void* vctx, int size );
 &proto_end
-This function is used to set the default trace data size. 
-The size defaults to zero until this function is called; after the application sets a non-zero value
-messages created with the &func(rmr_alloc_msg:) function will be allocated with trace data set to 
-the size provided. 
+This function is used to set the default trace data size.  The size
+defaults to zero until this function is called; after the application
+sets a non-zero value, messages created with the &func(rmr_alloc_msg:)
+function will be allocated with trace data set to the size provided.
 
 &proto_start
 rmr_mbuf_t* rmr_rcv_msg( void* vctx, rmr_mbuf_t* old_msg );
 &proto_end
-The &func(rmr_rcv_msg:) function is used to block and wait for a message to arrive. 
-When a message is received a pointer to an RMR message buffer structure is returned to the caller.
-The &cw(old_msg) parameter allows the application to to pass a message buffer for reuse. 
-If the application does not have an old buffer, a nil pointer is given and the function will
-allocate a new buffer.
+The &func(rmr_rcv_msg:) function is used to block and wait for a
+message to arrive.  When a message is received, a pointer to an RMR
+message buffer structure is returned to the caller.  The &cw(old_msg)
+parameter allows the application to to pass a message buffer for
+reuse.  If the application does not have an old buffer, a nil pointer
+is given and the function will allocate a new buffer.
 
 &proto_start
-rmr_mbuf_t* rmr_rcv_specific( void* uctx, rmr_mbuf_t* msg, char* expect, 
+rmr_mbuf_t* rmr_rcv_specific( void* uctx, rmr_mbuf_t* msg, char* expect,
      int allow2queue );
 &proto_end
-This function blocks until a message with a specific transaction ID is received. 
-If the &cw(allowd2queue) parameter is set to 1, messagess which do not match the ID are queued
-and returned to the application on subsequent calls to &func(rmr_rcv_msg:.)
-
+This function blocks until a message with a specific transaction ID is
+received.  If the &cw(allowd2queue) parameter is set to 1, messages
+which do not match the ID are queued and returned to the application
+on subsequent calls to &func(rmr_rcv_msg:.)
 
 &proto_start
 int rmr_ready( void* vctx );
 &proto_end
-This function is used to test whether RMR is capable of sending messages. 
-In other words once this function returns true (!0) RMR has received a route table (either from a static
-file or from a route manager process, and can map message types to endpoints.
-If the application attempts to send a message before this function returns true, the sends 
-will fail. 
-Applications which are only message receivers do not need to use this function.
+This function is used to test whether RMR is capable of sending
+messages.  In other words once this function returns true (!0) RMR has
+received a route table (either from a static file or from a route
+manager process) and can map message types to endpoints.  If the
+application attempts to send a message before this function returns
+true, the sends will fail.  Applications which are only message
+receivers do not need to use this function.
 
 &proto_start
 rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg );
 &proto_end
-The &func(rmr_rts_msg:) function allows the application to send a response message to the endpoint 
-from which the message originated.
-This requires that the application use the same message buffer that was received for the 
-response as it contains the sender information that is needed for this function to be successful.
-If the message cannot be sent, a pointer to the message buffer is returned and the status in the 
-message buffer is set to indicate the reason. 
-On success, a nil pointer will be returned.
-
+The &func(rmr_rts_msg:) function allows the application to send a
+response message to the endpoint from which the message originated.
+This requires that the application use the same message buffer that
+was received for the response as it contains the sender information
+that is needed for this function to be successful.  If the message
+cannot be sent, a pointer to the message buffer is returned and the
+status in the message buffer is set to indicate the reason.  On
+success, a nil pointer is returned.
 
 &proto_start
 int rmr_set_rtimeout( void* vctx, int time );
 &proto_end
-This function provides the ability to return from a receive operation after a timeout threshold
-is reached before a message is received, and is intended only to support the underlying Nanomsg
-transport mechanism (support for Nanomsg is deprecated).  
-The &func(rmr_torcv_msg) function should be used if timed receives are required.
+This function provides the ability to return from a receive operation
+after a timeout threshold is reached before a message is received, and
+is intended only to support the underlying Nanomsg transport mechanism
+(support for Nanomsg is deprecated).  The &func(rmr_torcv_msg)
+function should be used if timed receives are required.
 &space
-
-For transport mechanisms which support a receive timeout, this function allows the application to
-set a default timeout for receive operations.
-If a call to &func(rmr_rcv_msg) does not complete before &ital(time) milliseconds has elapsed, 
-the receive function will return a nil message buffer.
-This may not be supported by the underlying transport mechanism, and if it is not the return
-from this function will be -1.
+For transport mechanisms which support a receive timeout, this
+function allows the application to set a default timeout for receive
+operations.  If a call to &func(rmr_rcv_msg) does not complete before
+&ital(time) milliseconds has elapsed, the receive function will return
+a nil message buffer.  This may not be supported by the underlying
+transport mechanism, and if it is not the return from this function
+will be -1.
 
 &proto_start
 int rmr_set_stimeout( void* vctx, int rounds );
 &proto_end
-This function allows the application to set a maximum number of retry &ital(rounds) that RMR will
-attempt when send operations report a transient (retry) failure. 
-Each &ital(round) of retries requires approximately 1 millisecond, and setting the number of 
-rounds to zero (0) causes RMR to report the transient failure to the application without 
-any retry attempts.
-If the user application does not invoke this function, the default is one (1) round of retries.
+This function allows the application to set a maximum number of retry
+&ital(rounds) that RMR will attempt when send operations report a
+transient (retry) failure.  Each &ital(round) of retries requires
+approximately 1 millisecond, and setting the number of rounds to zero
+(0) causes RMR to report the transient failure to the application
+without any retry attempts.  If the user application does not invoke
+this function, the default is one (1) round of retries.
 
 &proto_start
 rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to );
 &proto_end
-This function because identically to the &func(rmr_rcv_msg) function, and allows the application to
-set a specific timeout value for the receive operation. 
-If a message is not received before the timeout period expires (ms_to milliseconds), a message buffer
-is returned with the state set to &cw(RMR_ERR_TIMEOUT.)
-
+This function behaves identically to the &func(rmr_rcv_msg) function,
+but allows the application to set a specific timeout value for the
+receive operation.  If a message is not received before the timeout
+period expires (ms_to milliseconds), a message buffer is returned with
+the state set to &cw(RMR_ERR_TIMEOUT.)
 
 &proto_start
-rmr_mbuf_t*  rmr_tralloc_msg( void* context, int msize, int trsize, 
+rmr_mbuf_t*  rmr_tralloc_msg( void* context, int msize, int trsize,
      unsigned const char* data );
 &proto_end
-Similar to the &func(rmr_alloc_msg) this function allocates a message buffer, and adds the 
-referenced trace data to the buffer.
-The new message buffer is returned.
+Similar to the &func(rmr_alloc_msg) this function allocates a message
+buffer, and adds the referenced trace data to the buffer.  The new
+message buffer is returned.
 
 &proto_start
 void rmr_wh_close( void* vctx, int whid );
 &proto_end
 This function closes an existing wormhole connection.
 
-
 &proto_start
 rmr_whid_t rmr_wh_open( void* vctx, char const* target );
 &proto_end
-This function allows the application to create a &ital(wormhole,) direct, connection to another application.
-The peer application must also be using RMR (messages sent on a wormhole connection are RMR messages).
-The target may be a hostname:port or IP-address:port combination.
-Upon successful completion, the &ital(wormhole ID) is returned; this ID must be passed on all
-subsequent calls to wormhole functions for this connection.
+This function allows the application to create a &ital(wormhole,) a
+direct connection to another application.  The peer application must
+also be using RMR (messages sent on a wormhole connection are RMR
+messages).  The target may be a hostname:port or IP-address:port
+combination.  Upon successful completion, the &ital(wormhole ID) is
+returned; this ID must be passed on all subsequent calls to wormhole
+functions for this connection.
 
 &proto_start
 rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg );
 &proto_end
-Once a wormhole has been established to a peer application, this function allows the application
-to send a message to the peer.
-All semantics of normal RMR sends (retries, etc.) are observed. 
-The application may opt not to supply the message type or subscription ID in the message as 
-neither are used by RMR; they may be required by the peer application depending on the application
-level protocol(s) in use.
-
+Once a wormhole has been established to a peer application, this
+function allows the application to send a message to the peer.  All
+semantics of normal RMR sends (retries, etc.) are observed.  The
+application may opt not to supply the message type or subscription ID
+in the message as neither are used by RMR; they may be required by the
+peer application depending on the application level protocol(s) in
+use.
 
 .** ------------------------------------
 &space
 &h2(Message Buffer Functions)
-The message buffer functions operate directly on a message buffer, and as such do not 
-require that RMR context as a parameter.
+The message buffer functions operate directly on a message buffer, and
+as such do not require that RMR context as a parameter.
 &space
 
 &proto_start
 int rmr_bytes2meid( rmr_mbuf_t* mbuf, unsigned char const* src, int len );
 &proto_end
-Copy the bytes referenced by &ital(src) to the &ital(meid) field in the RMR message header.
-Up to &ital(len) bytes are copied, though the maximum length of the field as
-governed by &cw(RMR_MAX_MEID) is enforced.
+Copy the bytes referenced by &ital(src) to the &ital(meid) field in
+the RMR message header.  Up to &ital(len) bytes are copied, though the
+maximum length of the field as governed by &cw(RMR_MAX_MEID) is
+enforced.
 
 &proto_start
 void rmr_bytes2payload( rmr_mbuf_t* mbuf, unsigned char const* src, int len );
 &proto_end
-This function copies &ital(len) bytes from &ital(src) into the message buffer payload.
-This function is primarily provided to support wrappers which don't directly support
-C pointers.
-
+This function copies &ital(len) bytes from &ital(src) into the message
+buffer payload.  This function is primarily provided to support
+wrappers which don't directly support C pointers.
 
 &proto_start
 int rmr_bytes2xact( rmr_mbuf_t* mbuf, unsigned char const* src, int len );
 &proto_end
-This function copies &ital(len) bytes of data from &ital(src) to the transaction ID
-field in the message buffer. 
-The number of bytes provided will be limited to a maximum of &cw(RMR_MAX_XID.)
+This function copies &ital(len) bytes of data from &ital(src) to the
+transaction ID field in the message buffer.  The number of bytes
+provided will be limited to a maximum of &cw(RMR_MAX_XID.)
 
 &proto_start
 void rmr_free_msg( rmr_mbuf_t* mbuf );
 &proto_end
-This function should be used by the application to release the storage used by a message buffer.
+This function should be used by the application to release the storage
+used by a message buffer.
 
 &proto_start
 unsigned char*  rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest );
 &proto_end
-The bytes from the &cw(meid) field of the message buffer are copied to the &ital(dest) buffer
-provided by the application. 
-The full field of &cw(RMR_MAX_MEID) bytes are copied; the caller must ensure that &ital(dest)
-is large enough.
-If the destination buffer pointer passed in is a nil pointer, the function will allocate a buffer
-and return a pointer, which the caller is expected to free, to the buffer.
+The bytes from the &cw(meid) field of the message buffer are copied to
+the &ital(dest) buffer provided by the application.  The full field of
+&cw(RMR_MAX_MEID) bytes are copied; the caller must ensure that
+&ital(dest) is large enough.  If the destination buffer pointer passed
+in is a nil pointer, the function will allocate a buffer and return a
+pointer to the buffer, which the caller is expected to free.
 
 &proto_start
 unsigned char*  rmr_get_src( rmr_mbuf_t* mbuf, unsigned char* dest );
 &proto_end
-The source of a message is copied to the &ital(dest) buffer provided by the caller.
-This is generally the hostname and port, separated by a colon, of the application 
-which sent the message, and is a zero terminated string.
-Up to &cw(RMR_MAX_SRC) bytes will be copied, so the caller must ensure that &ital(dest)
-is at least this large.
+The source of a message is copied to the &ital(dest) buffer provided
+by the caller.  This is generally the hostname and port, separated by
+a colon, of the application which sent the message, and is a zero
+terminated string.  Up to &cw(RMR_MAX_SRC) bytes will be copied, so
+the caller must ensure that &ital(dest) is at least this large.
 
 &proto_start
 unsigned char* rmr_get_srcip( rmr_mbuf_t* msg, unsigned char* dest );
 &proto_end
-This function copies the source IP address and port, separated by a colon, to the
-&ital(dest) buffer provided by the caller.
-This is the address of the application which sent the message.
-Up to &cw(RMR_MAX_SRC) bytes will be copied, so the caller must ensure that &ital(dest)
-is at least this large.
+This function copies the source IP address and port, separated by a
+colon, to the &ital(dest) buffer provided by the caller.  This is the
+address of the application which sent the message.  Up to
+&cw(RMR_MAX_SRC) bytes will be copied, so the caller must ensure that
+&ital(dest) is at least this large.
 
 &proto_start
 int rmr_get_trlen( rmr_mbuf_t* msg );
 &proto_end
-This function can be used to determine the size of the trace information in the message buffer.
-If no trace data is present, then 0 is returned.
+This function can be used to determine the size of the trace
+information in the message buffer. If no trace data is present, then 0
+is returned.
 
 &proto_start
 int rmr_get_trace( rmr_mbuf_t* msg, unsigned char* dest, int size );
 &proto_end
-The bytes from the trace data, up to &tial(size) bytes, is copied from the message buffer
-to the &ital(dest) buffer provided by the caller.
+The bytes from the trace data, up to &tial(size) bytes, is copied from
+the message buffer to the &ital(dest) buffer provided by the caller.
 The return value is the number of bytes actually copied.
 
 &proto_start
 unsigned char*  rmr_get_xact( rmr_mbuf_t* mbuf, unsigned char* dest );
 &proto_end
-The bytes from the &ital(transaction) field in the message buffer are copied to the &ital(dest) buffer
-provided by the application. 
-The full field of &cw(RMR_MAX_MEID) bytes are copied; the caller must ensure that &ital(dest)
-is large enough.
-If the destination buffer pointer passed in is a nil pointer, the function will allocate a buffer
-and return a pointer, which the caller is expected to free, to the buffer.
+The bytes from the &ital(transaction) field in the message buffer are
+copied to the &ital(dest) buffer provided by the application.  The
+full field of &cw(RMR_MAX_MEID) bytes are copied; the caller must
+ensure that &ital(dest) is large enough.  If the destination buffer
+pointer passed in is a nil pointer, the function will allocate a
+buffer and return a pointer to the buffer, which the caller is
+expected to free.
 
 &proto_start
 int rmr_payload_size( rmr_mbuf_t* msg );
 &proto_end
-This function returns the number of bytes in the message buffer's payload that are available
-for the application to use.  
-
+This function returns the number of bytes in the message buffer's
+payload that are available for the application to use.
 
 &proto_start
 rmr_mbuf_t* rmr_realloc_msg( rmr_mbuf_t* mbuf, int new_tr_size );
 &proto_end
-This function allows the application to reallocate a message buffer with a different trace
-data size.
-The contents of the message buffer supplied are copied to the new buffer, and a reference to 
-the new buffer is returned. 
+This function allows the application to reallocate a message buffer
+with a different trace data size.  The contents of the message buffer
+supplied are copied to the new buffer, and a reference to the new
+buffer is returned.
 
 &proto_start
 int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size );
 &proto_end
-The &ital(size) bytes, up to the size of the trace data in the message buffer,
-at &ital(data) are copied to the trace portion of the message buffer.
-The return value is the actual number of bytes copied which could be less than the number 
-requested.
-
+The &ital(size) bytes, up to the size of the trace data in the message
+buffer, at &ital(data) are copied to the trace portion of the message
+buffer.  The return value is the actual number of bytes copied which
+could be less than the number requested.
 
 &proto_start
 int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char const* str );
 &proto_end
-Accepts a pointer to a zero terminated string an copies it to the &cw(meid) field in the 
-message header. 
-Up to &cw(RMR_MAX_MEID) bytes are copied (including the final 0), and the number 
-copied is returned.
+Accepts a pointer to a zero terminated string an copies it to the
+&cw(meid) field in the message header.  Up to &cw(RMR_MAX_MEID) bytes
+are copied (including the final 0), and the number copied is returned.
 
 &proto_start
 void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str );
 &proto_end
-Accepts a pointer to a zero terminated string, and copies the string to the payload
-portion of the message buffer.
-If the string is longer than the allocated payload, the string will be truncated
-and will &bold(not) be terminated with a zero byte.
-
+Accepts a pointer to a zero terminated string, and copies the string
+to the payload portion of the message buffer.  If the string is longer
+than the allocated payload, the string will be truncated and will
+&bold(not) be terminated with a zero byte.
 
 &proto_start
 int rmr_str2xact( rmr_mbuf_t* mbuf, unsigned char const* str );
 &proto_end
-Accepts a pointer to a zero terminated string and copies the string to the transaction ID
-portion of the message buffer.
-If the string is longer than &cw(RMR_MAX_XID,) the string will be truncated and will &bold(not)
-be zero terminated.
+Accepts a pointer to a zero terminated string and copies the string to
+the transaction ID portion of the message buffer.  If the string is
+longer than &cw(RMR_MAX_XID,) the string will be truncated and will
+&bold(not) be zero terminated.
 
 &proto_start
 void* rmr_trace_ref( rmr_mbuf_t* msg, int* sizeptr );
 &proto_end
-This function returns a pointer to the trace information in the message buffer. 
-The intent is that the application will treat this as a read/only field and will not
-write trace data into the message buffer. 
-The length of data available should be determined by calling &func(rmr_get_trlen:.)
-
-
-
+This function returns a pointer to the trace information in the
+message buffer.  The intent is that the application will treat this as
+a read/only field and will not write trace data into the message
+buffer.  The length of data available should be determined by calling
+&func(rmr_get_trlen:.)

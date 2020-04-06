@@ -6,29 +6,32 @@
 .. Do NOT make changes directly to .rst or .md files. 
  
  
-RMR Configuration and Delpoyment 
+RMR Configuration and Deployment 
 ============================================================================================ 
  
-The RIC Message Router (RMR) is a library which applications 
-use to send and receive messages where the message routing, 
-endpoint selection, is based on the message type rather than 
-on traditional DNS names or IP addresses. This document 
-contains information regarding the configuration of RMR when 
-it is embedded by a *user application* . RMR itself is not a 
-deployable entity. 
+The RIC Message Router (RMR) is a library for peer-to-peer 
+communication. Applications use the library to send and 
+receive messages where the message routing and endpoint 
+selection is based on the message type rather than DNS host 
+name-IP port combinations. 
+ 
+This document contains information regarding the 
+configuration of RMR when it is embedded by a *user 
+application* . RMR itself is a library, not a deployable 
+entity. 
  
 Configuration 
 -------------------------------------------------------------------------------------------- 
  
-Several aspects of RMR behaviour is controlled via 
-environment variables which are set at the time that a user 
-application invokes the RMR initialisation function. This 
-allows these variables to be set before the application is 
-started as a function of the true environment, or set by the 
-application as a means for the application to influence RMR's 
-behaviour. The following is a list of RMR variables which RMR 
-recognises (see the main RMR manual page in the development 
-package for more details). 
+Many aspects of RMR behavior are controlled via environment 
+variables. These values are read when a user application 
+invokes the RMR initialization function. This allows these 
+variables to be set before the application is started as a 
+function of the true environment, or set by the application 
+as a means for the application to influence RMR's behaviour. 
+The following is a list of environment variables which RMR 
+recognizes. Also see the main RMR manual page in the 
+development package for more details. 
  
  
 RMR_ASYNC_CONN 

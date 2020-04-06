@@ -9,18 +9,22 @@
 RMR User's Guide 
 ============================================================================================ 
  
-The RIC Message Router (RMR) is a library which applications 
-use to send and receive messages where the message routing, 
-endpoint selection, is based on the message type rather than 
-on traditional DNS names or IP addresses. Because the user 
-documentation for RMR is a collection of UNIX manpages 
-(included in the development package, and available via the 
-man command when installed), there is no separate "User's 
-Guide." To provide something for the document scrapers to 
-find, this is a collection of the RMR manual pages formatted 
-directly from their source which might be a bit ragged when 
-combined into a single markup document. Read the manual pages 
-:) 
+The RIC Message Router (RMR) is a library for peer-to-peer 
+communication. Applications use the library to send and 
+receive messages where the message routing and endpoint 
+selection is based on the message type rather than DNS host 
+name-IP port combinations. 
+ 
+This document contains information that developers need to 
+know to use the RMR library. Because the primary 
+documentation for the RMR library is a collection of UNIX 
+manpages (included in the development package, and available 
+via the man command when installed), there is no separate 
+"User's Guide." To provide something for the document 
+scrapers to find, this is a collection of the RMR manual 
+pages formatted directly from their source, which might be a 
+bit ragged when combined into a single markup document. Read 
+the manual pages :) 
  
  
  

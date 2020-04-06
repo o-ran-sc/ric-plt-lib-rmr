@@ -25,46 +25,57 @@
 .fi
 
 &h1(General Use)
-To use, the RMR based application simply needs to initialise the RMR environment, wait for RMR to 
-have received a routing table (become ready), and then invoke either the send or receive functions.
-These steps, and some behind the scenes details, are described in the following paragraphs.
+To use, the RMR based application simply needs to initialise the RMR
+environment, wait for RMR to have received a routing table (become
+ready), and then invoke either the send or receive functions.  These
+steps, and some behind the scenes details, are described in the
+following paragraphs.
 
 &h2(Initialisation)
-The RMR function &func(rmr_init:) is used to set up the RMR environment and must be called before messages
-can be sent or received.
-One of the few parameters that the application must communicate to RMR is the port number that will be
-used as the listen port for new connections.
-The port number is passed on the initialisation function call and a TCP listen socket will be opened
-with this port. 
-If the port is already in use RMR will report a failure; the application will need to reinitialise with
-a different port number, abort, or take some other action appropriate for the application.
+The RMR function &func(rmr_init:) is used to set up the RMR
+environment and must be called before messages can be sent or
+received.  One of the few parameters that the application must
+communicate to RMR is the port number that will be used as the listen
+port for new connections.  The port number is passed on the
+initialisation function call and a TCP listen socket will be opened
+with this port.  If the port is already in use RMR will report a
+failure; the application will need to reinitialise with a different
+port number, abort, or take some other action appropriate for the
+application.
 .sp
-In addition to creating a TCP listen port, RMR will start a process thread which will be responsible for
-receiving dynamic updates to the route table. 
-This thread also causes a TCP listen port to be opened as it is expected that the process which generates
-route table updates will connect and send new information when needed. 
-The route table update port is &bold(not) supplied by the application, but is supplied via an environment 
-variable as this value is likely determined by the mechanism which is starting and configuring the application. 
+In addition to creating a TCP listen port, RMR will start a process
+thread which will be responsible for receiving dynamic updates to the
+route table.  This thread also causes a TCP listen port to be opened
+as it is expected that the process which generates route table updates
+will connect and send new information when needed.  The route table
+update port is &bold(not) supplied by the application, but is supplied
+via an environment variable as this value is likely determined by the
+mechanism which is starting and configuring the application.
 
 &h3(The RMR Context)
-On successful initialisation, a void pointer, often called a &ital(handle) by some programming languages, 
-is returned to the application.  This is a reference to the RMR control information and must be passed as the
-first parameter on most RMR functions calls.  
+On successful initialisation, a void pointer, often called a
+&ital(handle) by some programming languages, is returned to the
+application.  This is a reference to the RMR control information and
+must be passed as the first parameter on most RMR function calls.
 RMR refers to this as the context, or ctx.
 
 &h2(Wait For Ready)
-An application which is only receiving messages does not need to wait for RMR to &ital(become ready) after
-the call to the initialisation function. 
-However, before the application can successfully send a message, RMR must have loaded a route table, and 
-the application must wait for RMR to report that it has done so.
-The RMR function &func(rmr_ready:) will return the value &ital(true) (1) when a complete route table has
-been loaded and can be used to determine the endpoint for a send request.
+An application which is only receiving messages does not need to wait
+for RMR to &ital(become ready) after the call to the initialization
+function.  However, before the application can successfully send a
+message, RMR must have loaded a route table, and the application must
+wait for RMR to report that it has done so.  The RMR function
+&func(rmr_ready:) will return the value &ital(true) (1) when a
+complete route table has been loaded and can be used to determine the
+endpoint for a send request.
 
 &h2(Receiving Messages)
-The process of receiving is fairly straight forward. 
-The application invokes the RMR &func(rmr_rcv_msg:) function which will block until a message is received.
-The function returns a pointer to a message block which provides all of the details about the message.
-Specifically, the application has access to the following information either directly or indirectly:
+The process of receiving is fairly straight forward.  The application
+invokes the RMR &func(rmr_rcv_msg:) function which will block until a
+message is received.  The function returns a pointer to a message
+block which provides all of the details about the message.
+Specifically, the application has access to the following information
+either directly or indirectly:
 
 &half_space
 &indent
@@ -87,129 +98,163 @@ Specifically, the application has access to the following information either dir
 &space
 
 &h3(The Message Payload)
-The message payload contains the &ital(raw) data that was sent by the peer application.
-The format will likely depend on the message type, and is expected to be known by the application. 
-A direct pointer to the payload is available from the message buffer (see appendix &mbuf_appendix
-for specific message buffer details). 
+The message payload contains the &ital(raw) data that was sent by the
+peer application.  The format will likely depend on the message type,
+and is expected to be known by the application.  A direct pointer to
+the payload is available from the message buffer (see appendix
+&mbuf_appendix for specific message buffer details).
 
 &space
-Two payload related length values are also directly available: the total payload length, and the number of bytes
-actually filled with data. 
-The used length is set by the caller, and may or not be an accurate value.
-The total payload length is determined when the buffer is created for sending, and is the maximum
-number of bytes that the application may modify should the buffer be used to return a response.
+Two payload-related length values are also directly available: the
+total payload length, and the number of bytes actually filled with
+data.  The used length is set by the caller, and may or not be an
+accurate value.  The total payload length is determined when the
+buffer is created for sending, and is the maximum number of bytes that
+the application may modify should the buffer be used to return a
+response.
 
 &h3(Message Type and Subscription ID)
-The message type and subscription ID are both directly available from the message buffer, and 
-are the values which were used to by RMR in the sending application to select the endpoint.
-If the application resends the message, as opposed to returning the message buffer as a response,
-the message number and/or the subscription ID might need to be changed to avoid potential issues &note .sm .
+The message type and subscription ID are both directly available from
+the message buffer, and are the values which were used to by RMR in
+the sending application to select the endpoint.  If the application
+resends the message, as opposed to returning the message buffer as a
+response, the message number and/or the subscription ID might need to
+be changed to avoid potential issues &note .sm .
 .cn l=&cn_line_len i=&cn_ident start &atbot Times-roman 8p 1i
-	It is entirely possible to design a routing table, and application group,  such that the same message type is 
-	is left unchanged and the message is forwarded by an application after updating the payload. This type
-	of behaviour is often referred to as service chaining, and can be done without any "knowledge" by
-	an application with respect to where the message goes next.	Service chaining is supported by RMR
-	in as much as it allows the message to be resent, but the actual complexities of designing
-	and implementing service chaining lie with the route table generator process.
+	It is entirely possible to design a routing table, and
+	application group,  such that the same message type is
+	is left unchanged and the message is forwarded by an
+	application after updating the payload. This type of behaviour
+	is often referred to as service chaining, and can be done
+	without any "knowledge" by an application with respect to
+	where the message goes next.	Service chaining is supported
+	by RMR in as much as it allows the message to be resent, but
+	the actual complexities of designing and implementing service
+	chaining lie with the route table generator process.
 .cn end
 
 &h3(Sender Information)
-The source, or sender information, is indirectly available to the application via the &func(rmr_get_src:) and
-&func(rmr_get_ip:) functions.  
-The former returns a string containing &cw(hostname^:port,) while the string &cw(ip^:port) is returned
-by the latter. 
+The source, or sender information, is indirectly available to the
+application via the &func(rmr_get_src:) and &func(rmr_get_ip:)
+functions.  The former returns a string containing
+&cw(hostname^:port,) while the string &cw(ip^:port) is returned by the
+latter.
 
-&h3(Transaction ID) 
-The message buffer contains a fixed length set of bytes which applications can set to track related messages
-across the application concept of a transaction.
-RMR will use the transaction ID for matching a response message when the &func(rmr_call:) function is used to 
-send a message.
+&h3(Transaction ID)
+The message buffer contains a fixed length set of bytes which
+applications can set to track related messages across the application
+concept of a transaction.  RMR will use the transaction ID for
+matching a response message when the &func(rmr_call:) function is used
+to send a message.
 
 &h3(Trace Information)
-RMR supports the addition of an optional trace information to any message. 
-The presence and size is controlled by the application, and can vary from message to message if desired. 
-The actual contents of the trace information is determined by the application; RMR provides only the means to 
-set, extract, and obtain a direct reference to the trace bytes.
-The trace data field in a message buffer is discussed in greater detail in the &ital(Trace Data) section.
+RMR supports the addition of an optional trace information to any
+message.  The presence and size is controlled by the application, and
+can vary from message to message if desired.  The actual contents of
+the trace information is determined by the application; RMR provides
+only the means to set, extract, and obtain a direct reference to the
+trace bytes.  The trace data field in a message buffer is discussed in
+greater detail in the &ital(Trace Data) section.
 
 &h2(Sending Messages)
-Sending requires only slightly more work on the part of the application than receiving a message.
-The application must allocate an RMR message buffer, populate the message payload with data, set the 
+Sending requires only slightly more work on the part of the
+application than receiving a message.  The application must allocate
+an RMR message buffer, populate the message payload with data, set the
 message type and length, and optionally set the subscription ID.
-Information such as the source IP address,  hostname, and port are automatically added to the message buffer
-by RMR, so there is no need for the application to worry about these.
-
+Information such as the source IP address, hostname, and port are
+automatically added to the message buffer by RMR, so there is no need
+for the application to worry about these.
 
 &h3(Message Buffer Allocation)
-The function &func(rmr_msg_alloc:) allocates a &ital(zero copy) buffer and returns a pointer to the RMR
-&cw(rmr_mbuf_t) structure. 
-The message buffer provides direct access to the payload, length, message type and subscription ID fields.
-The buffer must be preallocated in order to allow the underlying transport mechanism to allocate the payload
-space from it's internal memory pool; this eliminates multiple copies as the message is sent, and thus is 
-more efficient.
+The function &func(rmr_msg_alloc:) allocates a &ital(zero copy) buffer
+and returns a pointer to the RMR &cw(rmr_mbuf_t) structure.  The
+message buffer provides direct access to the payload, length, message
+type and subscription ID fields.  The buffer must be preallocated in
+order to allow the underlying transport mechanism to allocate the
+payload space from its internal memory pool; this eliminates multiple
+copies as the message is sent, and thus is more efficient.
 
 .sp
-If a message buffer has been received, and the application wishes to use the buffer to send a response, or
-to forward the buffer to another application, a new buffer does &bold(not) need to be allocated.
-The application may set the necessary information (message type, etc.), and adjust the payload, as is 
-necessary and then pass the message buffer to &func(rmr_send_msg:) or &func(rmr_rts_msg:) to be sent or
+If a message buffer has been received, and the application wishes to
+use the buffer to send a response, or to forward the buffer to another
+application, a new buffer does &bold(not) need to be allocated.  The
+application may set the necessary information (message type, etc.),
+and adjust the payload, as is necessary and then pass the message
+buffer to &func(rmr_send_msg:) or &func(rmr_rts_msg:) to be sent or
 returned to the sender.
 
 &h3(Populating the Message Buffer)
-The application has direct access to several of the message buffer fields, and should set them appropriately.
+The application has direct access to several of the message buffer
+fields, and should set them appropriately.
 &half_space
 &indent
 &beg_dlist( 1i &ditext )
-	&di(len) This is the number of bytes that the application placed into the payload. Setting length to 0 is 
-			allowed, and length may be less than the allocated payload size.
+	&di(len) This is the number of bytes that the application
+		 	placed into the payload. Setting length to 0
+			is allowed, and length may be less than the
+			allocated payload size.
 
 	&half_space
-	&di(mtype) The message type that RMR will use to determine the endpoint used as the target of the send.
+	&di(mtype) The message type that RMR will use to determine the
+		   	endpoint used as the target of the send.
 
 	&half_space
-	&di(sub_id) The subscription ID if the message is to be routed based on the combination of message type and subscription ID.
-			If no subscription ID is valid for the message, the application should set the field with the
-			RMR constant &cw(RMR_VOID_SUBID.)
+	&di(sub_id) The subscription ID if the message is to be routed
+		    	based on the combination of message type and
+			subscription ID. If no subscription ID is
+			valid for the message, the application should
+			set the field with the RMR constant
+			&cw(RMR_VOID_SUBID.)
 
 	&half_space
-	&di(payload) The application should obtain the reference (pointer) to the payload from the message buffer
-			and place any data into the payload.  The application is responsible for ensuring that the
-			maximum payload size is not exceeded.  The application may obtain the maximum size via the &func(rmr_payload_size:) 
-			function.
+	&di(payload) The application should obtain the reference
+		     	(pointer) to the payload from the message
+			buffer and place any data into the payload.
+			The application is responsible for ensuring
+			that the maximum payload size is not exceeded.
+			The application may obtain the maximum size
+			via the &func(rmr_payload_size:) function.
 
 	&half_space
-	&di(trace data) Optionally, the application may add trace information to the message buffer. 
+	&di(trace data) Optionally, the application may add trace
+		  	information to the message buffer.
 			
 &end_dlist
 &space
 &uindent
 
 &h3(Sending a Message Buffer)
-Once the application has populated the necessary bits of a message, it may be sent by passing the buffer to
-the &func(rmr_send_msg:) function. 
-This function will select an endpoint to receive the message, based on message type and subscription ID, and
-will pass the message to the underlying transport mechanism for actual transmission on the connection.
-(Depending on the underlying transport mechanism, the actual connection to the endpoint may happen at the time of
-the first message sent to the endpoint, and thus the latency of the first send might be longer than expected.)
+Once the application has populated the necessary bits of a message, it
+may be sent by passing the buffer to the &func(rmr_send_msg:)
+function.  This function will select an endpoint to receive the
+message, based on message type and subscription ID, and will pass the
+message to the underlying transport mechanism for actual transmission
+on the connection.  (Depending on the underlying transport mechanism,
+the actual connection to the endpoint may happen at the time of the
+first message sent to the endpoint, and thus the latency of the first
+send might be longer than expected.)
 
 &space
-On success, the send function will return a reference to a message buffer; the status within that message
-buffer will indicate what the message buffer contains.
-When the status is &cw(RMR_OK)  the reference is to a &bold(new) message buffer for the application to use for the next
-send; the payload size is the same as the payload size allocated for the message that was just sent.  
-This is a convenience as it eliminates the need for the application to call the message allocation function
-at some point in the future, and assumes the application will send many messages which will require the same
-payload dimensions. 
+On success, the send function will return a reference to a message
+buffer; the status within that message buffer will indicate what the
+message buffer contains.  When the status is &cw(RMR_OK) the reference
+is to a &bold(new) message buffer for the application to use for the
+next send; the payload size is the same as the payload size allocated
+for the message that was just sent.  This is a convenience as it
+eliminates the need for the application to call the message allocation
+function at some point in the future, and assumes the application will
+send many messages which will require the same payload dimensions.
 
 &space
-If the message contains any status other than &cw(RMR_OK,) then the message could &bold(not) be sent, and the 
-reference is to the unsent message buffer.  
-The value of the status will indicate whether the nature of the failure was transient ( .sm &cw(RMR_ERR_RETRY) .sm )
-or not.  
-Transient failures are likely to be successful if the application attempts to send the message at a later time.
-Unfortunately, it is impossible for RMR to know the exact transient failure (e.g. connection being established, or
-TCP buffer shortage), and thus it is not possible to communicate how long the application should wait before 
-attempting to resend, if the application wishes to resend the message. 
-(More discussion with respect to message retries can be found in the &ital(Handling Failures) section.)
-
-
+If the message contains any status other than &cw(RMR_OK,) then the
+message could &bold(not) be sent, and the reference is to the unsent
+message buffer.  The value of the status will indicate whether the
+nature of the failure was transient ( .sm &cw(RMR_ERR_RETRY) .sm ) or
+not.  Transient failures are likely to be successful if the
+application attempts to send the message at a later time.
+Unfortunately, it is impossible for RMR to know the exact transient
+failure (e.g. connection being established, or TCP buffer shortage),
+and thus it is not possible to communicate how long the application
+should wait before attempting to resend, if the application wishes to
+resend the message.  (More discussion with respect to message retries
+can be found in the &ital(Handling Failures) section.)

@@ -80,7 +80,7 @@ clean:
 
 # ditch anything that can be rebuilt
 nuke: clean
-	rm -f *.ps *.pdf *.rst *.md
+	rm -f *.ps *.pdf *.rst *.md *.txt
 
 # make hack to force a rule to always be out of date
 always:

@@ -25,87 +25,104 @@
 .fi
 
 &h1(Advanced Usage)
-Several forms of usage fall into a more advanced category and are described in the following sections. 
-These include blocking call, return to sender and wormhole functions.
+Several forms of usage fall into a more advanced category and are
+described in the following sections.  These include blocking call,
+return to sender and wormhole functions.
 
 &h2(The Call Function)
-The RMR function &func(rmr_call) will send a message in the exact same manner as the &cw(rmr_send_msg()) function, 
-with the endpoint selection based on  the message key.
-Unlike the send function, &func(rmr_call) will block and wait for a response from the application that is selected
-to receive the message. 
-The matching message is determined by the transaction ID which the application must place into the message buffer
-prior to invoking &func(rmr_call) .sm .
-Similarly, the responding application must ensure that the same transaction ID is placed into the message buffer
-before returning its response. 
+The RMR function &func(rmr_call) sends a message in the exact same
+manner as the &cw(rmr_send_msg()) function, with the endpoint
+selection based on the message key.  But unlike the send function,
+&func(rmr_call) will block and wait for a response from the
+application that is selected to receive the message.  The matching
+message is determined by the transaction ID which the application must
+place into the message buffer prior to invoking &func(rmr_call) .sm .
+Similarly, the responding application must ensure that the same
+transaction ID is placed into the message buffer before returning its
+response.
 
-&space
-The return from the call is a message buffer with the response message; there is no difference between a message 
-buffer returned by the receive function and one returned by the &fucnt(rmr_call) function.
-If a response is not received in a reasonable amount of time, a nil message buffer is returned to the calling 
-application.
+&
+The return from the call is a message buffer with the response
+message; there is no difference between a message buffer returned by
+the receive function and one returned by the &func(rmr_call)
+function.  If a response is not received in a reasonable amount of
+time, a nil message buffer is returned to the calling application.
 
 &h3(Returning a Response)
-Because of the nature of RMR's routing policies, it is generally not possible for an application to control
-exactly which endpoint is sent a message.  
-There are cases, such as responding to a message delivered via &func(rmr_call:) that the application must
-send a message and guarantee that RMR routes it to an exact destination. 
-To enable this, RMR provides the &func(rmr_rts_msg:,) return to sender, function.
-Upon receipt of any message, an application may alter the payload, and if necessary the message type and subscription
-ID, an pass the altered message buffer to the &func(rmr_rts_msg:) function to return the altered message
-to the application which sent it.
-When this function is used, RMR will examine the message buffer for the source information and use that to 
-select the connection on which to write the response.
+Because of the nature of RMR's routing policies, it is generally not
+possible for an application to control exactly which endpoint is sent
+a message.  There are cases, such as responding to a message delivered
+via &func(rmr_call:) that the application must send a message and
+guarantee that RMR routes it to an exact destination.  To enable this,
+RMR provides the &func(rmr_rts_msg:,) return to sender, function.
+Upon receipt of any message, an application may alter the payload, and
+if necessary the message type and subscription ID, and pass the altered
+message buffer to the &func(rmr_rts_msg:) function to return the
+altered message to the application which sent it.  When this function
+is used, RMR will examine the message buffer for the source
+information and use that to select the connection on which to write
+the response.
 
 &h3(Multi-threaded Calls)
-The basic call mechanism described above is &bold(not) thread safe, as it is not possible to guarantee that a response 
-message is delivered to the correct thread.
-The RMR function &func(rmr_mt_call) accepts an additional parameter which identifies the calling thread in order 
-to ensure that the response is delivered properly. 
-In addition, the application must specifically initialise  the multi-threaded call environment by passing the 
-&cw(RMRFL_MTCALL) flag as an option to the &func(rmr_init) function &note .sm .
+
+The basic call mechanism described above is &bold(not) thread safe, as
+it is not possible to guarantee that a response message is delivered
+to the correct thread.  The RMR function &func(rmr_mt_call) accepts an
+additional parameter which identifies the calling thread in order to
+ensure that the response is delivered properly.  In addition, the
+application must specifically initialize the multi-threaded call
+environment by passing the &cw(RMRFL_MTCALL) flag as an option to the
+&func(rmr_init) function &note .sm .
 .if pfm
-.dv cnopts l=&cn_line_len i=&cn_indent  
+.dv cnopts l=&cn_line_len i=&cn_indent
 .dv cncmd .cn start &cnopts &atbot Times-roman 8p .7i
 .ei
 .dv cncmd .cn start &atbot Times-roman 8p .7i
 .fi
 
 &cncmd
-	There is additional overhead to support multi-threaded call as a special listener thread must be used
-	in order to deliver responses to the proper application thread.
+	There is additional overhead to support multi-threaded call as
+	a special listener thread must be used in order to deliver
+	responses to the proper application thread.
 .cn end
 
 &space
-One advantage of the multi-threaded call capability in RMR is the fact that only the calling thread is 
-blocked.  Messages received which are not responses to the call are continued to be delivered via normal
+One advantage of the multi-threaded call capability in RMR is the fact
+that only the calling thread is blocked.  Messages received which are
+not responses to the call are continued to be delivered via normal
 &func(rmr_rcv_msg) calls.
 
 
 &space
-While the process is blocked waiting for the response, it is entirely possible that asynchronous, nonmatching,
-messages will arrive. 
-When this happens, RMR will queues the messages and return them to the application over the next calls to 
-&func(rmr_rcv_msg:.)
+While the process is blocked waiting for the response, it is entirely
+possible that asynchronous, nonmatching, messages will arrive.  When
+this happens, RMR will queues the messages and return them to the
+application over the next calls to &func(rmr_rcv_msg:.)
 
 
 &h2(Wormholes)
-As was mentioned earlier, the design of RMR is to eliminate the need for an application to know a specific
-endpoint, even when a response message is being sent.
-In some rare cases it may be necessary for an application to establish a direct connection to an RMR based
-application rather than relying on message type and subscription ID based routing.
-The &ital(wormhole) functions provide an application with the ability to create a direct connection and then
-to send and receive messages across the connection.  
-The following are the RMR functions which provide wormhole communications:
+As was mentioned earlier, the design of RMR is to eliminate the need
+for an application to know a specific endpoint, even when a response
+message is being sent.  In some rare cases it may be necessary for an
+application to establish a direct connection to an RMR-based
+application rather than relying on message type and subscription ID
+based routing.  The &ital(wormhole) functions provide an application
+with the ability to create a direct connection and then to send and
+receive messages across the connection.  The following are the RMR
+functions which provide wormhole communications:
 
 &space
 &indent
 &beg_dlist( 1i Helvetica )
-	&di(rmr_wh_open) Open a connection to an endpoint. Name or IP address and port of the endpoint is supplied.
-		Returns a wormhole ID that the application must use when sending a direct message. 
+	&di(rmr_wh_open) Open a connection to an endpoint. Name or IP
+	address and port of the endpoint is supplied. Returns a
+	wormhole ID that the application must use when sending a
+	direct message.
 	&half_space
 
-	&di(rmr_wh_send_msg) Sends an RMR message buffer to the connected application. The message type and subscription
-		ID may be set in the message, but RMR will ignore both.
+	&di(rmr_wh_send_msg) Sends an RMR message buffer to the
+	connected application. The message type and subscription ID
+	may be set in the message, but RMR will ignore both.
 	&half_space
 
 	&di(rmr_wh_close) Closes the direct connection.
