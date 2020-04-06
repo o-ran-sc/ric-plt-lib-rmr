@@ -25,39 +25,41 @@
 .fi
 
 &h1(Configuration and Control)
-With the assumption that most RMR based applications will be executed in a containerised
-environment, there are some underlying mechanics which the developer may need to know 
-in order to properly provide a configuration specification to the container management 
-system.
-The following paragraphs briefly discuss these.
+With the assumption that most RMR based applications will be executed
+in a containerised environment, there are some underlying mechanics
+which the developer may need to know in order to properly provide a
+configuration specification to the container management system.  The
+following paragraphs briefly discuss these.
 
 .sp .1
 &h2(TCP Ports)
-RMR requires two (2) TCP listen ports: one for general application to application communications
-and one for route table updates.
-The general communication port is specified by the application at the time RMR is initialised.
-The port used to listen for route table updates is likely to be a constant port shared by all
-applications provided they are running in separate containers.  
-To that end, the port number defaults to 4561, but can be configured with an environment variable
-(see later paragraph in this section).
+RMR requires two (2) TCP listen ports: one for general
+application-to-application communications and one for route-table
+updates.  The general communication port is specified by the
+application at the time RMR is initialised.  The port used to listen
+for route table updates is likely to be a constant port shared by all
+applications provided they are running in separate containers.  To
+that end, the port number defaults to 4561, but can be configured with
+an environment variable (see later paragraph in this section).
 
 
 &h2(Host Names)
-RMR is typically host name agnostic.
-Route table entries may contain endpoints defined either by host name or IP address. 
-In the container world the concept of a &ital(service name) might exist, and likely is different
-than a host name.
-RMR's only requirement with respect to host names is that a name used on a route table entry must
-be resolvable via the &cw(gethostbyname) system call.
+RMR is typically host name agnostic.  Route table entries may contain
+endpoints defined either by host name or IP address.  In the container
+world the concept of a &ital(service name) might exist, and likely is
+different than a host name.  RMR's only requirement with respect to
+host names is that a name used on a route table entry must be
+resolvable via the &cw(gethostbyname) system call.
 
 
 &h2(Environment Variables)
-Several environment variables are recognised by RMR which,
-in general, are used to define interfaces and listen ports (e.g. the route table update
-listen port), or debugging information.
-Generally this information is system controlled and thus RMR expects this information to 
-be defined in the environment rather than provided by the application.
-The following is a list of the environment variables which RMR recognises:
+Several environment variables are recognised by RMR which, in general,
+are used to define interfaces and listen ports (e.g. the route table
+update listen port), or debugging information.  Generally this
+information is system controlled and thus RMR expects this information
+to be defined in the environment rather than provided by the
+application.  The following is a list of the environment variables
+which RMR recognises:
 
 &half_space
 .st 8p

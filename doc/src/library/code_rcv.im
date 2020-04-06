@@ -21,11 +21,11 @@
 .** example sender code
 
 &h2(Receiver Sample)
-The receiver code is even more simple than the sender code as it does not
-need to wait for a route table to arrive (only senders need to do that), nor
-does it need to allocate an initial buffer.
-The example assumes that the sender is transmitting a zero terminated string
-as the payload.
+The receiver code is even simpler than the sender code as it does not
+need to wait for a route table to arrive (only senders need to do
+that), nor does it need to allocate an initial buffer.  The example
+assumes that the sender is transmitting a zero terminated string as
+the payload.
 
 &space
 

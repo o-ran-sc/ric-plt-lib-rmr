@@ -8,8 +8,8 @@ documents as makes sense (e.g. glossary).
 
 Illustrations are all located in the ./figures directory and
 are created as .fig files [1] which describe drawings using an 
-open ASCII format (rather than as a binary and/or propriatory
-descritption). ASCII descriptions are easily maintained as
+open ASCII format (rather than as a binary and/or proprietary
+description). ASCII descriptions are easily maintained as
 source code to track changes and revert when necessary.
 A Dockerfile in the tools directory can be used to build a 
 "development image" with all of the tools needed to render
@@ -19,11 +19,11 @@ needed if a development environment doesn't provide Xfig and
 the related tools.
 
 [1] 
-	Defacto standard tools for creating and managing .fig files:
+	De facto standard tools for creating and managing .fig files:
 
 	Install Xfig on a Linux system with:
-		apt-get install xfig	(ubuntu-ish)
-		zypper install xfig		(OpenSuse)
+		apt-get install xfig     (ubuntu-ish)
+		zypper install xfig      (OpenSuse)
 
 	The fig2dev tool is used to "batch" process .fig files in 
 	order to generate desired output (.eps, .png, etc.). These

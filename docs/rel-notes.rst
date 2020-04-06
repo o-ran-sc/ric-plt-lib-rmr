@@ -28,6 +28,41 @@ Core RMR Changes
 -------------------------------------------------------------------------------------------- 
  
  
+2020 April 2; version 3.6.5 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Correct potential nil pointer use when examining interfaces 
+for use as a listen target (RIC-307) 
+ 
+ 
+2020 April 1; version 3.6.4 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Correct potential nil pointer use in the NNG interface 
+(RIC-303) Correct issue preventing CI build without a 
+container 
+ 
+ 
+2020 March 30; version 3.6.3 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Correct the max receive message size constant in rmr.h 
+(RIC-301) 
+ 
+ 
+2020 March 23; version 3.6.2 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Fix message initialisation bug when pulling a message from 
+the pool (RIC-295) 
+ 
+ 
+2020 March 19; version 3.6.1 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Fix problem with RPM package install 
+ 
+ 
 2020 March 18; version 3.6.0 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
@@ -45,6 +80,7 @@ ack/nack of meid tables (RIC-273)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 Add missing health check message types. 
+ 
  
 2020 March 9; version 3.5.0 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 

@@ -21,11 +21,10 @@
 .** example sender code
 
 &h2(Sender Sample)
-The following code segment shows how a message buffer can be allocated,
-populated, and sent.
-The snippet also illustrates how the result from the &func(rmr_send_msg)
-function is used to send the next message.
-It does not illustrate error and/or retry handling.
+The following code segment shows how a message buffer can be
+allocated, populated, and sent.  The snippet also illustrates how the
+result from the &func(rmr_send_msg) function is used to send the next
+message.  It does not illustrate error and/or retry handling.
 &space
 
 &indent

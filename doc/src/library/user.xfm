@@ -80,8 +80,11 @@
 .st &textsize
 
 &h1(Overview)
-The RIC Message Router (a.k.a. RMR) is a thin library which provides a latency sensitive application with the ability
-to send and receive messages with other RMR based applications.
+
+The RIC Message Router (RMR) is a library for peer-to-peer
+communication.  Applications use the library to send and receive
+messages where the message routing and endpoint selection is based on
+the message type rather than DNS host name-IP port combinations.
 The library provides the following major features:
 
 &half_space
@@ -96,63 +99,74 @@ The library provides the following major features:
 	&li Message distribution (round robin or fanout) is selectable by message type.
 	&half_space
 
-	&li Route management updates are received and processed asynchronously and without overt
-		application involvement.
+	&li Route management updates are received and processed
+		asynchronously and without overt application involvement.
 &end_list
 &uindent
 
 &space
 &h2(Purpose)
-RMR's main purpose is to provide an application with the ability to send and receive messages to/from other
-peer applications with minimal effort on the application's part.
-To achieve this, RMR manages manages all endpoint information, connections, and routing information necessary
-to establish and maintain communication.
-From the application's point of view, all that is required to send a message is to allocate (via RMR) a message
-buffer, add the payload data, and set the message type.
-To receive a message, the application needs only to invoke the receive function; when a message
-arrives a message buffer will be returned as the function result.
-
+RMR's main purpose is to provide an application with the ability to
+send and receive messages to/from other peer applications with minimal
+effort on the application's part.  To achieve this, RMR manages all
+endpoint information, connections, and routing information necessary
+to establish and maintain communication.  From the application's point
+of view, all that is required to send a message is to allocate (via
+RMR) a message buffer, add the payload data, and set the message type.
+To receive a message, the application needs only to invoke the receive
+function; when a message arrives a message buffer will be returned as
+the function result.
 
 &h2(Message Routing)
-Applications are required to place a message type into a message before sending, and may optionally add a
-subscription ID when appropriate.
-The combination of message type, and subscription ID are refered to as the &ital(message key,)
-and is used to match an entry in a routing table which provides the possible endpoints expecting
-to receive messages with the matching key.
+Applications are required to place a message type into a message
+before sending, and may optionally add a subscription ID when
+appropriate.  The combination of message type, and subscription ID are
+refered to as the &ital(message key,) and is used to match an entry in
+a routing table which provides the possible endpoints expecting to
+receive messages with the matching key.
 
 &h3(Round Robin Delivery)
-An endpoint from RMR's perspective is an application to which RMR may establish a connection, and expect to
-send messages with one or more defined message keys.
-Each entry in the route table consists of one or more endpoint groups, called round robin groups.
-When a message matches a specific entry, the entry's  groups are used to select the destination of the message.
-A message is sent once to each group, with messages being &ital(balanced) across the endpoints of a group
-via round robin selection.
-Care should be taken when defining multiple groups for a message type as there is extra overhead required
-and thus the overall message latency is somewhat reduced.
+An endpoint from RMR's perspective is an application to which RMR may
+establish a connection, and expect to send messages with one or more
+defined message keys.  Each entry in the route table consists of one
+or more endpoint groups, called round robin groups.  When a message
+matches a specific entry, the entry's groups are used to select the
+destination of the message.  A message is sent once to each group,
+with messages being &ital(balanced) across the endpoints of a group
+via round robin selection.  Care should be taken when defining
+multiple groups for a message type as there is extra overhead required
+and thus the overall message latency is somewhat increased.
 
 &h3(Routing Table Updates)
-Route table information is made available  to RMR a static file (loaded once), or by updates sent from a
-separate route manager application.
-If a static table is provided, it is loaded during RMR initialisation and will remain in use until
-an external process connects and delivers a route table update (often referred to as a dynamic update).
-Dynamic updates are listened for in a separate process thread and applied automatically; the application does not
-need to allow for, or trigger, updates.
+Route table information is made available to RMR a static file (loaded
+once), or by updates sent from a separate route manager application.
+If a static table is provided, it is loaded during RMR initialization
+and will remain in use until an external process connects and delivers
+a route table update (often referred to as a dynamic update).  Dynamic
+updates are listened for in a separate process thread and applied
+automatically; the application does not need to allow for, or trigger,
+updates.
 
 &h2(Latency And Throughput)
-While providing insulation from the underlying message transport mechanics, RMR must also do so in such a
-manner that message latency and throughput are not impacted.
-In general, the RMR induced overhead, incurred due to the process of selecting an endpoint for each message,
-is minimal and should not impact the overall latency or throughput of the application.
-This impact has been measured with test applications running on the same physical host and the average
-latency through RMR for a message was on the order of 0.02 milliseconds.
+While providing insulation from the underlying message transport
+mechanics, RMR must also do so in such a manner that message latency
+and throughput are not impacted.  In general, the RMR induced
+overhead, incurred due to the process of selecting an endpoint for
+each message, is minimal and should not impact the overall latency or
+throughput of the application.  This impact has been measured with
+test applications running on the same physical host and the average
+latency through RMR for a message was on the order of 0.02
+milliseconds.
 
 &space
-As an application's throughput increases, it becomes easy for the application to overrun the underlying
-transport mechanism (e.g. NNG), consume all available TCP transmit buffers, or otherwise find itself
-in a situation where a send might not immediately complete.
-RMR offers different &ital(modes) which allow the application to manage these states based on the
-overall needs of the application.
-These modes are discussed in the &ital(Configuration) section of this document.
+As an application's throughput increases, it becomes easy for the
+application to overrun the underlying transport mechanism (e.g. NNG),
+consume all available TCP transmit buffers, or otherwise find itself
+in a situation where a send might not immediately complete.  RMR
+offers different &ital(modes) which allow the application to manage
+these states based on the overall needs of the application.  These
+modes are discussed in the &ital(Configuration) section of this
+document.
 
 
 .** snarf in the major sections (to avoid one huge source document and maybe to promote reuse)

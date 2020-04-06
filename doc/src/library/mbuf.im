@@ -20,23 +20,20 @@
 
 &h1(Appendix &mbuf_appendix -- Message Buffer Details)
 
-The RMR message buffer is a C structure which is exposed in the &cw(rmr.h) 
-header file. 
-It is used to manage a message received from a peer endpoint, or a message
-that is being sent to a peer. 
-Fields include payload length, amount of payload actually used, status, 
-and a reference to the payload.
-There are also fields which the application should ignore, and could be 
-hidden in the header file, but we chose not to. These fields include
-a reference to the RMR header information, and to the underlying transport
-mechanism message struct which may or may not be the same as the RMR
-header reference. 
+The RMR message buffer is a C structure which is exposed in the
+&cw(rmr.h) header file.  It is used to manage a message received from
+a peer endpoint, or a message that is being sent to a peer.  Fields
+include payload length, amount of payload actually used, status, and a
+reference to the payload.  There are also fields which the application
+should ignore, and could be hidden in the header file, but we chose
+not to. These fields include a reference to the RMR header
+information, and to the underlying transport mechanism message struct
+which may or may not be the same as the RMR header reference.
 
 &h2(The Structure)
-The following is the C structure. 
-Readers are cautioned to examine the header file directly; the information 
-here may be out of date (old document in some cache), and thus it may
-be incorrect.
+The following is the C structure.  Readers are cautioned to examine
+the &cw(rmr.h) header file directly; the information here may be out
+of date (old document in some cache), and thus it may be incorrect.
 
 &space
 &indent
@@ -57,53 +54,61 @@ typedef struct {
     unsigned char* id;       // if we need an ID in the message separate from the xaction id
     int      flags;          // various MFL_ (private) flags as needed
     int      alloc_len;      // the length of the allocated space (hdr+payload)
+    void*    ring;           // ring this buffer should be queued back to
+    int      rts_fd;         // SI fd for return to sender
+    int      cookie;         // cookie to detect user misuse of free'd msg
 } rmr_mbuf_t;
 &ex_end
 &uindent
 &space
 
 &h2(State vs Transport State)
-The state field reflects the state at the time the message buffer is returned to the
-calling applicaiton. 
-For a send operation, if the state is not &cw(RMR_OK) then the message buffer references
-the payload that could not be sent, and when the state is &cw(RMR_OK) the buffer
-references a &ital(fresh) payload that the application may fill in. 
+The state field reflects the state at the time the message buffer is
+returned to the calling application.  For a send operation, if the
+state is not &cw(RMR_OK) then the message buffer references the
+payload that could not be sent, and when the state is &cw(RMR_OK) the
+buffer references a &ital(fresh) payload that the application may fill
+in.
 
 &space
-When the state is not &cw(RMR_OK,) C programmes may examine the global &cw(errno) value
-which RMR will have left set, if it was set, by the underlying transport mechanism.
-In some cases, wrapper modules are not able to directly access the C-library &cw(errno)
-value, and to assist with possible transport error details, the send and receive 
+When the state is not &cw(RMR_OK,) C programmes may examine the global
+&cw(errno) value which RMR will have left set, if it was set, by the
+underlying transport mechanism.  In some cases, wrapper modules are
+not able to directly access the C-library &cw(errno) value, and to
+assist with possible transport error details, the send and receive
 operations populate &cw(tp_state) with the value of &cw(errno.)
 
 &space
-Regardless of whether the application makes use of the &cw(tp_state,) or the &cw(errno)
-value, it should be noted that the underlying transport mechanism may not actually update
-the errno value; in other words: it might not be accurate.
-In addition, RMR populates the &cw(tp_state) value in the message buffer &bold(only) when
-the state is not &cw(RMR_OK.)
+Regardless of whether the application makes use of the &cw(tp_state,)
+or the &cw(errno) value, it should be noted that the underlying
+transport mechanism may not actually update the errno value; in other
+words: it might not be accurate.  In addition, RMR populates the
+&cw(tp_state) value in the message buffer &bold(only) when the state
+is not &cw(RMR_OK.)
 
 &h2(Field References)
-The transaction field was exposed in the first version of RMR, and in hindsight this 
-shouldn't have been done.  
-Rather than break any existing code the reference was left, but additional fields
-such as trace data, were not directly exposed to the application. 
-The application developer is strongly encouraged to use the functions which get and
-set the transaction ID rather than using the pointer directly; any data overruns will
-not be detected if the reference is used directly.
+The transaction field was exposed in the first version of RMR, and in
+hindsight this shouldn't have been done.  Rather than break any
+existing code the reference was left, but additional fields such as
+trace data, were not directly exposed to the application.  The
+application developer is strongly encouraged to use the functions
+which get and set the transaction ID rather than using the pointer
+directly; any data overruns will not be detected if the reference is
+used directly.
 
 &space
-In contrast, the payload reference should be used directly by the application in the
-interest of speed and ease of programming.  
-The same care to prevent writing more bytes to the payload buffer than it can hold
-must be taken by the application. 
-By the nature of the allocation of the payload in transport space, RMR is unable to 
-add guard bytes and/or test for data overrun.
+In contrast, the payload reference should be used directly by the
+application in the interest of speed and ease of programming.  The
+same care to prevent writing more bytes to the payload buffer than it
+can hold must be taken by the application.  By the nature of the
+allocation of the payload in transport space, RMR is unable to add
+guard bytes and/or test for data overrun.
 
 &h2(Actual Transmission)
-When RMR sends the application's message, the message buffer is &bold(not) transmitted.
-The transport buffer (tp_buf) which contains the RMR header and application payload
-is the only set of bytes which are transmitted. 
-While it may seem to the caller like the function &func(rmr_send_msg) is returning a 
-new message buffer, the same struct is reused and only a new transport buffer is allocated.
-The intent is to keep the alloc/free cycles to a minimum.
+When RMR sends the application's message, the message buffer is
+&bold(not) transmitted.  The transport buffer (tp_buf) which contains
+the RMR header and application payload is the only set of bytes which
+are transmitted.  While it may seem to the caller like the function
+&func(rmr_send_msg) is returning a new message buffer, the same struct
+is reused and only a new transport buffer is allocated.  The intent is
+to keep the alloc/free cycles to a minimum.
