@@ -25,17 +25,21 @@
 .fi
 
 &h1(Handling Failures)
-The vast majority of states reported by RMR are fatal; if encountered during setup or initialisation,
-then it is unlikely that any message oriented processing should continue, and when encountered on
-a message operation continued operation on that message should be abandoned.
-Specifically with regard to message sending, it is very likely that the underlying transport mechanism
-will report a &ital(soft,) or transient, failure which might be successful if the operation is retried at a
-later point in time.
-The paragraphs below discuss the methods that an application might deal with these soft failures.
+The vast majority of states reported by RMR are fatal; if encountered
+during setup or initialization, then it is unlikely that any message
+oriented processing should continue, and when encountered on a message
+operation continued operation on that message should be abandoned.
+Specifically with regard to message sending, it is very likely that
+the underlying transport mechanism will report a &ital(soft,) or
+transient, failure which might be successful if the operation is
+retried at a later point in time.  The paragraphs below discuss the
+methods that an application might deal with these soft failures.
 
 &h2(Failure Notification)
-When a soft failure is reported, the returned message buffer returned by the RMR function will be &cw(RMR_ERR_RETRY.)
-These types of failures can occur for various reasons; one of two reasons is typically the underlying cause:
+When a soft failure is reported, the returned message buffer returned
+by the RMR function will be &cw(RMR_ERR_RETRY.)  These types of
+failures can occur for various reasons; one of two reasons is
+typically the underlying cause:
 
 &half_space
 &indent
@@ -49,45 +53,52 @@ These types of failures can occur for various reasons; one of two reasons is typ
 &uindent
 &space
 
-Unfortunately, it is not possible for RMR to determine which of these two cases is occurring, and equally
-as unfortunate the time to resolve each is different.
-The first, no connection, may require up to a second before a message can be accepted, while a rejection
-because of buffer shortage is likely to resolve in less than a millisecond.
+Unfortunately, it is not possible for RMR to determine which of these
+two cases is occurring, and equally as unfortunate the time to resolve
+each is different.  The first, no connection, may require up to a
+second before a message can be accepted, while a rejection because of
+buffer shortage is likely to resolve in less than a millisecond.
 
 &h2(Application Response)
-The action which an application takes when a soft failure is reported ultimately depends on the nature
-of the application with respect to factors such as tolerance to extended message latency, dropped messages,
-and over all message rate.
+The action which an application takes when a soft failure is reported
+ultimately depends on the nature of the application with respect to
+factors such as tolerance to extended message latency, dropped
+messages, and over all message rate.
 
 &h2(RMR Retry Modes)
-In an effort to reduce the workload of an application developer, RMR has a default retry policy such that
-RMR will attempt to retransmit a message up to 1000 times when a soft failure is reported.
-These retries generally take less than 1 millisecond (if all 1000 are attempted) and in most cases eliminates
-nearly all reported soft failures to the application.
-When using this mode, it might allow the application to simply treat all bad return values from a send attempt
-as permanent failures.
-&space
+In an effort to reduce the workload of an application developer, RMR
+has a default retry policy such that RMR will attempt to retransmit a
+message up to 1000 times when a soft failure is reported.  These
+retries generally take less than 1 millisecond (if all 1000 are
+attempted) and in most cases eliminates nearly all reported soft
+failures to the application.  When using this mode, it might allow the
+application to simply treat all bad return values from a send attempt
+as permanent failures.  &space
 
-If an application is so sensitive to any delay in RMR, or the underlying transport mechanism, it is possible to
-set RMR to return a failure immediately on any kind of error (permanent failures are always reported without retry).
-In this mode, RMR will still set the state in the message buffer to &cw(RMR_ERR_RETRY,) but will &bold(not)
-make any attempts to resend the message.
-This zero-retry policy is enabled by invoking the &func(rmr_set_stimeout) with a value of 0; this can be done once
-immediately after &func(rmr_init:) is invoked.
+If an application is so sensitive to any delay in RMR, or the
+underlying transport mechanism, it is possible to set RMR to return a
+failure immediately on any kind of error (permanent failures are
+always reported without retry).  In this mode, RMR will still set the
+state in the message buffer to &cw(RMR_ERR_RETRY,) but will &bold(not)
+make any attempts to resend the message.  This zero-retry policy is
+enabled by invoking the &func(rmr_set_stimeout) with a value of 0;
+this can be done once immediately after &func(rmr_init:) is invoked.
 
 &space
-Regardless of the retry mode which the application sets, it will ultimately be up to the application to
-handle failures by queuing the message internally for resend, retrying immediately, or dropping the
-send attempt all together.
-As stated before, only the application can determine how to best handle send failures.
+Regardless of the retry mode which the application sets, it will
+ultimately be up to the application to handle failures by queuing the
+message internally for resend, retrying immediately, or dropping the
+send attempt all together.  As stated before, only the application can
+determine how to best handle send failures.
 
 
 &h2(Other Failures)
-RMR will return the state of processing for message based operations (send/receive) as the status in
-the message buffer.
-For non-message operations, state is returned to the caller as the integer return value for all functions
-which are not expected to return a pointer (e.g. &func(rmr_init:).)
-The following are the RMR state constants and a brief description of their meaning.
+RMR will return the state of processing for message based operations
+(send/receive) as the status in the message buffer.  For non-message
+operations, state is returned to the caller as the integer return
+value for all functions which are not expected to return a pointer
+(e.g. &func(rmr_init:).)  The following are the RMR state constants
+and a brief description of their meaning.
 
 &space
 .st 8p
@@ -135,7 +146,7 @@ The following are the RMR state constants and a brief description of their meani
 	&di(RMR_ERR_UNSET)		the message hasn't been populated with a transport buffer
 	&half_space
 
-	&di(RMR_ERR_TRUNC)		length in the received buffer is longer than the size of the allocated payload, 
+	&di(RMR_ERR_TRUNC)		length in the received buffer is longer than the size of the allocated payload,
 							received message likely truncated (length set by sender could be wrong, but we can't know that)
 	&half_space
 
@@ -148,7 +159,8 @@ The following are the RMR state constants and a brief description of their meani
 .st &textsize
 &space
 
-Depending on the underlying transport mechanism, and the nature of the call that RMR attempted, the
-system &cw(errno) value might reflect additional detail about the failure. 
-Applications should &bold(not) rely on errno as some transport mechanisms do not set it with
-any consistency.
+Depending on the underlying transport mechanism, and the nature of the
+call that RMR attempted, the system &cw(errno) value might reflect
+additional detail about the failure.  Applications should &bold(not)
+rely on errno as some transport mechanisms do not set it with any
+consistency.
