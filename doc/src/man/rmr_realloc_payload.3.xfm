@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@
 
 
 .if false
-	Mnemonic	rmr_realloc_payload.3.xfm
-	Abstract	The manual page for the rmr_realloc_payload function.
-	Author		E. Scott Daniels
-	Date		30 October 2019
+    Mnemonic    rmr_realloc_payload.3.xfm
+    Abstract    The manual page for the rmr_realloc_payload function.
+    Author      E. Scott Daniels
+    Date        30 October 2019
 .fi
 
 .gv e LIB lib
@@ -32,7 +32,7 @@
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_realloc_payload
+    rmr_realloc_payload
 
 &h2(SYNOPSIS )
 &indent
@@ -70,7 +70,7 @@ uninitialised value (-1) for type and ID, and the length is set to 0.
 The &cw(rmr_realloc_payload) function returns a pointer to the message buffer with the
 payload which is large enough to hold &ital(new_len) bytes.
 If the &ital(clone) option is true, this will be a pointer to the newly cloned
-message buffer; the original message buffer pointer may still be used to referenced
+message buffer; the original message buffer pointer may still be used to reference
 that message.
 It is the calling application's responsibility to free the memory associateed with
 both messages using the rmr_free_msg() function.
@@ -92,7 +92,7 @@ These value of &ital(errno) will reflect the error condition if a nil pointer is
 &half_space
 
 &di(EINVAL) The pointer passed in was nil, or refrenced an invalid message, or the required
-			length was not valid.
+    length was not valid.
 &end_dlist
 
 
@@ -108,8 +108,8 @@ is larger than the message received.
     if( msg == NULL ) {
       fprintf( stderr, "[ERR] realloc returned a nil pointer: %s\n", strerror( errno ) );
     } else {
-		// populate and send ack message
-	}
+      // populate and send ack message
+    }
 }
 
 &ex_end

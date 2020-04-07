@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,20 +19,20 @@
 
 
 .if false
-	Mnemonic	rmr_mt_call_man.xfm
-	Abstract	The manual page for the rmr multi-threaded call function.
-	Author		E. Scott Daniels
-	Date		24 May 2019
+    Mnemonic    rmr_mt_call_man.xfm
+    Abstract    The manual page for the rmr multi-threaded call function.
+    Author      E. Scott Daniels
+    Date        24 May 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_mt_call
+    rmr_mt_call
 
 &h2(SYNOPSIS )
 &indent
@@ -51,44 +51,38 @@ The user application supplies a completed message buffer, as it would for
 a &cw(rmr_send_msg) call, but unlike with a send, the buffer returned will have
 the response from the application that received the message.
 The thread invoking the &ital(rmr_mt_call())  will block until a message arrives
-or until &ital(timeout) milliseconds has passed; which ever comes first.  
+or until &ital(timeout) milliseconds has passed; which ever comes first.
 Using a timeout value of zero (0) will cause the thread to block without a timeout.
 
 &space
 The &ital(id) supplied as the third parameter is an integer in the range of 2 through
-255 inclusive. 
+255 inclusive.
 This is a caller defined "thread number" and is used to match the response message
 with the correct user application thread.
 If the ID value is not in the proper range, the attempt to make the call will fail.
 
 &space
 Messages which are received while waiting for the response are queued on a &ital(normal)
-receive queue and will be delivered to the user application with the next invocation 
-of &ital(rmr_mt_rcv()) or &ital(rmr_rvv_msg().) 
-by RMR, and are returned to the user application when &cw(rmr_rcv_msg) is 
+receive queue and will be delivered to the user application with the next invocation
+of &ital(rmr_mt_rcv()) or &ital(rmr_rvv_msg().)
+by RMR, and are returned to the user application when &cw(rmr_rcv_msg) is
 invoked.
-These messages are returned in th order received, one per call to &cw(rmr_rcv_msg.)
-
-&space
-NOTE: Currently the multi-threaded functions are supported only when the NNG 
-transport mechanism is being used. It will not be possible to link a programme
-using the Nanomsg version of the library when references to this function are
-present.
+These messages are returned in the order received, one per call to &cw(rmr_rcv_msg.)
 
 &h3(The Transaction ID)
 The user application is responsible for setting the value of the transaction ID field
-before invoking &ital(rmr_mt_call.)  
-The transaction ID is a &cw(RMR_MAX_XID) byte field that is used to match the 
-response message when it arrives. 
-RMr will compare &bold(all) of the bytes in the field, so the caller must ensure
-that they are set correctly to avoid missing the response message. 
-(The application which returns the response message is also expected to ensure that
+before invoking &ital(rmr_mt_call.)
+The transaction ID is a &cw(RMR_MAX_XID) byte field that is used to match the
+response message when it arrives.
+RMR will compare &bold(all) of the bytes in the field, so the caller must ensure
+that they are set correctly to avoid missing the response message.
+The application which returns the response message is also expected to ensure that
 the return buffer has the matching transaction ID. This can be done transparently if
-the application uses the &ital(rmr_rts_msg()) function and does not adjust the 
+the application uses the &ital(rmr_rts_msg()) function and does not adjust the
 transaction ID.
 
 .** pull in common retry text
-.im &{lib}/man/retry.im 
+.im &{lib}/man/retry.im
 
 &h2(RETURN VALUE)
 The &cw(rmr_mt_call) function returns a pointer to a message buffer with the state set to reflect
@@ -98,10 +92,10 @@ the state indicates the error encountered while attempting to send the message.
 
 &space
 If no response message is received when the timeout period has expired, a nil pointer
-will be returned (NULL).  
+will be returned (NULL).
 
 &h2(ERRORS)
-These values are reflected in the state field of the returned message. 
+These values are reflected in the state field of the returned message.
 
 &half_space
 &beg_dlist(.75i : ^&bold_font )
@@ -111,23 +105,23 @@ These values are reflected in the state field of the returned message.
 &di(RMR_ERR_BADARG) An argument passed to the function was invalid.
 
 &half_space
-&di(RMR_ERR_CALLFAILED) The call failed and the value of &ital(errno,) as described below, 
-	should be checked for the specific reason.
+&di(RMR_ERR_CALLFAILED) The call failed and the value of &ital(errno,) as described below,
+    should be checked for the specific reason.
 
 &half_space
 &di(RMR_ERR_NOENDPT) An endpoint associated with the message type could not be found in the
-	route table.
+    route table.
 
 &half_space
 &di(RMR_ERR_RETRY) The underlying transport mechanism was unable to accept the message
-	for sending. The user application can retry the call operation if appropriate to
-	do so.
+    for sending. The user application can retry the call operation if appropriate to
+    do so.
 
 &end_dlist
 
 &space
-The global "variable" &ital(errno) will be set to one of the following values if the 
-overall call processing was not successful. 
+The global "variable" &ital(errno) will be set to one of the following values if the
+overall call processing was not successful.
 &half_space
 
 &beg_dlist(.75i : ^&bold_font )
@@ -141,8 +135,8 @@ overall call processing was not successful.
 
 &half_space
 &di(EAGAIN)    The underlying message system wsa interrupted or the device was busy;
-	the message was &bold(not) sent, and user application should call 
-	this function with the message again.
+    the message was &bold(not) sent, and user application should call
+    this function with the message again.
 &end_dlist
 
 &h2(EXAMPLE)
@@ -155,29 +149,29 @@ how the transaction ID must be set.
     static rmr_mbuf_t*  mbuf = NULL;    // response msg
     msg_t*  pm;                         // private message (payload)
 
-	// get a send buffer and reference the payload 
+    // get a send buffer and reference the payload
     mbuf = rmr_alloc_msg( mr, RMR_MAX_RCV_BYTES );
     pm = (msg_t*) mbuf->payload;
 
-	// generate an xaction ID and fill in payload with data and msg type
+    // generate an xaction ID and fill in payload with data and msg type
     rmr_bytes2xact( mbuf, xid, RMR_MAX_XID );
     snprintf( pm->req, sizeof( pm->req ), "{ \"req\": \"num users\"}" );
     mbuf->mtype = MT_USR_RESP;
-    
-    msg = rmr_mt_call( mr, msg, my_id, 100 );		// wait up to 100ms
+
+    msg = rmr_mt_call( mr, msg, my_id, 100 );        // wait up to 100ms
     if( ! msg ) {               // probably a timeout and no msg received
         return NULL;            // let errno trickle up
-    } 
+    }
 
     if( mbuf->state != RMR_OK ) {
         while( retries_left-- > 0 &&             // loop as long as eagain
-               mbuf->state == RMR_ERR_RETRY && 
-               (msg = rmr_mt_call( mr, msg )) != NULL && 
+               mbuf->state == RMR_ERR_RETRY &&
+               (msg = rmr_mt_call( mr, msg )) != NULL &&
                mbuf->state != RMR_OK ) {
 
             usleep( retry_delay );
         }
-    
+ 
         if( mbuf == NULL || mbuf->state != RMR_OK ) {
             rmr_free_msg( mbuf );        // safe if nil
             return NULL;

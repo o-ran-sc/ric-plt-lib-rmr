@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,39 +18,39 @@
 .fi
 
 .if false
-	Mnemonic:	setup.im
-	Abstract:	Look at environment variables and pull in the correct setup prep
-				imbed file based on the desired output type (when running tfm).
-				Obviously, when running pfm we are always generating postscirpt
-				so this isn't really doing much.
-	Date:		29 July 2019
+    Mnemonic:    setup.im
+    Abstract:    Look at environment variables and pull in the correct setup prep
+        imbed file based on the desired output type (when running tfm).
+        Obviously, when running pfm we are always generating postscirpt
+        so this isn't really doing much.
+    Date:        29 July 2019
 .fi
 
 
-.if  ! _setup_im 
+.if  ! _setup_im
 
 .gv e LIB lib
 .if ! lib
-	.dv lib ..
+    .dv lib ..
 .fi
 
 .** CAUTION:  xfm comparisons are reverse polish so  "a b ="  is true if a == b.
 .if pfm
-	.im &{lib}/generic_ps.im
+    .im &{lib}/generic_ps.im
 .ei
-	.gv e OUTPUT_TYPE ot
-	.if "&ot" "txt" =
-		.im &{lib}/txt.im
-	.fi
-	.if "&ot" "rst" =
-		.im &{lib}/rst.im
-	.fi
-	.if "&ot" "markdown" =
-		.im &{lib}/markdown.im
-	.fi
-	.if "&ot" "troff" =
-		.im &{lib}/roff.im
-	.fi
+    .gv e OUTPUT_TYPE ot
+    .if "&ot" "txt" =
+        .im &{lib}/txt.im
+    .fi
+    .if "&ot" "rst" =
+        .im &{lib}/rst.im
+    .fi
+    .if "&ot" "markdown" =
+        .im &{lib}/markdown.im
+    .fi
+    .if "&ot" "troff" =
+        .im &{lib}/roff.im
+    .fi
 .fi
 
 .dv _setup_im 1

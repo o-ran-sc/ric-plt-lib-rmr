@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@
 .fi
 
 .if false
-	Mnemonic	rmr_bytes2xact.xfm
-	Abstract	The manual page for the rmr_bytes2xact function.
-	Author		E. Scott Daniels
-	Date		8 March 2019
+    Mnemonic    rmr_bytes2xact.xfm
+    Abstract    The manual page for the rmr_bytes2xact function.
+    Author      E. Scott Daniels
+    Date        8 March 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_bytes2xact
+    rmr_bytes2xact
 
 &h2(SYNOPSIS)
 &indent
@@ -44,8 +44,8 @@ int rmr_bytes2xact( rmr_mbuf_t* mbuf, unsigned char* src, int len )
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_bytes2xact) function will copy up to &ital(len) butes from &ital(src) to the 
-transaction ID (xaction) field in the message.  
+The &cw(rmr_bytes2xact) function will copy up to &ital(len) butes from &ital(src) to the
+transaction ID (xaction) field in the message.
 The field is a fixed length, gated by the constant &cw(RMR_MAX_XID) and if len is larger
 than this value, only RMR_MAX_XID bytes will actually be copied.
 
@@ -64,7 +64,7 @@ of the following constants with the meaning listed below.
 
 &half_space
 &di(EOVERFLOW) The length passed in was larger than the maximum length of the field; only a portion of
-	the source bytes were copied.
+    the source bytes were copied.
 &end_dlist
 
 &h2(EXAMPLE)

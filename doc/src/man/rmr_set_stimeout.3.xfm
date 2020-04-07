@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-    Copyright (c) 2019 Nokia
-    Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@
 ==================================================================================
 .fi
 .if false
-    Mnemonic	rmr_set_stimeout.xfm
-    Abstract	The manual page for the rmr_set_stimeout function.
-    Author		E. Scott Daniels
-    Date		28 January 2019
+    Mnemonic    rmr_set_stimeout.xfm
+    Abstract    The manual page for the rmr_set_stimeout function.
+    Author      E. Scott Daniels
+    Date        28 January 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -81,9 +81,9 @@ The following is a simple example of how the &cw(rmr_set_stimeout) function is c
 &ex_start
     #define NO_FLAGS    0
 
-    char*	port = "43086";     // port for message router listen
-    int		max_size = 4096;    // max message size for default allocations
-    void*	mr_context;         // message router context
+    char* port = "43086";     // port for message router listen
+    int   max_size = 4096;    // max message size for default allocations
+    void* mr_context;         // message router context
 
     mr_context = rmr_init( port, max_size, NO_FLAGS );
     if( mr_context != NULL ) {

@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@
 ==================================================================================
 .fi
 .if false
-	Mnemonic	rmr_mt_rcv_man.xfm
-	Abstract	The manual page for the rmr_mt_rcv function.
-	Author		E. Scott Daniels
-	Date		24 May 2019
+    Mnemonic    rmr_mt_rcv_man.xfm
+    Abstract    The manual page for the rmr_mt_rcv function.
+    Author      E. Scott Daniels
+    Date        24 May 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_mt_rcv
+    rmr_mt_rcv
 
 &h2(SYNOPSIS )
 &indent
@@ -43,8 +43,8 @@ rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* old_msg, int timeout );
 
 &h2(DESCRIPTION)
 The &cw(rmr_mt_rcv) function blocks until a message is received, or the timeout
-period (milliseconds) has passed. 
-The result is an RMr message buffer which references a received message. 
+period (milliseconds) has passed.
+The result is an RMr message buffer which references a received message.
 In the case of a timeout the state will be reflected in an "empty buffer" (if old_msg
 was not nil, or simply with the return of a nil pointer.
 If a timeout value of zero (0) is given, then the function will block until
@@ -52,51 +52,45 @@ the next message received.
 
 &space
 The &ital(vctx) pointer is the pointer returned by the &cw(rmr_init) function.
-&ital(Old_msg) is a pointer to a previously used message buffer or NULL. 
+&ital(Old_msg) is a pointer to a previously used message buffer or NULL.
 The ability to reuse message buffers helps to avoid alloc/free cycles in the
-user application. 
+user application.
 When no buffer is available to supply, the receive function will allocate one.
 
 &space
-The &ital(old_msg) parameter allows the user to pass a previously generated RMr 
-message back to RMr for reuse. 
+The &ital(old_msg) parameter allows the user to pass a previously generated RMR
+message back to RMR for reuse.
 Optionally, the user application may pass a nil pointer if no reusable message
-is available. 
-When a timeout occurs, and old_msg was not nil, the state will be returned 
-by returning a pointer to the old message with the state set. 
+is available.
+When a timeout occurs, and old_msg was not nil, the state will be returned
+by returning a pointer to the old message with the state set.
 
 &space
-It is possible to use the &ital(rmr_rcv_msg()) function instead of this function. 
-Doing so might be advantagous if the user programme does not always start the
+It is possible to use the &ital(rmr_rcv_msg()) function instead of this function.
+Doing so might be advantageous if the user programme does not always start the
 multi-threaded mode and the use of &ital(rmr_rcv_msg()) would make the flow of
-the code more simple. 
-The advantags of using this function are the ability to set a timeout without
+the code more simple.
+The advantages of using this function are the ability to set a timeout without
 using epoll, and a small performance gain (if multi-threaded mode is enabled, and the
 &ital(rmr_rcv_msg()) function is used, it simply invokes this function without
 a timeout value, thus there is the small cost of a second call that results).
 Similarly, the &ital(rmr_torcv_msg()) call can be used when in multi-threaded
 mode with the same "pass through" overhead to using this function directly.
 
-&space
-NOTE: Currently the multi-threaded functions are supported only when the NNG 
-transport mechanism is being used. It will not be possible to link a programme
-using the nanomsg version of the library when references to this function are
-present.
-
 &h2(RETURN VALUE)
-When a message is received before the timeout period expires, a pointer to the 
-RMr message buffer which describes the message is returned.  
+When a message is received before the timeout period expires, a pointer to the
+RMr message buffer which describes the message is returned.
 This will, with a high probability, be a different message buffer than &ital(old_msg;)
 the user application should not continue to use &ital(old_msg) after it is passed
-to this function. 
+to this function.
 
 &space
-In the event of a timeout the return value will be the old msg with the state set, 
+In the event of a timeout the return value will be the old msg with the state set,
 or a nil pointer if no old message was provided.
 
 &h2(ERRORS)
 The &ital(state) field in the message buffer will be set to one of the following
-values: 
+values:
 &space
 
 &beg_dlist(.75i : ^&bold_font )
@@ -106,14 +100,14 @@ values:
 &di(RMR_ERR_BADARG) A parameter passed to the function was not valid (e.g. a nil pointer).
 
 indicate either &cw(RMR_OK) or
-&cw(RMR_ERR_EMPTY) if an empty message was received. 
+&cw(RMR_ERR_EMPTY) if an empty message was received.
 
 &half_space
-&di(RMR_ERR_EMPTY) The message received had no associated data. The length of the 
-	message will be 0.
+&di(RMR_ERR_EMPTY) The message received had no associated data. The length of the
+    message will be 0.
 
 &half_space
-&di(RMR_ERR_NOTSUPP) The multi-threaded option was not enabled when RMr was 
+&di(RMR_ERR_NOTSUPP) The multi-threaded option was not enabled when RMr was
 initialised.  See the man page for &ital(rmr_init()) for details.
 
 &half_space

@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@
 .fi
 
 .if false
-	Mnemonic	rmr_bytes2payload.xfm
-	Abstract	The manual page for the rmr_bytes2payload function.
-	Author		E. Scott Daniels
-	Date		8 March 2019
+    Mnemonic    rmr_bytes2payload.xfm
+    Abstract    The manual page for the rmr_bytes2payload function.
+    Author      E. Scott Daniels
+    Date        8 March 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_bytes2payload
+    rmr_bytes2payload
 
 &h2(SYNOPSIS)
 &indent
@@ -48,7 +48,7 @@ This is a convenience function as some wrapper languages might not have the abil
 directly copy into the payload buffer.
 The bytes from &ital(src) for the length given are copied to the payload.
 It is the caller's responsibility to ensure that the payload is large enough.
-Upon successfully copy, the &cw(len) field in the message buffer is updated to 
+Upon successfully copy, the &cw(len) field in the message buffer is updated to
 reflect the number of bytes copied.
 .sp
 There is little error checking, and no error reporting.

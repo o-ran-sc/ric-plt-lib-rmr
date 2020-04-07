@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 ==================================================================================
 .fi
 .if false
-	Mnemonic	rmr_send_msg_man.xfm
-	Abstract	The manual page for the rmr_send_msg function.
-	Author		E. Scott Daniels
-	Date		28 January 2019
+    Mnemonic    rmr_send_msg_man.xfm
+    Abstract    The manual page for the rmr_send_msg function.
+    Author      E. Scott Daniels
+    Date        28 January 2019
 .fi
 
 .gv e LIB lib
@@ -30,7 +30,7 @@
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_send_msg
+    rmr_send_msg
 
 &h2(SYNOPSIS )
 &indent
@@ -71,7 +71,7 @@ The value of &ital(errno) may also be set to reflect a more detailed failure rea
 is known.
 
 &space
-In the event of extreme failure, a NULL pointer is returned. In this case the value of
+In the event of extreme failure, a nil pointer is returned. In this case the value of
 &cw(errno) might be of some use, for documentation, but there will be little that the
 user application can do other than to move on.
 
@@ -91,11 +91,11 @@ buffer.
 
 &space
 &beg_dlist(.75i : ^&bold_font )
-&di(RMR_RETRY) 	The message could not be sent, but the underlying transport mechanism
-	indicates that the failure is temporary. If the send operation is tried again
-	it might be successful.
+&di(RMR_RETRY) The message could not be sent, but the underlying transport mechanism
+    indicates that the failure is temporary. If the send operation is tried again
+    it might be successful.
 &di(RMR_SEND_FAILED) The send operation was not successful and the underlying transport
-	mechanism indicates a permanent (hard) failure; retrying the send is not possible.
+    mechanism indicates a permanent (hard) failure; retrying the send is not possible.
 &di(RMR_ERR_BADARG) The message buffer pointer did not refer to a valid message.
 &di(RMR_ERR_NOHDR)  The header in the message buffer was not valid or corrupted.
 &di(RMR_ERR_NOENDPT)  The message type in the message buffer did not map to a known endpoint.
@@ -116,7 +116,7 @@ The following values may be assigned to &cw(errno) on failure.
 &di(EMSGSIZE) The underlying transport refused to accept the message because of a size value issue (message was not attempted to be sent).
 
 &half_space
-&di(EFAULT) The message referenced by the message buffer is corrupt (NULL pointer or bad internal length).
+&di(EFAULT) The message referenced by the message buffer is corrupt (nil pointer or bad internal length).
 
 &half_space
 &di(EBADF) Internal RMR error; information provided to the message transport environment was not valid.
@@ -151,26 +151,25 @@ eliminating alloc/free cycles.
     msg_t*  send_pm;                            // payload for send
     msg_t*  pm;                                 // our message format in the received payload
 
-	if( send_msg  == NULL ) {
-        send_msg = rmr_alloc_msg( mr, MAX_SIZE );	// new buffer to send
-	}
+    if( send_msg  == NULL ) {
+        send_msg = rmr_alloc_msg( mr, MAX_SIZE ); // new buffer to send
+    }
 
-	// reference payload and fill in message type
+    // reference payload and fill in message type
     pm = (msg_t*) send_msg->payload;
     send_msg->mtype = MT_ANSWER;
 
     msg->len = generate_data( pm );       // something that fills the payload in
     msg = rmr_send_msg( mr, send_msg );   // ensure new pointer used after send
-	if( ! msg ) {
-		return ERROR;
-	} else {
-		if( msg->state != RMR_OK ) {
-			// check for RMR_ERR_RETRY, and resend if needed
-			// else return error
-		}
-	}
-
-	return OK;
+    if( ! msg ) {
+        return ERROR;
+    } else {
+        if( msg->state != RMR_OK ) {
+            // check for RMR_ERR_RETRY, and resend if needed
+            // else return error
+        }
+    }
+    return OK;
 
 &ex_end
 

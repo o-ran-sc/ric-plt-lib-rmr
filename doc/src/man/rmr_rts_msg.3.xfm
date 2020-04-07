@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 ==================================================================================
 .fi
 .if false
-	Mnemonic	rmr_rts_msg_man.xfm
-	Abstract	The manual page for the rmr_rts_msg function.
-	Author		E. Scott Daniels
-	Date		28 January 2019
+    Mnemonic    rmr_rts_msg_man.xfm
+    Abstract    The manual page for the rmr_rts_msg function.
+    Author      E. Scott Daniels
+    Date        28 January 2019
 .fi
 
 .gv e LIB lib
@@ -30,7 +30,7 @@
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_rts_msg
+    rmr_rts_msg
 
 &h2(SYNOPSIS )
 &indent
@@ -57,7 +57,7 @@ take care not to write more bytes to the message payload than the allocated mess
 has.
 In the case of a received message, it is possible that the response needs to be
 larger than the payload associated with the inbound message.
-In order to use the return to sender function, the source infomration in the orignal
+In order to use the return to sender function, the source information in the original
 message must be present in the response; information which cannot be added to a
 message buffer allocated through the standard RMR allocation function.
 To allocate a buffer with a larger payload, and which retains the necessary sender
@@ -71,12 +71,12 @@ The state in this buffer will reflect the overall send operation state and shoul
 &cw(RMR_OK.)
 
 &space
-If the state in the returned buffer is anything other than &cw(UT_OK,) the user application
+If the state in the returned buffer is anything other than &cw(RMR_OK,) the user application
 may need to attempt a retransmission of the message, or take other action depending on the
 setting of &cw(errno) as described below.
 
 &space
-In the event of extreme failure, a NULL pointer is returned. In this case the value of
+In the event of extreme failure, a nil pointer is returned. In this case the value of
 &cw(errno) might be of some use, for documentation, but there will be little that the
 user application can do other than to move on.
 
@@ -107,7 +107,7 @@ The following values may be assigned to &cw(errno) on failure.
 &di(EMSGSIZE) The underlying transport refused to accept the message because of a size value issue (message was not attempted to be sent).
 
 &half_space
-&di(EFAULT) The message referenced by the message buffer is corrupt (NULL pointer or bad internal length).
+&di(EFAULT) The message referenced by the message buffer is corrupt (nil pointer or bad internal length).
 
 &half_space
 &di(EBADF) Internal RMR error; information provided to the message transport environment was not valid.
