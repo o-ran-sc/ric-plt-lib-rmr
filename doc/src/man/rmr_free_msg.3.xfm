@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -44,14 +44,14 @@ void rmr_free_msg( rmr_mbuf_t* mbuf );
 
 &h2(DESCRIPTION)
 The message buffer is returned to the pool, or the associated memory is
-released depending on the needs of the underlying messaging system. 
-This allows the user application to release a buffer that is not going 
+released depending on the needs of the underlying messaging system.
+This allows the user application to release a buffer that is not going
 to be used.
-It is safe to pass a nil pointer to this function, and doing so does 
+It is safe to pass a nil pointer to this function, and doing so does
 not result in a change to the value of &cw(errrno.)
 &space
 
-After calling, the user application should &bold(not) use any of the 
+After calling, the user application should &bold(not) use any of the
 pointers (transaction ID, or payload) which were available.
 
 

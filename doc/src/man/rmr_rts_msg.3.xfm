@@ -57,7 +57,7 @@ take care not to write more bytes to the message payload than the allocated mess
 has.
 In the case of a received message, it is possible that the response needs to be
 larger than the payload associated with the inbound message.
-In order to use the return to sender function, the source infomration in the orignal
+In order to use the return to sender function, the source information in the original
 message must be present in the response; information which cannot be added to a
 message buffer allocated through the standard RMR allocation function.
 To allocate a buffer with a larger payload, and which retains the necessary sender
@@ -71,7 +71,7 @@ The state in this buffer will reflect the overall send operation state and shoul
 &cw(RMR_OK.)
 
 &space
-If the state in the returned buffer is anything other than &cw(UT_OK,) the user application
+If the state in the returned buffer is anything other than &cw(RMR_OK,) the user application
 may need to attempt a retransmission of the message, or take other action depending on the
 setting of &cw(errno) as described below.
 

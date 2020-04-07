@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -45,12 +45,12 @@ int rmr_get_trace( rmr_mbuf_t* mbuf, unsigned char* dest, int size )
 
 &h2(DESCRIPTION)
 The &cw(rmr_get_trace) function will copy the trace information from the message into the user's
-allocated memory referenced by &cw(dest.) 
+allocated memory referenced by &cw(dest.)
 The &cw(size) parameter is assumed to be the maximum number of bytes which can be copied (size
 of the destination buffer).
 
 &h2(RETURN VALUE)
-On success, the number of bytes actually copied is returned. 
+On success, the number of bytes actually copied is returned.
 If the return value is 0, no bytes copied, then the reason could be that the message pointer
 was nil, or the size parameter was <= 0.
 

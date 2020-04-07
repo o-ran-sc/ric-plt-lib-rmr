@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 
 &line_len(6i)
@@ -45,7 +45,7 @@ int rmr_payload_size( rmr_mbuf_t* msg );
 &h2(DESCRIPTION)
 Given a message buffer, this function returns the amount of space (bytes)
 available for the user application to consume in the message payload.
-This is different than the message length available as a field in the 
+This is different than the message length available as a field in the
 message buffer.
 
 &h2(RETURN VALUE)

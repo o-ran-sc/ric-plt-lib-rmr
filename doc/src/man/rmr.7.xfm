@@ -99,7 +99,7 @@ meid_map | end | 2
 &ex_end
 
 This table indicates that the application (endpoint) &ital(control1) "owns" 6 MEIDs
-and &ital(control2) owns 4. 
+and &ital(control2) owns 4.
 When message type 0 is sent, the MEID in the message will be used to select the
 endpoint via this table.
 

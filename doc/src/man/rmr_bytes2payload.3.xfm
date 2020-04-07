@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -48,7 +48,7 @@ This is a convenience function as some wrapper languages might not have the abil
 directly copy into the payload buffer.
 The bytes from &ital(src) for the length given are copied to the payload.
 It is the caller's responsibility to ensure that the payload is large enough.
-Upon successfully copy, the &cw(len) field in the message buffer is updated to 
+Upon successfully copy, the &cw(len) field in the message buffer is updated to
 reflect the number of bytes copied.
 .sp
 There is little error checking, and no error reporting.
