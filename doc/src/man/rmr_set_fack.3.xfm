@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019-2020 Nokia 
+	Copyright (c) 2019-2020 Nokia
 	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -44,9 +44,9 @@ void rmr_set_fack( void* vctx );
 
 &h2(DESCRIPTION)
 The &cw(rmr_set_fack) function enables &ital(fast TCP acknowledgements) if
-the underlying transport library supports it. 
-This might be useful for applications which must send messages as a maximum
-rate. 
+the underlying transport library supports it.
+This might be useful for applications which must send messages at a maximum
+rate.
 
 &h2(RETURN VALUE)
 There is no return value.

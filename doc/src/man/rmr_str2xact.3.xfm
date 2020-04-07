@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -44,16 +44,16 @@ int rmr_str2xact( rmr_mbuf_t* mbuf, unsigned char* src, int len )
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_str2xact) function will copy the string pointed to by src to the 
-transaction ID (xaction) field in the given message.  
+The &cw(rmr_str2xact) function will copy the string pointed to by src to the
+transaction ID (xaction) field in the given message.
 The field is a fixed length, gated by the constant &cw(RMR_MAX_XID) and if string length is larger
 than this value, then &bold(nothing) will be copied. (Note, this differs slightly from the
 behaviour of the &cw(lrmr_bytes2xact()) function.)
 
 &beg_dlist(.75i : ^&bold_font )
 &h2(RETURN VALUE)
-On success, the value RMR_OK is returned. 
-If the string cannot be copied to the message, the return value will be one of the 
+On success, the value RMR_OK is returned.
+If the string cannot be copied to the message, the return value will be one of the
 errors listed below.
 
 &h2(ERRORS)

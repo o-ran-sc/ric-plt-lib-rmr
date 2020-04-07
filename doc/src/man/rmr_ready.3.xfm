@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -48,7 +48,7 @@ The return value indicates the state of readiness.
 
 &h2(RETURN VALUE)
 A return value of 1 (true) indicates that the routing table is in place and
-attempts to send messages can be made. 
+attempts to send messages can be made.
 When 0 is returned (false) the routing table has not been received and thus
 attempts to send messages will fail with &ital(no endpoint) errors.
 
