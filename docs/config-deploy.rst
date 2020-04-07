@@ -37,23 +37,23 @@ development package for more details.
 RMR_ASYNC_CONN 
    
   Allows the async connection mode to be turned off (by 
-  setting the value to 0. When set to 1, or missing from the 
-  environment, RMR will invoke the connection interface in 
-  the transport mechanism using the non-blocking (async) 
+  setting the value to 0). When set to 1, or missing from 
+  the environment, RMR will invoke the connection interface 
+  in the transport mechanism using the non-blocking (async) 
   mode. This will likely result in many "soft failures" 
   (retry) until the connection is established, but allows 
-  the application to continue unimpeeded should the 
+  the application to continue unimpeded should the 
   connection be slow to set up. 
    
  
 RMR_BIND_IF 
    
   This provides the interface that RMR will bind listen 
-  ports to allowing for a single interface to be used rather 
-  than listening across all interfaces. This should be the 
-  IP address assigned to the interface that RMR should 
-  listen on, and if not defined RMR will listen on all 
-  interfaces. 
+  ports to, allowing for a single interface to be used 
+  rather than listening across all interfaces. This should 
+  be the IP address assigned to the interface that RMR 
+  should listen on, and if not defined RMR will listen on 
+  all interfaces. 
    
  
 RMR_CTL_PORT 
@@ -66,17 +66,16 @@ RMR_CTL_PORT
   port) was used to define this port. However, a future 
   version of Route Manager will require RMR to connect and 
   request tables, thus that variable is now used to supply 
-  the Route Manager well known address and port. 
+  the Route Manager's well-known address and port. 
    
-  To maintain backwards compatablibility with the older 
-  Route Manager versions, the presence of this variable in 
-  the environment will shift RMR's behaviour with respect to 
-  the default value used when RMR_RTG_SVC is **not** 
-  defined. 
+  To maintain backwards compatibility with the older Route 
+  Manager versions, the presence of this variable in the 
+  environment will shift RMR's behaviour with respect to the 
+  default value used when RMR_RTG_SVC is **not** defined. 
    
   When RMR_CTL_PORT is **defined:** RMR assumes that Route 
   Manager requires RMR to connect and request table updates 
-  is made, and the default well known address for Route 
+  is made, and the default well-known address for Route 
   manager is used (routemgr:4561). 
    
   When RMR_CTL_PORT is **undefined:** RMR assumes that Route 
@@ -168,8 +167,8 @@ RMR_RTG_ISRAW
    
   **Deprecated.** Should be set to 1 if the route table 
   generator is sending "plain" messages (not using RMR to 
-  send messages, 0 if the rtg is using RMR to send. The 
-  default is 1 as we don't expect the rtg to use RMR. 
+  send messages), 0 if the RTG is using RMR to send. The 
+  default is 1 as we don't expect the RTG to use RMR. 
    
   This variable is only recognised when using the NNG 
   transport library as it is not possible to support NNG 
@@ -189,7 +188,7 @@ RMR_SEED_RT
   report *ready* until a table is received. The static route 
   table may contain both the route table (between newrt 
   start and end records), and the MEID map (between meid_map 
-  start and end records) 
+  start and end records). 
  
 RMR_SRC_ID 
    

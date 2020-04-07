@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -44,28 +44,28 @@ void* rmr_init_trace( void* ctx )
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_init_trace) function establishes the default trace space placed in each 
+The &cw(rmr_init_trace) function establishes the default trace space placed in each
 message buffer allocated with &cw(rmr_alloc_msg().)
 If this function is never called, then no trace space is allocated by default into
-any message buffer. 
+any message buffer.
 
 .sp
 Trace space allows the user application to pass some trace token, or other data
 with the message, but outside of the payload.
 Trace data may be added to any message with &cw(rmr_set_trace(),) and may be extracted
-from a message with &cw(rmr_get_trace().)  
+from a message with &cw(rmr_get_trace().)
 The number of bytes that a message contains for/with trace data can be determined by
-invoking &cw(rmr_get_trlen().) 
+invoking &cw(rmr_get_trlen().)
 
 .sp
 This function may be safely called at any time during the life of the user programme
-to (re)set the default trace space reserved.  
+to (re)set the default trace space reserved.
 If the user programme needs to allocate a message with trace space of a different
-size than is allocated by default, without fear of extra overhead of reallocating 
+size than is allocated by default, without fear of extra overhead of reallocating
 a message later, the &cw(rmr_tralloc_msg()) function can be used.
 
 &h2(RETURN VALUE)
-A value of 1 is returned on success, and 0 on failure.  A failure indicates that the 
+A value of 1 is returned on success, and 0 on failure.  A failure indicates that the
 RMr context (a void pointer passed to this function was not valid.
 
 &h2(SEE ALSO )

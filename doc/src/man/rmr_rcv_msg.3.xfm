@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -44,15 +44,15 @@ rmr_mbuf_t* rmr_rcv_msg( void* vctx, rmr_mbuf_t* old_msg );
 &h2(DESCRIPTION)
 The &cw(rmr_rcv_msg) function blocks until a message is received, returning
 the message to the caller via a pointer to a &cw(rmr_mbuf_t) structure type.
-If messages were queued while waiting for the response to a previous invocation 
-of &cw(rmr_call,)  the oldest message is removed from the queue and returned 
+If messages were queued while waiting for the response to a previous invocation
+of &cw(rmr_call,)  the oldest message is removed from the queue and returned
 without delay.
 
 &space
 The &ital(vctx) pointer is the pointer returned by the &cw(rmr_init) function.
-&ital(Old_msg) is a pointer to a previously used message buffer or NULL. 
+&ital(Old_msg) is a pointer to a previously used message buffer or NULL.
 The ability to reuse message buffers helps to avoid alloc/free cycles in the
-user application. 
+user application.
 When no buffer is available to supply, the receive function will allocate one.
 
 &h2(RETURN VALUE)
@@ -61,10 +61,10 @@ the message information (state, length, payload), or a NULL pointer in the case
 of an extreme error.
 
 &h2(ERRORS)
-The &ital(state) field in the message buffer will indicate either &cw(RMR_OK) 
+The &ital(state) field in the message buffer will indicate &cw(RMR_OK)
 when the message receive process was successful and the message can be used
 by the caller.
-Depending on the underlying transport mechanism, one of the following RMR 
+Depending on the underlying transport mechanism, one of the following RMR
 error stats may be returned:
 &half_space
 
@@ -74,7 +74,7 @@ error stats may be returned:
 &half_space
 &di(RMR_ERR_TIMEOUT) For some transport mechanisms, or if reading the receive
 queue from multiple threads, it is possible for one thread to find no data
-waiting when it queries the queue.  When this state is reported, the 
+waiting when it queries the queue.  When this state is reported, the
 message buffer does not contain message data and the user application should
 reinvoke the receive function.
 &end_dlist
@@ -87,7 +87,7 @@ provide more information. The following is a list of possible values that
 might accompany the states listed above:
 
 &half_space
-&cw(RMR_ERR_EMPTY) if an empty message was received. 
+&cw(RMR_ERR_EMPTY) if an empty message was received.
 If a nil pointer is returned, or any other state value was set in the message
 buffer,  &cw(errno) will be set to one of the following:
 &space

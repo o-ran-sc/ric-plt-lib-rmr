@@ -27,7 +27,7 @@
 .fi
 
 
-.if  ! _setup_im 
+.if  ! _setup_im
 
 .gv e LIB lib
 .if ! lib

@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2020 Nokia 
+	Copyright (c) 2020 Nokia
 	Copyright (c) 2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -45,7 +45,7 @@ int rmr_wh_state( void* vctx, rmr_whid_t whid )
 
 &h2(DESCRIPTION)
 The &cw(rmr_wh_state) function will return the current state of the connection
-associated with the given wormhole (whid). 
+associated with the given wormhole (whid).
 The return value indicates whether the connection is open (RMR_OK), or closed
 (any other return value).
 

@@ -70,7 +70,7 @@ uninitialised value (-1) for type and ID, and the length is set to 0.
 The &cw(rmr_realloc_payload) function returns a pointer to the message buffer with the
 payload which is large enough to hold &ital(new_len) bytes.
 If the &ital(clone) option is true, this will be a pointer to the newly cloned
-message buffer; the original message buffer pointer may still be used to referenced
+message buffer; the original message buffer pointer may still be used to reference
 that message.
 It is the calling application's responsibility to free the memory associateed with
 both messages using the rmr_free_msg() function.

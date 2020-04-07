@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -53,16 +53,16 @@ the response from the application that received the message.
 
 &space
 Messages which are received while waiting for the response are queued internally
-by RMR, and are returned to the user application when &cw(rmr_rcv_msg) is 
+by RMR, and are returned to the user application when &cw(rmr_rcv_msg) is
 invoked.
-These messages are returned in th order received, one per call to &cw(rmr_rcv_msg.)
+These messages are returned in the order received, one per call to &cw(rmr_rcv_msg.)
 
 &h3(Call Timeout)
 The &cw(rmr_call) function implements a timeout failsafe to prevent, in most cases, the
-function from blocking forever. 
+function from blocking forever.
 The timeout period is &bold(not) based on time (calls to clock are deemed too expensive
-for a low latency system level library, but instead the period is based on the number of
-received messages which are not the response. 
+for a low latency system level library), but instead the period is based on the number of
+received messages which are not the response.
 Using a non-time mechanism for &ital(timeout) prevents the async queue from filling
 (which would lead to message drops) in an environment where there is heavy message traffic.
 
@@ -74,28 +74,28 @@ Currently the threshold is fixed at 20 messages, though in future versions of th
 this might be extended to be a parameter which the user application may set.
 
 .** pull in common retry text
-.im &{lib}/man/retry.im 
+.im &{lib}/man/retry.im
 
 &h2(RETURN VALUE)
 The &cw(rmr_call) function returns a pointer to a message buffer with the state set to reflect
-the overall state of call processing (see Errors below). 
-In some cases a NULL pointer will be returned; when this is the case only &ital(errno) 
+the overall state of call processing (see Errors below).
+In some cases a NULL pointer will be returned; when this is the case only &ital(errno)
 will be available to describe the reason for failure.
 
 &h2(ERRORS)
-These values are reflected in the state field of the returned message. 
+These values are reflected in the state field of the returned message.
 
 &half_space
 &beg_dlist(.75i : ^&bold_font )
 &di(RMR_OK) The call was successful and the message buffer references the response message.
 &half_space
-&di(RMR_ERR_CALLFAILED) The call failed and the value of &ital(errno,) as described below, 
+&di(RMR_ERR_CALLFAILED) The call failed and the value of &ital(errno,) as described below,
 			should be checked for the specific reason.
 &end_dlist
 
 &space
-The global "variable" &ital(errno) will be set to one of the following values if the 
-overall call processing was not successful. 
+The global "variable" &ital(errno) will be set to one of the following values if the
+overall call processing was not successful.
 &half_space
 
 &beg_dlist(.75i : ^&bold_font )
@@ -105,13 +105,13 @@ overall call processing was not successful.
 &half_space
 &di(EINVAL)     A parameter was not valid
 &half_space
-&di(EAGAIN)    The underlying message system wsa interrupted or the device was busy;
-               the message was &bold(not) sent, and user application should call 
+&di(EAGAIN)    The underlying message system was interrupted or the device was busy;
+               the message was &bold(not) sent, and the user application should call
 				this function with the message again.
 &end_dlist
 
 &h2(EXAMPLE)
-The following code bit shows one way of using the &cw(rmr_call) function, and illustrates
+The following code snippet shows one way of using the &cw(rmr_call) function, and illustrates
 how the transaction ID must be set.
 
 &space
@@ -121,7 +121,7 @@ how the transaction ID must be set.
     static rmr_mbuf_t*  mbuf = NULL;    // response msg
     msg_t*  pm;                         // private message (payload)
 
-	// get a send buffer and reference the payload 
+	// get a send buffer and reference the payload
     mbuf = rmr_alloc_msg( mr, RMR_MAX_RCV_BYTES );
     pm = (msg_t*) mbuf->payload;
 
@@ -129,21 +129,21 @@ how the transaction ID must be set.
     snprintf( mbuf->xaction, RMR_MAX_XID, "%s", gen_xaction() );
     snprintf( pm->req, sizeof( pm->req ), "{ \"req\": \"num users\"}" );
     mbuf->mtype = MT_REQ;
-    
+
     msg = rmr_call( mr, msg );
     if( ! msg ) {               // probably a timeout and no msg received
         return NULL;            // let errno trickle up
-    } 
+    }
 
     if( mbuf->state != RMR_OK ) {
         while( retries_left-- > 0 &&             // loop as long as eagain
-               errno == EAGAIN && 
-               (msg = rmr_call( mr, msg )) != NULL && 
+               errno == EAGAIN &&
+               (msg = rmr_call( mr, msg )) != NULL &&
                mbuf->state != RMR_OK ) {
 
             usleep( retry_delay );
         }
-    
+
         if( mbuf == NULL || mbuf->state != RMR_OK ) {
             rmr_free_msg( mbuf );        // safe if nil
             return NULL;
