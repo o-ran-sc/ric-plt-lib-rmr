@@ -86,7 +86,7 @@ extern int SIgenaddr( char *target, int proto, int family, int socktype, struct 
 		if( *dstr == '[' ) {				// strip [ and ] from v6 and point pstring if port there
 			dstr++;
 			pstr = strchr( dstr, ']' );
-			if( *pstr != ']' ) {
+			if( !pstr || *pstr != ']' ) {
 				free( fptr );
 				return -1;
 			}
@@ -109,15 +109,16 @@ extern int SIgenaddr( char *target, int proto, int family, int socktype, struct 
 	memset( &hint, 0, sizeof( hint  ) );
 	hint.ai_family = family;			//  AF_INET AF_INET6...  let this be 0 to select best based on addr 
 	hint.ai_socktype = socktype;		//  SOCK_DGRAM SOCK_STREAM 
-	hint.ai_protocol = proto;			//  IPPORTO_TCP IPPROTO_UDP 
+	hint.ai_protocol = proto;			//  IPPROTO_TCP IPPROTO_UDP 
 	hint.ai_flags = ga_flags;
 
 	if( DEBUG ) 
-		rmr_vlog( RMR_VL_DEBUG, "siaddress: calling getaddrinfo flags=%x proto=%d family=%d target=%s host=%s port=%s\n", 
-				ga_flags, proto, family, target, dstr, pstr );
+		rmr_vlog( RMR_VL_DEBUG, "siaddress: calling getaddrinfo flags=%x sockty=%d proto=%d family=%d target=%s host=%s port=%s\n",
+				ga_flags, socktype, proto, family, target, dstr, pstr );
 
 	if( (error = getaddrinfo( dstr, pstr, &hint, &list )) ) {
-		fprintf( stderr, "error from getaddrinfo: target=%s host=%s port=%s(port): error=(%d) %s\n", target, dstr, pstr, error, gai_strerror( error ) );
+		fprintf( stderr, "sigenaddr: error from getaddrinfo: target=%s host=%s port=%s(port): error=(%d) %s\n", 
+			target, dstr, pstr, error, gai_strerror( error ) );
 	} else {
 		*rap = (struct sockaddr *) malloc(  list->ai_addrlen );		//  alloc a buffer and give address to caller 
 		memcpy( *rap, list->ai_addr, list->ai_addrlen  );
@@ -167,11 +168,12 @@ extern int SIaddress( void *src, void **dest, int type ) {
 			rlen = strlen( *dest );
 			break;
 
-  		case AC_TOADDR6:         		//  from hostname;port string to address for send etc 
-			return SIgenaddr( src, PF_INET6, IPPROTO_TCP, SOCK_STREAM, (struct sockaddr **) dest );
+  		case AC_TOADDR6:         		//  from hostname:port string to address for send etc 
+			return SIgenaddr( src, IPPROTO_TCP, AF_INET6, SOCK_STREAM, (struct sockaddr **) dest );
 
   		case AC_TOADDR:         		//  from dotted decimal to address struct ip4 
-			return SIgenaddr( src, PF_INET, IPPROTO_TCP, SOCK_STREAM, (struct sockaddr **) dest );
+			//return SIgenaddr( src, AF_INET, IPPROTO_TCP, SOCK_STREAM, (struct sockaddr **) dest );
+			return SIgenaddr( src, IPPROTO_TCP, AF_INET, SOCK_STREAM, (struct sockaddr **) dest );
 	}
 
 	return rlen;

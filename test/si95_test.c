@@ -36,6 +36,12 @@
 #include <pthread.h>
 #include <ctype.h>
 
+#include <netdb.h>		// these four needed for si address tests
+#include <stdio.h>
+#include <ctype.h>
+#include <netinet/in.h>
+
+
 
 #include <unistd.h>
 #include <stdio.h>
@@ -67,14 +73,14 @@
 #include <rmr_logging.h>
 #include <logging.c>
 
-//#include <si95/siaddress.c>
+#include <si95/siaddress.c>
 //#include <si95/sialloc.c>
 //#include <si95/sibldpoll.c>
 //#include <si95/sicbreg.c>
 //#include <si95/sicbstat.c>
 //#include <si95/siclose.c>
-//#include <si95/siconnect.c>
-//#include <si95/siestablish.c>
+#include <si95/siconnect.c>
+#include <si95/siestablish.c>
 //#include <si95/sigetadd.c>
 //#include <si95/sigetname.c>
 #include <si95/siinit.c>
@@ -90,6 +96,11 @@
 #include <si95/sitrash.c>
 //#include <si95/siwait.c>
 
+// ---------------------------------------------------------------------
+
+void*	si_ctx = NULL;			// a global context might be useful
+
+// ---------------------------------------------------------------------
 
 /*
 	Memory allocation/free related tests
@@ -124,7 +135,6 @@ static int memory( ) {
 	return errors;
 }
 
-void*	si_ctx = NULL;			// a global context might be useful
 
 /*
 	Test initialisation related things
@@ -141,6 +151,58 @@ static int init() {
 	return errors;
 }
 
+static int cleanup() {
+	int errors = 0;
+	
+	if( ! si_ctx ) {
+		return 0;
+	}
+
+	SIconnect( si_ctx, "localhost:43086" ); 	// ensure context has a tp block to free on shutdown
+	SIshutdown( si_ctx );
+
+	return errors;
+}
+
+/*
+	Address related tests.
+*/
+static int addr() {
+	int errors = 0;
+	int l;
+	struct sockaddr* addr;
+	char buf1[4096];
+	char buf2[4096];
+	char* dest;
+
+	addr = (struct sockaddr *) malloc( sizeof( struct sockaddr ) );
+/*
+	l = SIgenaddr( "    [ff02::4]:4567", PF_INET6, IPPROTO_TCP, SOCK_STREAM, &addr );
+
+	SIgenaddr( "    [ff02::4]:4567", PF_INET6, IPPROTO_TCP, SOCK_STREAM, &addr );
+*/
+
+	dest = NULL;
+	snprintf( buf1, sizeof( buf1 ), "   [ff02::5:4001" );		// invalid address, drive leading space eater too
+	l = SIaddress( buf1, &dest, AC_TOADDR6 );
+	errors += fail_if_true( l > 0, "to addr6 with bad addr convdersion returned valid len" );
+
+	snprintf( buf1, sizeof( buf1 ), "[ff02::5]:4002" );		// v6 might not be supported so failure is OK here
+	l=SIaddress( buf1, &dest, AC_TOADDR6 );
+	errors += fail_if_true( l < 1, "to addr convdersion failed" );
+
+	snprintf( buf1, sizeof( buf1 ), "localhost:43086" );
+	l = SIaddress( buf1, (void **) &dest, AC_TOADDR );
+	errors += fail_if_true( l < 1, "to addr convdersion failed" );
+
+	snprintf( buf1, sizeof( buf1 ), "localhost:4004" );
+	l = SIaddress( buf1, &dest, AC_TODOT );
+	errors += fail_if_true( l < 1, "to dot convdersion failed" );
+
+	return errors;
+
+}
+
 /*
 	Drive tests...
 */
@@ -153,7 +215,11 @@ int main() {
 
 	errors += init();
 	errors += memory();
+	errors += addr();
+fprintf( stderr, ">>> cleaning\n" );
+	errors += cleanup();
 
+	fprintf( stderr, "<INFO> testing finished\n" );
 	if( errors == 0 ) {
 		fprintf( stderr, "<PASS> all tests were OK\n\n" );
 	} else {
