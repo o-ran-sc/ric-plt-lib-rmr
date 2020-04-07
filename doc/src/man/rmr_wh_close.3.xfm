@@ -31,7 +31,7 @@
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_wh_open
+	rmr_wh_close
 
 &h2(SYNOPSIS)
 &indent
@@ -50,7 +50,7 @@ Future calls to &cw(rmr_wh_send_msg) with this ID will fail.
 
 &space
 The underlying TCP connection to the remote endpoint is &bold(not) closed as this 
-session may be reqruired for regularlly routed messages (messages routed based on message
+session may be required for regularly routed messages (messages routed based on message
 type). 
 There is no way to force a TCP session to be closed at this point in time.
 

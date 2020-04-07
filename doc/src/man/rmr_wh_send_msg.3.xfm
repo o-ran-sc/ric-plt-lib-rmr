@@ -45,13 +45,13 @@ rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t id, rmr_mbuf_t* msg );
 The &cw(rmr_wh_send_msg) function accepts a message buffer from the user application 
 and attempts to send it using the wormhole ID provided (id).
 Unlike &ital(rmr_send_msg,) this function attempts to send the message directly
-to a process at the other end of a wormhole which was created with &ital(rmr_wh-open().)
-When sending message via wormholes, the normal RMr routing based on message type is
+to a process at the other end of a wormhole which was created with &ital(rmr_wh_open().)
+When sending message via wormholes, the normal RMR routing based on message type is
 ignored, and the caller may leave the message type unspecified in the message buffer
 (unless it is needed by the receiving process).
 
 .sp
-The message buffer (msg) used to send is the same format as used for regular RMr 
+The message buffer (msg) used to send is the same format as used for regular RMR 
 send and reply to sender operations, thus any buffer allocated by these means, or
 calls to &ital(rmr_rcv_msg()) can be passed to this function.
 
@@ -144,7 +144,7 @@ int main() {
 
    mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
    if( mrc == NULL ) {
-      fprintf( stderr, "[FAIL] unable to initialise RMr environment\n" );
+      fprintf( stderr, "[FAIL] unable to initialise RMR environment\n" );
       exit( 1 );
    }
 

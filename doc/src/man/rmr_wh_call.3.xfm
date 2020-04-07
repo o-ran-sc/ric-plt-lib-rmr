@@ -52,8 +52,8 @@ use &cw(rmr_rts_msg()) to send their response.
 
 &space
 Like &ital(rmr_wh_send_msg,) this function attempts to send the message directly
-to a process at the other end of a wormhole which was created with &ital(rmr_wh-open().)
-When sending message via wormholes, the normal RMr routing based on message type is
+to a process at the other end of a wormhole which was created with &ital(rmr_wh_open().)
+When sending message via wormholes, the normal RMR routing based on message type is
 ignored, and the caller may leave the message type unspecified in the message buffer
 (unless it is needed by the receiving process).
 
@@ -111,7 +111,7 @@ int main() {
 
    mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
    if( mrc == NULL ) {
-      fprintf( stderr, "[FAIL] unable to initialise RMr environment\n" );
+      fprintf( stderr, "[FAIL] unable to initialise RMR environment\n" );
       exit( 1 );
    }
 

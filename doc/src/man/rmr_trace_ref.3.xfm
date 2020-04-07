@@ -44,8 +44,8 @@ int rmr_trace_ref( rmr_mbuf_t* mbuf, int* sizeptr )
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_trace_ref) function return a pointer to the trace area in the message, and optionally
-populate the user programme supplied size integer with the trace area size, if &ital(sizeptr) is
+The &cw(rmr_trace_ref) function returns a pointer to the trace area in the message, and optionally
+populates the user programme supplied size integer with the trace area size, if &ital(sizeptr) is
 not nil.
 
 &h2(RETURN VALUE)

@@ -67,10 +67,10 @@ by returning a pointer to the old message with the state set.
 
 &space
 It is possible to use the &ital(rmr_rcv_msg()) function instead of this function. 
-Doing so might be advantagous if the user programme does not always start the
+Doing so might be advantageous if the user programme does not always start the
 multi-threaded mode and the use of &ital(rmr_rcv_msg()) would make the flow of
 the code more simple. 
-The advantags of using this function are the ability to set a timeout without
+The advantages of using this function are the ability to set a timeout without
 using epoll, and a small performance gain (if multi-threaded mode is enabled, and the
 &ital(rmr_rcv_msg()) function is used, it simply invokes this function without
 a timeout value, thus there is the small cost of a second call that results).

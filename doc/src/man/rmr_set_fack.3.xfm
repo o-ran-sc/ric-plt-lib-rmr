@@ -45,7 +45,7 @@ void rmr_set_fack( void* vctx );
 &h2(DESCRIPTION)
 The &cw(rmr_set_fack) function enables &ital(fast TCP acknowledgements) if
 the underlying transport library supports it. 
-This might be useful for applications which must send messages as a maximum
+This might be useful for applications which must send messages at a maximum
 rate. 
 
 &h2(RETURN VALUE)

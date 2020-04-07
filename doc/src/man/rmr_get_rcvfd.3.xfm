@@ -55,8 +55,8 @@ The context (ctx) pointer passed in is the pointer returned by the call to rmr_i
 
 &space
 &bold(NOTE^:) There is no support for epoll in Nanomsg, thus his function is only supported 
-when linking with the NNG version of RMr and the file descriptor returned when using the 
-Nanomsg verfsion will always return an error.
+when linking with the NNG version of RMR and the file descriptor returned when using the 
+Nanomsg version will always return an error.
 
 
 &h2(RETURN VALUE)

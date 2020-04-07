@@ -31,7 +31,7 @@
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_wh_open
+	rmr_close
 
 &h2(SYNOPSIS)
 &indent

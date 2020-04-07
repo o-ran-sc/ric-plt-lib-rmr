@@ -32,7 +32,7 @@
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_set_trace
+	rmr_set_vlevel
 
 &h2(SYNOPSIS)
 &indent
@@ -86,8 +86,8 @@ indicated meanings:
 &end_dlist
 &space
 
-generally RMR does not write messages to the standard error device from &ital(critical path)
-functions, therefore it is usually not harmful to enable a verbosity level of either RMR_VL_CRIT, or RMR_VL_ERR.
+Generally RMR does not write messages to the standard error device from &ital(critical path)
+functions, therefore it is usually not harmful to enable a verbosity level of either RMR_VL_CRIT or RMR_VL_ERR.
 
 &space
 Messages written from the route table collection thread are still governed by the value placed

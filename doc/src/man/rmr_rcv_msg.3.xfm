@@ -61,7 +61,7 @@ the message information (state, length, payload), or a NULL pointer in the case
 of an extreme error.
 
 &h2(ERRORS)
-The &ital(state) field in the message buffer will indicate either &cw(RMR_OK) 
+The &ital(state) field in the message buffer will indicate &cw(RMR_OK) 
 when the message receive process was successful and the message can be used
 by the caller.
 Depending on the underlying transport mechanism, one of the following RMR 

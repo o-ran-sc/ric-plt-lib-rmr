@@ -112,9 +112,9 @@ to this approach.
 
 &space
 &h2(ENVIRONMENT)
-As a part of the initialisation process &cw(rmr_init) will look into the available 
-environment variables to influence it's setup. 
-The following variables will be used when found.
+As a part of the initialisation process &cw(rmr_init) reads
+environment variables to configure itself.
+The following variables are used if found.
 &half_space 
 
 .** the list of environment vars supported

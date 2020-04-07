@@ -32,14 +32,14 @@
 
 &beg_dlist(.75i : ^&bold_font )
 &ditem(RMR_ASYNC_CONN) Allows the async connection mode to be turned off (by setting the
-	value to 0. When set to 1, or missing from the environment, RMR will invoke the
+	value to 0). When set to 1, or missing from the environment, RMR will invoke the
 	connection interface in the transport mechanism using the non-blocking (async)
 	mode.  This will likely result in many "soft failures" (retry) until the connection
-	is established, but allows the application to continue unimpeeded should the
+	is established, but allows the application to continue unimpeded should the
 	connection be slow to set up.
 	&half_space
 
-&ditem(RMR_BIND_IF) This provides the interface that RMR will bind listen ports to allowing
+&ditem(RMR_BIND_IF) This provides the interface that RMR will bind listen ports to, allowing
 	for a single interface to be used rather than listening across all interfaces.
 	This should be the IP address assigned to the interface that RMR should listen
 	on, and if not defined RMR will listen on all interfaces.
@@ -55,17 +55,17 @@
 	was used to define this port.
 	However, a future version of Route Manager will require RMR to connect
 	and request tables, thus that variable is now used to supply the Route
-	Manager well known address and port.
+	Manager's well-known address and port.
 
 	&space
-	To maintain backwards compatablibility with the older Route Manager versions,
+	To maintain backwards compatibility with the older Route Manager versions,
 	the presence of this variable in the environment will shift RMR's behaviour
 	with respect to the default value used when &cw(RMR_RTG_SVC) is &bold(not) defined.
 
 	&space
 	When &cw(RMR_CTL_PORT) is &bold(defined^:)
 	RMR assumes that Route Manager requires RMR to connect and request table
-	updates is made, and the default well known address for Route manager
+	updates is made, and the default well-known address for Route manager
 	is used (routemgr:4561).
 
 	&space
@@ -132,8 +132,8 @@
 &ditem(RMR_RTG_ISRAW) 
 	&bold(Deprecated.)
 	Should be set to 1 if the route table generator is sending "plain" messages
-	(not using RMR to send messages, 0 if the rtg is using RMR to send. The default
-	is 1 as we don't expect the rtg to use RMR.
+	(not using RMR to send messages), 0 if the RTG is using RMR to send. The default
+	is 1 as we don't expect the RTG to use RMR.
 	&half_space
 	This variable is only recognised when using the NNG transport library as 
 	it is not possible to support NNG "raw" communications with other transport
@@ -148,7 +148,7 @@
 	If not defined, no static table is used and RMR will not report &ital(ready)
 	until a table is received.
 	The static route table may contain both the route table (between newrt start
-	and end records), and the MEID map (between meid_map start and end records)
+	and end records), and the MEID map (between meid_map start and end records).
 
 &ditem(RMR_SRC_ID) This is either the name or IP address which is placed into outbound
 	messages as the message source. This will used when an RMR based application uses

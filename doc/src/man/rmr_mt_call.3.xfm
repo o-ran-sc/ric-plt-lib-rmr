@@ -67,7 +67,7 @@ receive queue and will be delivered to the user application with the next invoca
 of &ital(rmr_mt_rcv()) or &ital(rmr_rvv_msg().) 
 by RMR, and are returned to the user application when &cw(rmr_rcv_msg) is 
 invoked.
-These messages are returned in th order received, one per call to &cw(rmr_rcv_msg.)
+These messages are returned in the order received, one per call to &cw(rmr_rcv_msg.)
 
 &space
 NOTE: Currently the multi-threaded functions are supported only when the NNG 
@@ -82,7 +82,7 @@ The transaction ID is a &cw(RMR_MAX_XID) byte field that is used to match the
 response message when it arrives. 
 RMr will compare &bold(all) of the bytes in the field, so the caller must ensure
 that they are set correctly to avoid missing the response message. 
-(The application which returns the response message is also expected to ensure that
+The application which returns the response message is also expected to ensure that
 the return buffer has the matching transaction ID. This can be done transparently if
 the application uses the &ital(rmr_rts_msg()) function and does not adjust the 
 transaction ID.

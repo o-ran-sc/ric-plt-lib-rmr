@@ -55,13 +55,13 @@ the response from the application that received the message.
 Messages which are received while waiting for the response are queued internally
 by RMR, and are returned to the user application when &cw(rmr_rcv_msg) is 
 invoked.
-These messages are returned in th order received, one per call to &cw(rmr_rcv_msg.)
+These messages are returned in the order received, one per call to &cw(rmr_rcv_msg.)
 
 &h3(Call Timeout)
 The &cw(rmr_call) function implements a timeout failsafe to prevent, in most cases, the
 function from blocking forever. 
 The timeout period is &bold(not) based on time (calls to clock are deemed too expensive
-for a low latency system level library, but instead the period is based on the number of
+for a low latency system level library), but instead the period is based on the number of
 received messages which are not the response. 
 Using a non-time mechanism for &ital(timeout) prevents the async queue from filling
 (which would lead to message drops) in an environment where there is heavy message traffic.
@@ -74,7 +74,7 @@ Currently the threshold is fixed at 20 messages, though in future versions of th
 this might be extended to be a parameter which the user application may set.
 
 .** pull in common retry text
-.im &{lib}/man/retry.im 
+.im &{lib}/man/retry.im
 
 &h2(RETURN VALUE)
 The &cw(rmr_call) function returns a pointer to a message buffer with the state set to reflect
@@ -105,13 +105,13 @@ overall call processing was not successful.
 &half_space
 &di(EINVAL)     A parameter was not valid
 &half_space
-&di(EAGAIN)    The underlying message system wsa interrupted or the device was busy;
-               the message was &bold(not) sent, and user application should call 
+&di(EAGAIN)    The underlying message system was interrupted or the device was busy;
+               the message was &bold(not) sent, and the user application should call 
 				this function with the message again.
 &end_dlist
 
 &h2(EXAMPLE)
-The following code bit shows one way of using the &cw(rmr_call) function, and illustrates
+The following code snippet shows one way of using the &cw(rmr_call) function, and illustrates
 how the transaction ID must be set.
 
 &space

@@ -43,13 +43,13 @@ rmr_mbuf_t* rmr_tralloc_msg( void* vctx, int size,
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_alloc_msg) function is used to allocate a buffer which the user 
-programme can write into and then send through the a library.
+The &cw(rmr_tralloc_msg) function is used to allocate a buffer which the user 
+programme can write into and then send through the library.
 The buffer is allocated such that sending it requires no additional copying
 from the buffer as it passes through the underlying transport mechanism. 
 .sp
 
-The &ital(size) parameter is used to set the payload length in the message and
+The &ital(size) parameter is used to set the payload length in the message.
 If it is 0, then the default size supplied on the &ital(rmr_init) call will be used. 
 In addition to allocating the payload, a space in the buffer is 
 reserved for &ital(trace) data (tr_size bytes), and the bytes pointed to
@@ -113,7 +113,7 @@ should &bold(NOT) make use of the payload pointer.
 &diitem(xaction) The &ital(xaction) field is a pointer to a fixed sized area in 
 the message into which the user may write a transaction ID.  
 The ID is optional with the exception of when the user application uses the &cw(rmr_call)
-function to send a message and wait for the reply; the underlying a processing
+function to send a message and wait for the reply; the underlying processing
 expects that the matching reply message will also contain the same data in the
 &ital(xaction) field.
 &end_dlist
