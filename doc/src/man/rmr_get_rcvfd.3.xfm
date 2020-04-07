@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@
 .fi
 
 .if false
-	Mnemonic	rmr_get_rcvfd.3.xfm
-	Abstract	The manual page for the rmr_get_rcvfd function.
-	Author		E. Scott Daniels
-	Date		11 February 2019
+    Mnemonic    rmr_get_rcvfd.3.xfm
+    Abstract    The manual page for the rmr_get_rcvfd function.
+    Author      E. Scott Daniels
+    Date        11 February 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_get_rcvfd
+    rmr_get_rcvfd
 
 &h2(SYNOPSIS)
 &indent
@@ -48,22 +48,14 @@ The &cw(rmr_get_rcvfd) function returns a file descriptor which may be given to 
 by an application that wishes to use event poll in a single thread rather than block
 on the arrival of a message via calls to rmr_rcv_msg().
 When epoll_wait() indicates that this file descriptor is ready, a call to rmr_rcv_msg()
-will not block as at least one message has been received. 
+will not block as at least one message has been received.
 
 &space
 The context (ctx) pointer passed in is the pointer returned by the call to rmr_init().
 
-&space
-&bold(NOTE^:) There is no support for epoll in Nanomsg, thus his function is only supported 
-when linking with the NNG version of RMr and the file descriptor returned when using the 
-Nanomsg verfsion will always return an error.
-
-
 &h2(RETURN VALUE)
 The &cw(rmr_get_rcvfd) function returns a file descriptor greater or equal to 0 on success
-and -1 on error.  
-If this function is called from a user application linked against the Nanomsg RMr library, 
-calls will always return -1 with errno set to EINVAL.
+and -1 on error.
 
 &h2(ERRORS)
 The following error values are specifically set by this RMR function. In some cases the
@@ -93,25 +85,25 @@ int main() {
     rmr_mbuf_t* msg = NULL;
     int nready;
     int i;
- 
+
     mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
     rcv_fd = rmr_get_rcvfd( mrc );
- 
-	ep_fd = epoll_create1( 0 );			// initialise epoll environment
+
+    ep_fd = epoll_create1( 0 );             // initialise epoll environment
     epe.events = EPOLLIN;
     epe.data.fd = rcv_fd;
     epoll_ctl( ep_fd, EPOLL_CTL_ADD, rcv_fd, &epe );    // add our info to the mix
- 
+
     while( 1 ) {
-        nready = epoll_wait( ep_fd, events, 10, -1 );       // -1 == block forever (no timeout)
-        for( i = 0; i < nready && i < 10; i++ ) {           // loop through to find what is ready
-            if( events[i].data.fd == rcv_fd ) {             // RMr has something
+        nready = epoll_wait( ep_fd, events, 10, -1 );   // -1 == block forever (no timeout)
+        for( i = 0; i < nready && i < 10; i++ ) {       // loop through to find what is ready
+            if( events[i].data.fd == rcv_fd ) {         // RMR has something
                 msg = rmr_rcv_msg( mrc, msg );
                 if( msg ) {
                     // do something with msg
                 }
             }
- 
+
             // check for other ready fds....
         }
     }

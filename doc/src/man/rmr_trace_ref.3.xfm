@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@
 .fi
 
 .if false
-	Mnemonic	rmr_trace_ref.3.xfm
-	Abstract	The manual page for the rmr_trace_ref function.
-	Author		E. Scott Daniels
-	Date		11 July 2019
+    Mnemonic    rmr_trace_ref.3.xfm
+    Abstract    The manual page for the rmr_trace_ref function.
+    Author      E. Scott Daniels
+    Date        11 July 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_trace_ref
+    rmr_trace_ref
 
 &h2(SYNOPSIS)
 &indent
@@ -44,12 +44,12 @@ int rmr_trace_ref( rmr_mbuf_t* mbuf, int* sizeptr )
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_trace_ref) function return a pointer to the trace area in the message, and optionally
-populate the user programme supplied size integer with the trace area size, if &ital(sizeptr) is
+The &cw(rmr_trace_ref) function returns a pointer to the trace area in the message, and optionally
+populates the user programme supplied size integer with the trace area size, if &ital(sizeptr) is
 not nil.
 
 &h2(RETURN VALUE)
-On success, a void pointer to the trace area of the message is returned.  
+On success, a void pointer to the trace area of the message is returned.
 A nil pointer is returned if the message has no trace data area allocated, or if the message
 itself is invalid.
 

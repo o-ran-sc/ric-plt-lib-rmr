@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@
 .fi
 
 .if false
-	Mnemonic	rmr_str2meid.xfm
-	Abstract	The manual page for the rmr_str2meid function.
-	Author		E. Scott Daniels
-	Date		8 March 2019
+    Mnemonic    rmr_str2meid.xfm
+    Abstract    The manual page for the rmr_str2meid function.
+    Author      E. Scott Daniels
+    Date        8 March 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_str2meid
+    rmr_str2meid
 
 &h2(SYNOPSIS)
 &indent
@@ -44,15 +44,15 @@ int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char* src, int len )
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_str2meid) function will copy the string pointed to by src to the 
-managed entity ID (meid) field in the given message.  
+The &cw(rmr_str2meid) function will copy the string pointed to by src to the
+managed entity ID (meid) field in the given message.
 The field is a fixed length, gated by the constant &cw(RMR_MAX_MEID) and if string length is larger
 than this value, then &bold(nothing) will be copied. (Note, this differs slightly from the
 behaviour of the &cw(lrmr_bytes2meid()) function.)
 
 &h2(RETURN VALUE)
-On success, the value RMR_OK is returned. 
-If the string cannot be copied to the message, the return value will be one of the 
+On success, the value RMR_OK is returned.
+If the string cannot be copied to the message, the return value will be one of the
 errors listed below.
 
 &h2(ERRORS)
@@ -65,7 +65,7 @@ If the return value is not RMR_OK, then it will be set to one of the values belo
 
 &half_space
 &di(RMR_ERR_OVERFLOW) The length passed in was larger than the maximum length of the field; only a portion of
-	the source bytes were copied.
+    the source bytes were copied.
 &end_dlist
 
 &h2(EXAMPLE)

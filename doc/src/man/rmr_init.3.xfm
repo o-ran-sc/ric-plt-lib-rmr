@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019-2020 Nokia 
-	Copyright (c) 2018-2020 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@
 .fi
 
 .if false
-	Mnemonic	rmr_init_man.xfm
-	Abstract	The manual page for the rmr_init function.
-	Author		E. Scott Daniels
-	Date		28 January 2019
+    Mnemonic    rmr_init_man.xfm
+    Abstract    The manual page for the rmr_init function.
+    Author      E. Scott Daniels
+    Date        28 January 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_init
+    rmr_init
 
 &h2(SYNOPSIS)
 &indent
@@ -46,83 +46,83 @@ void* rmr_init( char* proto_port, int max_msg_size, int flags );
 &h2(DESCRIPTION)
 The &cw(rmr_init) function prepares the environment for sending and receiving messages.
 It does so by establishing a worker thread (pthread) which subscribes to a route table
-generator which provides the necessary routing information for the RMR library to 
+generator which provides the necessary routing information for the RMR library to
 send messages.
 
 &space
 &ital(Port) is used to listen for connection requests from other RMR based applications.
 The &ital(max_msg_size) parameter is used to allocate receive buffers and is the
-maximum message size which the application expects to receive. 
+maximum message size which the application expects to receive.
 This value is the sum of &bold(both) the maximum payload size &bold(and) the maximum
-trace data size. 
+trace data size.
 This value is also used as the default message size when allocating message buffers.
-Messages arriving which are longer than the given maximum will be dropped without 
-notification to the application. 
+Messages arriving which are longer than the given maximum will be dropped without
+notification to the application.
 A warning is written to standard error for the first message which is too large on
 each connection.
 
 &space
-&ital(Flags) allows for selection of some RMr options at the time of initialisation. 
-These are set by ORing &cw(RMRFL) constants from the RMr header file. Currently the 
+&ital(Flags) allows for selection of some RMr options at the time of initialisation.
+These are set by ORing &cw(RMRFL) constants from the RMr header file. Currently the
 following flags are supported:
 
 &half_space
 &beg_dlist(1i : &bold_font )
-&ditem(RMRFL_NONE) 
-	No flags are set.
+&ditem(RMRFL_NONE)
+    No flags are set.
 
 &half_space
 &ditem(RMRFL_NOTHREAD)
-	The route table collector thread is not to be started. This should only be used
-	by the route table generator application if it is based on RMr.
+    The route table collector thread is not to be started. This should only be used
+    by the route table generator application if it is based on RMr.
 
 &half_space
 &ditem(RMRFL_MTCALL)
-	Enable multi-threaded call support. 
+    Enable multi-threaded call support.
 
 &half_space
 &ditem(RMRFL_NOLOCK)
-	Some underlying transport providers (e.g. SI95) enable locking to be turned off
-	if the user application is single threaded, or otherwise can guarantee that RMR
-	functions will not be invoked concurrently from different threads. Turning off
-	locking can help make message receipt more efficient. 
-	If this flag is set when the underlying transport does not support disabling
-	locks, it will be ignored.
+    Some underlying transport providers (e.g. SI95) enable locking to be turned off
+    if the user application is single threaded, or otherwise can guarantee that RMR
+    functions will not be invoked concurrently from different threads. Turning off
+    locking can help make message receipt more efficient.
+    If this flag is set when the underlying transport does not support disabling
+    locks, it will be ignored.
 &end_dlist
 
 &h3(Multi-threaded Calling)
 The support for an application to issue a &ital(blocking call) by the &cw(rmr_call()) function
 was limited such that only user applications which were operating in a single thread
 could safely use the function.
-Further, timeouts were message count based and not time unit based. 
+Further, timeouts were message count based and not time unit based.
 Multi-threaded call support adds the ability for a user application with multiple threads
-to invoke a blocking call function with the guarantee that the correct response message 
-is delivered to the thread.  
+to invoke a blocking call function with the guarantee that the correct response message
+is delivered to the thread.
 The additional support is implemented with the &ital(rmr_mt_call()) and &ital(rmr_mt_rcv())
-function calls. 
+function calls.
 &space
 
 Multi-threaded call support requires the user application to specifically enable it
-when RMr is initialised. 
-This is necessary because a second, dedicated, receiver thread  must be started, and 
+when RMr is initialised.
+This is necessary because a second, dedicated, receiver thread  must be started, and
 requires all messages to be examined and queued by this thread.
 The additional overhead is minimal, queuing information is all in the RMr message
-header, but as an additional process is necessary the user application must "opt in" 
+header, but as an additional process is necessary the user application must "opt in"
 to this approach.
 
 &space
 &h2(ENVIRONMENT)
-As a part of the initialisation process &cw(rmr_init) will look into the available 
-environment variables to influence it's setup. 
-The following variables will be used when found.
-&half_space 
+As a part of the initialisation process &cw(rmr_init) reads
+environment variables to configure itself.
+The following variables are used if found.
+&half_space
 
 .** the list of environment vars supported
 .im &{lib}/man/env_var_list.im
 
 &h2(RETURN VALUE)
 The &cw(rmr_init) function returns a void pointer (a contex if you will) that is passed
-as the first parameter to nearly all other RMR functions. 
+as the first parameter to nearly all other RMR functions.
 If &cw(rmr_init) is unable to properly initialise the environment, NULL is returned and
 errno is set to an appropriate value.
 

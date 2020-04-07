@@ -1,11 +1,11 @@
 
 Various RMr man pages. These are maintained in {X}fm format which allows
 them to be rendered into one of these formats:
-	Postscript
-	troff
-	rst
-	markdown
-	html
+    Postscript
+    troff
+    rst
+    markdown
+    html
 
 
 Troff is generated and installed into deb packages such that 'man rmr_call'

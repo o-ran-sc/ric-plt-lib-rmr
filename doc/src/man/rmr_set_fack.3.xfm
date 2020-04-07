@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019-2020 Nokia 
-	Copyright (c) 2018-2020 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@
 ==================================================================================
 .fi
 .if false
-	Mnemonic	rmr_set_fack.3.xfm
-	Abstract	The manual page for the set fast ack function.
-	Author		E. Scott Daniels
-	Date		19 Fabruary 2020
+    Mnemonic    rmr_set_fack.3.xfm
+    Abstract    The manual page for the set fast ack function.
+    Author      E. Scott Daniels
+    Date        19 Fabruary 2020
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_set_fack
+    rmr_set_fack
 
 &h2(SYNOPSIS )
 &indent
@@ -44,9 +44,9 @@ void rmr_set_fack( void* vctx );
 
 &h2(DESCRIPTION)
 The &cw(rmr_set_fack) function enables &ital(fast TCP acknowledgements) if
-the underlying transport library supports it. 
-This might be useful for applications which must send messages as a maximum
-rate. 
+the underlying transport library supports it.
+This might be useful for applications which must send messages at a maximum
+rate.
 
 &h2(RETURN VALUE)
 There is no return value.
