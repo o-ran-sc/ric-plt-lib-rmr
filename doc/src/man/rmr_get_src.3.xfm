@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@
 .fi
 
 .if false
-	Mnemonic	rmr_get_src.xfm
-	Abstract	The manual page for the rmr_get_src function.
-	Author		E. Scott Daniels
-	Date		8 March 2019
+    Mnemonic    rmr_get_src.xfm
+    Abstract    The manual page for the rmr_get_src function.
+    Author      E. Scott Daniels
+    Date        8 March 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_get_src
+    rmr_get_src
 
 &h2(SYNOPSIS)
 &indent
@@ -61,7 +61,7 @@ On success, a pointer to the destination buffer is given as a convenience to the
 On failure, a nil pointer is returned and the value of errno is set.
 
 &h2(ERRORS)
-If an error occurs, the value of the global variable &cw( errno ) will be set to one of
+If an error occurs, the value of the global variable &cw(errno) will be set to one of
 the following with the indicated meaning.
 
 &beg_dlist(.75i : ^&bold_font )

@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@
 .fi
 
 .if false
-	Mnemonic	rmr_get_xact.xfm
-	Abstract	The manual page for the rmr_get_xact function.
-	Author		E. Scott Daniels
-	Date		13 August 2019
+    Mnemonic    rmr_get_xact.xfm
+    Abstract    The manual page for the rmr_get_xact function.
+    Author      E. Scott Daniels
+    Date        13 August 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_get_xact
+    rmr_get_xact
 
 &h2(SYNOPSIS)
 &indent
@@ -45,19 +45,19 @@ char* rmr_get_xact( rmr_mbuf_t* mbuf, unsigned char* dest )
 
 &h2(DESCRIPTION)
 The &cw(rmr_get_xact) function will copy the transaction field from the message
-into the &ital(dest) buffer provided by the user.  
+into the &ital(dest) buffer provided by the user.
 The buffer referenced by &ital(dest) is assumed to be at least &cw(RMR_MAX_XID) bytes in length.
 If &ital(dest) is NULL, then a buffer is allocated (the calling application is expected
 to free when the buffer is no longer needed).
 
 &h2(RETURN VALUE)
-On success, a pointer to the extracted string is returned. 
+On success, a pointer to the extracted string is returned.
 If &ital(dest) was supplied, then this is just a pointer to the caller's buffer.
 If &ital(dest) was NULL, this is a pointer to the allocated buffer.
 If an error occurs, a nil pointer is returned and errno is set as described below.
 
 &h2(ERRORS)
-If an error occurs, the value of the global variable &cw(errno) will be set to one of 
+If an error occurs, the value of the global variable &cw(errno) will be set to one of
 the following with the indicated meaning.
 
 &beg_dlist(.75i : ^&bold_font )
@@ -65,8 +65,8 @@ the following with the indicated meaning.
 &di(EINVAL) The message, or an internal portion of the message, was corrupted or the pointer was invalid.
 
 &half_space
-&di(ENOMEM) A nil pointer was passed for &ital(dest,) however it was not possible to allocate a 
-	buffer using malloc().
+&di(ENOMEM) A nil pointer was passed for &ital(dest,) however it was not possible to allocate a
+    buffer using malloc().
 &end_dlist
 
 

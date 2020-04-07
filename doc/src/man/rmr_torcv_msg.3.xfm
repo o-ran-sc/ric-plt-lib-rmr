@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@
 ==================================================================================
 .fi
 .if false
-	Mnemonic	rmr_torcv_msg_man.xfm
-	Abstract	The manual page for the rmr_torcv_msg function.
-	Author		E. Scott Daniels
-	Date		29 January 2019
+    Mnemonic    rmr_torcv_msg_man.xfm
+    Abstract    The manual page for the rmr_torcv_msg function.
+    Author      E. Scott Daniels
+    Date        29 January 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_torcv_msg
+    rmr_torcv_msg
 
 &h2(SYNOPSIS )
 &indent
@@ -43,22 +43,22 @@ rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to );
 
 &h2(DESCRIPTION)
 The &cw(rmr_torcv_msg) function will pause for &ital(ms_to) milliseconds waiting
-for a message to arrive. 
+for a message to arrive.
 If a message arrives before the timeout expires the message buffer returned
 will have a status of RMR_OK and the payload will contain the data received.
-If the timeout expires before the message is received, the status will 
+If the timeout expires before the message is received, the status will
 have the value RMR_ERR_TIMEOUT.
 When a received message is returned the message buffer will also contain the
 message type and length set by the sender.
-If messages were queued while waiting for the response to a previous invocation 
-of &cw(rmr_call,)  the oldest message is removed from the queue and returned 
+If messages were queued while waiting for the response to a previous invocation
+of &cw(rmr_call,)  the oldest message is removed from the queue and returned
 without delay.
 
 &space
 The &ital(vctx) pointer is the pointer returned by the &cw(rmr_init) function.
-&ital(Old_msg) is a pointer to a previously used message buffer or NULL. 
+&ital(Old_msg) is a pointer to a previously used message buffer or NULL.
 The ability to reuse message buffers helps to avoid alloc/free cycles in the
-user application. 
+user application.
 When no buffer is available to supply, the receive function will allocate one.
 
 &h2(RETURN VALUE)
@@ -74,17 +74,17 @@ The &ital(state) field in the message buffer will be one of the following:
 
 &space
 &di(RMR_ERR_INITFAILED) The first call to this function must initialise an underlying
-	system notification mechanism. On failure, this error is returned and errno
-	will have the system error status set.  If this function fails to intialise,
-	the poll mechansim, it is likely that message receives will never be successful.
+    system notification mechanism. On failure, this error is returned and errno
+    will have the system error status set.  If this function fails to intialise,
+    the poll mechansim, it is likely that message receives will never be successful.
 
 &space
 &di(RMR_ERR_TIMEOUT) The timeout expired before a complete message was received.
-	All other fields in the message buffer are not valid.
+    All other fields in the message buffer are not valid.
 
 &space
-&di(RMR_ERR_EMPTY) A message was received, but it had no payload. All other 
-	fields in the message buffer are not valid.
+&di(RMR_ERR_EMPTY) A message was received, but it had no payload. All other
+    fields in the message buffer are not valid.
 &end_dlist
 &space
 

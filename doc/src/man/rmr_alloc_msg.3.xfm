@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 ==================================================================================
 .fi
 .if false
-	Mnemonic	rmr_alloc_msg.xfm
-	Abstract	The manual page for the rmr_alloc_msg function.
-	Author		E. Scott Daniels
-	Date		28 January 2019
+    Mnemonic    rmr_alloc_msg.xfm
+    Abstract    The manual page for the rmr_alloc_msg function.
+    Author      E. Scott Daniels
+    Date        28 January 2019
 .fi
 
 .gv e LIB lib
@@ -29,7 +29,7 @@
 &line_len(6i)
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_alloc_msg
+    rmr_alloc_msg
 
 &h2(SYNOPSIS )
 &indent
@@ -63,8 +63,8 @@ typedef struct {
     int len;
     unsigned char* payload;
     unsigned char* xaction;
-	int sub_id;
-	int tp_state;
+    int sub_id;
+    int tp_state;
 } rmr_mbuf_t;
 &ex_end
 

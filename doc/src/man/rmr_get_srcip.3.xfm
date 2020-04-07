@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@
 .fi
 
 .if false
-	Mnemonic	rmr_get_srcip.xfm
-	Abstract	The manual page for the rmr_get_srcip function.
-	Author		E. Scott Daniels
-	Date		11 June 2019
+    Mnemonic    rmr_get_srcip.xfm
+    Abstract    The manual page for the rmr_get_srcip function.
+    Author      E. Scott Daniels
+    Date        11 June 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_get_srcip
+    rmr_get_srcip
 
 &h2(SYNOPSIS)
 &indent
@@ -47,13 +47,13 @@ unsigned char* rmr_get_srcip( rmr_mbuf_t* mbuf, unsigned char* dest )
 The &cw(rmr_get_srcip) function will copy the &ital(source IP address) from the message to a buffer
 (dest) supplied by the user.
 In an RMr message, the source IP address is the sender's information that is used for return to sender
-function calls;  this function makes it available to the user application. 
+function calls;  this function makes it available to the user application.
 The address is maintained as IP:port where &ital(IP) could be either an IPv6 or IPv4 address depending
 on what was provided by the sending application.
 .sp
 
 The maximum size allowed by RMr is 64 bytes (including the nil string terminator), so the user
-must ensure that the destination buffer given is at least 64 bytes. The user application should use 
+must ensure that the destination buffer given is at least 64 bytes. The user application should use
 the RMr constant RMR_MAX_SRC to ensure that the buffer supplied is large enough, and to protect
 against future RMr enhancements which might increase the address buffer size requirement.
 

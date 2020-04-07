@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@
 ==================================================================================
 .fi
 .if false
-	Mnemonic	rmr_ready_man.xfm
-	Abstract	The manual page for the rmr_ready function.
-	Author		E. Scott Daniels
-	Date		28 January 2019
+    Mnemonic    rmr_ready_man.xfm
+    Abstract    The manual page for the rmr_ready function.
+    Author      E. Scott Daniels
+    Date        28 January 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_ready
+    rmr_ready
 
 &h2(SYNOPSIS )
 &indent
@@ -48,7 +48,7 @@ The return value indicates the state of readiness.
 
 &h2(RETURN VALUE)
 A return value of 1 (true) indicates that the routing table is in place and
-attempts to send messages can be made. 
+attempts to send messages can be made.
 When 0 is returned (false) the routing table has not been received and thus
 attempts to send messages will fail with &ital(no endpoint) errors.
 

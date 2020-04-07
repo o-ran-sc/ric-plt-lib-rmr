@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,25 +17,25 @@
 ==================================================================================
 .fi
 .if false
-	Mnemonic	rmr_support_man.xfm
-	Abstract	The manual page for the rmr_ functions that support the library
-				and are available to support other applications such as the route
-				table generator, but are not directly related to message sending
-				and receiving.  These "second class" functions therefore are 
-				likely not to need a dedicated man page, so we lump them all
-				here.
-	Author		E. Scott Daniels
-	Date		28 January 2019
+    Mnemonic    rmr_support_man.xfm
+    Abstract    The manual page for the rmr_ functions that support the library
+                and are available to support other applications such as the route
+                table generator, but are not directly related to message sending
+                and receiving.  These "second class" functions therefore are
+                likely not to need a dedicated man page, so we lump them all
+                here.
+    Author      E. Scott Daniels
+    Date        28 January 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	RMR support functions
+    RMR support functions
 
 &h2(SYNOPSIS )
 &indent
@@ -61,7 +61,7 @@ as some (e.g. route table generators) might need and/or want to make use of them
 
 
 The &cw(rmr_fib) function accepts a file name and reads the entire file into a single buffer.
-The intent is to provide an easy way to load a static route table without a lot of 
+The intent is to provide an easy way to load a static route table without a lot of
 buffered I/O hoops.
 
 &space
@@ -73,7 +73,7 @@ before checking.
 
 &space
 The &cw(rmr_tokenise) function is a simple tokeniser which splits &ital(buf) into tokens
-at each occurrence of &ital(sep). 
+at each occurrence of &ital(sep).
 Multiple occurrences of the separator character (e.g. a,,b) result in a nil token.
 Pointers to the tokens are placed into the &ital(tokens) array provided by the caller which
 is assumed to have at least enough space for &ital(max) entries.
@@ -87,18 +87,18 @@ The &cw(rmr_ring_free) function accepts a pointer to a ring context and frees th
 &space
 The &cw(rmr_ring_insert) and &cw(rmr_ring_extract) functions are provided as static inline functions
 via the &ital(rmr/ring_inline.h) header file.
-These functions both accept the ring &ital(context) returned by &cw(mk_ring,) and either insert a 
+These functions both accept the ring &ital(context) returned by &cw(mk_ring,) and either insert a
 pointer at the next available slot (tail) or extract the data at the head.
 
 &h2(RETURN VALUES)
 The following are the return values for each of these functions.
 
 &space
-The &cw(rmr_fib) function returns a pointer to the buffer containing the contents of the 
-file.  
+The &cw(rmr_fib) function returns a pointer to the buffer containing the contents of the
+file.
 The buffer is terminated with a single nil character (0) making it a legitimate C string.
-If the file was empty or nonexistent, a buffer with an immediate nil character. 
-If it is important to the calling programme to know if the file was empty or did not exist, 
+If the file was empty or nonexistent, a buffer with an immediate nil character.
+If it is important to the calling programme to know if the file was empty or did not exist,
 the caller should use the system stat function call to make that determination.
 
 &space
@@ -117,7 +117,7 @@ The &cw(rmr_ring_insert) function returns 1 if the data was successfully inserte
 0 if the ring is full and the pointer could not be deposited.
 
 &space
-The &cw(rmr_ring_extract) will return the data which is at the head of the ring, or NULL if the 
+The &cw(rmr_ring_extract) will return the data which is at the head of the ring, or NULL if the
 ring is empty.
 
 &h2(ERRORS)

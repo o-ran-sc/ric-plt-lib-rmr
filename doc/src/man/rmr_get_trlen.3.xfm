@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@
 ==================================================================================
 .fi
 .if false
-	Mnemonic	rmr_get_trlen
-	Abstract	The manual page for the get trace len function.
-	Author		E. Scott Daniels
-	Date		19 April 2019
+    Mnemonic    rmr_get_trlen
+    Abstract    The manual page for the get trace len function.
+    Author      E. Scott Daniels
+    Date        19 April 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_get_trlen
+    rmr_get_trlen
 
 &h2(SYNOPSIS )
 &indent
@@ -44,7 +44,7 @@ int rmr_get_trlen( rmr_mbuf_t* msg );
 
 &h2(DESCRIPTION)
 Given a message buffer, this function returns the amount of space (bytes)
-that have been allocated for trace data. 
+that have been allocated for trace data.
 If no trace data has been allocated, then 0 is returned.
 
 &h2(RETURN VALUE)

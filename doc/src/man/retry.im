@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,35 +18,35 @@
 .fi
 
 .if false
-	Mnemonic:	retry.im
-	Abstract:	Common text for all send operation functions. This should be imbedded by any
-				function which will ultimately use the internal send_msg funciton which
-				governs retries in this manner.
-	Date:		16 July 2019
+    Mnemonic: retry.im
+    Abstract: Common text for all send operation functions. This should be imbedded by any
+              function which will ultimately use the internal send_msg funciton which
+              governs retries in this manner.
+    Date:     16 July 2019
 .fi
 
 &h3(Retries)
-The send operations in RMr will retry &ital(soft) send failures until one of three
+The send operations in RMR will retry &ital(soft) send failures until one of three
 conditions occurs:
 &half_space
 &indent
 &beg_dlist( 0.3i : ^&bold_font )
-	&di(1.) The message is sent without error
-	&half_space
+    &di(1.) The message is sent without error
+    &half_space
 
-	&di(2.) The underlying transport reports a &ital( hard ) failure
-	&half_space
+    &di(2.) The underlying transport reports a &ital(hard) failure
+    &half_space
 
-	&di(3.) The maximum number of retry loops has been attempted
-	&end_dlist
+    &di(3.) The maximum number of retry loops has been attempted
+    &end_dlist
 &uindent
 
 &space
-A retry loop consists of approximately 1000 send attemps &bold( without) any intervening
-calls to &ital( sleep() ) or &ital( usleep(). )
+A retry loop consists of approximately 1000 send attempts &bold(without) any intervening
+calls to &ital(sleep()) or &ital(usleep().)
 The number of retry loops defaults to 1, thus a maximum of 1000 send attempts is performed
 before returning to the user application.
-This value can be set at any point after RMr initialisation using the &ital( rmr_set_stimeout() )
+This value can be set at any point after RMr initialisation using the &ital(rmr_set_stimeout())
 function allowing the user application to completely disable retires (set to 0), or to
 increase the number of retry loops.
 
@@ -61,10 +61,9 @@ reported immediately to the user application.
 
 &space
 It should be noted that depending on the underlying transport mechanism being used, it is
-extremly possible that during normal operations that retry conditions are very likely to
-happen.
-These are completely out of RMr's control, and there is nothing that RMr can do to avoid or midigate
-these other than by allowing RMr to retry the send operation, and even then it is possible
-(e.g. during connection reattempts), that a single retry loop is not enough to guarentee a
+extremely likely that retry conditions will happen during normal operations.
+These are completely out of RMR's control, and there is nothing that RMR can do to avoid or mitigate
+these other than by allowing RMR to retry the send operation, and even then it is possible
+(e.g., during connection reattempts), that a single retry loop is not enough to guarantee a
 successful send.
 

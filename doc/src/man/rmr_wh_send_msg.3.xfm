@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@
 ==================================================================================
 .fi
 .if false
-	Mnemonic	rmr_wh_send_msg_man.xfm
-	Abstract	The manual page for the rmr_wh_send_msg function.
-	Author		E. Scott Daniels
-	Date		28 January 2019
+    Mnemonic    rmr_wh_send_msg_man.xfm
+    Abstract    The manual page for the rmr_wh_send_msg function.
+    Author      E. Scott Daniels
+    Date        28 January 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_wh_send_msg
+    rmr_wh_send_msg
 
 &h2(SYNOPSIS )
 &indent
@@ -42,21 +42,21 @@ rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t id, rmr_mbuf_t* msg );
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_wh_send_msg) function accepts a message buffer from the user application 
+The &cw(rmr_wh_send_msg) function accepts a message buffer from the user application
 and attempts to send it using the wormhole ID provided (id).
 Unlike &ital(rmr_send_msg,) this function attempts to send the message directly
-to a process at the other end of a wormhole which was created with &ital(rmr_wh-open().)
-When sending message via wormholes, the normal RMr routing based on message type is
+to a process at the other end of a wormhole which was created with &ital(rmr_wh_open().)
+When sending message via wormholes, the normal RMR routing based on message type is
 ignored, and the caller may leave the message type unspecified in the message buffer
 (unless it is needed by the receiving process).
 
 .sp
-The message buffer (msg) used to send is the same format as used for regular RMr 
+The message buffer (msg) used to send is the same format as used for regular RMR
 send and reply to sender operations, thus any buffer allocated by these means, or
 calls to &ital(rmr_rcv_msg()) can be passed to this function.
 
 .** pull in common retry text
-.im &{lib}/man/retry.im 
+.im &{lib}/man/retry.im
 
 &h2(RETURN VALUE)
 On success, a new message buffer, with an empty payload, is returned for the application
@@ -65,18 +65,18 @@ The state in this buffer will reflect the overall send operation state and shoul
 &cw(RMR_OK.)
 
 &space
-If the state in the returned buffer is anything other than &cw(RMR_OK,) the user application 
+If the state in the returned buffer is anything other than &cw(RMR_OK,) the user application
 may need to attempt a retransmission of the message, or take other action depending on the
-setting of &cw(errno) as described below. 
+setting of &cw(errno) as described below.
 
 &space
-In the event of extreme failure, a NULL pointer is returned. In this case the value of 
-&cw(errno) might be of some use, for documentation, but there will be little that the 
+In the event of extreme failure, a NULL pointer is returned. In this case the value of
+&cw(errno) might be of some use, for documentation, but there will be little that the
 user application can do other than to move on.
 
 &h2(ERRORS)
 The following values may be passed back in the &ital(state) field of the returned message
-buffer. 
+buffer.
 
 &space
 &beg_dlist(.75i : ^&bold_font )
@@ -133,7 +133,7 @@ Some error checking is omitted for clarity.
 &space
 &ex_start
 
-#include <rmr/rmr.h>	// system headers omitted for clarity
+#include <rmr/rmr.h>    // system headers omitted for clarity
 
 int main() {
    rmr_whid_t whid = -1;   // wormhole id for sending
@@ -144,11 +144,11 @@ int main() {
 
    mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
    if( mrc == NULL ) {
-      fprintf( stderr, "[FAIL] unable to initialise RMr environment\n" );
+      fprintf( stderr, "[FAIL] unable to initialise RMR environment\n" );
       exit( 1 );
    }
 
-   while( ! rmr_ready( mrc ) ) {		// wait for routing table info
+   while( ! rmr_ready( mrc ) ) {        // wait for routing table info
       sleep( 1 );
    }
 
@@ -157,14 +157,14 @@ int main() {
    while( 1 ) {
      if( whid < 0 ) {
        whid = rmr_wh_open( mrc, "localhost:6123" );  // open fails if endpoint refuses conn
-   	   if( RMR_WH_CONNECTED( wh ) ) { 
+          if( RMR_WH_CONNECTED( wh ) ) {
            snprintf( sbuf->payload, 1024, "periodic update from sender: %d", count++ );
            sbuf->len =  strlen( sbuf->payload );
            sbuf = rmr_wh_send_msg( mrc, whid, sbuf );
-		}
-	 }
+        }
+     }
 
-	 sleep( 5 );
+     sleep( 5 );
    }
 }
 &ex_end

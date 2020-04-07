@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019 Nokia
+   Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@
 .fi
 
 .if false
-	Mnemonic	rmr_set_trace.xfm
-	Abstract	The manual page for the rmr_set_trace function.
-	Author		E. Scott Daniels
-	Date		19 April 2019
+    Mnemonic    rmr_set_trace.xfm
+    Abstract    The manual page for the rmr_set_trace function.
+    Author      E. Scott Daniels
+    Date        19 April 2019
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
 &h1(RMR Library Functions)
 &h2(NAME)
-	rmr_set_trace
+    rmr_set_trace
 
 &h2(SYNOPSIS)
 &indent
@@ -44,8 +44,8 @@ int rmr_set_trace( rmr_mbuf_t* mbuf, unsigned char* data, int len )
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_set_trace) function will copy &cw(len) bytes from &cw(data) into the trace portion of 
-&cw(mbuf.) 
+The &cw(rmr_set_trace) function will copy &cw(len) bytes from &cw(data) into the trace portion of
+&cw(mbuf.)
 If the trace area of &cw(mbuf) is not the correct size, the message buffer will be reallocated
 to ensure that enough space is available for the trace data.
 

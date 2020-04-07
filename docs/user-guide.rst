@@ -407,7 +407,7 @@ that received the message.
 Messages which are received while waiting for the response 
 are queued internally by RMR, and are returned to the user 
 application when rmr_rcv_msg is invoked. These messages are 
-returned in th order received, one per call to rmr_rcv_msg. 
+returned in the order received, one per call to rmr_rcv_msg. 
  
 Call Timeout 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -416,7 +416,7 @@ The rmr_call function implements a timeout failsafe to
 prevent, in most cases, the function from blocking forever. 
 The timeout period is **not** based on time (calls to clock 
 are deemed too expensive for a low latency system level 
-library, but instead the period is based on the number of 
+library), but instead the period is based on the number of 
 received messages which are not the response. Using a 
 non-time mechanism for *timeout* prevents the async queue 
 from filling (which would lead to message drops) in an 
@@ -433,7 +433,7 @@ parameter which the user application may set.
 Retries 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
-The send operations in RMr will retry *soft* send failures 
+The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
  
  
@@ -445,7 +445,7 @@ until one of three conditions occurs:
  
 2. 
    
-  The underlying transport reports a * hard * failure 
+  The underlying transport reports a *hard* failure 
    
  
 3. 
@@ -453,12 +453,12 @@ until one of three conditions occurs:
   The maximum number of retry loops has been attempted 
  
  
-A retry loop consists of approximately 1000 send attemps ** 
-without** any intervening calls to * sleep() * or * usleep(). 
-* The number of retry loops defaults to 1, thus a maximum of 
+A retry loop consists of approximately 1000 send attempts 
+**without** any intervening calls to *sleep()* or *usleep().* 
+The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
 application. This value can be set at any point after RMr 
-initialisation using the * rmr_set_stimeout() * function 
+initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
  
@@ -476,14 +476,13 @@ underlying mechanisms (software or hardware) will be reported
 immediately to the user application. 
  
 It should be noted that depending on the underlying transport 
-mechanism being used, it is extremly possible that during 
-normal operations that retry conditions are very likely to 
-happen. These are completely out of RMr's control, and there 
-is nothing that RMr can do to avoid or midigate these other 
-than by allowing RMr to retry the send operation, and even 
-then it is possible (e.g. during connection reattempts), that 
-a single retry loop is not enough to guarentee a successful 
-send. 
+mechanism being used, it is extremely likely that retry 
+conditions will happen during normal operations. These are 
+completely out of RMR's control, and there is nothing that 
+RMR can do to avoid or mitigate these other than by allowing 
+RMR to retry the send operation, and even then it is possible 
+(e.g., during connection reattempts), that a single retry 
+loop is not enough to guarantee a successful send. 
  
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
@@ -538,17 +537,18 @@ EINVAL
  
 EAGAIN 
    
-  The underlying message system wsa interrupted or the 
-  device was busy; the message was **not** sent, and user 
-  application should call this function with the message 
-  again. 
+  The underlying message system was interrupted or the 
+  device was busy; the message was **not** sent, and the 
+  user application should call this function with the 
+  message again. 
  
  
 EXAMPLE 
 -------------------------------------------------------------------------------------------- 
  
-The following code bit shows one way of using the rmr_call 
-function, and illustrates how the transaction ID must be set. 
+The following code snippet shows one way of using the 
+rmr_call function, and illustrates how the transaction ID 
+must be set. 
  
  
 :: 
@@ -557,26 +557,24 @@ function, and illustrates how the transaction ID must be set.
      int retry_delay = 50000;            // retry delay (usec)
      static rmr_mbuf_t*  mbuf = NULL;    // response msg
      msg_t*  pm;                         // private message (payload)
-     m// get a send buffer and reference the payload 
+     m// get a send buffer and reference the payload
      mbuf = rmr_alloc_msg( mr, RMR_MAX_RCV_BYTES );
      pm = (msg_t*) mbuf->payload;
      p// generate an xaction ID and fill in payload with data and msg type
      snprintf( mbuf->xaction, RMR_MAX_XID, "%s", gen_xaction() );
      snprintf( pm->req, sizeof( pm->req ), "{ \\"req\\": \\"num users\\"}" );
      mbuf->mtype = MT_REQ;
-     
      msg = rmr_call( mr, msg );
      if( ! msg ) {               // probably a timeout and no msg received
          return NULL;            // let errno trickle up
-     } 
+     }
      if( mbuf->state != RMR_OK ) {
          while( retries_left-- > 0 &&             // loop as long as eagain
-                errno == EAGAIN && 
-                (msg = rmr_call( mr, msg )) != NULL && 
+                errno == EAGAIN &&
+                (msg = rmr_call( mr, msg )) != NULL &&
                 mbuf->state != RMR_OK ) {
              usleep( retry_delay );
          }
-     
          if( mbuf == NULL || mbuf->state != RMR_OK ) {
              rmr_free_msg( mbuf );        // safe if nil
              return NULL;
@@ -599,7 +597,7 @@ rmr_tokenise(3), rmr_mk_ring(3), rmr_ring_free(3)
 NAME 
 -------------------------------------------------------------------------------------------- 
  
-rmr_wh_open 
+rmr_close 
  
 SYNOPSIS 
 -------------------------------------------------------------------------------------------- 
@@ -773,8 +771,8 @@ by the call to rmr_init().
  
 **NOTE:** There is no support for epoll in Nanomsg, thus his 
 function is only supported when linking with the NNG version 
-of RMr and the file descriptor returned when using the 
-Nanomsg verfsion will always return an error. 
+of RMR and the file descriptor returned when using the 
+Nanomsg version will always return an error. 
  
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
@@ -820,15 +818,12 @@ function. Error checking has been omitted for clarity.
      rmr_mbuf_t* msg = NULL;
      int nready;
      int i;
-  
      mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
      rcv_fd = rmr_get_rcvfd( mrc );
-  
      rep_fd = epoll_create1( 0 );    _    B    ,// initialise epoll environment
      epe.events = EPOLLIN;
      epe.data.fd = rcv_fd;
      epoll_ctl( ep_fd, EPOLL_CTL_ADD, rcv_fd, &epe );    // add our info to the mix
-  
      while( 1 ) {
          nready = epoll_wait( ep_fd, events, 10, -1 );       // -1 == block forever (no timeout)
          for( i = 0; i < nready && i < 10; i++ ) {           // loop through to find what is ready
@@ -838,7 +833,6 @@ function. Error checking has been omitted for clarity.
                      // do something with msg
                  }
              }
-  
              // check for other ready fds....
          }
      }
@@ -1257,32 +1251,32 @@ an additional process is necessary the user application must
 ENVIRONMENT 
 -------------------------------------------------------------------------------------------- 
  
-As a part of the initialisation process rmr_init will look 
-into the available environment variables to influence it's 
-setup. The following variables will be used when found. 
+As a part of the initialisation process rmr_init reads 
+environment variables to configure itself. The following 
+variables are used if found. 
  
  
  
 RMR_ASYNC_CONN 
    
   Allows the async connection mode to be turned off (by 
-  setting the value to 0. When set to 1, or missing from the 
-  environment, RMR will invoke the connection interface in 
-  the transport mechanism using the non-blocking (async) 
+  setting the value to 0). When set to 1, or missing from 
+  the environment, RMR will invoke the connection interface 
+  in the transport mechanism using the non-blocking (async) 
   mode. This will likely result in many "soft failures" 
   (retry) until the connection is established, but allows 
-  the application to continue unimpeeded should the 
+  the application to continue unimpeded should the 
   connection be slow to set up. 
    
  
 RMR_BIND_IF 
    
   This provides the interface that RMR will bind listen 
-  ports to allowing for a single interface to be used rather 
-  than listening across all interfaces. This should be the 
-  IP address assigned to the interface that RMR should 
-  listen on, and if not defined RMR will listen on all 
-  interfaces. 
+  ports to, allowing for a single interface to be used 
+  rather than listening across all interfaces. This should 
+  be the IP address assigned to the interface that RMR 
+  should listen on, and if not defined RMR will listen on 
+  all interfaces. 
    
  
 RMR_CTL_PORT 
@@ -1295,17 +1289,16 @@ RMR_CTL_PORT
   port) was used to define this port. However, a future 
   version of Route Manager will require RMR to connect and 
   request tables, thus that variable is now used to supply 
-  the Route Manager well known address and port. 
+  the Route Manager's well-known address and port. 
    
-  To maintain backwards compatablibility with the older 
-  Route Manager versions, the presence of this variable in 
-  the environment will shift RMR's behaviour with respect to 
-  the default value used when RMR_RTG_SVC is **not** 
-  defined. 
+  To maintain backwards compatibility with the older Route 
+  Manager versions, the presence of this variable in the 
+  environment will shift RMR's behaviour with respect to the 
+  default value used when RMR_RTG_SVC is **not** defined. 
    
   When RMR_CTL_PORT is **defined:** RMR assumes that Route 
   Manager requires RMR to connect and request table updates 
-  is made, and the default well known address for Route 
+  is made, and the default well-known address for Route 
   manager is used (routemgr:4561). 
    
   When RMR_CTL_PORT is **undefined:** RMR assumes that Route 
@@ -1397,8 +1390,8 @@ RMR_RTG_ISRAW
    
   **Deprecated.** Should be set to 1 if the route table 
   generator is sending "plain" messages (not using RMR to 
-  send messages, 0 if the rtg is using RMR to send. The 
-  default is 1 as we don't expect the rtg to use RMR. 
+  send messages), 0 if the RTG is using RMR to send. The 
+  default is 1 as we don't expect the RTG to use RMR. 
    
   This variable is only recognised when using the NNG 
   transport library as it is not possible to support NNG 
@@ -1418,7 +1411,7 @@ RMR_SEED_RT
   report *ready* until a table is received. The static route 
   table may contain both the route table (between newrt 
   start and end records), and the MEID map (between meid_map 
-  start and end records) 
+  start and end records). 
  
 RMR_SRC_ID 
    
@@ -1599,7 +1592,7 @@ are queued on a *normal* receive queue and will be delivered
 to the user application with the next invocation of 
 *rmr_mt_rcv()* or *rmr_rvv_msg().* by RMR, and are returned 
 to the user application when rmr_rcv_msg is invoked. These 
-messages are returned in th order received, one per call to 
+messages are returned in the order received, one per call to 
 rmr_rcv_msg. 
  
 NOTE: Currently the multi-threaded functions are supported 
@@ -1616,7 +1609,7 @@ transaction ID is a RMR_MAX_XID byte field that is used to
 match the response message when it arrives. RMr will compare 
 **all** of the bytes in the field, so the caller must ensure 
 that they are set correctly to avoid missing the response 
-message. (The application which returns the response message 
+message. The application which returns the response message 
 is also expected to ensure that the return buffer has the 
 matching transaction ID. This can be done transparently if 
 the application uses the *rmr_rts_msg()* function and does 
@@ -1625,7 +1618,7 @@ not adjust the transaction ID.
 Retries 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
-The send operations in RMr will retry *soft* send failures 
+The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
  
  
@@ -1637,7 +1630,7 @@ until one of three conditions occurs:
  
 2. 
    
-  The underlying transport reports a * hard * failure 
+  The underlying transport reports a *hard* failure 
    
  
 3. 
@@ -1645,12 +1638,12 @@ until one of three conditions occurs:
   The maximum number of retry loops has been attempted 
  
  
-A retry loop consists of approximately 1000 send attemps ** 
-without** any intervening calls to * sleep() * or * usleep(). 
-* The number of retry loops defaults to 1, thus a maximum of 
+A retry loop consists of approximately 1000 send attempts 
+**without** any intervening calls to *sleep()* or *usleep().* 
+The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
 application. This value can be set at any point after RMr 
-initialisation using the * rmr_set_stimeout() * function 
+initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
  
@@ -1668,14 +1661,13 @@ underlying mechanisms (software or hardware) will be reported
 immediately to the user application. 
  
 It should be noted that depending on the underlying transport 
-mechanism being used, it is extremly possible that during 
-normal operations that retry conditions are very likely to 
-happen. These are completely out of RMr's control, and there 
-is nothing that RMr can do to avoid or midigate these other 
-than by allowing RMr to retry the send operation, and even 
-then it is possible (e.g. during connection reattempts), that 
-a single retry loop is not enough to guarentee a successful 
-send. 
+mechanism being used, it is extremely likely that retry 
+conditions will happen during normal operations. These are 
+completely out of RMR's control, and there is nothing that 
+RMR can do to avoid or mitigate these other than by allowing 
+RMR to retry the send operation, and even then it is possible 
+(e.g., during connection reattempts), that a single retry 
+loop is not enough to guarantee a successful send. 
  
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
@@ -1769,26 +1761,25 @@ function, and illustrates how the transaction ID must be set.
      int retries_left = 5;               // max retries on dev not available
      static rmr_mbuf_t*  mbuf = NULL;    // response msg
      msg_t*  pm;                         // private message (payload)
-     m// get a send buffer and reference the payload 
+     m// get a send buffer and reference the payload
      mbuf = rmr_alloc_msg( mr, RMR_MAX_RCV_BYTES );
      pm = (msg_t*) mbuf->payload;
      p// generate an xaction ID and fill in payload with data and msg type
      rmr_bytes2xact( mbuf, xid, RMR_MAX_XID );
      snprintf( pm->req, sizeof( pm->req ), "{ \\"req\\": \\"num users\\"}" );
      mbuf->mtype = MT_USR_RESP;
-     
      msg = rmr_mt_call( mr, msg, my_id, 100 );    e    :// wait up to 100ms
      if( ! msg ) {               // probably a timeout and no msg received
          return NULL;            // let errno trickle up
-     } 
+     }
      if( mbuf->state != RMR_OK ) {
          while( retries_left-- > 0 &&             // loop as long as eagain
-                mbuf->state == RMR_ERR_RETRY && 
-                (msg = rmr_mt_call( mr, msg )) != NULL && 
+                mbuf->state == RMR_ERR_RETRY &&
+                (msg = rmr_mt_call( mr, msg )) != NULL &&
                 mbuf->state != RMR_OK ) {
              usleep( retry_delay );
          }
-     
+  
          if( mbuf == NULL || mbuf->state != RMR_OK ) {
              rmr_free_msg( mbuf );        // safe if nil
              return NULL;
@@ -1845,17 +1836,17 @@ buffer is available to supply, the receive function will
 allocate one. 
  
 The *old_msg* parameter allows the user to pass a previously 
-generated RMr message back to RMr for reuse. Optionally, the 
+generated RMR message back to RMR for reuse. Optionally, the 
 user application may pass a nil pointer if no reusable 
 message is available. When a timeout occurs, and old_msg was 
 not nil, the state will be returned by returning a pointer to 
 the old message with the state set. 
  
 It is possible to use the *rmr_rcv_msg()* function instead of 
-this function. Doing so might be advantagous if the user 
+this function. Doing so might be advantageous if the user 
 programme does not always start the multi-threaded mode and 
 the use of *rmr_rcv_msg()* would make the flow of the code 
-more simple. The advantags of using this function are the 
+more simple. The advantages of using this function are the 
 ability to set a timeout without using epoll, and a small 
 performance gain (if multi-threaded mode is enabled, and the 
 *rmr_rcv_msg()* function is used, it simply invokes this 
@@ -2103,9 +2094,9 @@ payload), or a NULL pointer in the case of an extreme error.
 ERRORS 
 -------------------------------------------------------------------------------------------- 
  
-The *state* field in the message buffer will indicate either 
-RMR_OK when the message receive process was successful and 
-the message can be used by the caller. Depending on the 
+The *state* field in the message buffer will indicate RMR_OK 
+when the message receive process was successful and the 
+message can be used by the caller. Depending on the 
 underlying transport mechanism, one of the following RMR 
 error stats may be returned: 
  
@@ -2294,7 +2285,7 @@ The rmr_realloc_payload function returns a pointer to the
 message buffer with the payload which is large enough to hold 
 *new_len* bytes. If the *clone* option is true, this will be 
 a pointer to the newly cloned message buffer; the original 
-message buffer pointer may still be used to referenced that 
+message buffer pointer may still be used to reference that 
 message. It is the calling application's responsibility to 
 free the memory associateed with both messages using the 
 rmr_free_msg() function. 
@@ -2385,7 +2376,7 @@ as rmr_send_msg.
 Retries 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
-The send operations in RMr will retry *soft* send failures 
+The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
  
  
@@ -2397,7 +2388,7 @@ until one of three conditions occurs:
  
 2. 
    
-  The underlying transport reports a * hard * failure 
+  The underlying transport reports a *hard* failure 
    
  
 3. 
@@ -2405,12 +2396,12 @@ until one of three conditions occurs:
   The maximum number of retry loops has been attempted 
  
  
-A retry loop consists of approximately 1000 send attemps ** 
-without** any intervening calls to * sleep() * or * usleep(). 
-* The number of retry loops defaults to 1, thus a maximum of 
+A retry loop consists of approximately 1000 send attempts 
+**without** any intervening calls to *sleep()* or *usleep().* 
+The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
 application. This value can be set at any point after RMr 
-initialisation using the * rmr_set_stimeout() * function 
+initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
  
@@ -2428,14 +2419,13 @@ underlying mechanisms (software or hardware) will be reported
 immediately to the user application. 
  
 It should be noted that depending on the underlying transport 
-mechanism being used, it is extremly possible that during 
-normal operations that retry conditions are very likely to 
-happen. These are completely out of RMr's control, and there 
-is nothing that RMr can do to avoid or midigate these other 
-than by allowing RMr to retry the send operation, and even 
-then it is possible (e.g. during connection reattempts), that 
-a single retry loop is not enough to guarentee a successful 
-send. 
+mechanism being used, it is extremely likely that retry 
+conditions will happen during normal operations. These are 
+completely out of RMR's control, and there is nothing that 
+RMR can do to avoid or mitigate these other than by allowing 
+RMR to retry the send operation, and even then it is possible 
+(e.g., during connection reattempts), that a single retry 
+loop is not enough to guarantee a successful send. 
  
 PAYLOAD SIZE 
 -------------------------------------------------------------------------------------------- 
@@ -2446,7 +2436,7 @@ the message payload than the allocated message has. In the
 case of a received message, it is possible that the response 
 needs to be larger than the payload associated with the 
 inbound message. In order to use the return to sender 
-function, the source infomration in the orignal message must 
+function, the source information in the original message must 
 be present in the response; information which cannot be added 
 to a message buffer allocated through the standard RMR 
 allocation function. To allocate a buffer with a larger 
@@ -2464,7 +2454,7 @@ state in this buffer will reflect the overall send operation
 state and should be RMR_OK. 
  
 If the state in the returned buffer is anything other than 
-UT_OK, the user application may need to attempt a 
+RMR_OK, the user application may need to attempt a 
 retransmission of the message, or take other action depending 
 on the setting of errno as described below. 
  
@@ -2623,7 +2613,7 @@ library.)
 Retries 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
-The send operations in RMr will retry *soft* send failures 
+The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
  
  
@@ -2635,7 +2625,7 @@ until one of three conditions occurs:
  
 2. 
    
-  The underlying transport reports a * hard * failure 
+  The underlying transport reports a *hard* failure 
    
  
 3. 
@@ -2643,12 +2633,12 @@ until one of three conditions occurs:
   The maximum number of retry loops has been attempted 
  
  
-A retry loop consists of approximately 1000 send attemps ** 
-without** any intervening calls to * sleep() * or * usleep(). 
-* The number of retry loops defaults to 1, thus a maximum of 
+A retry loop consists of approximately 1000 send attempts 
+**without** any intervening calls to *sleep()* or *usleep().* 
+The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
 application. This value can be set at any point after RMr 
-initialisation using the * rmr_set_stimeout() * function 
+initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
  
@@ -2666,14 +2656,13 @@ underlying mechanisms (software or hardware) will be reported
 immediately to the user application. 
  
 It should be noted that depending on the underlying transport 
-mechanism being used, it is extremly possible that during 
-normal operations that retry conditions are very likely to 
-happen. These are completely out of RMr's control, and there 
-is nothing that RMr can do to avoid or midigate these other 
-than by allowing RMr to retry the send operation, and even 
-then it is possible (e.g. during connection reattempts), that 
-a single retry loop is not enough to guarentee a successful 
-send. 
+mechanism being used, it is extremely likely that retry 
+conditions will happen during normal operations. These are 
+completely out of RMR's control, and there is nothing that 
+RMR can do to avoid or mitigate these other than by allowing 
+RMR to retry the send operation, and even then it is possible 
+(e.g., during connection reattempts), that a single retry 
+loop is not enough to guarantee a successful send. 
  
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
@@ -2877,7 +2866,7 @@ DESCRIPTION
  
 The rmr_set_fack function enables *fast TCP acknowledgements* 
 if the underlying transport library supports it. This might 
-be useful for applications which must send messages as a 
+be useful for applications which must send messages at a 
 maximum rate. 
  
 RETURN VALUE 
@@ -3035,7 +3024,7 @@ rmr_wh_open(3), rmr_wh_send_msg(3)
 NAME 
 -------------------------------------------------------------------------------------------- 
  
-rmr_set_trace 
+rmr_set_vlevel 
  
 SYNOPSIS 
 -------------------------------------------------------------------------------------------- 
@@ -3100,10 +3089,10 @@ RMR_VL_DEBUG
   as it can grossly affect performance. 
  
  
-generally RMR does not write messages to the standard error 
+Generally RMR does not write messages to the standard error 
 device from *critical path* functions, therefore it is 
 usually not harmful to enable a verbosity level of either 
-RMR_VL_CRIT, or RMR_VL_ERR. 
+RMR_VL_CRIT or RMR_VL_ERR. 
  
 Messages written from the route table collection thread are 
 still governed by the value placed into the verbose level 
@@ -3542,10 +3531,10 @@ SYNOPSIS
 DESCRIPTION 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_trace_ref function return a pointer to the trace area 
-in the message, and optionally populate the user programme 
-supplied size integer with the trace area size, if *sizeptr* 
-is not nil. 
+The rmr_trace_ref function returns a pointer to the trace 
+area in the message, and optionally populates the user 
+programme supplied size integer with the trace area size, if 
+*sizeptr* is not nil. 
  
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
@@ -3581,7 +3570,7 @@ SYNOPSIS
 :: 
   
  #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_tralloc_msg( void* vctx, int size, 
+ rmr_mbuf_t* rmr_tralloc_msg( void* vctx, int size,
                               int trace_size, unsigned const char *tr_data );
  
  
@@ -3589,14 +3578,14 @@ SYNOPSIS
 DESCRIPTION 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_alloc_msg function is used to allocate a buffer which 
-the user programme can write into and then send through the a 
-library. The buffer is allocated such that sending it 
+The rmr_tralloc_msg function is used to allocate a buffer 
+which the user programme can write into and then send through 
+the library. The buffer is allocated such that sending it 
 requires no additional copying from the buffer as it passes 
 through the underlying transport mechanism. 
  
 The *size* parameter is used to set the payload length in the 
-message and If it is 0, then the default size supplied on the 
+message. If it is 0, then the default size supplied on the 
 *rmr_init* call will be used. In addition to allocating the 
 payload, a space in the buffer is reserved for *trace* data 
 (tr_size bytes), and the bytes pointed to by *tr_data* are 
@@ -3675,9 +3664,9 @@ xaction
   the message into which the user may write a transaction 
   ID. The ID is optional with the exception of when the user 
   application uses the rmr_call function to send a message 
-  and wait for the reply; the underlying a processing 
-  expects that the matching reply message will also contain 
-  the same data in the *xaction* field. 
+  and wait for the reply; the underlying processing expects 
+  that the matching reply message will also contain the same 
+  data in the *xaction* field. 
  
  
 RETURN VALUE 
@@ -3736,8 +3725,8 @@ process **must** use rmr_rts_msg() to send their response.
  
 Like *rmr_wh_send_msg,* this function attempts to send the 
 message directly to a process at the other end of a wormhole 
-which was created with *rmr_wh-open().* When sending message 
-via wormholes, the normal RMr routing based on message type 
+which was created with *rmr_wh_open().* When sending message 
+via wormholes, the normal RMR routing based on message type 
 is ignored, and the caller may leave the message type 
 unspecified in the message buffer (unless it is needed by the 
 receiving process). The call_id parameter is a number in the 
@@ -3752,7 +3741,7 @@ Go's goroutines) is possible.
 Retries 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
-The send operations in RMr will retry *soft* send failures 
+The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
  
  
@@ -3764,7 +3753,7 @@ until one of three conditions occurs:
  
 2. 
    
-  The underlying transport reports a * hard * failure 
+  The underlying transport reports a *hard* failure 
    
  
 3. 
@@ -3772,12 +3761,12 @@ until one of three conditions occurs:
   The maximum number of retry loops has been attempted 
  
  
-A retry loop consists of approximately 1000 send attemps ** 
-without** any intervening calls to * sleep() * or * usleep(). 
-* The number of retry loops defaults to 1, thus a maximum of 
+A retry loop consists of approximately 1000 send attempts 
+**without** any intervening calls to *sleep()* or *usleep().* 
+The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
 application. This value can be set at any point after RMr 
-initialisation using the * rmr_set_stimeout() * function 
+initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
  
@@ -3795,14 +3784,13 @@ underlying mechanisms (software or hardware) will be reported
 immediately to the user application. 
  
 It should be noted that depending on the underlying transport 
-mechanism being used, it is extremly possible that during 
-normal operations that retry conditions are very likely to 
-happen. These are completely out of RMr's control, and there 
-is nothing that RMr can do to avoid or midigate these other 
-than by allowing RMr to retry the send operation, and even 
-then it is possible (e.g. during connection reattempts), that 
-a single retry loop is not enough to guarentee a successful 
-send. 
+mechanism being used, it is extremely likely that retry 
+conditions will happen during normal operations. These are 
+completely out of RMR's control, and there is nothing that 
+RMR can do to avoid or mitigate these other than by allowing 
+RMR to retry the send operation, and even then it is possible 
+(e.g., during connection reattempts), that a single retry 
+loop is not enough to guarantee a successful send. 
  
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
@@ -3868,7 +3856,7 @@ clarity.
     int     count = 0;
     mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
     if( mrc == NULL ) {
-       fprintf( stderr, "[FAIL] unable to initialise RMr environment\\n" );
+       fprintf( stderr, "[FAIL] unable to initialise RMR environment\\n" );
        exit( 1 );
     }
     while( ! rmr_ready( mrc ) ) {    e    i// wait for routing table info
@@ -3878,7 +3866,7 @@ clarity.
     while( 1 ) {
       if( whid < 0 ) {
         whid = rmr_wh_open( mrc, "localhost:6123" );  // open fails if endpoint refuses conn
-        w   if( RMR_WH_CONNECTED( wh ) ) { 
+        w   if( RMR_WH_CONNECTED( wh ) ) {
             snprintf( sbuf->payload, 1024, "periodic update from sender: %d", count++ );
             sbuf->len =  strlen( sbuf->payload );
             sbuf = rmr_wh_call( mrc, whid, sbuf, 1000 );    f    s// expect a response in 1s or less
@@ -3909,7 +3897,7 @@ rmr_wh_state(3)
 NAME 
 -------------------------------------------------------------------------------------------- 
  
-rmr_wh_open 
+rmr_wh_close 
  
 SYNOPSIS 
 -------------------------------------------------------------------------------------------- 
@@ -3930,10 +3918,10 @@ the wormhole id passed in. Future calls to rmr_wh_send_msg
 with this ID will fail. 
  
 The underlying TCP connection to the remote endpoint is 
-**not** closed as this session may be reqruired for 
-regularlly routed messages (messages routed based on message 
-type). There is no way to force a TCP session to be closed at 
-this point in time. 
+**not** closed as this session may be required for regularly 
+routed messages (messages routed based on message type). 
+There is no way to force a TCP session to be closed at this 
+point in time. 
  
 SEE ALSO 
 -------------------------------------------------------------------------------------------- 
@@ -4030,7 +4018,7 @@ EXAMPLE
     rmr_whid_t wh;
     rmc = rmr_init( "43086", 4096, 0 ); // init context
     wh = rmr_wh_open( rmc, "localhost:6123" );
-    if( !RMR_WH_CONNECTED( wh ) ) { 
+    if( !RMR_WH_CONNECTED( wh ) ) {
      f fprintf( stderr, "unable to connect wormhole: %s\\n",
               strerror( errno ) );
     }
@@ -4072,20 +4060,20 @@ the user application and attempts to send it using the
 wormhole ID provided (id). Unlike *rmr_send_msg,* this 
 function attempts to send the message directly to a process 
 at the other end of a wormhole which was created with 
-*rmr_wh-open().* When sending message via wormholes, the 
-normal RMr routing based on message type is ignored, and the 
+*rmr_wh_open().* When sending message via wormholes, the 
+normal RMR routing based on message type is ignored, and the 
 caller may leave the message type unspecified in the message 
 buffer (unless it is needed by the receiving process). 
  
 The message buffer (msg) used to send is the same format as 
-used for regular RMr send and reply to sender operations, 
+used for regular RMR send and reply to sender operations, 
 thus any buffer allocated by these means, or calls to 
 *rmr_rcv_msg()* can be passed to this function. 
  
 Retries 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
-The send operations in RMr will retry *soft* send failures 
+The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
  
  
@@ -4097,7 +4085,7 @@ until one of three conditions occurs:
  
 2. 
    
-  The underlying transport reports a * hard * failure 
+  The underlying transport reports a *hard* failure 
    
  
 3. 
@@ -4105,12 +4093,12 @@ until one of three conditions occurs:
   The maximum number of retry loops has been attempted 
  
  
-A retry loop consists of approximately 1000 send attemps ** 
-without** any intervening calls to * sleep() * or * usleep(). 
-* The number of retry loops defaults to 1, thus a maximum of 
+A retry loop consists of approximately 1000 send attempts 
+**without** any intervening calls to *sleep()* or *usleep().* 
+The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
 application. This value can be set at any point after RMr 
-initialisation using the * rmr_set_stimeout() * function 
+initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
  
@@ -4128,14 +4116,13 @@ underlying mechanisms (software or hardware) will be reported
 immediately to the user application. 
  
 It should be noted that depending on the underlying transport 
-mechanism being used, it is extremly possible that during 
-normal operations that retry conditions are very likely to 
-happen. These are completely out of RMr's control, and there 
-is nothing that RMr can do to avoid or midigate these other 
-than by allowing RMr to retry the send operation, and even 
-then it is possible (e.g. during connection reattempts), that 
-a single retry loop is not enough to guarentee a successful 
-send. 
+mechanism being used, it is extremely likely that retry 
+conditions will happen during normal operations. These are 
+completely out of RMR's control, and there is nothing that 
+RMR can do to avoid or mitigate these other than by allowing 
+RMR to retry the send operation, and even then it is possible 
+(e.g., during connection reattempts), that a single retry 
+loop is not enough to guarantee a successful send. 
  
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
@@ -4277,7 +4264,7 @@ clarity.
     int     count = 0;
     mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
     if( mrc == NULL ) {
-       fprintf( stderr, "[FAIL] unable to initialise RMr environment\\n" );
+       fprintf( stderr, "[FAIL] unable to initialise RMR environment\\n" );
        exit( 1 );
     }
     while( ! rmr_ready( mrc ) ) {    e    i// wait for routing table info
@@ -4287,7 +4274,7 @@ clarity.
     while( 1 ) {
       if( whid < 0 ) {
         whid = rmr_wh_open( mrc, "localhost:6123" );  // open fails if endpoint refuses conn
-        w   if( RMR_WH_CONNECTED( wh ) ) { 
+        w   if( RMR_WH_CONNECTED( wh ) ) {
             snprintf( sbuf->payload, 1024, "periodic update from sender: %d", count++ );
             sbuf->len =  strlen( sbuf->payload );
             sbuf = rmr_wh_send_msg( mrc, whid, sbuf );
