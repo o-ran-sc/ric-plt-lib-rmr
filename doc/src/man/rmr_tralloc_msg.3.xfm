@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@
 .fi
 
 .gv e LIB lib
-.im &{lib}/man/setup.im 
+.im &{lib}/man/setup.im
 
 &line_len(6i)
 
@@ -37,21 +37,21 @@
 &ex_start
 #include <rmr/rmr.h>
 
-rmr_mbuf_t* rmr_tralloc_msg( void* vctx, int size, 
+rmr_mbuf_t* rmr_tralloc_msg( void* vctx, int size,
                              int trace_size, unsigned const char *tr_data );
 &ex_end
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_alloc_msg) function is used to allocate a buffer which the user 
-programme can write into and then send through the a library.
+The &cw(rmr_tralloc_msg) function is used to allocate a buffer which the user
+programme can write into and then send through the library.
 The buffer is allocated such that sending it requires no additional copying
-from the buffer as it passes through the underlying transport mechanism. 
+from the buffer as it passes through the underlying transport mechanism.
 .sp
 
-The &ital(size) parameter is used to set the payload length in the message and
-If it is 0, then the default size supplied on the &ital(rmr_init) call will be used. 
-In addition to allocating the payload, a space in the buffer is 
+The &ital(size) parameter is used to set the payload length in the message.
+If it is 0, then the default size supplied on the &ital(rmr_init) call will be used.
+In addition to allocating the payload, a space in the buffer is
 reserved for &ital(trace) data (tr_size bytes), and the bytes pointed to
 by &ital(tr_data) are copied into that portion of the message.
 
@@ -60,7 +60,7 @@ the &ital(rmr_init) function.
 
 
 &space
-The pointer to the message buffer returned is a structure which has some 
+The pointer to the message buffer returned is a structure which has some
 user application visible fields; the structure is described in &cw(rmr.h,)
 and is illustrated below.
 
@@ -77,11 +77,11 @@ typedef struct {
 
 &space
 &beg_dlist(.75i : ^&bold_font )
-&diitem(state )  Is the current buffer state.  Following a call to &cw(rmr_send_msg) 
+&diitem(state )  Is the current buffer state.  Following a call to &cw(rmr_send_msg)
 the state indicates whether the buffer was successfully sent which determines
 exactly what the payload points to.  If the send failed, the payload referenced
-by the buffer is the message that failed to send (allowing the application to 
-attempt a retransmission).  
+by the buffer is the message that failed to send (allowing the application to
+attempt a retransmission).
 When the state is &cw(a_OK) the buffer represents an empty buffer that the application
 may fill in in preparation to send.
 
@@ -90,30 +90,30 @@ may fill in in preparation to send.
 to the appropriate message type value (as determined by the user programme). Upon send
 this value determines how the a library will route the message.
 For a buffer which has been received, this field will contain the message type that was
-set by the sending application. 
+set by the sending application.
 
 &half_space
 &diitem(len ) The application using a buffer to send a message is expected to set the
 length value to the actual number of bytes that it placed into the message. This
 is likely less than the total number of bytes that the message can carry.
 For a message buffer that is passed to the application as the result of a receive
-call, this will be the value that the sending application supplied and should 
+call, this will be the value that the sending application supplied and should
 indicate the number of bytes in the payload which are valid.
 
 &half_space
 &diitem(payload ) The payload is a pointer to the actual received data.  The
 user programme may read and write from/to the memory referenced by the payload
 up until the point in time that the buffer is used on a &cw(rmr_send, rmr_call)
-or &cw(rmr_reply) function call.  
+or &cw(rmr_reply) function call.
 Once the buffer has been passed back to a a library function the user programme
 should &bold(NOT) make use of the payload pointer.
 
 
 &half_space
-&diitem(xaction) The &ital(xaction) field is a pointer to a fixed sized area in 
-the message into which the user may write a transaction ID.  
+&diitem(xaction) The &ital(xaction) field is a pointer to a fixed sized area in
+the message into which the user may write a transaction ID.
 The ID is optional with the exception of when the user application uses the &cw(rmr_call)
-function to send a message and wait for the reply; the underlying a processing
+function to send a message and wait for the reply; the underlying processing
 expects that the matching reply message will also contain the same data in the
 &ital(xaction) field.
 &end_dlist
