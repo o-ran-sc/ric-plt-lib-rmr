@@ -55,6 +55,7 @@
 #include <semaphore.h>
 
 #define DEBUG 1
+#define PARINOID_CHECKS	1					// must have parinoid testing on to not fail on nil pointer tests
 
 											// specific test tools in this directory
 #undef NNG_UNDER_TEST 
@@ -73,6 +74,7 @@
 #include "rmr_si.c"
 #include "mbuf_api.c"
 
+
 static void gen_rt( uta_ctx_t* ctx );		// defined in sr_si_static_test, but used by a few others (eliminate order requirement below)
 
 											// and finally....
@@ -83,6 +85,7 @@ static void gen_rt( uta_ctx_t* ctx );		// defined in sr_si_static_test, but used
 #include "wormhole_static_test.c"
 #include "mbuf_api_static_test.c"
 #include "sr_si_static_test.c"
+#include "lg_buf_static_test.c"
 
 #include "rmr_si_api_static_test.c"
 
@@ -94,6 +97,10 @@ int main() {
 	int errors = 0;
 
 	rmr_set_vlevel( 5 );			// enable all debugging
+
+	fprintf( stderr, "\n<INFO> starting lg buffer tests (%d)\n", errors );
+	errors += rmr_lgbuf_test();
+	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
 	fprintf( stderr, "\n<INFO> starting ring tests (%d)\n", errors );
 	errors += ring_test();

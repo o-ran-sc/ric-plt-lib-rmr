@@ -38,11 +38,22 @@
 
 ulimit -c unlimited
 
+# driven with -L sender or -L receiver on the command line
+# run something though valgrind to check for leaks; requires valgind
+function leak_anal {
+	valgrind  -v --leak-resolution=high --leak-check=yes $opt "$@"
+}
+
 # The sender and receivers are run asynch. Their exit statuses are captured in a
 # file in order for the 'main' to pick them up easily.
 #
 function run_sender {
-	./v_sender${si} ${nmsg:-10} ${delay:-100000} ${mtype_start_stop:-0:1} 
+	if (( la_sender ))
+	then
+		leak_anal ./v_sender${si} ${nmsg:-10} ${delay:-100000} ${mtype_start_stop:-0:1}  >/tmp/la.log 2>&1
+	else
+		./v_sender${si} ${nmsg:-10} ${delay:-100000} ${mtype_start_stop:-0:1}
+	fi
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -52,7 +63,12 @@ function run_rcvr {
 
 	port=$(( 4460 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	./ex_rts_receiver${si} $copyclone -p $port
+	if (( la_receiver ))
+	then
+		leak_anal ./ex_rts_receiver${si} $copyclone -p $port >/tmp/la.log 2>&1
+	else
+		./ex_rts_receiver${si} $copyclone -p $port
+	fi
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -114,6 +130,7 @@ do
 		-B)	rebuild=1;;
 		-d)	delay=${2//,/}; shift;;				# delay in micro seconds allow 1,000 to make it easier on user
 		-i)	use_installed=1;;
+		-L)	leak_anal=$2; shift;;
 		-m)	mtype_start_stop="$2"; shift;;
 		-M)	mt_call_flag="EX_CFLAGS=-DMTC=1";;	# turn on mt-call receiver option
 		-N)	si="";;								# enable nng based testing
@@ -126,6 +143,7 @@ do
 			echo "usage: $0 [-B] [-c caller-threads] [-d micor-sec-delay] [-i] [-M] [-m mtype] [-n num-msgs] [-r num-receivers] [-S] [-v]"
 			echo "  -B forces a rebuild which will use .build"
 			echo "  -i will use installed libraries (/usr/local) and cause -B to be ignored if supplied)"
+			echo "  -L {sender|receiver} run the sender or recevier code under valgrind for leak analysis (output to /tmp/la.log)"
 			echo "  -m mtype  will set the stopping (max) message type; sender will loop through 0 through mtype-1"
 			echo "  -m start:stop  will set the starting and stopping mtypes; start through stop -1"
 			echo "  -M enables mt-call receive processing to test the RMR asynch receive pthread"
@@ -141,6 +159,11 @@ do
 	shift
 done
 
+# set leak analysis (do not do this from any automated tests)
+case $leak_anal in 
+	s*)	la_sender=1;;
+	r*)	la_receiver=1;;
+esac
 
 if (( verbose ))
 then
