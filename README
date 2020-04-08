@@ -1,7 +1,7 @@
 #
 #==================================================================================
-#       Copyright (c) 2019 Nokia
-#       Copyright (c) 2018-2019 AT&T Intellectual Property.
+#       Copyright (c) 2020 Nokia
+#       Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,39 +25,39 @@ by the message type and subscription ID, or just the message type.  RMR is
 responsible for establishing and managing each connection freeing the application
 from any network connectivity management.
 
-This repo contains the source and documentation for both the core RMR library
-and for the Python bindings which allow a Python (v3) application to use RMR
-to send and receive messages.
+This repo contains the source and documentation for the core RMR library.
+RMR python bindings are available as a submodule in the xapp-frame-py PyPI package at
+https://pypi.org/project/ricxappframe/ and documented at https://docs.o-ran-sc.org/projects/o-ran-sc-ric-plt-xapp-frame-py/en/latest/.
 
 The directories at the root level are as follows, each contains its own readme
 file where additional details are necessary.
 
 
-ci		This directory contains the continuous integration scripts needed
-		to build and verify RMR when changes are made and committed to the repo.
+ci      This directory contains the continuous integration scripts needed
+        to build and verify RMR when changes are made and committed to the repo.
 
-doc		RMR documentation is written in a document language and thus is
-		source code.  This directory contains the source for all generated
-		documentation.
+doc     RMR documentation is written in a document language and thus is
+        source code.  This directory contains the source for all generated
+        documentation.
 
-docs	This is a 'canned' directory which is intended to be scraped. Direct
-		editing of documentation files in this directory is dangerous as
-		most of the files, even though checked into the repo per mandate,
-		are artifacts and will be overlaid if hand edited.
+docs    This is a 'canned' directory which is intended to be scraped. Direct
+        editing of documentation files in this directory is dangerous as
+        most of the files, even though checked into the repo per mandate,
+        are artifacts and will be overlaid if hand edited.
 
 examples This directory contains example programmes which illustrate the use
-		of RMR.
+        of RMR.
 
-ext		RMR makes use of NNG (next generation Nanomsg). The ext directory is
-		the git reference allowing the NNG code to be pulled and built as
-		a reference.
+ext     RMR makes use of NNG (next generation Nanomsg). The ext directory is
+        the git reference allowing the NNG code to be pulled and built as
+        a reference.
 
-src		This directory is the top level source directory containing both the
-		core RMR code, and any bindings which have been written.
+src     This directory is the top level source directory containing the
+        core RMR code.
 
-test	All unit and application level tests for the core library are kept
-		within this directory.  Tests for bindings are managed within the
-		binding's directory under the source directory.
+test    All unit and application level tests for the core library are kept
+        within this directory.  Tests for bindings are managed within the
+        binding's directory under the source directory.
 
 Top level pollution
 There are several "configuration" files which sit at the top level of the
@@ -66,9 +66,9 @@ if not all of the CI/CD goo is in the ci directory where it's out of the way
 and thus not confusing. However, there is some pollution that can generally
 be ignored:
 
-	tox.ini -- this seems to drive the scraper which pulls from docs and
-			writes to some external documentation repo/host.
+    tox.ini -- this seems to drive the scraper which pulls from docs and
+            writes to some external documentation repo/host.
 
 
-	.readthedocs.yaml -- this seems to be some configuration for the docs
-			scraping process(es).
+    .readthedocs.yaml -- this seems to be some configuration for the docs
+            scraping process(es).

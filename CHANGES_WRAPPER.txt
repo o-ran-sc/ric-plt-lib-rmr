@@ -5,6 +5,9 @@
 #API and build change  and fix summaries. Doc correctsions
 #and/or changes are not mentioned here; see the commit messages.
 
+2020 April 8; Version n/a
+    RMR Python moved to Python Xapp Framework (https://gerrit.o-ran-sc.org/r/admin/repos/ric-plt/xapp-frame-py)
+
 2020 February 29; Version 2.4.0
 	Add consolidated testing under CMake
 	Add support binary for health check (SI95 only)
