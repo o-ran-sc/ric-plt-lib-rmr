@@ -223,7 +223,7 @@ static int uta_epsock_byname( uta_ctx_t* ctx, char* ep_name, int* nn_sock, endpo
 	endpoint_t*		ep;
 	int				state = FALSE;
 
-	if( PARINOID_CHECKS ) {
+	if( PARANOID_CHECKS ) {
 		if( ctx == NULL || (rt = ctx->rtable) == NULL || (si_ctx = ctx->si_ctx) == NULL  ) {
 			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: parinoia check pop ctx=%p rt=%p\n", ctx, rt );
 			return FALSE;
@@ -299,7 +299,7 @@ static int uta_epsock_rr( uta_ctx_t* ctx, rtable_ent_t* rte, int group, int* mor
 	rrgroup_t* rrg;
 	int	idx;
 
-	if( PARINOID_CHECKS ) {
+	if( PARANOID_CHECKS ) {
 		if( ctx == NULL || (si_ctx = ctx->si_ctx) == NULL  ) {
 			return FALSE;
 		}
@@ -403,7 +403,7 @@ static int epsock_meid( uta_ctx_t* ctx, route_table_t *rtable, rmr_mbuf_t* msg, 
 	char*	meid;
 	si_ctx_t*	si_ctx;
 
-	if( PARINOID_CHECKS ) {
+	if( PARANOID_CHECKS ) {
 		if( ctx == NULL || (si_ctx = ctx->si_ctx) == NULL  ) {
 			return FALSE;
 		}

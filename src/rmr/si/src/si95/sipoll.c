@@ -53,7 +53,7 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
  char ibuf[1025];
  int i;                        //  loop index
  struct tp_blk *tpptr;         //  pointer at tp stuff
- struct tp_blk *nextone;        //  pointer at next block to process
+ struct tp_blk *nextone = NULL;	//  pointer at next block to process
  int pstat;                    //  poll status
  int kstat;                    //  keyboard status
  struct timeval  delay;        //  delay to use on select call
@@ -120,7 +120,6 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
       }
 
      // for( tpptr = gptr->tplist; tpptr != NULL; tpptr = tpptr->next )
-     for( tpptr = gptr->tplist; tpptr != NULL; tpptr = nextone )
 	tpptr = gptr->tplist; 
 	while( tpptr != NULL ) {
 		nextone = tpptr->next;					//  allow for a delete in loop
