@@ -51,6 +51,10 @@
 #define RF_NOTIFIED	0x01	// notification made about river issue
 #define RF_DROP		0x02	// this message is large and being dropped
 
+#define	TP_SZFIELD_LEN	((sizeof(uint32_t)*2)+1)	// number of bytes needed for msg size in transport header
+#define	TP_SZ_MARKER	'$'							// marker indicating net byte order used
+
+
 #define SI_MAX_ADDR_LEN		512
 
 /*

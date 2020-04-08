@@ -96,7 +96,7 @@ static struct tp_blk *em_siconn_prep( struct ginfo_blk *gptr, int type, char *ab
 void *em_cb_data = NULL;
 static void em_sicbreg( struct ginfo_blk *gptr, int type, int ((*fptr)()), void * dptr ) {
 	if( em_cb_data == NULL ) {
-		fprintf( stderr, "<SIEM> calldback dptr saved for type %d\n", type );
+		fprintf( stderr, "<SIEM> calldback dptr %p saved for type %d\n", dptr, type );
 		em_cb_data = dptr;
 	}
 	return;
