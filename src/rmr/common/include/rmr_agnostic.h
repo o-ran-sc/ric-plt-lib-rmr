@@ -87,6 +87,7 @@ typedef struct uta_ctx  uta_ctx_t;
 #define MFL_NOALLOC		0x02		// send should NOT allocate a new buffer before returning
 #define MFL_ADDSRC		0x04		// source must be added on send
 #define MFL_RAW			0x08		// message is 'raw' and not from an RMr based sender (no header)
+#define MFL_HUGE		0x10		// buffer was larger than applications indicated usual max; don't cache
 
 #define MAX_EP_GROUP	32			// max number of endpoints in a group
 #define MAX_RTG_MSG_SZ	2048		// max expected message size from route generator

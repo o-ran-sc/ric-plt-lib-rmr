@@ -100,6 +100,8 @@ int main( int argc, char** argv ) {
 	char	osrc[128];					// src strings to test when cloning
 	char	nsrc[128];
 	int		verbose = 0;
+	int		old_len;
+	int		dmb_size = 2048;			// default message buffer size
 
 	data = getenv( "RMR_RTG_SVC" );
 	if( data == NULL ) {
@@ -135,15 +137,20 @@ int main( int argc, char** argv ) {
 
 	memset( count_bins, 0, sizeof( count_bins ) );
 
-	fprintf( stderr, "<EXRCVR> listening on port: %s for a max of %d messages\n", listen_port, nmsgs );
+	fprintf( stderr, "<EXRCVR> listening on port %s for a max of 20 seconds\n", listen_port );
 	fprintf( stderr, "<EXRCVR> copy=%d clone=%d\n", copy, clone );
 
+	if( ! clone ) {
+		dmb_size = 128;			// not cloning, force small buffer to test larger buffer receives
+	}
+
+	fprintf( stderr, "<EXRCVR> default receive message buffer size: %d\n", dmb_size );
 #ifdef MTC
 	fprintf( stderr, "<EXRCVR> starting in multi-threaded mode\n" );
-	mrc = rmr_init( listen_port, RMR_MAX_RCV_BYTES, RMRFL_MTCALL ); // start RMr in mt-receive mode
+	mrc = rmr_init( listen_port, dmb_size, RMRFL_MTCALL ); // start RMr in mt-receive mode
 #else
 	fprintf( stderr, "<EXRCVR> starting in direct receive mode\n" );
-	mrc = rmr_init( listen_port, RMR_MAX_RCV_BYTES, RMRFL_NONE );	// start your engines!
+	mrc = rmr_init( listen_port, dmb_size, RMRFL_NONE );	// start your engines!
 #endif
 	if( mrc == NULL ) {
 		fprintf( stderr, "<EXRCVR> ABORT:  unable to initialise RMr\n" );
@@ -180,18 +187,22 @@ int main( int argc, char** argv ) {
 				}
 
 				if( clone ) {
-					need = rmr_payload_size( msg );
+					need = msg->len;							// clone what was sent, not entire payload
 				} else {
 					need = generate_payload( ack_header, ack_data, 0, 0 );		// create an ack w/ random payload in payload, and set data in header
 				}
 
 				if( clone || rmr_payload_size( msg ) < need ) {					// received message too small or we want to clone the original for test
+					old_len = msg->len;
 					resized++;
 					omsg = msg;
 					rmr_get_src( omsg, osrc );
 					msg = rmr_realloc_payload( msg, need, copy, clone );		// reallocate the message with a payload big enough or clone if set
 					rmr_get_src( msg, nsrc );
 
+					if( msg->len != old_len ) {
+						fprintf( stderr, "[ERR] after realloc len=%d didn't match old len=%d\n", msg->len, old_len );
+					}
 					if( strcmp( osrc, nsrc ) != 0 ) {
 						fprintf( stderr, "[ERR] realloc source strings don't match (%s) new=(%s)\n", osrc, nsrc );
 					} else {
