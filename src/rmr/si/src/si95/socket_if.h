@@ -35,7 +35,7 @@
 #define _SOCKET_IF_H
 
 #ifndef PARINOID_CHECKS
-#	define PARINOID_CHECKS 1
+#	define PARINOID_CHECKS 0
 #endif
 
 #define TCP_DEVICE	0     	//  device type of socket 

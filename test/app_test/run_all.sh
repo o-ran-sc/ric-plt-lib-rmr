@@ -186,5 +186,5 @@ else
 fi
 
 
-fm -fr goober_dir
+rm -fr goober_dir
 exit $(( !! errors ))

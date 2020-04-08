@@ -45,8 +45,14 @@ The &cw(rmr_alloc_msg) function is used to allocate a buffer which the user
 programme can write into and then send through the RMR library.
 The buffer is allocated such that sending it requires no additional copying
 out of the buffer.
-If the value passed in &cw(size) is 0, then the default size supplied on the
-&ital(rmr_init) call will be used.
+If the value passed in &cw(size) is less than or equal to 0, then the 
+&ital(normal maximum size) supplied on the &ital(rmr_init) call will be used.
+When &ital(size) is greater than zero, the message allocated will have at least 
+the indicated number of bytes in the payload.
+There is no maximum size imposed by RMR, however the underlying system memory 
+managerment (e.g. malloc) functions may impose a limit.
+
+&space
 The &ital(ctx) parameter is the void context pointer that was returned by
 the &ital(rmr_init) function.
 

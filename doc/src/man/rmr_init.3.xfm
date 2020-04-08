@@ -38,7 +38,7 @@
 &ex_start
 #include <rmr/rmr.h>
 
-void* rmr_init( char* proto_port, int max_msg_size, int flags );
+void* rmr_init( char* proto_port, int norm_msg_size, int flags );
 &ex_end
 
 &uindent
@@ -51,15 +51,25 @@ send messages.
 
 &space
 &ital(Port) is used to listen for connection requests from other RMR based applications.
-The &ital(max_msg_size) parameter is used to allocate receive buffers and is the
-maximum message size which the application expects to receive.
-This value is the sum of &bold(both) the maximum payload size &bold(and) the maximum
-trace data size.
+The &ital(norm_msg_size) parameter is used to allocate receive buffers and should be
+set to what the user application expects to be a size which will hold the vast majority
+of expected messages.
+When computing the size, the application should consider the usual payload size &bold(and)
+the maximum trace data size that will be used.
 This value is also used as the default message size when allocating message buffers.
-Messages arriving which are longer than the given maximum will be dropped without
-notification to the application.
-A warning is written to standard error for the first message which is too large on
-each connection.
+Messages arriving which are longer than the given normal size will cause RMR to allocate
+a new buffer which is large enough for the arriving message.
+
+&space
+Starting with version 3.8.0 RMR no longer places a maximum buffer size for received 
+messages.
+The underlying system memory manager might impose such a limit and the attempt to
+allocate a buffer larger than that limit will likely result in an application abort.
+Other than the potential performance impact from extra memory allocation and release, 
+there is no penality to the user programme for specifyning a normal buffer size which
+is usually smaller than received buffers. 
+Similarly, the only penality to the application for over specifying the normal buffer
+size might be a larger memory footprint.
 
 &space
 &ital(Flags) allows for selection of some RMr options at the time of initialisation.
