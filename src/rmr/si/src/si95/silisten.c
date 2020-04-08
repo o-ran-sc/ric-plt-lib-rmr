@@ -45,7 +45,7 @@ extern int SIlistener( struct ginfo_blk *gptr, int type, char *abuf ) {
 	struct tp_blk *tpptr;      		//  pointer into tp list
 	int status = SI_ERROR;     		//  status of processing
 
-	if( PARINOID_CHECKS ) {
+	if( PARANOID_CHECKS ) {
 		if( gptr == NULL ) {
 			return status;
 		}

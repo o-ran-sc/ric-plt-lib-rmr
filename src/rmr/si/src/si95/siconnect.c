@@ -57,7 +57,7 @@ extern int SIconnect( struct ginfo_blk *gptr, char *abuf ) {
 	int alen = 0;					//  len of address struct 
 	int fd = SI_ERROR;             	//  file descriptor to return to caller 
 
-	if( PARINOID_CHECKS ) {
+	if( PARANOID_CHECKS ) {
 		if( gptr == NULL ) {
 			return SI_ERROR;
 		}
