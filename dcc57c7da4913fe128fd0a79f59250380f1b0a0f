@@ -69,6 +69,30 @@
       "revId": "dcc57c7da4913fe128fd0a79f59250380f1b0a0f",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8730fd20_d27693b8",
+        "filename": "README",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-08T16:50:20Z",
+      "side": 1,
+      "message": "LMGTFY\n\nhttps://docs.o-ran-sc.org/projects/o-ran-sc-ric-plt-xapp-frame-py/en/latest/",
+      "parentUuid": "989b874b_30b6a652",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 1
+      },
+      "revId": "dcc57c7da4913fe128fd0a79f59250380f1b0a0f",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
