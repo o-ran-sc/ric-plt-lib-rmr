@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b0e70ea6_6c51842f",
+        "filename": "doc/src/man/rmr_init.3.xfm",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-09T19:56:41Z",
+      "side": 1,
+      "message": "Fixed, but I really don\u0027t grock the distaste for trailing whitspace; disk is cheap :)",
+      "parentUuid": "1c87da8c_10d1e015",
+      "range": {
+        "startLine": 71,
+        "startChar": 41,
+        "endLine": 71,
+        "endChar": 42
+      },
+      "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4b30f066_ac986ee3",
         "filename": "src/rmr/si/src/si95/socket_if.h",
         "patchSetId": 5
@@ -39,6 +63,24 @@
       "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b6bbb8a3_5adb28c8",
+        "filename": "src/rmr/si/src/si95/socket_if.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-09T19:56:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4b30f066_ac986ee3",
+      "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "bac555e3_f85dcbcf",
+        "filename": "src/rmr/si/src/sr_si_static.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-09T19:56:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3646303b_429e153e",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 1
+      },
+      "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "194a53df_00c80616",
         "filename": "test/app_test/run_exrts_test.sh",
         "patchSetId": 5
@@ -79,6 +145,24 @@
       "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "abddea81_69483cb3",
+        "filename": "test/app_test/run_exrts_test.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-09T19:56:41Z",
+      "side": 1,
+      "message": "Nope. Running code through spellchec is simply maddening.  This is why I came to research: prove things could be done without having to spend more time polishing turds than what it took to do the hard work.   I just don\u0027t have the patience for making sure every bit of extra trailing white space is removed, or any production tasks.",
+      "parentUuid": "194a53df_00c80616",
+      "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -102,6 +186,30 @@
       "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a1c6178_1517148e",
+        "filename": "test/rmr_si_test.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-09T19:56:41Z",
+      "side": 1,
+      "message": "Well this one is embarrassing, but Im past caring today.   They are all changed.",
+      "parentUuid": "7d3cf895_b3c63f98",
+      "range": {
+        "startLine": 58,
+        "startChar": 8,
+        "endLine": 58,
+        "endChar": 23
+      },
+      "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
