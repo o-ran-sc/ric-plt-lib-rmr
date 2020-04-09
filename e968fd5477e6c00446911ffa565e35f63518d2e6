@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1c87da8c_10d1e015",
+        "filename": "doc/src/man/rmr_init.3.xfm",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-09T19:38:45Z",
+      "side": 1,
+      "message": "Please watch trailing whitespace",
+      "range": {
+        "startLine": 71,
+        "startChar": 41,
+        "endLine": 71,
+        "endChar": 42
+      },
+      "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b30f066_ac986ee3",
+        "filename": "src/rmr/si/src/si95/socket_if.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-09T19:38:45Z",
+      "side": 1,
+      "message": "pls watch trailing whitespace",
+      "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3646303b_429e153e",
+        "filename": "src/rmr/si/src/sr_si_static.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-09T19:38:45Z",
+      "side": 1,
+      "message": "pls watch trailing whitespace",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 1
+      },
+      "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "194a53df_00c80616",
+        "filename": "test/app_test/run_exrts_test.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-09T19:38:45Z",
+      "side": 1,
+      "message": "Do you ever use shellcheck.net ?",
+      "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d3cf895_b3c63f98",
+        "filename": "test/rmr_si_test.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-09T19:38:45Z",
+      "side": 1,
+      "message": "PARANOID_CHECKS\n\nyes they really are out to get your spelling lol",
+      "range": {
+        "startLine": 58,
+        "startChar": 8,
+        "endLine": 58,
+        "endChar": 23
+      },
+      "revId": "e968fd5477e6c00446911ffa565e35f63518d2e6",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
