@@ -53,43 +53,45 @@ if( BUILD_DOC )
 	# base filenames (with .xfm are input)
 	set( man_names
 		rmr.7
-		rmr_bytes2meid.3
-		rmr_bytes2xact.3
-		rmr_bytes2payload.3
-		rmr_free_msg.3
-		rmr_payload_size.3
-		rmr_rts_msg.3
-		rmr_wh_close.3
 		rmr_alloc_msg.3
-		rmr_get_rcvfd.3
-		rmr_get_meid.3
-		rmr_rcv_msg.3
-		rmr_send_msg.3
-		rmr_wh_open.3
+		rmr_bytes2meid.3
+		rmr_bytes2payload.3
+		rmr_bytes2xact.3
 		rmr_call.3
+		rmr_close.3
+		rmr_free_msg.3
+		rmr_get_meid.3
+		rmr_get_rcvfd.3
+		rmr_get_src.3
+		rmr_get_srcip.3
+		rmr_get_trace.3
+		rmr_get_trlen.3
+		rmr_get_xact.3
 		rmr_init.3
+		rmr_init_trace.3
+ 		rmr_mt_call.3
+		rmr_mt_rcv.3
+		rmr_payload_size.3
+		rmr_rcv_msg.3
 		rmr_ready.3
+		rmr_realloc_payload.3
+		rmr_rts_msg.3
+		rmr_send_msg.3
+    rmr_set_fack.3
+		rmr_set_stimeout.3
+		rmr_set_trace.3
+		rmr_set_vlevel.3
 		rmr_str2meid.3
 		rmr_str2xact.3
 		rmr_support.3
 		rmr_torcv_msg.3
-		rmr_wh_send_msg.3
-		rmr_get_trace.3
-		rmr_init_trace.3
-		rmr_set_trace.3
-		rmr_set_vlevel.3
-		rmr_tralloc_msg.3
-		rmr_get_trlen.3
-		rmr_get_src.3
- 		rmr_mt_call.3
-		rmr_mt_rcv.3
-		rmr_get_srcip.3
-		rmr_realloc_payload.3
 		rmr_trace_ref.3
-		rmr_set_stimeout.3
-		rmr_get_xact.3
-		rmr_wh_state.3
+		rmr_tralloc_msg.3
 		rmr_wh_call.3
+		rmr_wh_close.3
+		rmr_wh_open.3
+		rmr_wh_send_msg.3
+		rmr_wh_state.3
 	)
 
 	# initialise lists of files we generated
