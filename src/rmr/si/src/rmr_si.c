@@ -532,7 +532,7 @@ extern int rmr_set_rtimeout( void* vctx, int time ) {
 				that we know about. The _user_ should ensure that the supplied length also
 				includes the trace data length maximum as they are in control of that.
 */
-static void* init(  char* uproto_port, int max_msg_size, int flags ) {
+static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	static	int announced = 0;
 	uta_ctx_t*	ctx = NULL;
 	char	bind_info[256];				// bind info
@@ -581,7 +581,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 
 	ctx->send_retries = 1;							// default is not to sleep at all; RMr will retry about 10K times before returning
 	ctx->d1_len = 4;								// data1 space in header -- 4 bytes for now
-	ctx->max_ibm = max_msg_size < 1024 ? 1024 : max_msg_size;					// larger than their request doesn't hurt
+	ctx->max_ibm = def_msg_size < 1024 ? 1024 : def_msg_size;					// larger than their request doesn't hurt
 	ctx->max_ibm += sizeof( uta_mhdr_t ) + ctx->d1_len + ctx->d2_len + TP_HDR_LEN + 64;		// add in header size, transport hdr, and a bit of fudge
 
 	ctx->mring = uta_mk_ring( 4096 );				// message ring is always on for si
@@ -598,8 +598,8 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 
 
 	ctx->max_plen = RMR_MAX_RCV_BYTES;				// max user payload lengh
-	if( max_msg_size > 0 ) {
-		ctx->max_plen = max_msg_size;
+	if( def_msg_size > 0 ) {
+		ctx->max_plen = def_msg_size;
 	}
 
 	// we're using a listener to get rtg updates, so we do NOT need this.
@@ -623,7 +623,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		port = proto_port;			// assume something like "1234" was passed
 	}
 
-	if( (tok = getenv( "ENV_RTG_PORT" )) != NULL && atoi( tok ) < 1 ) { 	// must check here -- if < 1 then we just start static file 'listener'
+	if( (tok = getenv( ENV_RTG_PORT )) != NULL && atoi( tok ) < 1 ) { 	// must check here -- if < 1 then we just start static file 'listener'
 		static_rtc = 1;
 	}
 
@@ -699,10 +699,12 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		ctx->rtable = rt_clone_space( NULL, NULL, 0 );		// creates an empty route table so that wormholes still can be used
 	} else {
 		if( static_rtc ) {
+			rmr_vlog( RMR_VL_INFO, "rmr_init: file based route table only for context on port %s\n", uproto_port );
 			if( pthread_create( &ctx->rtc_th,  NULL, rtc_file, (void *) ctx ) ) { 	// kick the rt collector thread as just file reader
 				rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start static route table collector thread: %s", strerror( errno ) );
 			}
 		} else {
+			rmr_vlog( RMR_VL_INFO, "rmr_init: dynamic route table for context on port %s\n", uproto_port );
 			if( pthread_create( &ctx->rtc_th,  NULL, rtc, (void *) ctx ) ) { 	// kick the real rt collector thread
 				rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start dynamic route table collector thread: %s", strerror( errno ) );
 			}
@@ -733,8 +735,8 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		without drastically changing anything. The user should invoke with RMRFL_NONE to
 		avoid any misbehavour as there are internal flags which are suported
 */
-extern void* rmr_init( char* uproto_port, int max_msg_size, int flags ) {
-	return init( uproto_port, max_msg_size, flags & UFL_MASK  );		// ensure any internal flags are off
+extern void* rmr_init( char* uproto_port, int def_msg_size, int flags ) {
+	return init( uproto_port, def_msg_size, flags & UFL_MASK  );		// ensure any internal flags are off
 }
 
 /*

@@ -141,8 +141,9 @@ int main() {
         int i;
    rmr_mbuf_t*  sbuf;      // send buffer
    int     count = 0;
+   int     norm_msg_size = 1500;  // most msg fit in this size
 
-   mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
+   mrc = rmr_init( "43086", norm_msg_size, RMRFL_NONE );
    if( mrc == NULL ) {
       fprintf( stderr, "[FAIL] unable to initialise RMR environment\n" );
       exit( 1 );

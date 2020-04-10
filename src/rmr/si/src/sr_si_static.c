@@ -39,13 +39,13 @@ static void dump_n( char *p, char* label, int n ) {
 
 
 	if( label ) {
-		fprintf( stderr, ">>>>> %s p=%p %d bytes\n", label, p, n );
+		fprintf( stderr, "[DUMP] %s p=%p %d bytes\n", label, p, n );
 	}
 
 	rows = (n/16) + ((n % 16) ? 1 : 0);
 
 	for( j = 0; j < rows; j++ ) {
-		fprintf( stderr, "%04x: ", j * 16 );
+		fprintf( stderr, "[DUMP] %04x: ", j * 16 );
 
 		for( i = 0; t < n && i < 16; i++, t++ ) {
 			fprintf( stderr, "%02x ", (unsigned char) *p );
