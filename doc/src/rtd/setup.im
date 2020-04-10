@@ -62,5 +62,12 @@
 .cd 1 6.5i m=0 i=0
 &line_len( 6i)
 
+.if ! textsize
+	.dv textsize 10
+.fi
+.if ! textfont
+	.dv textfont Helvetica
+.fi
+
 .dv _setup_im 1
 .fi

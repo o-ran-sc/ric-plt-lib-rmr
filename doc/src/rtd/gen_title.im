@@ -1,0 +1,65 @@
+.** vim: ts=4 sw=4 noet:
+.if false
+==================================================================================
+	Copyright (c) 2020 Nokia
+	Copyright (c) 2020 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+
+.if false
+	Mnemonic:	gen_title.im
+	Abstract:	Imbed file to generate a title when requested.  Uses doc_title and
+				doc_subtitle strings if available. We will inject a man page title
+				if the INPUT_FILE env variable is set (to avoid having to edit
+				all of them to add such a beast which isn't needed for a real
+				man page.
+
+	Date:		10 April 2020
+.fi
+
+.gv e INPUT_FILE in
+.if in
+	.if ! doc_title
+		.dv doc_title Man Page: &in
+	.fi
+.fi
+
+.im license.im 
+
+.gv e OUTPUT_TYPE ot
+.if doc_title
+	.if "&ot" "rst" =
+		&many_equals .br
+		&doc_title .br
+		&many_equals .br
+		.if &doc_subtitle
+			&many_dashes .br
+			&doc_subtitle .br
+			&many_dashes .br
+		.fi
+	.ei
+		.sf Helvetica
+		.sp 5
+		.st 18
+		.ce &doc_title
+		.st 12
+		.if &doc_subtitle
+			.ce &doc_subtitle
+		.fi
+		.st &textsize
+		.sf &txtfont
+		.sp 2
+	.fi
+.fi

@@ -1,9 +1,11 @@
  
+ 
 .. This work is licensed under a Creative Commons Attribution 4.0 International License. 
 .. SPDX-License-Identifier: CC-BY-4.0 
 .. CAUTION: this document is generated from source in doc/src/rtd. 
 .. To make changes edit the source and recompile the document. 
 .. Do NOT make changes directly to .rst or .md files. 
+ 
  
  
 RMR User's Guide 
@@ -51,10 +53,16 @@ The rmr_alloc_msg function is used to allocate a buffer which
 the user programme can write into and then send through the 
 RMR library. The buffer is allocated such that sending it 
 requires no additional copying out of the buffer. If the 
-value passed in size is 0, then the default size supplied on 
-the *rmr_init* call will be used. The *ctx* parameter is the 
-void context pointer that was returned by the *rmr_init* 
-function. 
+value passed in size is less than or equal to 0, then the 
+*normal maximum size* supplied on the *rmr_init* call will be 
+used. When *size* is greater than zero, the message allocated 
+will have at least the indicated number of bytes in the 
+payload. There is no maximum size imposed by RMR, however the 
+underlying system memory managerment (e.g. malloc) functions 
+may impose a limit. 
+ 
+The *ctx* parameter is the void context pointer that was 
+returned by the *rmr_init* function. 
  
 The pointer to the message buffer returned is a structure 
 which has some user application visible fields; the structure 
@@ -410,7 +418,7 @@ application when rmr_rcv_msg is invoked. These messages are
 returned in the order received, one per call to rmr_rcv_msg. 
  
 Call Timeout 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The rmr_call function implements a timeout failsafe to 
 prevent, in most cases, the function from blocking forever. 
@@ -424,14 +432,14 @@ environment where there is heavy message traffic.
  
 When the threshold number of messages have been queued 
 without receiving a response message, control is returned to 
-the user application and a NULL pointer is returned to 
+the user application and a nil pointer is returned to 
 indicate that no message was received to process. Currently 
 the threshold is fixed at 20 messages, though in future 
 versions of the library this might be extended to be a 
 parameter which the user application may set. 
  
 Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
@@ -463,7 +471,7 @@ allowing the user application to completely disable retires
 (set to 0), or to increase the number of retry loops. 
  
 Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The underlying transport mechanism used to send messages is 
 configured in *non-blocking* mode. This means that if a 
@@ -489,7 +497,7 @@ RETURN VALUE
  
 The rmr_call function returns a pointer to a message buffer 
 with the state set to reflect the overall state of call 
-processing (see Errors below). In some cases a NULL pointer 
+processing (see Errors below). In some cases a nil pointer 
 will be returned; when this is the case only *errno* will be 
 available to describe the reason for failure. 
  
@@ -556,9 +564,9 @@ must be set.
      int retries_left = 5;               // max retries on dev not available
      int retry_delay = 50000;            // retry delay (usec)
      static rmr_mbuf_t*  mbuf = NULL;    // response msg
-     msg_t*  pm;                         // private message (payload)
+     msg_t*  pm;                         // application struct for payload
      // get a send buffer and reference the payload
-     mbuf = rmr_alloc_msg( mr, RMR_MAX_RCV_BYTES );
+     mbuf = rmr_alloc_msg( mr, sizeof( pm->req ) );
      pm = (msg_t*) mbuf->payload;
      // generate an xaction ID and fill in payload with data and msg type
      snprintf( mbuf->xaction, RMR_MAX_XID, "%s", gen_xaction() );
@@ -669,6 +677,59 @@ rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3),
 rmr_rcv_specific(3), rmr_rts_msg(3), rmr_ready(3), 
 rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), rmr_mk_ring(3), 
 rmr_ring_free(3) 
+ 
+ 
+NAME 
+-------------------------------------------------------------------------------------------- 
+ 
+rmr_get_const 
+ 
+SYNOPSIS 
+-------------------------------------------------------------------------------------------- 
+ 
+ 
+:: 
+  
+ #include <rmr/rmr.h>
+ unsigned char* rmr_get_const();
+ 
+ 
+ 
+DESCRIPTION 
+-------------------------------------------------------------------------------------------- 
+ 
+The rmr_get_const function is a convenience function for 
+wrappers which do not have the ability to "compile in" RMR 
+constants. The function will build a nil terminated string 
+containing JSON which defines the RMR constants that C and Go 
+applications have at compile time via the rmr.h header file. 
+ 
+All values are represented as strings and the JSON format is 
+illustrated in the following (partial) example: 
+ 
+ 
+:: 
+  
+ {
+   "RMR_MAX_XID": "32",
+   "RMR_OK": "0",
+   "RMR_ERR_BADARG", "1",
+   "RMR_ERR_NOENDPT" "2"
+ }
+ 
+ 
+ 
+RETURN VALUE 
+-------------------------------------------------------------------------------------------- 
+ 
+On success, a pointer to a string containing the JSON 
+defining constant and value pairs. On failure a nil pointer 
+is returned. 
+ 
+SEE ALSO 
+-------------------------------------------------------------------------------------------- 
+ 
+rmr(7) 
  
  
 NAME 
@@ -810,7 +871,8 @@ function. Error checking has been omitted for clarity.
      rmr_mbuf_t* msg = NULL;
      int nready;
      int i;
-     mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
+     int norm_msg_size = 1500;               // 95% messages are less than this
+     mrc = rmr_init( "43086", norm_msg_size, RMRFL_NONE );
      rcv_fd = rmr_get_rcvfd( mrc );
      ep_fd = epoll_create1( 0 );             // initialise epoll environment
      epe.events = EPOLLIN;
@@ -1155,7 +1217,7 @@ SYNOPSIS
 :: 
   
  #include <rmr/rmr.h>
- void* rmr_init( char* proto_port, int max_msg_size, int flags );
+ void* rmr_init( char* proto_port, int norm_msg_size, int flags );
  
  
  
@@ -1169,16 +1231,30 @@ which provides the necessary routing information for the RMR
 library to send messages. 
  
 *Port* is used to listen for connection requests from other 
-RMR based applications. The *max_msg_size* parameter is used 
-to allocate receive buffers and is the maximum message size 
-which the application expects to receive. This value is the 
-sum of **both** the maximum payload size **and** the maximum 
-trace data size. This value is also used as the default 
-message size when allocating message buffers. Messages 
-arriving which are longer than the given maximum will be 
-dropped without notification to the application. A warning is 
-written to standard error for the first message which is too 
-large on each connection. 
+RMR based applications. The *norm_msg_size* parameter is used 
+to allocate receive buffers and should be set to what the 
+user application expects to be a size which will hold the 
+vast majority of expected messages. When computing the size, 
+the application should consider the usual payload size 
+**and** the maximum trace data size that will be used. This 
+value is also used as the default message size when 
+allocating message buffers (when a zero size is given to 
+rmr_alloc_msg(); see the rmr_alloc_msg() manual page). 
+Messages arriving which are longer than the given normal size 
+will cause RMR to allocate a new buffer which is large enough 
+for the arriving message. 
+ 
+Starting with version 3.8.0 RMR no longer places a maximum 
+buffer size for received messages. The underlying system 
+memory manager might impose such a limit and the attempt to 
+allocate a buffer larger than that limit will likely result 
+in an application abort. Other than the potential performance 
+impact from extra memory allocation and release, there is no 
+penality to the user programme for specifyning a normal 
+buffer size which is usually smaller than received buffers. 
+Similarly, the only penality to the application for over 
+specifying the normal buffer size might be a larger memory 
+footprint. 
  
 *Flags* allows for selection of some RMr options at the time 
 of initialisation. These are set by ORing RMRFL constants 
@@ -1217,7 +1293,7 @@ RMRFL_NOLOCK
  
  
 Multi-threaded Calling 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The support for an application to issue a *blocking call* by 
 the rmr_call() function was limited such that only user 
@@ -1588,7 +1664,7 @@ messages are returned in the order received, one per call to
 rmr_rcv_msg. 
  
 The Transaction ID 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The user application is responsible for setting the value of 
 the transaction ID field before invoking *rmr_mt_call.* The 
@@ -1603,7 +1679,7 @@ the application uses the *rmr_rts_msg()* function and does
 not adjust the transaction ID. 
  
 Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
@@ -1635,7 +1711,7 @@ allowing the user application to completely disable retires
 (set to 0), or to increase the number of retry loops. 
  
 Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The underlying transport mechanism used to send messages is 
 configured in *non-blocking* mode. This means that if a 
@@ -1747,9 +1823,9 @@ function, and illustrates how the transaction ID must be set.
   
      int retries_left = 5;               // max retries on dev not available
      static rmr_mbuf_t*  mbuf = NULL;    // response msg
-     msg_t*  pm;                         // private message (payload)
+     msg_t*  pm;                         // appl message struct (payload)
      // get a send buffer and reference the payload
-     mbuf = rmr_alloc_msg( mr, RMR_MAX_RCV_BYTES );
+     mbuf = rmr_alloc_msg( mr, sizeof( pm->req ) );
      pm = (msg_t*) mbuf->payload;
      // generate an xaction ID and fill in payload with data and msg type
      rmr_bytes2xact( mbuf, xid, RMR_MAX_XID );
@@ -1766,7 +1842,6 @@ function, and illustrates how the transaction ID must be set.
                 mbuf->state != RMR_OK ) {
              usleep( retry_delay );
          }
-  
          if( mbuf == NULL || mbuf->state != RMR_OK ) {
              rmr_free_msg( mbuf );        // safe if nil
              return NULL;
@@ -2071,7 +2146,7 @@ RETURN VALUE
  
 The function returns a pointer to the rmr_mbuf_t structure 
 which references the message information (state, length, 
-payload), or a NULL pointer in the case of an extreme error. 
+payload), or a nil pointer in the case of an extreme error. 
  
 ERRORS 
 -------------------------------------------------------------------------------------------- 
@@ -2242,7 +2317,7 @@ original payload are copied if the *copy* parameter is true
 there is no additional memory allocation and copying. 
  
 Cloning The Message Buffer 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 This function can also be used to generate a separate copy of 
 the original message, with the desired payload size, without 
@@ -2252,7 +2327,7 @@ parameter is true (1). When cloning, the payload is copied to
 the cloned message **only** if the *copy* parameter is true. 
  
 Message Buffer Metadata 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The metadata in the original message buffer (message type, 
 subscription ID, and payload length) will be preserved if the 
@@ -2356,7 +2431,7 @@ than this small difference, the behaviour is exactly the same
 as rmr_send_msg. 
  
 Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
@@ -2388,7 +2463,7 @@ allowing the user application to completely disable retires
 (set to 0), or to increase the number of retry loops. 
  
 Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The underlying transport mechanism used to send messages is 
 configured in *non-blocking* mode. This means that if a 
@@ -2440,7 +2515,7 @@ RMR_OK, the user application may need to attempt a
 retransmission of the message, or take other action depending 
 on the setting of errno as described below. 
  
-In the event of extreme failure, a NULL pointer is returned. 
+In the event of extreme failure, a nil pointer is returned. 
 In this case the value of errno might be of some use, for 
 documentation, but there will be little that the user 
 application can do other than to move on. 
@@ -2503,7 +2578,7 @@ EMSGSIZE
 EFAULT 
    
   The message referenced by the message buffer is corrupt 
-  (NULL pointer or bad internal length). 
+  (nil pointer or bad internal length). 
    
  
 EBADF 
@@ -2593,7 +2668,7 @@ used by the RMR library, and not the responsibility of the
 library.) 
  
 Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
@@ -2625,7 +2700,7 @@ allowing the user application to completely disable retires
 (set to 0), or to increase the number of retry loops. 
  
 Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The underlying transport mechanism used to send messages is 
 configured in *non-blocking* mode. This means that if a 
@@ -2660,7 +2735,7 @@ state set to indicate the reason for failure. The value of
 *errno* may also be set to reflect a more detailed failure 
 reason if it is known. 
  
-In the event of extreme failure, a NULL pointer is returned. 
+In the event of extreme failure, a nil pointer is returned. 
 In this case the value of errno might be of some use, for 
 documentation, but there will be little that the user 
 application can do other than to move on. 
@@ -2741,7 +2816,7 @@ EMSGSIZE
 EFAULT 
    
   The message referenced by the message buffer is corrupt 
-  (NULL pointer or bad internal length). 
+  (nil pointer or bad internal length). 
    
  
 EBADF 
@@ -2901,7 +2976,7 @@ if the *rloops* value is greater than 1.
  
  
 Disabling Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 By default, the send operations will execute with an *rloop* 
 setting of 1; each send operation will attempt to resend the 
@@ -3393,7 +3468,7 @@ RETURN VALUE
  
 The function returns a pointer to the rmr_mbuf_t structure 
 which references the message information (state, length, 
-payload), or a NULL pointer in the case of an extreme error. 
+payload), or a nil pointer in the case of an extreme error. 
  
 ERRORS 
 -------------------------------------------------------------------------------------------- 
@@ -3721,7 +3796,7 @@ potentially non-threaded concurrent applications (such as
 Go's goroutines) is possible. 
  
 Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
@@ -3753,7 +3828,7 @@ allowing the user application to completely disable retires
 (set to 0), or to increase the number of retry loops. 
  
 Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The underlying transport mechanism used to send messages is 
 configured in *non-blocking* mode. This means that if a 
@@ -3836,7 +3911,8 @@ clarity.
          int i;
     rmr_mbuf_t*  sbuf;      // send buffer
     int     count = 0;
-    mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
+    int     norm_msg_size = 1500;    // most messages fit in this size
+    mrc = rmr_init( "43086", norm_msg_size, RMRFL_NONE );
     if( mrc == NULL ) {
        fprintf( stderr, "[FAIL] unable to initialise RMR environment\\n" );
        exit( 1 );
@@ -4053,7 +4129,7 @@ thus any buffer allocated by these means, or calls to
 *rmr_rcv_msg()* can be passed to this function. 
  
 Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
@@ -4085,7 +4161,7 @@ allowing the user application to completely disable retires
 (set to 0), or to increase the number of retry loops. 
  
 Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The underlying transport mechanism used to send messages is 
 configured in *non-blocking* mode. This means that if a 
@@ -4119,7 +4195,7 @@ RMR_OK, the user application may need to attempt a
 retransmission of the message, or take other action depending 
 on the setting of errno as described below. 
  
-In the event of extreme failure, a NULL pointer is returned. 
+In the event of extreme failure, a nil pointer is returned. 
 In this case the value of errno might be of some use, for 
 documentation, but there will be little that the user 
 application can do other than to move on. 
@@ -4183,7 +4259,7 @@ EMSGSIZE
 EFAULT 
    
   The message referenced by the message buffer is corrupt 
-  (NULL pointer or bad internal length). 
+  (nil pointer or bad internal length). 
    
  
 EBADF 
@@ -4244,7 +4320,8 @@ clarity.
          int i;
     rmr_mbuf_t*  sbuf;      // send buffer
     int     count = 0;
-    mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
+    int     norm_msg_size = 1500;  // most msg fit in this size
+    mrc = rmr_init( "43086", norm_msg_size, RMRFL_NONE );
     if( mrc == NULL ) {
        fprintf( stderr, "[FAIL] unable to initialise RMR environment\\n" );
        exit( 1 );

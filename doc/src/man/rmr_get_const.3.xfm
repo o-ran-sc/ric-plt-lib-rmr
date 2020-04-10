@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2020 Nokia
+   Copyright (c) 2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,13 +18,11 @@
 .fi
 
 .if false
-    Mnemonic    rmr_close.3.xfm
-    Abstract    The manual page for the rmr_close function.
+    Mnemonic    rmr_get_const.xfm
+    Abstract    The manual page for the rmr_get_const function.
     Author      E. Scott Daniels
-    Date        21 February 2019
+    Date        10 April 2020
 .fi
-
-.dv doc_title Man Page: rmr_close
 
 .gv e LIB lib
 .im &{lib}/man/setup.im
@@ -33,45 +31,45 @@
 
 &h1(RMR Library Functions)
 &h2(NAME)
-    rmr_close
+    rmr_get_const
 
 &h2(SYNOPSIS)
 &indent
 &ex_start
 #include <rmr/rmr.h>
 
-void rmr_close( void* vctx )
+unsigned char* rmr_get_const();
 &ex_end
 
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_close) function closes the listen socket effectively cutting the application
-off.
-The route table listener is also stopped.
-Calls to rmr_rcv_msg() will fail with unpredictable error codes, and calls to rmr_send_msg(),
-rmr_call(), and rmr_rts_msg() will have unknown results.
-
+The &cw(rmr_get_const) function is a convenience function for wrappers which do not have
+the ability to "compile in" RMR constants.
+The function will build a nil terminated string containing JSON which defines the
+RMR constants that C and Go applications have at compile time via the &cw(rmr.h) header file.
 .sp
+
+All values are represented as strings and the JSON format is illustrated in the following (partial)
+example:
+&half_space
+
+&ex_start
+{
+  "RMR_MAX_XID": "32",
+  "RMR_OK": "0",
+  "RMR_ERR_BADARG", "1",
+  "RMR_ERR_NOENDPT" "2"
+}
+&ex_end
+
+&h2(RETURN VALUE)
+On success, a pointer to a string containing the JSON defining constant and value pairs.
+On failure a nil pointer is returned.
 
 
 &h2(SEE ALSO )
 .ju off
-rmr_alloc_msg(3),
-rmr_call(3),
-rmr_free_msg(3),
-rmr_get_rcvfd(3),
-rmr_payload_size(3),
-rmr_send_msg(3),
-rmr_rcv_msg(3),
-rmr_rcv_specific(3),
-rmr_rts_msg(3),
-rmr_ready(3),
-rmr_fib(3),
-rmr_has_str(3),
-rmr_tokenise(3),
-rmr_mk_ring(3),
-rmr_ring_free(3),
-rmr_wh_open(3),
-rmr_wh_send_msg(3)
+rmr(7)
 .ju on
+
