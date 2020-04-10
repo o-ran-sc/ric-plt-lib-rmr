@@ -53,5 +53,10 @@
     .fi
 .fi
 
+.gv e GEN_TITLE gen_title
+.if "&gen_title" "1" =
+	.im gen_title.im
+.fi
+
 .dv _setup_im 1
 .fi

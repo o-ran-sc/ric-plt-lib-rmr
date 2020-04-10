@@ -24,6 +24,8 @@
     Date        21 February 2019
 .fi
 
+.dv doc_title Man Page: rmr_close
+
 .gv e LIB lib
 .im &{lib}/man/setup.im
 

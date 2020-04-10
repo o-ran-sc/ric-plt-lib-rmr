@@ -27,6 +27,12 @@
 	only to be overlaid by a regen.  Committing output is stupid.
 .fi
 
+.if ! _license_im
+
+.cd 1 14i i=0
+.ll 14i
+.in 0i
+
 .dv lic_comment_1 This work is licensed under a Creative Commons Attribution 4.0 International License.
 .dv lic_comment_2 SPDX-License-Identifier: CC-BY-4.0
 .dv caution_1 CAUTION: this document is generated from source in doc/src/rtd. 
@@ -56,3 +62,10 @@
 
 .sp 1
 
+
+.cd 1 8i i=0
+.ll 8i
+.in 0
+
+.dv _license_im 1
+.fi
