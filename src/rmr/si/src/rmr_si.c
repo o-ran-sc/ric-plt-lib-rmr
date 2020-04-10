@@ -528,6 +528,11 @@ extern int rmr_set_rtimeout( void* vctx, int time ) {
 	open ports without starting additional route table collectors, will invoke this
 	directly with the proper flag.
 
+	The max_msg_size is now interpreted as the normal inbound message size as none of the 
+	supported underlying transports restrict inbound message size.  The caller should supply
+	a size into which 90% of the exepcted messaegs will fit; an additional malloc/free is
+	required for every message that is larger than the "normal" value given.
+
 	CAUTION:   The max_ibm (max inbound message) size is the supplied user max plus the lengths
 				that we know about. The _user_ should ensure that the supplied length also
 				includes the trace data length maximum as they are in control of that.
@@ -623,7 +628,7 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		port = proto_port;			// assume something like "1234" was passed
 	}
 
-	if( (tok = getenv( "ENV_RTG_PORT" )) != NULL && atoi( tok ) < 1 ) { 	// must check here -- if < 1 then we just start static file 'listener'
+	if( (tok = getenv( ENV_RTG_PORT )) != NULL && atoi( tok ) < 1 ) { 	// must check here -- if < 1 then we just start static file 'listener'
 		static_rtc = 1;
 	}
 
@@ -699,10 +704,12 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		ctx->rtable = rt_clone_space( NULL, NULL, 0 );		// creates an empty route table so that wormholes still can be used
 	} else {
 		if( static_rtc ) {
+			rmr_vlog( RMR_VL_INFO, "rmr_init: file based route table only for context on port %s\n", uproto_port );
 			if( pthread_create( &ctx->rtc_th,  NULL, rtc_file, (void *) ctx ) ) { 	// kick the rt collector thread as just file reader
 				rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start static route table collector thread: %s", strerror( errno ) );
 			}
 		} else {
+			rmr_vlog( RMR_VL_INFO, "rmr_init: dynamic route table for context on port %s\n", uproto_port );
 			if( pthread_create( &ctx->rtc_th,  NULL, rtc, (void *) ctx ) ) { 	// kick the real rt collector thread
 				rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start dynamic route table collector thread: %s", strerror( errno ) );
 			}

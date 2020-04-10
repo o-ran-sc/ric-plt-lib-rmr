@@ -119,10 +119,10 @@ how the transaction ID must be set.
     int retries_left = 5;               // max retries on dev not available
     int retry_delay = 50000;            // retry delay (usec)
     static rmr_mbuf_t*  mbuf = NULL;    // response msg
-    msg_t*  pm;                         // private message (payload)
+    msg_t*  pm;                         // application struct for payload
 
     // get a send buffer and reference the payload
-    mbuf = rmr_alloc_msg( mr, RMR_MAX_RCV_BYTES );
+    mbuf = rmr_alloc_msg( mr, sizeof( pm->req ) );
     pm = (msg_t*) mbuf->payload;
 
     // generate an xaction ID and fill in payload with data and msg type

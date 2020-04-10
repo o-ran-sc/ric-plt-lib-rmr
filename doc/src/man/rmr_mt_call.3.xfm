@@ -147,10 +147,10 @@ how the transaction ID must be set.
 &ex_start
     int retries_left = 5;               // max retries on dev not available
     static rmr_mbuf_t*  mbuf = NULL;    // response msg
-    msg_t*  pm;                         // private message (payload)
+    msg_t*  pm;                         // appl message struct (payload)
 
     // get a send buffer and reference the payload
-    mbuf = rmr_alloc_msg( mr, RMR_MAX_RCV_BYTES );
+    mbuf = rmr_alloc_msg( mr, sizeof( pm->req ) );
     pm = (msg_t*) mbuf->payload;
 
     // generate an xaction ID and fill in payload with data and msg type
@@ -171,7 +171,7 @@ how the transaction ID must be set.
 
             usleep( retry_delay );
         }
- 
+
         if( mbuf == NULL || mbuf->state != RMR_OK ) {
             rmr_free_msg( mbuf );        // safe if nil
             return NULL;

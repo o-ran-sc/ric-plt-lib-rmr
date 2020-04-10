@@ -85,8 +85,9 @@ int main() {
     rmr_mbuf_t* msg = NULL;
     int nready;
     int i;
+	int	norm_msg_size = 1500;			// 95% messages are less than this	
 
-    mrc = rmr_init( "43086", RMR_MAX_RCV_BYTES, RMRFL_NONE );
+    mrc = rmr_init( "43086", norm_msg_size, RMRFL_NONE );
     rcv_fd = rmr_get_rcvfd( mrc );
 
     ep_fd = epoll_create1( 0 );             // initialise epoll environment
