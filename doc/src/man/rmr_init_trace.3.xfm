@@ -66,7 +66,7 @@ a message later, the &cw(rmr_tralloc_msg()) function can be used.
 
 &h2(RETURN VALUE)
 A value of 1 is returned on success, and 0 on failure.  A failure indicates that the
-RMr context (a void pointer passed to this function was not valid.
+RMR context (a void pointer passed to this function was not valid.
 
 &h2(SEE ALSO )
 .ju off

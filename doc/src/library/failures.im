@@ -153,7 +153,7 @@ and a brief description of their meaning.
 	&di(RMR_ERR_INITFAILED) initialisation of something (probably message) failed
 	&half_space
 
-	&di(RMR_ERR_NOTSUPP)	the request is not supported, or RMr was not initialised for the request
+	&di(RMR_ERR_NOTSUPP)	the request is not supported, or RMR was not initialised for the request
 &end_dlist
 &uindent
 .st &textsize

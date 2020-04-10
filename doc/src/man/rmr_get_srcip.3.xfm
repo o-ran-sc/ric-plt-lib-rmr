@@ -46,16 +46,16 @@ unsigned char* rmr_get_srcip( rmr_mbuf_t* mbuf, unsigned char* dest )
 &h2(DESCRIPTION)
 The &cw(rmr_get_srcip) function will copy the &ital(source IP address) from the message to a buffer
 (dest) supplied by the user.
-In an RMr message, the source IP address is the sender's information that is used for return to sender
+In an RMR message, the source IP address is the sender's information that is used for return to sender
 function calls;  this function makes it available to the user application.
 The address is maintained as IP:port where &ital(IP) could be either an IPv6 or IPv4 address depending
 on what was provided by the sending application.
 .sp
 
-The maximum size allowed by RMr is 64 bytes (including the nil string terminator), so the user
+The maximum size allowed by RMR is 64 bytes (including the nil string terminator), so the user
 must ensure that the destination buffer given is at least 64 bytes. The user application should use
-the RMr constant RMR_MAX_SRC to ensure that the buffer supplied is large enough, and to protect
-against future RMr enhancements which might increase the address buffer size requirement.
+the RMR constant RMR_MAX_SRC to ensure that the buffer supplied is large enough, and to protect
+against future RMR enhancements which might increase the address buffer size requirement.
 
 &h2(RETURN VALUE)
 On success, a pointer to the destination buffer is given as a convenience to the user programme.

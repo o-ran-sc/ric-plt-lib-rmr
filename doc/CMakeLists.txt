@@ -60,6 +60,7 @@ if( BUILD_DOC )
 		rmr_call.3
 		rmr_close.3
 		rmr_free_msg.3
+		rmr_get_const.3
 		rmr_get_meid.3
 		rmr_get_rcvfd.3
 		rmr_get_src.3

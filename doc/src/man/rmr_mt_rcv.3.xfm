@@ -44,7 +44,7 @@ rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* old_msg, int timeout );
 &h2(DESCRIPTION)
 The &cw(rmr_mt_rcv) function blocks until a message is received, or the timeout
 period (milliseconds) has passed.
-The result is an RMr message buffer which references a received message.
+The result is an RMR message buffer which references a received message.
 In the case of a timeout the state will be reflected in an "empty buffer" (if old_msg
 was not nil, or simply with the return of a nil pointer.
 If a timeout value of zero (0) is given, then the function will block until
@@ -79,7 +79,7 @@ mode with the same "pass through" overhead to using this function directly.
 
 &h2(RETURN VALUE)
 When a message is received before the timeout period expires, a pointer to the
-RMr message buffer which describes the message is returned.
+RMR message buffer which describes the message is returned.
 This will, with a high probability, be a different message buffer than &ital(old_msg;)
 the user application should not continue to use &ital(old_msg) after it is passed
 to this function.
@@ -107,7 +107,7 @@ indicate either &cw(RMR_OK) or
     message will be 0.
 
 &half_space
-&di(RMR_ERR_NOTSUPP) The multi-threaded option was not enabled when RMr was
+&di(RMR_ERR_NOTSUPP) The multi-threaded option was not enabled when RMR was
 initialised.  See the man page for &ital(rmr_init()) for details.
 
 &half_space

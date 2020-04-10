@@ -1,9 +1,11 @@
  
+ 
 .. This work is licensed under a Creative Commons Attribution 4.0 International License. 
 .. SPDX-License-Identifier: CC-BY-4.0 
 .. CAUTION: this document is generated from source in doc/src/rtd. 
 .. To make changes edit the source and recompile the document. 
 .. Do NOT make changes directly to .rst or .md files. 
+ 
  
  
 RMR Developer Guide 
@@ -73,7 +75,7 @@ si
  
  
 Internal Function Exposure 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The decision to limit as much as practical the exposure of 
 truly internal RMR functions was made, and as a result most 
