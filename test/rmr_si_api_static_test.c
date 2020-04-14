@@ -45,6 +45,10 @@
 					 rmr_mtosend_msg
 					 rmr_free_msg
 
+				Not all message/call functions can be tested here because of the
+				callback nature of SI.  There is a specific rcv test static module
+				for those tests.
+
 	Author:		E. Scott Daniels
 	Date:		5 April 2019
 */
@@ -61,45 +65,6 @@
 
 #include "rmr.h"
 #include "rmr_agnostic.h"
-
-/*
-	Send a 'burst' of messages to drive some send retry failures to increase RMr coverage
-	by handling the retry caee.
-*/
-static void send_n_msgs( void* ctx, int n ) {
-	rmr_mbuf_t*	msg;			// message buffers
-	int i;
-
-	msg = rmr_alloc_msg( ctx,  1024 );
-	if( ! msg ) {
-		return;
-	}
-
-	for( i = 0; i < n; i++ ) {
-		//fprintf( stderr, "mass send\n" );
-		msg->len = 100;
-		msg->mtype = 1;
-		msg->state = 999;
-		errno = 999;
-		msg = rmr_send_msg( ctx, msg );
-	}
-}
-
-/*
-	Refresh or allocate a message with some default values
-*/
-static rmr_mbuf_t* fresh_msg( void* ctx, rmr_mbuf_t* msg ) {
-	if( ! msg )  {
-		msg = rmr_alloc_msg( ctx, 2048 );
-	}
-
-	msg->mtype = 0;
-	msg->sub_id = -1;
-	msg->state = 0;
-	msg->len = 100;
-
-	return msg;
-}
 
 static int rmr_api_test( ) {
 	int		errors = 0;
@@ -264,109 +229,6 @@ static int rmr_api_test( ) {
 
 	mt_disc_cb( rmc, 0 );			// disconnect callback for coverage
 	mt_disc_cb( rmc, 100 );			// with a fd that doesn't exist
-
-return errors;
-
-	msg2 = rmr_rcv_msg( NULL, NULL );
-	errors += fail_if( msg2 != NULL, "rmr_rcv_msg returned msg when given nil context and msg "  );
-
-	msg2 = rmr_rcv_msg( rmc, NULL );
-	errors += fail_if( msg2 == NULL, "rmr_rcv_msg returned nil msg when given nil msg "  );
-	if( msg2 ) {
-		if( msg2->state != RMR_ERR_EMPTY ) {
-			errors += fail_not_equal( msg2->state, RMR_OK, "receive given nil message did not return msg with good state (not empty) "  );
-		}
-	}
-
-
-	msg = rmr_rcv_msg( rmc, msg );
-	if( msg ) {
-		errors += fail_not_equal( msg->state, RMR_OK, "rmr_rcv_msg did not return an ok state "  );
-		errors += fail_not_equal( msg->len, 220, "rmr_rcv_msg returned message with invalid len "  );
-	} else {
-		errors += fail_if_nil( msg, "rmr_rcv_msg returned a nil pointer "  );
-	}
-
-	rmr_rts_msg( NULL, NULL );			// drive for coverage
-	rmr_rts_msg( rmc, NULL );
-	errors += fail_if( errno == 0, "rmr_rts_msg did not set errno when given a nil message "  );
-
-	msg->state = 0;
-	msg = rmr_rts_msg( NULL, msg );			// should set state in msg
-	if( msg ) {
-		errors += fail_if_equal( msg->state, 0, "rmr_rts_msg did not set state when given valid message but no context "  );
-	} else {
-		errors += fail_if_nil( msg,  "rmr_rts_msg returned a nil msg when given a good one" );
-	}
-
-
-	msg = rmr_rts_msg( rmc, msg );			// return the buffer to the sender
-	errors += fail_if_nil( msg, "rmr_rts_msg did not return a message pointer "  );
-	errors += fail_not_equal( msg->state, 0, "rts_msg did not return a good state (a) when expected" );
-	errors += fail_not_equal( errno, 0, "rmr_rts_msg did not reset errno (a) expected (b)"  );
-
-	msg->state = 0;
-	msg = rmr_call( NULL, msg );
-	errors += fail_if( msg->state == 0, "rmr_call did not set message state when given message with nil context "  );
-
-	snprintf( msg->xaction, 17, "%015d", 16 );		// dummy transaction id (emulation generates, this should arrive after a few calls to recv)
-	msg->mtype = 0;
-	msg->sub_id = -1;
-	em_set_rcvcount( 0 );							// reset message counter
-	em_set_rcvdelay( 1 );							// force slow msg rate during mt testing
-	msg = rmr_call( rmc, msg );						// dummy nng/nano function will sequentually add xactions and should match or '16'
-	errors += fail_if_nil( msg, "rmr_call returned a nil message on call expected to succeed "  );
-	if( msg ) {
-		errors += fail_not_equal( msg->state, RMR_OK, "rmr_call did not properly set state on successful return "  );
-		errors += fail_not_equal( errno, 0, "rmr_call did not properly set errno (a) on successful return "  );
-	}
-
-	snprintf( wbuf, 17, "%015d", 14 );				// while waiting, the queued messages should have #14, so issue a few receives looking for it
-	for( i = 0; i < 16; i++ ) {						// it should be in the first 15
-		msg = rmr_rcv_msg( rmc, msg );
-		if( msg ) {
-			if( strcmp( wbuf, msg->xaction ) == 0 ) {		// found the queued message
-				break;
-			}
-			fprintf( stderr, "<INFO> msg: %s\n", msg->xaction );
-		} else {
-			errors += fail_if_nil( msg, "receive returnd nil msg while looking for queued message "  );
-		}
-	}
-
-	errors += fail_if( i >= 16, "did not find expected message on queue "  );
-
-	if( ! msg ) {
-		msg = rmr_alloc_msg( rmc, 2048 );				// something buggered above; get a new one
-	}
-	msg->mtype = 0;
-	msg->sub_id = -1;
-	msg = rmr_call( rmc, msg );							// make a call that we never expect a response on (nil pointer back)
-	errors += fail_not_nil( msg, "rmr_call returned a nil message on call expected not to receive a response "  );
-	errors += fail_if( errno == 0, "rmr_call did not set errno on failure "  );
-
-	rmr_free_msg( NULL ); 			// drive for coverage; nothing to check
-	rmr_free_msg( msg2 );
-
-
-	msg2 = rmr_torcv_msg( NULL, NULL, 10 );
-	errors += fail_not_nil( msg2, "rmr_torcv_msg returned a pointer when given nil information "  );
-	msg2 = rmr_torcv_msg( rmc, NULL, 10 );
-	errors += fail_if_nil( msg2, "rmr_torcv_msg did not return a message pointer when given a nil old msg "  );
-
-	// ---  test timeout receive; our dummy epoll function will return 1 ready on first call and 0 ready (timeout emulation) on second
-	// 		however we must drain the swamp (queue) first, so run until we get a timeout error, or 20 and report error if we get to 20.
-	msg = NULL;
-	for( i = 0; i < 40; i++ ) {
-		msg = rmr_torcv_msg( rmc, msg, 10 );
-		errors += fail_if_nil( msg, "torcv_msg returned nil msg when message expected "  );
-		if( msg ) {
-			if( msg->state == RMR_ERR_TIMEOUT || msg->state == RMR_ERR_EMPTY ) {		// queue drained and we've seen both states from poll if we get a timeout
-				break;
-			}
-		}
-	}
-	errors += fail_if( i >= 40, "torcv_msg never returned a timeout "  );
 
 
 	// ---- trace things that are not a part of the mbuf_api functions and thus must be tested here -------

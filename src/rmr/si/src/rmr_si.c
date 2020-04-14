@@ -370,7 +370,7 @@ extern rmr_mbuf_t* rmr_call( void* vctx, rmr_mbuf_t* msg ) {
 		return msg;
 	}
 
-	return rmr_mt_call( vctx, msg, 1, 1000 );		// use the reserved call-id of 1 and wait up to 1 sec
+    return mt_call( vctx, msg, 1, 1000, NULL );		// use the reserved call-id of 1 and wait up to 1 sec
 }
 
 /*
@@ -874,6 +874,7 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 		if( mbuf != NULL ) {
 			mbuf->flags |= MFL_ADDSRC;               // turn on so if user app tries to send this buffer we reset src
 		}
+
 		return mbuf;
 	}
 
@@ -970,12 +971,6 @@ static rmr_mbuf_t* mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int max_w
 
 	if( ! (ctx->flags & CFL_MTC_ENABLED) ) {
 		mbuf->state = RMR_ERR_NOTSUPP;
-		mbuf->tp_state = errno;
-		return mbuf;
-	}
-
-	if( call_id > MAX_CALL_ID || call_id < 2 ) {					// 0 and 1 are reserved; user app cannot supply them
-		mbuf->state = RMR_ERR_BADARG;
 		mbuf->tp_state = errno;
 		return mbuf;
 	}
@@ -1081,6 +1076,14 @@ static rmr_mbuf_t* mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int max_w
 	This is now just an outward facing wrapper so we can support wormhole calls.
 */
 extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int max_wait ) {
+
+	// must vet call_id here, all others vetted by workhorse mt_call() function
+	if( call_id > MAX_CALL_ID || call_id < 2 ) {		// 0 and 1 are reserved; user app cannot supply them
+		mbuf->state = RMR_ERR_BADARG;
+		mbuf->tp_state = EINVAL;
+		return mbuf;
+	}
+
 	return mt_call( vctx, mbuf, call_id, max_wait, NULL );
 }
 
