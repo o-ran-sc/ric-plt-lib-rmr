@@ -61,6 +61,7 @@
 #undef NNG_UNDER_TEST 
 #include "test_support.c"					// things like fail_if()
 #include "test_ctx_support.c"				// dummy context support
+#include "test_msg_support.c"
 #include "test_gen_rt.c"
 
 
@@ -86,6 +87,7 @@ static void gen_rt( uta_ctx_t* ctx );		// defined in sr_si_static_test, but used
 #include "mbuf_api_static_test.c"
 #include "sr_si_static_test.c"
 #include "lg_buf_static_test.c"
+// do NOT include the receive test static must be stand alone
 
 #include "rmr_si_api_static_test.c"
 

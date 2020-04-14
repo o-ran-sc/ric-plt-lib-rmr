@@ -32,7 +32,7 @@
 #include "rmr.h" 				// we use some of rmr defs in building dummy messages, so we need these
 #include "rmr_agnostic.h"
 
-// ---------------------- emulated nng functions ---------------------------
+// ---------------------- emulated SI95 functions ---------------------------
 
 
 #ifndef _em_si		// this is the same define as the nng emulation code uses to give warning if both included
@@ -42,6 +42,37 @@
 #include <pthread.h>
 
 #include "test_common_em.c"			// common emulation needed for all (epoll, gethostname...)
+
+// --- some globals --------------------------------------------------------
+int em_reset_call_flag = 0;			// allows a send to turn off the call flag (see em_disable_call_flg())
+
+// ------------- emulated message header -----------------------------------
+
+/*
+	This is a copy from agnostic.h. we need to reset flags in some situations
+	so we have to have this, under a different name to avoid disaster.
+*/
+typedef struct {
+    int32_t mtype;                      // message type  ("long" network integer)
+    int32_t plen;                       // payload length (sender data length in payload)
+    int32_t rmr_ver;                    // our internal message version number
+    unsigned char xid[RMR_MAX_XID];     // space for user transaction id or somesuch
+    unsigned char sid[RMR_MAX_SID];     // sender ID for return to sender needs
+    unsigned char src[RMR_MAX_SRC];     // name:port of the sender (source)
+    unsigned char meid[RMR_MAX_MEID];   // managed element id.
+    struct timespec ts;                 // timestamp ???
+
+                                        // V2 extension
+    int32_t flags;                      // HFL_* constants
+    int32_t len0;                       // length of the RMr header data
+    int32_t len1;                       // length of the tracing data
+    int32_t len2;                       // length of data 1 (d1)
+    int32_t len3;                       // length of data 2 (d2)
+    int32_t sub_id;                     // subscription id (-1 invalid)
+
+                                        // v3 extension
+    unsigned char srcip[RMR_MAX_SRC];   // ip address and port of the source
+} em_mhdr_t;
 
 //--------------------------------------------------------------------------
 /*
@@ -123,8 +154,10 @@ static int em_siconnect( struct ginfo_blk *gptr, char *abuf ) {
 		return -1;
 	}
 
-	fprintf( stderr, "<SIEM> siem is emulating connect attempt return fd=%d\n", em_next_fd );
-	em_next_fd++;
+	fprintf( stderr, "<SIEM> siem is emulating connect to (%s) attempt return fd=%d\n", abuf, em_next_fd );
+	if( em_next_fd < 50 ) {
+		em_next_fd++;
+	}
 	return em_next_fd-1;
 }
 
@@ -171,6 +204,25 @@ static void em_sisend( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 	return;
 }
 
+/*
+	Calling this function causes the send emulation to turn off the call
+	flag in the RMR header. Turning that flag off makes the arriving message
+	look as though it might be a response to a call rather than a call itself.
+	This is needed since we loop back messages.
+*/
+static void em_disable_call_flg() {
+	em_reset_call_flag = 1;
+	fprintf( stderr, "<SIEM> reset call flag setting is: %d\n", em_reset_call_flag );
+}
+
+/*
+	Opposite of disable_call_flg; the flag is not touched.
+*/
+static void em_allow_call_flg() {
+	em_reset_call_flag = 0;
+	fprintf( stderr, "<SIEM> reset call flag setting is: %d\n", em_reset_call_flag );
+}
+
 //  callback prototype to drive to simulate 'receive'
 static int mt_data_cb( void* datap, int fd, char* buf, int buflen );
 /*
@@ -189,6 +241,15 @@ static int em_sisendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 		//fprintf( stderr, "<SIEM> sendt is failing send with blocked/again\n\n" );
 		errno = EAGAIN;
 		return SIEM_BLOCKED;
+	}
+
+	if( em_reset_call_flag ) {		// for call testing we need to flip the flag off to see it "return"
+		em_mhdr_t*	hdr;
+
+		hdr = (em_mhdr_t *) (ubuf+50);		// past the transport header bytes
+fprintf( stderr, ">>>> resetting call_flag before: %x\n", hdr->flags );
+		hdr->flags &= ~HFL_CALL_MSG;		// flip off the call flag
+fprintf( stderr, ">>>> resetting call_flag after: %x\n", hdr->flags );
 	}
 
 	uss++;
