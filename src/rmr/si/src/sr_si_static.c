@@ -789,6 +789,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 				} else {
 					ok_sends++;
 					msg = clone_m;										// clone will be the next to send
+					msg->state = RMR_OK;
 				}
 			} else {
 				msg = send_msg( ctx, msg, nn_sock, max_to );			// send the last, and allocate a new buffer; drops the clone if it was

@@ -59,7 +59,7 @@ static int rmr_lgbuf_test( ) {
 	snprintf( msg->payload, msg->len, "Rambling Wreck from Georgia Tech!\n\n" );
 	msg = rmr_send_msg( rmc, msg );
 	if( msg && msg->state != RMR_OK ) {
-		printf( stderr, "[ERR] lg buf test: send failed? %d\n", msg->state );
+		fprintf( stderr, "<FAIL> lg buf test: send failed? %d\n", msg->state );
 	}
 	rmr_free_msg( msg );
 
