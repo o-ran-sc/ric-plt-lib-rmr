@@ -158,6 +158,7 @@
 #define TS_QOE_PRED_REQ				30001
 #define TS_QUE_PREDICTION			30002
 
+#define MC_REPORT					30010		// Measurement campaign xApp reports
 
 
 // ---- these are old (release 0) definitions and should not be used ------
