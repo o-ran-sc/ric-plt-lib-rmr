@@ -285,12 +285,8 @@ static void* rtc( void* vctx ) {
 		if( msg != NULL && msg->len > 0 ) {
 			payload = msg->payload;
 			mlen = msg->len;					// usable bytes in the payload
-			if( vlevel > 1 ) {
-				rmr_vlog_force( RMR_VL_DEBUG, "rmr_rtc: received rt message type=%d len=%d bytes (%s)\n", msg->mtype, (int) mlen, msg->payload );
-			} else {
-				if( DEBUG > 1 || (vlevel > 0) ) rmr_vlog( RMR_VL_DEBUG, "rmr_rtc: received rt message type=%d len=%d\n", msg->mtype, (int) mlen );
-			}
 
+			if( DEBUG > 1 || (vlevel > 0) ) rmr_vlog( RMR_VL_DEBUG, "rmr_rtc: received rt message type=%d len=%d\n", msg->mtype, (int) mlen );
 			switch( msg->mtype ) {
 				case RMRRM_TABLE_DATA:
 					if( (flags & RTCFL_HAVE_UPDATE) == 0 ) {
@@ -311,6 +307,9 @@ static void* rtc( void* vctx ) {
 					}
 					memcpy( pbuf, payload, mlen );
 					pbuf[mlen] = 0;										// don't depend on sender making this a legit string
+					if( vlevel > 1 ) {
+						rmr_vlog_force( RMR_VL_DEBUG, "rmr_rtc: rt message: (%s)\n", pbuf );
+					}
 
 					curr = pbuf;
 					while( curr ) {								// loop over each record in the buffer

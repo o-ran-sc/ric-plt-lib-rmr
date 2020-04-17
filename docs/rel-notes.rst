@@ -30,6 +30,28 @@ Core RMR Changes
 -------------------------------------------------------------------------------------------- 
  
  
+2020 April 17; version 3.8.0 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Add safe connect to avoid potential connect bug on Linux 
+(RIC-332) 
+ 
+Change debugging in route table collector to avoid possible 
+segment fault when in level 2 debug (RIC-335) 
+ 
+ 
+2020 April 15; version 3.7.4 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Add missing message type to header file (RIC-334) 
+ 
+ 
+2020 April 14; version 3.7.3 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Fix bug in rmr_call() when using SI95 (RIC-333) 
+ 
+ 
 2020 April 10; version 3.7.2 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  

@@ -62,8 +62,9 @@
 #define NO_EMULATION 1						// no emulation of transport functions
 #define NO_PRIVATE_HEADERS 1				// no rmr_si or rmr_nng headers
 #define NO_DUMMY_RMR 1						// no msg things
-#include "test_support.c"					// things like fail_if()
 
+#include "test_support.c"					// things like fail_if()
+#include "test_transport_em.c"				// system/transport emulation (open, close, connect, etc)
 
 /*
 #include "rmr.h"					// things the users see
@@ -84,7 +85,7 @@
 //#include <si95/sigetadd.c>
 //#include <si95/sigetname.c>
 #include <si95/siinit.c>
-//#include <si95/silisten.c>
+#include <si95/silisten.c>
 #include <si95/sinew.c>
 //#include <si95/sinewses.c>
 //#include <si95/sipoll.c>
@@ -148,6 +149,7 @@ static int init() {
 	SIclr_tflags( si_ctx, 0x00 );		// drive for coverage; no return value from these
 	SIset_tflags( si_ctx, 0x03 );
 
+	fprintf( stderr, "<INFO> init  module finished with %d errors\n", errors );
 	return errors;
 }
 
@@ -158,9 +160,14 @@ static int cleanup() {
 		return 0;
 	}
 
+	SItp_stats( si_ctx );		// drive for coverage only
+	SItp_stats( NULL );
+
 	SIconnect( si_ctx, "localhost:43086" ); 	// ensure context has a tp block to free on shutdown
 	SIshutdown( si_ctx );
 
+
+	fprintf( stderr, "<INFO> cleanup  module finished with %d errors\n", errors );
 	return errors;
 }
 
@@ -184,11 +191,11 @@ static int addr() {
 
 	dest = NULL;
 	snprintf( buf1, sizeof( buf1 ), "   [ff02::5:4001" );		// invalid address, drive leading space eater too
-	l = SIaddress( buf1, &dest, AC_TOADDR6 );
+	l = SIaddress( buf1, (void **)  &dest, AC_TOADDR6 );
 	errors += fail_if_true( l > 0, "to addr6 with bad addr convdersion returned valid len" );
 
 	snprintf( buf1, sizeof( buf1 ), "[ff02::5]:4002" );		// v6 might not be supported so failure is OK here
-	l=SIaddress( buf1, &dest, AC_TOADDR6 );
+	l=SIaddress( buf1, (void **) &dest, AC_TOADDR6 );
 	errors += fail_if_true( l < 1, "to addr convdersion failed" );
 
 	snprintf( buf1, sizeof( buf1 ), "localhost:43086" );
@@ -196,11 +203,54 @@ static int addr() {
 	errors += fail_if_true( l < 1, "to addr convdersion failed" );
 
 	snprintf( buf1, sizeof( buf1 ), "localhost:4004" );
-	l = SIaddress( buf1, &dest, AC_TODOT );
+	l = SIaddress( buf1, (void **) &dest, AC_TODOT );
 	errors += fail_if_true( l < 1, "to dot convdersion failed" );
 
+	fprintf( stderr, "<INFO> addr module finished with %d errors\n", errors );
 	return errors;
 
+}
+
+
+/*
+	Connection oriented tests.
+*/
+static int conn( ) {
+	int errors = 0;
+	int state;
+
+	state = SIconnect( si_ctx, "localhost:4567" );		// driver regular connect
+	errors += fail_if_true( state < 0, "connect to low port failed" );
+
+	state = SIconnect( si_ctx, "localhost:43086" ); 	// drive save connect with good return code
+	errors += fail_if_true( state < 0, "connect to high port failed" );
+
+	tpem_set_addr_dup_state( 1 );				// force get sockket name emulation to return a duplicate address
+	state = SIconnect( si_ctx, "localhost:43086" ); 	// drive save connect with good return code
+	errors += fail_if_true( state >= 0, "forced dup connect did not return error" );
+
+	tpem_set_addr_dup_state( 0 );				// force get sockket name emulation to return a duplicate address
+	tpem_set_conn_state( 1 );
+	state = SIconnect( si_ctx, "localhost:4567" );		// driver regular connect
+	errors += fail_if_true( state >= 0, "connect to low port successful when failure expected" );
+
+	tpem_set_sock_state( 1 );		// make scoket calls fail
+	state = SIconnect( si_ctx, "localhost:4567" );		// driver regular connect
+	errors += fail_if_true( state >= 0, "connect to low port successful when socket based failure expected" );
+
+	tpem_set_sock_state( 0 );
+
+	state = SIlistener( si_ctx, TCP_DEVICE, "0.0.0.0:4567" );
+	errors += fail_if_true( state < 0, "listen failed" );
+
+	tpem_set_bind_state( 1 );
+	state = SIlistener( si_ctx, TCP_DEVICE, "0.0.0.0:4567" );
+	errors += fail_if_true( state >= 0, "listen successful when bind error set" );
+	tpem_set_bind_state( 0 );
+
+
+	fprintf( stderr, "<INFO> conn module finished with %d errors\n", errors );
+	return errors;
 }
 
 /*
@@ -216,7 +266,7 @@ int main() {
 	errors += init();
 	errors += memory();
 	errors += addr();
-fprintf( stderr, ">>> cleaning\n" );
+	errors += conn();
 	errors += cleanup();
 
 	fprintf( stderr, "<INFO> testing finished\n" );

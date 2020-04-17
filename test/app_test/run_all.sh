@@ -58,7 +58,7 @@ function run_test {
 
 build=""
 errors=0
-si_flag=""				# eventually we'll default to -S to run SI tests over NNG tests
+si_flag="-S"				# default to -S to prefer to run SI tests over NNG tests
 
 src_root="../.."
 if [[ -z $BUILD_PATH ]]						# if not explicitly set, assume one of our standard spots

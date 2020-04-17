@@ -145,6 +145,7 @@ extern void rmr_vlog( int write_level, char* fmt, ... ) {
 		write_level = RMR_VL_DEBUG;
 	}
 
+	memset( msg, 0, sizeof( msg ) );								// logging is slow; this ensures 0 term if msg is too large
 	hlen = snprintf( msg, sizeof( msg ), "%ld %d/RMR [%s] ", (long) time( NULL ), log_pid, log_situations[write_level] );
 	body = msg + hlen;
 
@@ -171,7 +172,7 @@ extern void rmr_vlog_force( int write_level, char* fmt, ... ) {
 		rmr_vlog_init();
 	}
 
-	if( log_vlevel <= 0 ) {			// cant force if off completely to allow for total silience
+	if( log_vlevel <= 0 ) {			// can force if off completely to allow for total silience
 		return;
 	}
 

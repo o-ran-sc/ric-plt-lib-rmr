@@ -129,6 +129,29 @@ extern struct tp_blk *SIlisten_prep( struct ginfo_blk *gptr, int type, char* abu
 }
 
 /*
+	Look at the address and determine if the connect attempt to this address must
+	use safe_connect() rather than the system connect_call(). On linux, a smart
+	connect is needed if the target port is >32K and is even. This makes the assumption
+	that the local port rage floor is 32K; we could read something in /proc, but 
+	at this point won't bother.  Returns true if we determine that it is best to
+	use safe_connect().
+*/
+static int need_smartc( char* abuf ) {
+	char*	tok;
+	int		state = 1;
+	int		v;
+
+	if( (tok = strchr( abuf, ':')) != NULL ) {
+		v = atoi( tok+1 );
+		if( v < 32767  || v % 2 != 0 ) {
+			state = 0;
+		}
+	}
+
+	return state;
+}
+
+/*
 	Prep a socket to use to connect to a listener.
 	Establish a transport block and target address in prep to connect.
 	Type is the SI constant UDP_DEVICE or TCP_DEVICE. The abuf pointer
@@ -179,16 +202,11 @@ extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf,
 		if( (tptr->fd = SOCKET( tptr->family, tptr->type, protocol )) >= SI_OK ) {
 			optval = 1;
 
-			if( SO_REUSEPORT ) {
-				SETSOCKOPT( tptr->fd, SOL_SOCKET, SO_REUSEPORT, (char *)&optval, sizeof( optval) );
-			}
-
 			if( gptr->tcp_flags & SI_TF_NODELAY ) {
 				optval = 1;
 			} else {
 				optval = 0;
 			}
-			//fprintf( stderr, ">>>>> conn_prep: setting no delay = %d\n", optval );
 			SETSOCKOPT( tptr->fd, SOL_TCP, TCP_NODELAY, (void *)&optval, sizeof( optval) ) ;
 
 			if( gptr->tcp_flags & SI_TF_FASTACK ) {
@@ -196,14 +214,15 @@ extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf,
 			} else {
 				optval = 0;
 			}
-			//fprintf( stderr, ">>>>> conn_prep: setting quick ack = %d\n", optval );
 			SETSOCKOPT( tptr->fd, SOL_TCP, TCP_QUICKACK, (void *)&optval, sizeof( optval) ) ;
 
 			tptr->paddr = addr;				// tuck the remote peer address away
+			if( need_smartc( abuf ) ) {
+				tptr->flags |= TPF_SAFEC;
+			}
 		} else {
-			//fprintf( stderr, ">>>>> conn_prep: bad socket create: %s\n", strerror( errno ) );
 			free( addr );
-			SItrash( TP_BLK, tptr );       	//  free the trasnsport block 
+			SItrash( TP_BLK, tptr );       	// free the trasnsport block 
 			tptr = NULL;					// we'll return nil
 		}
 	}

@@ -58,7 +58,7 @@ RETURN VALUE
 -------------------------------------------------------------------------------------------- 
  
 A value of 1 is returned on success, and 0 on failure. A 
-failure indicates that the RMr context (a void pointer passed 
+failure indicates that the RMR context (a void pointer passed 
 to this function was not valid. 
  
 SEE ALSO 

@@ -22,22 +22,66 @@
 ***************************************************************************
 *
 *  Mnemonic: 	SIconnect
-*  Abstract: 	Start a TCP/IP session with another process.
-*  Parms:    
-*            	addr - Pointer to a string containing the process' address
-*				The address is either ipv4 or ipv6 formmat with the
-*				port number separated with a semicolon (::1;4444,
-*				localhost;4444 climber;4444 129.168.0.4;4444).
-*  Returns:  	The session number if all goes well, SI_ERROR if not.
+*  Abstract: 	This module contains functions to make the connection using
+*				a transport block which has been given a transport (tcp) family
+*				address structure.
 *
 *  Date:		March 1995
 *  Author:		E. Scott Daniels
 *
-*  Mod:		08 Mar 2007 - conversion of sorts to support ipv6
+*  Mod:			08 Mar 2007 - conversion of sorts to support ipv6
+*				17 Apr 2020 - Add safe connect capabilities
 ******************************************************************************
 */
 #include "sisetup.h"
 #include "sitransport.h"
+
+// ---------------- internal functions ----------------------------------------------
+
+/*
+	Attempts a connection to addr, and ensures that the linux even port
+	connect bug does not establish the connection back to our process.
+	If we detect this, then we abort the connection and return -1. 0
+	returned on a good connection.
+
+	If we are hit with the even port connection bug we have no choice but
+	to abort the connection which will CLOSE the caller's FD. This may
+	not be expected in some situations, and when we do the errno is set to
+	EBADFD to indicate this. We ensure that this state is returned ONLY
+	if the failure results in a closed fd which the caller will need to reopen.
+*/
+int safe_connect( int fd, struct sockaddr* addr, int alen ) {
+	int state = 0;
+	char	caddr[255];			// work buffer for get sock name (v6 addr ~28 bytes, so this is plenty)
+	int		calen;				// len of the connect generated address
+
+	if( (state = CONNECT( fd, addr, alen )) != 0 ) {
+		if( errno == EBADFD ) {			// ensure we return bad fd ONLY if we abort later
+			errno = ECONNABORTED;
+		}
+		return state;
+	}
+
+	if( PARANOID_CHECKS ) {
+		if( alen > sizeof( caddr ) ) {		// shouldn't happen, but be safe
+			fprintf( stderr, "safe_connect: address buffer for connect exceeds work space %d > %lu\n", alen, sizeof( caddr ) );
+			errno = E2BIG;
+			return -1;
+		}
+	}
+
+	calen = alen;			// we assume a bound address will have the same type, and thus len, as the connect to addr
+	if( getsockname( fd, (struct sockaddr *) &caddr, &calen ) == 0 ) {
+		if( calen != alen || memcmp( addr, &caddr, calen ) != 0 ) {			// addresses differ, so it's good
+			errno = 0;
+			return 0;
+		}
+	}
+
+	siabort_conn( fd );
+	errno = EBADFD;
+	return -1;
+}
 
 /*
 	Accept a file descriptor and add it to the map.
@@ -50,6 +94,20 @@ extern void SImap_fd( struct ginfo_blk *gptr, int fd, struct tp_blk* tpptr ) {
 	}
 }
 
+/*
+	Creates a connection to the target endpoint using the address in the
+	buffer provided.  The address may be one of three forms:
+		hostname:port
+		IPv4-address:port
+		[IPv6-address]:port
+
+	On success the open file descriptor is returned; else -1 is returned. Errno
+	will be left set by the underlying connect() call.
+
+	To avoid the even port connect bug in the linux connect() systeem call,
+	we will use safe_connect() if indicated during the connection prep
+	process.
+*/
 extern int SIconnect( struct ginfo_blk *gptr, char *abuf ) {
 	int status;
 	struct tp_blk *tpptr;       	//  pointer to new block 
@@ -71,11 +129,20 @@ extern int SIconnect( struct ginfo_blk *gptr, char *abuf ) {
 	if( tpptr != NULL ) {
 		taddr = tpptr->paddr;
 		errno = 0;
-		if( connect( tpptr->fd, taddr, tpptr->palen ) != 0 ) {
-			close( tpptr->fd );     			//  clean up fd and tp_block 
-			SItrash( TP_BLK, tpptr );       	//  free the trasnsport block 
-			fd = SI_ERROR;             			//  send bad session id num back 
-		} else  {                      			//  connect ok 
+		if( tpptr->flags & TPF_SAFEC ) {
+			if( safe_connect( tpptr->fd, taddr, tpptr->palen ) != 0 ) {		// fd closed on failure
+				SItrash( TP_BLK, tpptr );
+				tpptr->fd = -1;
+			}
+		} else {
+			if( CONNECT( tpptr->fd, taddr, tpptr->palen ) != 0 ) {
+				CLOSE( tpptr->fd );     			//  clean up fd and tp_block 
+				tpptr->fd = -1;
+				SItrash( TP_BLK, tpptr );       	//  free the trasnsport block 
+			}
+		}
+
+		if( tpptr->fd >= 0 ) {								// connect ok
 			tpptr->flags |= TPF_SESSION;    		//  indicate we have a session here 
 			tpptr->next = gptr->tplist;     		//  add block to the list 
 			if( tpptr->next != NULL ) {
