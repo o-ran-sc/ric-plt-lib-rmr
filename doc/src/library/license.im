@@ -23,9 +23,11 @@
 .** documents, and at the top for text based documents. It's purpose is
 .** to ensure the output doc has the license statement.
 
+.** thsis will add license info as a comment to the output
+.im ../rtd/license.im
+
 .if pfm
 .sp 5
-.fi
 
 This document, and the source used to generate it, is governed by the following
 copyright statement(s).
@@ -50,3 +52,4 @@ copyright statement(s).
 .fo
 .ln
 .sp 2
+.fi

@@ -21,6 +21,8 @@
 	Title page, toc and license for page oriented output
 .fi
 
+
+.if ! _front_junk
 .sp 20
 .st 24
 .bc start
@@ -51,4 +53,9 @@ Revised: &_date
 .fi
 
 .** ensure this is restored after toc spits
-.cd 1 6.0i
+.if pfm
+	.cd 1 6.0i
+.fi
+
+.dv _front_junk 1
+.fi
