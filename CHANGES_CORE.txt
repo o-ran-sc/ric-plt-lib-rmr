@@ -5,6 +5,9 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 April 20; version 3.8.1
+	Add user guide which replaces the concatination of manages (RIC-328)
+
 2020 April 17; version 3.8.0
 	Add safe connect to avoid potential connect bug on Linux (RIC-332)
 

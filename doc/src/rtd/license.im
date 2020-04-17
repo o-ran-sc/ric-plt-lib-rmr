@@ -21,9 +21,9 @@
 
 
 .if false
-	These things are forced into some output to cary the license forward since 
+	These things are forced into some output to cary the license forward since
 	someone believes the documentation generated is 'source'. We know better.
-	Also, we want to prevent anybody from acutally changing stuff in docs/ 
+	Also, we want to prevent anybody from acutally changing stuff in docs/
 	only to be overlaid by a regen.  Committing output is stupid.
 .fi
 
@@ -35,7 +35,7 @@
 
 .dv lic_comment_1 This work is licensed under a Creative Commons Attribution 4.0 International License.
 .dv lic_comment_2 SPDX-License-Identifier: CC-BY-4.0
-.dv caution_1 CAUTION: this document is generated from source in doc/src/rtd. 
+.dv caution_1 CAUTION: this document is generated from source in doc/src/rtd.
 .dv caution_2 To make changes edit the source and recompile the document.
 .dv caution_3 Do NOT make changes directly to .rst or ^.md files.
 
@@ -47,7 +47,7 @@
 	.fo
 	.** no caution because nobody will change the postscript
 .ei
-	.if "&ot" "rst" = 
+	.if "&ot" "rst" =
 		^.. &lic_comment_1
 		.br
 		^.. &lic_comment_2
@@ -63,7 +63,12 @@
 .sp 1
 
 
-.cd 1 8i i=0
+.if ! col_width
+	.cd 1 8i i=0
+.ei
+	.cd 1 &col_width i=0
+.fi
+
 .ll 8i
 .in 0
 

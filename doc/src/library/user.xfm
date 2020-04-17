@@ -50,10 +50,6 @@
 	.im p1var_setup.ca
 .fi
 
-.** vars picked up by front_junk as it's a generic module
-.dv doc_title RIC Message Router -- RMR
-.dv doc_subtitle User's Manual
-
 .if pfm
 	.** add licence,  a title page, and table of contents
 	.im front_junk.im
@@ -62,22 +58,20 @@
 	.im license.im
 .fi
 
+.** vars picked up by gen_title as it's a generic module
+.dv doc_title RIC Message Router -- RMR
+.dv doc_subtitle User's Manual
+
+.gv e GEN_TITLE gen_title
+.if "&gen_title" "1" =
+	.im ../rtd/gen_title.im
+.fi
+
 .if pfm
 	.pn on noline center f=%d 0
 .fi
 
-&mult_space( 5 )
-.st 18
-&center_start
-.sf &bold_font
-&doc_title
-.br
-.st 12
-&doc_subtitle
-&center_end
-.sf &textfont
-&mult_space( 2 )
-.st &textsize
+.** --------------------------------------------------------------------------------------
 
 &h1(Overview)
 
@@ -186,7 +180,14 @@ document.
 
 .dv qr_appendix A
 .pa
+.if "&ot" "rst" =
+&h1(Appendix &qr_appendix -- Quick Reference)
+Please refer to the RMR manual pages on the Read the Docs site
+&space
+https://docs.o-ran-sc.org/projects/o-ran-sc-ric-plt-lib-rmr/en/latest/index.html
+.ei
 .im api_qref.im
+.fi
 
 .dv mbuf_appendix B
 .pa

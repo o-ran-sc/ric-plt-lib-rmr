@@ -23,12 +23,18 @@
 .** documents, and at the top for text based documents. It's purpose is
 .** to ensure the output doc has the license statement.
 
+.** rtd license will add license info as a comment to the output (ps or rst) file
+.im ../rtd/license.im
+
+
+.** for postscript docs we add a copyright between the cover and table of contents
+.** as should be done for any published work.
 .if pfm
 .sp 5
-.fi
 
-This document, and the source used to generate it, is governed by the following
-copyright statement(s).
+This document, the source used to generate it, and the source code which is
+described in this document, are all governed by the following
+copyright statement.
 
 .sp 2
 .ln
@@ -50,3 +56,4 @@ copyright statement(s).
 .fo
 .ln
 .sp 2
+.fi

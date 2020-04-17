@@ -27,7 +27,7 @@ SYNOPSIS
 :: 
   
  #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_set_stimeout( void* vctx, int rloops );
+ int rmr_set_stimeout( void* vctx, int rloops );
  
  
  

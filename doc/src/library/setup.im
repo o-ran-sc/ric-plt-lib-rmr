@@ -32,6 +32,9 @@
 	.dv lib ..
 .fi
 
+.** sane default for everything except rst
+.dv col_width 6.5i
+
 .** CAUTION:  xfm comparisons are reverse polish so  "a b ="  is true if a == b.
 .if pfm
 	.im &{lib}/generic_ps.im
@@ -42,6 +45,8 @@
 		.im &{lib}/txt.im
 	.fi
 	.if "&ot" "rst" =
+		.** bleeding rst needs bullet lists to have no line breaks
+		.dv col_width 20i
 		.im &{lib}/rst.im
 	.fi
 	.if "&ot" "markdown" =

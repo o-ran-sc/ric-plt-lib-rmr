@@ -214,7 +214,7 @@ SYNOPSIS
 DESCRIPTION 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_bytes2meid function will copy up to *len* butes from 
+The rmr_bytes2meid function will copy up to *len* bytes from 
 *src* to the managed entity ID (meid) field in the message. 
 The field is a fixed length, gated by the constant 
 RMR_MAX_MEID and if len is larger than this value, only 
@@ -334,7 +334,7 @@ SYNOPSIS
 DESCRIPTION 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_bytes2xact function will copy up to *len* butes from 
+The rmr_bytes2xact function will copy up to *len* bytes from 
 *src* to the transaction ID (xaction) field in the message. 
 The field is a fixed length, gated by the constant 
 RMR_MAX_XID and if len is larger than this value, only 
@@ -1517,8 +1517,8 @@ RMR_WARNINGS
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_init function returns a void pointer (a contex if you 
-will) that is passed as the first parameter to nearly all 
+The rmr_init function returns a void pointer (a context if 
+you will) that is passed as the first parameter to nearly all 
 other RMR functions. If rmr_init is unable to properly 
 initialise the environment, NULL is returned and errno is set 
 to an appropriate value. 
@@ -2954,7 +2954,7 @@ SYNOPSIS
 :: 
   
  #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_set_stimeout( void* vctx, int rloops );
+ int rmr_set_stimeout( void* vctx, int rloops );
  
  
  
