@@ -7,4418 +7,1246 @@
 .. Do NOT make changes directly to .rst or .md files. 
  
  
+============================================================================================ 
+RIC Message Router -- RMR 
+============================================================================================ 
+-------------------------------------------------------------------------------------------- 
+User's Manual 
+-------------------------------------------------------------------------------------------- 
  
-RMR User's Guide 
+Overview 
 ============================================================================================ 
  
-The RIC Message Router (RMR) is a library for peer-to-peer 
-communication. Applications use the library to send and 
-receive messages where the message routing and endpoint 
-selection is based on the message type rather than DNS host 
-name-IP port combinations. 
+The RIC Message Router (RMR) is a library for peer-to-peer communication. 
+Applications use the library to send and receive messages where the message 
+routing and endpoint selection is based on the message type rather than DNS host 
+name-IP port combinations. The library provides the following major features: 
  
-This document contains information that developers need to 
-know to use the RMR library. Because the primary 
-documentation for the RMR library is a collection of UNIX 
-manpages (included in the development package, and available 
-via the man command when installed), there is no separate 
-"User's Guide." To provide something for the document 
-scrapers to find, this is a collection of the RMR manual 
-pages formatted directly from their source, which might be a 
-bit ragged when combined into a single markup document. Read 
-the manual pages :) 
+ 
++ Routing and endpoint selection is based on *message type.* 
+ 
++ Application is insulated from the underlying transport mechanism and/or protocols. 
+ 
++ Message distribution (round robin or fanout) is selectable by message type. 
+ 
++ Route management updates are received and processed asynchronously and without overt application involvement. 
  
  
  
-NAME 
+Purpose 
 -------------------------------------------------------------------------------------------- 
  
-rmr_alloc_msg 
+RMR's main purpose is to provide an application with the 
+ability to send and receive messages to/from other peer 
+applications with minimal effort on the application's part. 
+To achieve this, RMR manages all endpoint information, 
+connections, and routing information necessary to establish 
+and maintain communication. From the application's point of 
+view, all that is required to send a message is to allocate 
+(via RMR) a message buffer, add the payload data, and set the 
+message type. To receive a message, the application needs 
+only to invoke the receive function; when a message arrives a 
+message buffer will be returned as the function result. 
  
-SYNOPSIS 
+Message Routing 
 -------------------------------------------------------------------------------------------- 
  
+Applications are required to place a message type into a 
+message before sending, and may optionally add a subscription 
+ID when appropriate. The combination of message type, and 
+subscription ID are refered to as the *message key,* and is 
+used to match an entry in a routing table which provides the 
+possible endpoints expecting to receive messages with the 
+matching key. 
  
-:: 
-  
- #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_alloc_msg( void* ctx, int size );
+Round Robin Delivery 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
+An endpoint from RMR's perspective is an application to which 
+RMR may establish a connection, and expect to send messages 
+with one or more defined message keys. Each entry in the 
+route table consists of one or more endpoint groups, called 
+round robin groups. When a message matches a specific entry, 
+the entry's groups are used to select the destination of the 
+message. A message is sent once to each group, with messages 
+being *balanced* across the endpoints of a group via round 
+robin selection. Care should be taken when defining multiple 
+groups for a message type as there is extra overhead required 
+and thus the overall message latency is somewhat increased. 
  
+Routing Table Updates 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
-DESCRIPTION 
+Route table information is made available to RMR a static 
+file (loaded once), or by updates sent from a separate route 
+manager application. If a static table is provided, it is 
+loaded during RMR initialization and will remain in use until 
+an external process connects and delivers a route table 
+update (often referred to as a dynamic update). Dynamic 
+updates are listened for in a separate process thread and 
+applied automatically; the application does not need to allow 
+for, or trigger, updates. 
+ 
+Latency And Throughput 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_alloc_msg function is used to allocate a buffer which 
-the user programme can write into and then send through the 
-RMR library. The buffer is allocated such that sending it 
-requires no additional copying out of the buffer. If the 
-value passed in size is less than or equal to 0, then the 
-*normal maximum size* supplied on the *rmr_init* call will be 
-used. When *size* is greater than zero, the message allocated 
-will have at least the indicated number of bytes in the 
-payload. There is no maximum size imposed by RMR, however the 
-underlying system memory managerment (e.g. malloc) functions 
-may impose a limit. 
+While providing insulation from the underlying message 
+transport mechanics, RMR must also do so in such a manner 
+that message latency and throughput are not impacted. In 
+general, the RMR induced overhead, incurred due to the 
+process of selecting an endpoint for each message, is minimal 
+and should not impact the overall latency or throughput of 
+the application. This impact has been measured with test 
+applications running on the same physical host and the 
+average latency through RMR for a message was on the order of 
+0.02 milliseconds. 
  
-The *ctx* parameter is the void context pointer that was 
-returned by the *rmr_init* function. 
+As an application's throughput increases, it becomes easy for 
+the application to overrun the underlying transport mechanism 
+(e.g. NNG), consume all available TCP transmit buffers, or 
+otherwise find itself in a situation where a send might not 
+immediately complete. RMR offers different *modes* which 
+allow the application to manage these states based on the 
+overall needs of the application. These modes are discussed 
+in the *Configuration* section of this document. 
  
-The pointer to the message buffer returned is a structure 
-which has some user application visible fields; the structure 
-is described in rmr.h, and is illustrated below. 
+General Use 
+============================================================================================ 
+ 
+To use, the RMR based application simply needs to initialise 
+the RMR environment, wait for RMR to have received a routing 
+table (become ready), and then invoke either the send or 
+receive functions. These steps, and some behind the scenes 
+details, are described in the following paragraphs. 
+ 
+Initialisation 
+-------------------------------------------------------------------------------------------- 
+ 
+The RMR function is used to set up the RMR environment and 
+must be called before messages can be sent or received. One 
+of the few parameters that the application must communicate 
+to RMR is the port number that will be used as the listen 
+port for new connections. The port number is passed on the 
+initialisation function call and a TCP listen socket will be 
+opened with this port. If the port is already in use RMR will 
+report a failure; the application will need to reinitialise 
+with a different port number, abort, or take some other 
+action appropriate for the application. 
+ 
+In addition to creating a TCP listen port, RMR will start a 
+process thread which will be responsible for receiving 
+dynamic updates to the route table. This thread also causes a 
+TCP listen port to be opened as it is expected that the 
+process which generates route table updates will connect and 
+send new information when needed. The route table update port 
+is **not** supplied by the application, but is supplied via 
+an environment variable as this value is likely determined by 
+the mechanism which is starting and configuring the 
+application. 
+ 
+The RMR Context 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+On successful initialisation, a void pointer, often called a 
+*handle* by some programming languages, is returned to the 
+application. This is a reference to the RMR control 
+information and must be passed as the first parameter on most 
+RMR function calls. RMR refers to this as the context, or 
+ctx. 
+ 
+Wait For Ready 
+-------------------------------------------------------------------------------------------- 
+ 
+An application which is only receiving messages does not need 
+to wait for RMR to *become ready* after the call to the 
+initialization function. However, before the application can 
+successfully send a message, RMR must have loaded a route 
+table, and the application must wait for RMR to report that 
+it has done so. The RMR function will return the value *true* 
+(1) when a complete route table has been loaded and can be 
+used to determine the endpoint for a send request. 
+ 
+Receiving Messages 
+-------------------------------------------------------------------------------------------- 
+ 
+The process of receiving is fairly straight forward. The 
+application invokes the RMR function which will block until a 
+message is received. The function returns a pointer to a 
+message block which provides all of the details about the 
+message. Specifically, the application has access to the 
+following information either directly or indirectly: 
  
  
-:: 
-  
- typedef struct {
-     int state;
-     int mtype;
-     int len;
-     unsigned char* payload;
-     unsigned char* xaction;
-     int sub_id;
-     int tp_state;
- } rmr_mbuf_t;
++ The payload (actual data) 
+ 
++ The total payload length in bytes 
+ 
++ The number of bytes of the payload which contain valid data 
+ 
++ The message type and subscription ID values 
+ 
++ The hostname and IP address of the source of the message (the sender) 
+ 
++ The transaction ID 
+ 
++ Tracing data (if provided) 
  
  
  
+The Message Payload 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+The message payload contains the *raw* data that was sent by 
+the peer application. The format will likely depend on the 
+message type, and is expected to be known by the application. 
+A direct pointer to the payload is available from the message 
+buffer (see appendix B for specific message buffer details). 
+ 
+Two payload-related length values are also directly 
+available: the total payload length, and the number of bytes 
+actually filled with data. The used length is set by the 
+caller, and may or not be an accurate value. The total 
+payload length is determined when the buffer is created for 
+sending, and is the maximum number of bytes that the 
+application may modify should the buffer be used to return a 
+response. 
+ 
+Message Type and Subscription ID 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+The message type and subscription ID are both directly 
+available from the message buffer, and are the values which 
+were used to by RMR in the sending application to select the 
+endpoint. If the application resends the message, as opposed 
+to returning the message buffer as a response, the message 
+number and/or the subscription ID might need to be changed to 
+avoid potential issues[1]. 
+ 
+Sender Information 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+The source, or sender information, is indirectly available to 
+the application via the and functions. The former returns a 
+string containing hostname:port, while the string ip:port is 
+returned by the latter. 
+ 
+Transaction ID 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+The message buffer contains a fixed length set of bytes which 
+applications can set to track related messages across the 
+application concept of a transaction. RMR will use the 
+transaction ID for matching a response message when the 
+function is used to send a message. 
+ 
+Trace Information 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+RMR supports the addition of an optional trace information to 
+any message. The presence and size is controlled by the 
+application, and can vary from message to message if desired. 
+The actual contents of the trace information is determined by 
+the application; RMR provides only the means to set, extract, 
+and obtain a direct reference to the trace bytes. The trace 
+data field in a message buffer is discussed in greater detail 
+in the *Trace Data* section. 
+ 
+Sending Messages 
+-------------------------------------------------------------------------------------------- 
+ 
+Sending requires only slightly more work on the part of the 
+application than receiving a message. The application must 
+allocate an RMR message buffer, populate the message payload 
+with data, set the message type and length, and optionally 
+set the subscription ID. Information such as the source IP 
+address, hostname, and port are automatically added to the 
+message buffer by RMR, so there is no need for the 
+application to worry about these. 
+ 
+Message Buffer Allocation 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+The function allocates a *zero copy* buffer and returns a 
+pointer to the RMR rmr_mbuf_t structure. The message buffer 
+provides direct access to the payload, length, message type 
+and subscription ID fields. The buffer must be preallocated 
+in order to allow the underlying transport mechanism to 
+allocate the payload space from its internal memory pool; 
+this eliminates multiple copies as the message is sent, and 
+thus is more efficient. 
+ 
+If a message buffer has been received, and the application 
+wishes to use the buffer to send a response, or to forward 
+the buffer to another application, a new buffer does **not** 
+need to be allocated. The application may set the necessary 
+information (message type, etc.), and adjust the payload, as 
+is necessary and then pass the message buffer to or to be 
+sent or returned to the sender. 
+ 
+Populating the Message Buffer 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+The application has direct access to several of the message 
+buffer fields, and should set them appropriately. 
  
  
-state 
+ 
+len 
    
-  Is the current buffer state. Following a call to 
-  rmr_send_msg the state indicates whether the buffer was 
-  successfully sent which determines exactly what the 
-  payload points to. If the send failed, the payload 
-  referenced by the buffer is the message that failed to 
-  send (allowing the application to attempt a 
-  retransmission). When the state is RMR_OK the buffer 
-  represents an empty buffer that the application may fill 
-  in in preparation to send. 
+  This is the number of bytes that the application placed 
+  into the payload. Setting length to 0 is allowed, and 
+  length may be less than the allocated payload size. 
    
  
 mtype 
    
-  When sending a message, the application is expected to set 
-  this field to the appropriate message type value (as 
-  determined by the user programme). Upon send this value 
-  determines how the RMR library will route the message. For 
-  a buffer which has been received, this field will contain 
-  the message type that was set by the sending application. 
-   
- 
-len 
-   
-  The application using a buffer to send a message is 
-  expected to set the length value to the actual number of 
-  bytes that it placed into the message. This is likely less 
-  than the total number of bytes that the message can carry. 
-  For a message buffer that is passed to the application as 
-  the result of a receive call, this will be the value that 
-  the sending application supplied and should indicate the 
-  number of bytes in the payload which are valid. 
-   
- 
-payload 
-   
-  The payload is a pointer to the actual received data. The 
-  user programme may read and write from/to the memory 
-  referenced by the payload up until the point in time that 
-  the buffer is used on a rmr_send, rmr_call or rmr_reply 
-  function call. Once the buffer has been passed back to a 
-  RMR library function the user programme should **NOT** 
-  make use of the payload pointer. 
-   
- 
-xaction 
-   
-  The *xaction* field is a pointer to a fixed sized area in 
-  the message into which the user may write a transaction 
-  ID. The ID is optional with the exception of when the user 
-  application uses the rmr_call function to send a message 
-  and wait for the reply; the underlying RMR processing 
-  expects that the matching reply message will also contain 
-  the same data in the *xaction* field. 
+  The message type that RMR will use to determine the 
+  endpoint used as the target of the send. 
    
  
 sub_id 
    
-  This value is the subscription ID. It, in combination with 
-  the message type is used by rmr to determine the target 
-  endpoint when sending a message. If the application to 
-  application protocol does not warrant the use of a 
-  subscription ID, the RMR constant RMR_VOID_SUBID should be 
-  placed in this field. When an application is forwarding or 
-  returning a buffer to the sender, it is the application's 
-  responsibility to set/reset this value. 
+  The subscription ID if the message is to be routed based 
+  on the combination of message type and subscription ID. If 
+  no subscription ID is valid for the message, the 
+  application should set the field with the RMR constant 
+  RMR_VOID_SUBID. 
    
  
-tp_state 
+payload 
    
-  For C applications making use of RMR, the state of a 
-  transport based failure will often be available via errno. 
-  However, some wrapper environments may not have direct 
-  access to the C-lib errno value. RMR send and receive 
-  operations will place the current value of errno into this 
-  field which should make it available to wrapper functions. 
-  User applications are strongly cautioned against relying 
-  on the value of errno as some transport mechanisms may not 
-  set this value on all calls. This value should also be 
-  ignored any time the message status is RMR_OK. 
- 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-The function returns a pointer to a rmr_mbuf structure, or 
-NULL on error. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
- 
- 
-ENOMEM 
-   
-  Unable to allocate memory. 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_tralloc_msg(3), rmr_call(3), rmr_free_msg(3), 
-rmr_init(3), rmr_init_trace(3), rmr_get_trace(3), 
-rmr_get_trlen(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_set_trace(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_bytes2meid 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- int rmr_bytes2meid( rmr_mbuf_t* mbuf, unsigned char* src, int len )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_bytes2meid function will copy up to *len* butes from 
-*src* to the managed entity ID (meid) field in the message. 
-The field is a fixed length, gated by the constant 
-RMR_MAX_MEID and if len is larger than this value, only 
-RMR_MAX_MEID bytes will actually be copied. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, the actual number of bytes copied is returned, or 
--1 to indicate a hard error. If the length is less than 0, or 
-not the same as length passed in, errno is set to one of the 
-errors described in the *Errors* section. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-If the returned length does not match the length passed in, 
-errno will be set to one of the following constants with the 
-meaning listed below. 
- 
- 
- 
-EINVAL 
-   
-  The message, or an internal portion of the message, was 
-  corrupted or the pointer was invalid. 
+  The application should obtain the reference (pointer) to 
+  the payload from the message buffer and place any data 
+  into the payload. The application is responsible for 
+  ensuring that the maximum payload size is not exceeded. 
+  The application may obtain the maximum size via the 
+  function. 
    
  
-EOVERFLOW 
+trace data 
    
-  The length passed in was larger than the maximum length of 
-  the field; only a portion of the source bytes were copied. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_bytes2xact(3), rmr_call(3), 
-rmr_free_msg(3), rmr_get_rcvfd(3), rmr_get_meid(3), 
-rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 
-rmr_rcv_specific(3), rmr_rts_msg(3), rmr_ready(3), 
-rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), rmr_mk_ring(3), 
-rmr_ring_free(3), rmr_str2meid(3), rmr_str2xact(3), 
-rmr_wh_open(3), rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_bytes2payload 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- void rmr_bytes2payload( rmr_mbuf_t* mbuf, unsigned char* src, int len )
+  Optionally, the application may add trace information to 
+  the message buffer. 
  
  
  
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-This is a convenience function as some wrapper languages 
-might not have the ability to directly copy into the payload 
-buffer. The bytes from *src* for the length given are copied 
-to the payload. It is the caller's responsibility to ensure 
-that the payload is large enough. Upon successfully copy, the 
-len field in the message buffer is updated to reflect the 
-number of bytes copied. 
- 
-There is little error checking, and no error reporting. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-None. 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_bytes2xact(3), rmr_bytes2payload(3), 
-rmr_call(3), rmr_free_msg(3), rmr_get_rcvfd(3), 
-rmr_get_meid(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_str2meid(3), 
-rmr_str2xact(3), rmr_wh_open(3), rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_bytes2xact 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- int rmr_bytes2xact( rmr_mbuf_t* mbuf, unsigned char* src, int len )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_bytes2xact function will copy up to *len* butes from 
-*src* to the transaction ID (xaction) field in the message. 
-The field is a fixed length, gated by the constant 
-RMR_MAX_XID and if len is larger than this value, only 
-RMR_MAX_XID bytes will actually be copied. 
- 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, the actual number of bytes copied is returned, 
-or -1 to indicate a hard error. If the length is less than 
-0, or not the same as length passed in, errno is set to 
-one of the errors described in the *Errors* section. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-If the returned length does not match the length passed 
-in, errno will be set to one of the following constants 
-with the meaning listed below. 
- 
- 
-EINVAL 
-   
-  The message, or an internal portion of the message, was 
-  corrupted or the pointer was invalid. 
-   
- 
-EOVERFLOW 
-   
-  The length passed in was larger than the maximum length of 
-  the field; only a portion of the source bytes were copied. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_bytes2meid(3), rmr_call(3), 
-rmr_free_msg(3), rmr_get_meid(3), rmr_get_rcvfd(3), 
-rmr_get_xact(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_str2meid(3), 
-rmr_wh_open(3), rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_call 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- extern rmr_mbuf_t* rmr_call( void* vctx, rmr_mbuf_t* msg );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_call function sends the user application message to a 
-remote endpoint, and waits for a corresponding response 
-message before returning control to the user application. The 
-user application supplies a completed message buffer, as it 
-would for a rmr_send call, but unlike with the send, the 
-buffer returned will have the response from the application 
-that received the message. 
- 
-Messages which are received while waiting for the response 
-are queued internally by RMR, and are returned to the user 
-application when rmr_rcv_msg is invoked. These messages are 
-returned in the order received, one per call to rmr_rcv_msg. 
- 
-Call Timeout 
+Sending a Message Buffer 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
-The rmr_call function implements a timeout failsafe to 
-prevent, in most cases, the function from blocking forever. 
-The timeout period is **not** based on time (calls to clock 
-are deemed too expensive for a low latency system level 
-library), but instead the period is based on the number of 
-received messages which are not the response. Using a 
-non-time mechanism for *timeout* prevents the async queue 
-from filling (which would lead to message drops) in an 
-environment where there is heavy message traffic. 
+Once the application has populated the necessary bits of a 
+message, it may be sent by passing the buffer to the 
+function. This function will select an endpoint to receive 
+the message, based on message type and subscription ID, and 
+will pass the message to the underlying transport mechanism 
+for actual transmission on the connection. (Depending on the 
+underlying transport mechanism, the actual connection to the 
+endpoint may happen at the time of the first message sent to 
+the endpoint, and thus the latency of the first send might be 
+longer than expected.) 
  
-When the threshold number of messages have been queued 
-without receiving a response message, control is returned to 
-the user application and a nil pointer is returned to 
-indicate that no message was received to process. Currently 
-the threshold is fixed at 20 messages, though in future 
-versions of the library this might be extended to be a 
-parameter which the user application may set. 
+On success, the send function will return a reference to a 
+message buffer; the status within that message buffer will 
+indicate what the message buffer contains. When the status is 
+RMR_OK the reference is to a **new** message buffer for the 
+application to use for the next send; the payload size is the 
+same as the payload size allocated for the message that was 
+just sent. This is a convenience as it eliminates the need 
+for the application to call the message allocation function 
+at some point in the future, and assumes the application will 
+send many messages which will require the same payload 
+dimensions. 
  
-Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+If the message contains any status other than RMR_OK, then 
+the message could **not** be sent, and the reference is to 
+the unsent message buffer. The value of the status will 
+indicate whether the nature of the failure was transient ( 
+RMR_ERR_RETRY) or not. Transient failures are likely to be 
+successful if the application attempts to send the message at 
+a later time. Unfortunately, it is impossible for RMR to know 
+the exact transient failure (e.g. connection being 
+established, or TCP buffer shortage), and thus it is not 
+possible to communicate how long the application should wait 
+before attempting to resend, if the application wishes to 
+resend the message. (More discussion with respect to message 
+retries can be found in the *Handling Failures* section.) 
  
-The send operations in RMR will retry *soft* send failures 
-until one of three conditions occurs: 
+Advanced Usage 
+============================================================================================ 
  
+Several forms of usage fall into a more advanced category and 
+are described in the following sections. These include 
+blocking call, return to sender and wormhole functions. 
  
- 
-1. 
-   
-  The message is sent without error 
-   
- 
-2. 
-   
-  The underlying transport reports a *hard* failure 
-   
- 
-3. 
-   
-  The maximum number of retry loops has been attempted 
- 
- 
-A retry loop consists of approximately 1000 send attempts 
-**without** any intervening calls to *sleep()* or *usleep().* 
-The number of retry loops defaults to 1, thus a maximum of 
-1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMR 
-initialisation using the *rmr_set_stimeout()* function 
-allowing the user application to completely disable retires 
-(set to 0), or to increase the number of retry loops. 
- 
-Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The underlying transport mechanism used to send messages is 
-configured in *non-blocking* mode. This means that if a 
-message cannot be sent immediately the transport mechanism 
-will **not** pause with the assumption that the inability to 
-send will clear quickly (within a few milliseconds). This 
-means that when the retry loop is completely disabled (set to 
-0), that the failure to accept a message for sending by the 
-underlying mechanisms (software or hardware) will be reported 
-immediately to the user application. 
- 
-It should be noted that depending on the underlying transport 
-mechanism being used, it is extremely likely that retry 
-conditions will happen during normal operations. These are 
-completely out of RMR's control, and there is nothing that 
-RMR can do to avoid or mitigate these other than by allowing 
-RMR to retry the send operation, and even then it is possible 
-(e.g., during connection reattempts), that a single retry 
-loop is not enough to guarantee a successful send. 
- 
-RETURN VALUE 
+The Call Function 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_call function returns a pointer to a message buffer 
-with the state set to reflect the overall state of call 
-processing (see Errors below). In some cases a nil pointer 
-will be returned; when this is the case only *errno* will be 
-available to describe the reason for failure. 
+The RMR function sends a message in the exact same manner as 
+the rmr_send_msg() function, with the endpoint selection 
+based on the message key. But unlike the send function, will 
+block and wait for a response from the application that is 
+selected to receive the message. The matching message is 
+determined by the transaction ID which the application must 
+place into the message buffer prior to invoking. Similarly, 
+the responding application must ensure that the same 
+transaction ID is placed into the message buffer before 
+returning its response. 
  
-ERRORS 
+The return from the call is a message buffer with the 
+response message; there is no difference between a message 
+buffer returned by the receive function and one returned by 
+the function. If a response is not received in a reasonable 
+amount of time, a nil message buffer is returned to the 
+calling application. 
+ 
+Returning a Response 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Because of the nature of RMR's routing policies, it is 
+generally not possible for an application to control exactly 
+which endpoint is sent a message. There are cases, such as 
+responding to a message delivered via that the application 
+must send a message and guarantee that RMR routes it to an 
+exact destination. To enable this, RMR provides the return to 
+sender, function. Upon receipt of any message, an application 
+may alter the payload, and if necessary the message type and 
+subscription ID, and pass the altered message buffer to the 
+function to return the altered message to the application 
+which sent it. When this function is used, RMR will examine 
+the message buffer for the source information and use that to 
+select the connection on which to write the response. 
+ 
+Multi-threaded Calls 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+The basic call mechanism described above is **not** thread 
+safe, as it is not possible to guarantee that a response 
+message is delivered to the correct thread. The RMR function 
+accepts an additional parameter which identifies the calling 
+thread in order to ensure that the response is delivered 
+properly. In addition, the application must specifically 
+initialise the multi-threaded call environment by passing the 
+RMRFL_MTCALL flag as an option to the function[2]. 
+ 
+One advantage of the multi-threaded call capability in RMR is 
+the fact that only the calling thread is blocked. Messages 
+received which are not responses to the call are continued to 
+be delivered via normal calls. 
+ 
+While the process is blocked waiting for the response, it is 
+entirely possible that asynchronous, non-matching, messages 
+will arrive. When this happens, RMR will queues the messages 
+and return them to the application over the next calls to 
+ 
+Wormholes 
 -------------------------------------------------------------------------------------------- 
  
-These values are reflected in the state field of the returned 
-message. 
+As was mentioned earlier, the design of RMR is to eliminate 
+the need for an application to know a specific endpoint, even 
+when a response message is being sent. In some rare cases it 
+may be necessary for an application to establish a direct 
+connection to an RMR-based application rather than relying on 
+message type and subscription ID based routing. The 
+*wormhole* functions provide an application with the ability 
+to create a direct connection and then to send and receive 
+messages across the connection. The following are the RMR 
+functions which provide wormhole communications: 
+ 
+ 
+ 
+rmr_wh_open 
+   
+  Open a connection to an endpoint. Name or IP address and 
+  port of the endpoint is supplied. Returns a wormhole ID 
+  that the application must use when sending a direct 
+  message. 
+   
+ 
+rmr_wh_send_msg 
+   
+  Sends an RMR message buffer to the connected application. 
+  The message type and subscription ID may be set in the 
+  message, but RMR will ignore both. 
+   
+ 
+rmr_wh_close 
+   
+  Closes the direct connection. 
+ 
+ 
+ 
+Handling Failures 
+============================================================================================ 
+ 
+The vast majority of states reported by RMR are fatal; if 
+encountered during setup or initialization, then it is 
+unlikely that any message oriented processing should 
+continue, and when encountered on a message operation 
+continued operation on that message should be abandoned. 
+Specifically with regard to message sending, it is very 
+likely that the underlying transport mechanism will report a 
+*soft,* or transient, failure which might be successful if 
+the operation is retried at a later point in time. The 
+paragraphs below discuss the methods that an application 
+might deal with these soft failures. 
+ 
+Failure Notification 
+-------------------------------------------------------------------------------------------- 
+ 
+When a soft failure is reported, the returned message buffer 
+returned by the RMR function will be RMR_ERR_RETRY. These 
+types of failures can occur for various reasons; one of two 
+reasons is typically the underlying cause: 
+ 
+ 
++ The session to the targeted recipient (endpoint) is not connected. 
+ 
++ The transport mechanism buffer pool is full and cannot accept another buffer. 
+ 
+ 
+ 
+Unfortunately, it is not possible for RMR to determine which 
+of these two cases is occurring, and equally as unfortunate 
+the time to resolve each is different. The first, no 
+connection, may require up to a second before a message can 
+be accepted, while a rejection because of buffer shortage is 
+likely to resolve in less than a millisecond. 
+ 
+Application Response 
+-------------------------------------------------------------------------------------------- 
+ 
+The action which an application takes when a soft failure is 
+reported ultimately depends on the nature of the application 
+with respect to factors such as tolerance to extended message 
+latency, dropped messages, and over all message rate. 
+ 
+RMR Retry Modes 
+-------------------------------------------------------------------------------------------- 
+ 
+In an effort to reduce the workload of an application 
+developer, RMR has a default retry policy such that RMR will 
+attempt to retransmit a message up to 1000 times when a soft 
+failure is reported. These retries generally take less than 1 
+millisecond (if all 1000 are attempted) and in most cases 
+eliminates nearly all reported soft failures to the 
+application. When using this mode, it might allow the 
+application to simply treat all bad return values from a send 
+attempt as permanent failures. 
+ 
+If an application is so sensitive to any delay in RMR, or the 
+underlying transport mechanism, it is possible to set RMR to 
+return a failure immediately on any kind of error (permanent 
+failures are always reported without retry). In this mode, 
+RMR will still set the state in the message buffer to 
+RMR_ERR_RETRY, but will **not** make any attempts to resend 
+the message. This zero-retry policy is enabled by invoking 
+the with a value of 0; this can be done once immediately 
+after is invoked. 
+ 
+Regardless of the retry mode which the application sets, it 
+will ultimately be up to the application to handle failures 
+by queuing the message internally for resend, retrying 
+immediately, or dropping the send attempt all together. As 
+stated before, only the application can determine how to best 
+handle send failures. 
+ 
+Other Failures 
+-------------------------------------------------------------------------------------------- 
+ 
+RMR will return the state of processing for message based 
+operations (send/receive) as the status in the message 
+buffer. For non-message operations, state is returned to the 
+caller as the integer return value for all functions which 
+are not expected to return a pointer (e.g. and a brief 
+description of their meaning. 
  
  
  
 RMR_OK 
    
-  The call was successful and the message buffer references 
-  the response message. 
-   
- 
-RMR_ERR_CALLFAILED 
-   
-  The call failed and the value of *errno,* as described 
-  below, should be checked for the specific reason. 
- 
- 
-The global "variable" *errno* will be set to one of the 
-following values if the overall call processing was not 
-successful. 
- 
- 
- 
-ETIMEDOUT 
-   
-  Too many messages were queued before receiving the 
-  expected response 
-   
- 
-ENOBUFS 
-   
-  The queued message ring is full, messages were dropped 
-   
- 
-EINVAL 
-   
-  A parameter was not valid 
-   
- 
-EAGAIN 
-   
-  The underlying message system was interrupted or the 
-  device was busy; the message was **not** sent, and the 
-  user application should call this function with the 
-  message again. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
-The following code snippet shows one way of using the 
-rmr_call function, and illustrates how the transaction ID 
-must be set. 
- 
- 
-:: 
-  
-     int retries_left = 5;               // max retries on dev not available
-     int retry_delay = 50000;            // retry delay (usec)
-     static rmr_mbuf_t*  mbuf = NULL;    // response msg
-     msg_t*  pm;                         // application struct for payload
-     // get a send buffer and reference the payload
-     mbuf = rmr_alloc_msg( mr, sizeof( pm->req ) );
-     pm = (msg_t*) mbuf->payload;
-     // generate an xaction ID and fill in payload with data and msg type
-     snprintf( mbuf->xaction, RMR_MAX_XID, "%s", gen_xaction() );
-     snprintf( pm->req, sizeof( pm->req ), "{ \\"req\\": \\"num users\\"}" );
-     mbuf->mtype = MT_REQ;
-     msg = rmr_call( mr, msg );
-     if( ! msg ) {               // probably a timeout and no msg received
-         return NULL;            // let errno trickle up
-     }
-     if( mbuf->state != RMR_OK ) {
-         while( retries_left-- > 0 &&             // loop as long as eagain
-                errno == EAGAIN &&
-                (msg = rmr_call( mr, msg )) != NULL &&
-                mbuf->state != RMR_OK ) {
-             usleep( retry_delay );
-         }
-         if( mbuf == NULL || mbuf->state != RMR_OK ) {
-             rmr_free_msg( mbuf );        // safe if nil
-             return NULL;
-         }
-     }
-     // do something with mbuf
- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_free_msg(3), rmr_init(3), 
-rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 
-rmr_rcv_specific(3), rmr_rts_msg(3), rmr_ready(3), 
-rmr_fib(3), rmr_has_str(3), rmr_set_stimeout(3), 
-rmr_tokenise(3), rmr_mk_ring(3), rmr_ring_free(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_close 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- void rmr_close( void* vctx )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_close function closes the listen socket effectively 
-cutting the application off. The route table listener is also 
-stopped. Calls to rmr_rcv_msg() will fail with unpredictable 
-error codes, and calls to rmr_send_msg(), rmr_call(), and 
-rmr_rts_msg() will have unknown results. 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_rcvfd(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_wh_open(3), 
-rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_free_msg 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- void rmr_free_msg( rmr_mbuf_t* mbuf );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The message buffer is returned to the pool, or the associated 
-memory is released depending on the needs of the underlying 
-messaging system. This allows the user application to release 
-a buffer that is not going to be used. It is safe to pass a 
-nil pointer to this function, and doing so does not result in 
-a change to the value of errrno. 
- 
-After calling, the user application should **not** use any of 
-the pointers (transaction ID, or payload) which were 
-available. 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_init(3), 
-rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 
-rmr_rcv_specific(3), rmr_rts_msg(3), rmr_ready(3), 
-rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), rmr_mk_ring(3), 
-rmr_ring_free(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_get_const 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- unsigned char* rmr_get_const();
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_get_const function is a convenience function for 
-wrappers which do not have the ability to "compile in" RMR 
-constants. The function will build a nil terminated string 
-containing JSON which defines the RMR constants that C and Go 
-applications have at compile time via the rmr.h header file. 
- 
-All values are represented as strings and the JSON format is 
-illustrated in the following (partial) example: 
- 
- 
-:: 
-  
- {
-   "RMR_MAX_XID": "32",
-   "RMR_OK": "0",
-   "RMR_ERR_BADARG", "1",
-   "RMR_ERR_NOENDPT" "2"
- }
- 
- 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, a pointer to a string containing the JSON 
-defining constant and value pairs. On failure a nil pointer 
-is returned. 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr(7) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_get_meid 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- char* rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_get_meid function will copy the managed entity ID 
-(meid) field from the message into the *dest* buffer provided 
-by the user. The buffer referenced by *dest* is assumed to be 
-at least RMR_MAX_MEID bytes in length. If *dest* is NULL, 
-then a buffer is allocated (the calling application is 
-expected to free when the buffer is no longer needed). 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, a pointer to the extracted string is returned. If 
-*dest* was supplied, then this is just a pointer to the 
-caller's buffer. If *dest* was NULL, this is a pointer to the 
-allocated buffer. If an error occurs, a nil pointer is 
-returned and errno is set as described below. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-If an error occurs, the value of the global variable errno 
-will be set to one of the following with the indicated 
-meaning. 
- 
- 
- 
-EINVAL 
-   
-  The message, or an internal portion of the message, was 
-  corrupted or the pointer was invalid. 
-   
- 
-ENOMEM 
-   
-  A nil pointer was passed for *dest,* however it was not 
-  possible to allocate a buffer using malloc(). 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_bytes2xact(3), rmr_bytes2meid(3), 
-rmr_call(3), rmr_free_msg(3), rmr_get_rcvfd(3), 
-rmr_get_xact(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_str2meid(3), 
-rmr_str2xact(3), rmr_wh_open(3), rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_get_rcvfd 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- void* rmr_get_rcvfd( void* ctx )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_get_rcvfd function returns a file descriptor which 
-may be given to epoll_wait() by an application that wishes to 
-use event poll in a single thread rather than block on the 
-arrival of a message via calls to rmr_rcv_msg(). When 
-epoll_wait() indicates that this file descriptor is ready, a 
-call to rmr_rcv_msg() will not block as at least one message 
-has been received. 
- 
-The context (ctx) pointer passed in is the pointer returned 
-by the call to rmr_init(). 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_get_rcvfd function returns a file descriptor greater 
-or equal to 0 on success and -1 on error. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-The following error values are specifically set by this RMR 
-function. In some cases the error message of a system call is 
-propagated up, and thus this list might be incomplete. 
- 
- 
-EINVAL 
-   
-  The use of this function is invalid in this environment. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
-The following short code bit illustrates the use of this 
-function. Error checking has been omitted for clarity. 
- 
- 
-:: 
-  
- #include <stdio.h>
- #include <stdlib.h>
- #include <sys/epoll.h>
- #include <rmr/rmr.h>
- int main() {
-     int rcv_fd;     // pollable fd
-     void* mrc;      //msg router context
-     struct epoll_event events[10];          // support 10 events to poll
-     struct epoll_event epe;                 // event definition for event to listen to
-     int     ep_fd = -1;
-     rmr_mbuf_t* msg = NULL;
-     int nready;
-     int i;
-     int norm_msg_size = 1500;               // 95% messages are less than this
-     mrc = rmr_init( "43086", norm_msg_size, RMRFL_NONE );
-     rcv_fd = rmr_get_rcvfd( mrc );
-     ep_fd = epoll_create1( 0 );             // initialise epoll environment
-     epe.events = EPOLLIN;
-     epe.data.fd = rcv_fd;
-     epoll_ctl( ep_fd, EPOLL_CTL_ADD, rcv_fd, &epe );    // add our info to the mix
-     while( 1 ) {
-         nready = epoll_wait( ep_fd, events, 10, -1 );   // -1 == block forever (no timeout)
-         for( i = 0; i < nready && i < 10; i++ ) {       // loop through to find what is ready
-             if( events[i].data.fd == rcv_fd ) {         // RMR has something
-                 msg = rmr_rcv_msg( mrc, msg );
-                 if( msg ) {
-                     // do something with msg
-                 }
-             }
-             // check for other ready fds....
-         }
-     }
- }
- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
-rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 
-rmr_rcv_specific(3), rmr_rts_msg(3), rmr_ready(3), 
-rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), rmr_mk_ring(3), 
-rmr_ring_free(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_get_src 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- unsigned char* rmr_get_src( rmr_mbuf_t* mbuf, unsigned char* dest )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_get_src function will copy the *source* information 
-from the message to a buffer (dest) supplied by the user. In 
-an RMR message, the source is the sender's information that 
-is used for return to sender function calls, and is generally 
-the hostname and port in the form *name*. The source might be 
-an IP address port combination; the data is populated by the 
-sending process and the only requirement is that it be 
-capable of being used to start a TCP session with the sender. 
- 
-The maximum size allowed by RMR is 64 bytes (including the 
-nil string terminator), so the user must ensure that the 
-destination buffer given is at least 64 bytes. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, a pointer to the destination buffer is given as a 
-convenience to the user programme. On failure, a nil pointer 
-is returned and the value of errno is set. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-If an error occurs, the value of the global variable errno 
-will be set to one of the following with the indicated 
-meaning. 
- 
- 
- 
-EINVAL 
-   
-  The message, or an internal portion of the message, was 
-  corrupted or the pointer was invalid. 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_bytes2xact(3), rmr_bytes2meid(3), 
-rmr_call(3), rmr_free_msg(3), rmr_get_rcvfd(3), 
-rmr_get_srcip(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_str2meid(3), 
-rmr_str2xact(3), rmr_wh_open(3), rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_get_srcip 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- unsigned char* rmr_get_srcip( rmr_mbuf_t* mbuf, unsigned char* dest )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_get_srcip function will copy the *source IP address* 
-from the message to a buffer (dest) supplied by the user. In 
-an RMR message, the source IP address is the sender's 
-information that is used for return to sender function calls; 
-this function makes it available to the user application. The 
-address is maintained as IP:port where *IP* could be either 
-an IPv6 or IPv4 address depending on what was provided by the 
-sending application. 
- 
-The maximum size allowed by RMR is 64 bytes (including the 
-nil string terminator), so the user must ensure that the 
-destination buffer given is at least 64 bytes. The user 
-application should use the RMR constant RMR_MAX_SRC to ensure 
-that the buffer supplied is large enough, and to protect 
-against future RMR enhancements which might increase the 
-address buffer size requirement. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, a pointer to the destination buffer is given as a 
-convenience to the user programme. On failure, a nil pointer 
-is returned and the value of errno is set. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-If an error occurs, the value of the global variable errno 
-will be set to one of the following with the indicated 
-meaning. 
- 
- 
- 
-EINVAL 
-   
-  The message, or an internal portion of the message, was 
-  corrupted or the pointer was invalid. 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_bytes2xact(3), rmr_bytes2meid(3), 
-rmr_call(3), rmr_free_msg(3), rmr_get_rcvfd(3), 
-rmr_get_src(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_str2meid(3), 
-rmr_str2xact(3), rmr_wh_open(3), rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_get_trace 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- int rmr_get_trace( rmr_mbuf_t* mbuf, unsigned char* dest, int size )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_get_trace function will copy the trace information 
-from the message into the user's allocated memory referenced 
-by dest. The size parameter is assumed to be the maximum 
-number of bytes which can be copied (size of the destination 
-buffer). 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, the number of bytes actually copied is returned. 
-If the return value is 0, no bytes copied, then the reason 
-could be that the message pointer was nil, or the size 
-parameter was <= 0. 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_tralloc_msg(3), rmr_bytes2xact(3), 
-rmr_bytes2meid(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_rcvfd(3), rmr_get_trlen(3), rmr_init(3), 
-rmr_init_trace(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_str2meid(3), 
-rmr_str2xact(3), rmr_wh_open(3), rmr_wh_send_msg(3), 
-rmr_set_trace(3), rmr_trace_ref(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_get_trlen 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- int rmr_get_trlen( rmr_mbuf_t* msg );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-Given a message buffer, this function returns the amount of 
-space (bytes) that have been allocated for trace data. If no 
-trace data has been allocated, then 0 is returned. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-The number of bytes allocated for trace information in the 
-given message. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
- 
- 
-INVAL 
-   
-  Parameter(s) passed to the function were not valid. 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_trace(3), rmr_init(3), rmr_init_trace(3), 
-rmr_send_msg(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 
-rmr_rts_msg(3), rmr_ready(3), rmr_fib(3), rmr_has_str(3), 
-rmr_tokenise(3), rmr_mk_ring(3), rmr_ring_free(3), 
-rmr_set_trace(3), rmr_tralloc_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_get_xact 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- char* rmr_get_xact( rmr_mbuf_t* mbuf, unsigned char* dest )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_get_xact function will copy the transaction field 
-from the message into the *dest* buffer provided by the user. 
-The buffer referenced by *dest* is assumed to be at least 
-RMR_MAX_XID bytes in length. If *dest* is NULL, then a buffer 
-is allocated (the calling application is expected to free 
-when the buffer is no longer needed). 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, a pointer to the extracted string is returned. If 
-*dest* was supplied, then this is just a pointer to the 
-caller's buffer. If *dest* was NULL, this is a pointer to the 
-allocated buffer. If an error occurs, a nil pointer is 
-returned and errno is set as described below. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-If an error occurs, the value of the global variable errno 
-will be set to one of the following with the indicated 
-meaning. 
- 
- 
- 
-EINVAL 
-   
-  The message, or an internal portion of the message, was 
-  corrupted or the pointer was invalid. 
-   
- 
-ENOMEM 
-   
-  A nil pointer was passed for *dest,* however it was not 
-  possible to allocate a buffer using malloc(). 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_bytes2xact(3), rmr_bytes2meid(3), 
-rmr_call(3), rmr_free_msg(3), rmr_get_rcvfd(3), 
-rmr_get_meid(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_str2meid(3), 
-rmr_str2xact(3), rmr_wh_open(3), rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_init 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- void* rmr_init( char* proto_port, int norm_msg_size, int flags );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_init function prepares the environment for sending 
-and receiving messages. It does so by establishing a worker 
-thread (pthread) which subscribes to a route table generator 
-which provides the necessary routing information for the RMR 
-library to send messages. 
- 
-*Port* is used to listen for connection requests from other 
-RMR based applications. The *norm_msg_size* parameter is used 
-to allocate receive buffers and should be set to what the 
-user application expects to be a size which will hold the 
-vast majority of expected messages. When computing the size, 
-the application should consider the usual payload size 
-**and** the maximum trace data size that will be used. This 
-value is also used as the default message size when 
-allocating message buffers (when a zero size is given to 
-rmr_alloc_msg(); see the rmr_alloc_msg() manual page). 
-Messages arriving which are longer than the given normal size 
-will cause RMR to allocate a new buffer which is large enough 
-for the arriving message. 
- 
-Starting with version 3.8.0 RMR no longer places a maximum 
-buffer size for received messages. The underlying system 
-memory manager might impose such a limit and the attempt to 
-allocate a buffer larger than that limit will likely result 
-in an application abort. Other than the potential performance 
-impact from extra memory allocation and release, there is no 
-penality to the user programme for specifyning a normal 
-buffer size which is usually smaller than received buffers. 
-Similarly, the only penality to the application for over 
-specifying the normal buffer size might be a larger memory 
-footprint. 
- 
-*Flags* allows for selection of some RMR options at the time 
-of initialisation. These are set by ORing RMRFL constants 
-from the RMR header file. Currently the following flags are 
-supported: 
- 
- 
- 
-RMRFL_NONE 
-   
-  No flags are set. 
-   
- 
-RMRFL_NOTHREAD 
-   
-  The route table collector thread is not to be started. 
-  This should only be used by the route table generator 
-  application if it is based on RMR. 
-   
- 
-RMRFL_MTCALL 
-   
-  Enable multi-threaded call support. 
-   
- 
-RMRFL_NOLOCK 
-   
-  Some underlying transport providers (e.g. SI95) enable 
-  locking to be turned off if the user application is single 
-  threaded, or otherwise can guarantee that RMR functions 
-  will not be invoked concurrently from different threads. 
-  Turning off locking can help make message receipt more 
-  efficient. If this flag is set when the underlying 
-  transport does not support disabling locks, it will be 
-  ignored. 
- 
- 
-Multi-threaded Calling 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The support for an application to issue a *blocking call* by 
-the rmr_call() function was limited such that only user 
-applications which were operating in a single thread could 
-safely use the function. Further, timeouts were message count 
-based and not time unit based. Multi-threaded call support 
-adds the ability for a user application with multiple threads 
-to invoke a blocking call function with the guarantee that 
-the correct response message is delivered to the thread. The 
-additional support is implemented with the *rmr_mt_call()* 
-and *rmr_mt_rcv()* function calls. 
- 
-Multi-threaded call support requires the user application to 
-specifically enable it when RMR is initialised. This is 
-necessary because a second, dedicated, receiver thread must 
-be started, and requires all messages to be examined and 
-queued by this thread. The additional overhead is minimal, 
-queuing information is all in the RMR message header, but as 
-an additional process is necessary the user application must 
-"opt in" to this approach. 
- 
- 
-ENVIRONMENT 
--------------------------------------------------------------------------------------------- 
- 
-As a part of the initialisation process rmr_init reads 
-environment variables to configure itself. The following 
-variables are used if found. 
- 
- 
- 
-RMR_ASYNC_CONN 
-   
-  Allows the async connection mode to be turned off (by 
-  setting the value to 0). When set to 1, or missing from 
-  the environment, RMR will invoke the connection interface 
-  in the transport mechanism using the non-blocking (async) 
-  mode. This will likely result in many "soft failures" 
-  (retry) until the connection is established, but allows 
-  the application to continue unimpeded should the 
-  connection be slow to set up. 
-   
- 
-RMR_BIND_IF 
-   
-  This provides the interface that RMR will bind listen 
-  ports to, allowing for a single interface to be used 
-  rather than listening across all interfaces. This should 
-  be the IP address assigned to the interface that RMR 
-  should listen on, and if not defined RMR will listen on 
-  all interfaces. 
-   
- 
-RMR_CTL_PORT 
-   
-  This variable defines the port that RMR should open for 
-  communications with Route Manager, and other RMR control 
-  applications. If not defined, the port 4561 is assumed. 
-   
-  Previously, the RMR_RTG_SVC (route table generator service 
-  port) was used to define this port. However, a future 
-  version of Route Manager will require RMR to connect and 
-  request tables, thus that variable is now used to supply 
-  the Route Manager's well-known address and port. 
-   
-  To maintain backwards compatibility with the older Route 
-  Manager versions, the presence of this variable in the 
-  environment will shift RMR's behaviour with respect to the 
-  default value used when RMR_RTG_SVC is **not** defined. 
-   
-  When RMR_CTL_PORT is **defined:** RMR assumes that Route 
-  Manager requires RMR to connect and request table updates 
-  is made, and the default well-known address for Route 
-  manager is used (routemgr:4561). 
-   
-  When RMR_CTL_PORT is **undefined:** RMR assumes that Route 
-  Manager will connect and push table updates, thus the 
-  default listen port (4561) is used. 
-   
-  To avoid any possible misinterpretation and/or incorrect 
-  assumptions on the part of RMR, it is recommended that 
-  both the RMR_CTL_PORT and RMR_RTG_SVC be defined. In the 
-  case where both variables are defined, RMR will behave 
-  exactly as is communicated with the variable's values. 
-   
- 
-RMR_RTG_SVC 
-   
-  The value of this variable depends on the Route Manager in 
-  use. 
-   
-  When the Route Manager is expecting to connect to an xAPP 
-  and push route tables, this variable must indicate the 
-  port which RMR should use to listen for these connections. 
-   
-  When the Route Manager is expecting RMR to connect and 
-  request a table update during initialisation, the variable 
-  should be the host of the Route Manager process. 
-   
-  The RMR_CTL_PORT variable (added with the support of 
-  sending table update requests to Route manager), controls 
-  the behaviour if this variable is not set. See the 
-  description of that variable for details. 
-   
- 
-RMR_HR_LOG 
-   
-  By default RMR writes messages to standard error 
-  (incorrectly referred to as log messages) in human 
-  readable format. If this environment variable is set to 0, 
-  the format of standard error messages might be written in 
-  some format not easily read by humans. If missing, a value 
-  of 1 is assumed. 
-   
- 
-RMR_LOG_VLEVEL 
-   
-  This is a numeric value which corresponds to the verbosity 
-  level used to limit messages written to standard error. 
-  The lower the number the less chatty RMR functions are 
-  during execution. The following is the current 
-  relationship between the value set on this variable and 
-  the messages written: 
-   
- 
-0 
-   
-  Off; no messages of any sort are written. 
-   
- 
-1 
-   
-  Only critical messages are written (default if this 
-  variable does not exist) 
-   
- 
-2 
-   
-  Errors and all messages written with a lower value. 
-   
- 
-3 
-   
-  Warnings and all messages written with a lower value. 
-   
- 
-4 
-   
-  Informational and all messages written with a lower 
-  value. 
-   
- 
-5 
-   
-  Debugging mode -- all messages written, however this 
-  requires RMR to have been compiled with debugging 
-  support enabled. 
- 
- 
- 
-RMR_RTG_ISRAW 
-   
-  **Deprecated.** Should be set to 1 if the route table 
-  generator is sending "plain" messages (not using RMR to 
-  send messages), 0 if the RTG is using RMR to send. The 
-  default is 1 as we don't expect the RTG to use RMR. 
-   
-  This variable is only recognised when using the NNG 
-  transport library as it is not possible to support NNG 
-  "raw" communications with other transport libraries. It is 
-  also necessary to match the value of this variable with 
-  the capabilities of the Route Manager; at some point in 
-  the future RMR will assume that all Route Manager messages 
-  will arrive via an RMR connection and will ignore this 
-  variable. 
- 
-RMR_SEED_RT 
-   
-  This is used to supply a static route table which can be 
-  used for debugging, testing, or if no route table 
-  generator process is being used to supply the route table. 
-  If not defined, no static table is used and RMR will not 
-  report *ready* until a table is received. The static route 
-  table may contain both the route table (between newrt 
-  start and end records), and the MEID map (between meid_map 
-  start and end records). 
- 
-RMR_SRC_ID 
-   
-  This is either the name or IP address which is placed into 
-  outbound messages as the message source. This will used 
-  when an RMR based application uses the rmr_rts_msg() 
-  function to return a response to the sender. If not 
-  supplied RMR will use the hostname which in some container 
-  environments might not be routable. 
-   
-  The value of this variable is also used for Route Manager 
-  messages which are sent via an RMR connection. 
- 
-RMR_VCTL_FILE 
-   
-  This supplies the name of a verbosity control file. The 
-  core RMR functions do not produce messages unless there is 
-  a critical failure. However, the route table collection 
-  thread, not a part of the main message processing 
-  component, can write additional messages to standard 
-  error. If this variable is set, RMR will extract the 
-  verbosity level for these messages (0 is silent) from the 
-  first line of the file. Changes to the file are detected 
-  and thus the level can be changed dynamically, however RMR 
-  will only suss out this variable during initialisation, so 
-  it is impossible to enable verbosity after startup. 
- 
-RMR_WARNINGS 
-   
-  If set to 1, RMR will write some warnings which are 
-  non-performance impacting. If the variable is not defined, 
-  or set to 0, RMR will not write these additional warnings. 
- 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_init function returns a void pointer (a contex if you 
-will) that is passed as the first parameter to nearly all 
-other RMR functions. If rmr_init is unable to properly 
-initialise the environment, NULL is returned and errno is set 
-to an appropriate value. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-The following error values are specifically set by this RMR 
-function. In some cases the error message of a system call is 
-propagated up, and thus this list might be incomplete. 
- 
- 
-ENOMEM 
-   
-  Unable to allocate memory. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
-    void*  uh;
-    rmr_mbuf* buf = NULL;
-    uh = rmr_init( "43086", 4096, 0 );
-    buf = rmr_rcv_msg( uh, buf );
- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_rcvfd(3), rmr_mt_call(3), rmr_mt_rcv(3), 
-rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 
-rmr_rcv_specific(3), rmr_rts_msg(3), rmr_ready(3), 
-rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), rmr_mk_ring(3), 
-rmr_ring_free(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_init_trace 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- void* rmr_init_trace( void* ctx )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_init_trace function establishes the default trace 
-space placed in each message buffer allocated with 
-rmr_alloc_msg(). If this function is never called, then no 
-trace space is allocated by default into any message buffer. 
- 
-Trace space allows the user application to pass some trace 
-token, or other data with the message, but outside of the 
-payload. Trace data may be added to any message with 
-rmr_set_trace(), and may be extracted from a message with 
-rmr_get_trace(). The number of bytes that a message contains 
-for/with trace data can be determined by invoking 
-rmr_get_trlen(). 
- 
-This function may be safely called at any time during the 
-life of the user programme to (re)set the default trace space 
-reserved. If the user programme needs to allocate a message 
-with trace space of a different size than is allocated by 
-default, without fear of extra overhead of reallocating a 
-message later, the rmr_tralloc_msg() function can be used. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-A value of 1 is returned on success, and 0 on failure. A 
-failure indicates that the RMR context (a void pointer passed 
-to this function was not valid. 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_tr_alloc_msg(3), rmr_call(3), 
-rmr_free_msg(3), rmr_get_rcvfd(3), rmr_get_trace(3), 
-rmr_get_trlen(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_set_trace(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_mt_call 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* msg, int id, int timeout );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_mt_call function sends the user application message 
-to a remote endpoint, and waits for a corresponding response 
-message before returning control to the user application. The 
-user application supplies a completed message buffer, as it 
-would for a rmr_send_msg call, but unlike with a send, the 
-buffer returned will have the response from the application 
-that received the message. The thread invoking the 
-*rmr_mt_call()* will block until a message arrives or until 
-*timeout* milliseconds has passed; which ever comes first. 
-Using a timeout value of zero (0) will cause the thread to 
-block without a timeout. 
- 
-The *id* supplied as the third parameter is an integer in the 
-range of 2 through 255 inclusive. This is a caller defined 
-"thread number" and is used to match the response message 
-with the correct user application thread. If the ID value is 
-not in the proper range, the attempt to make the call will 
-fail. 
- 
-Messages which are received while waiting for the response 
-are queued on a *normal* receive queue and will be delivered 
-to the user application with the next invocation of 
-*rmr_mt_rcv()* or *rmr_rvv_msg().* by RMR, and are returned 
-to the user application when rmr_rcv_msg is invoked. These 
-messages are returned in the order received, one per call to 
-rmr_rcv_msg. 
- 
-The Transaction ID 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The user application is responsible for setting the value of 
-the transaction ID field before invoking *rmr_mt_call.* The 
-transaction ID is a RMR_MAX_XID byte field that is used to 
-match the response message when it arrives. RMR will compare 
-**all** of the bytes in the field, so the caller must ensure 
-that they are set correctly to avoid missing the response 
-message. The application which returns the response message 
-is also expected to ensure that the return buffer has the 
-matching transaction ID. This can be done transparently if 
-the application uses the *rmr_rts_msg()* function and does 
-not adjust the transaction ID. 
- 
-Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The send operations in RMR will retry *soft* send failures 
-until one of three conditions occurs: 
- 
- 
- 
-1. 
-   
-  The message is sent without error 
-   
- 
-2. 
-   
-  The underlying transport reports a *hard* failure 
-   
- 
-3. 
-   
-  The maximum number of retry loops has been attempted 
- 
- 
-A retry loop consists of approximately 1000 send attempts 
-**without** any intervening calls to *sleep()* or *usleep().* 
-The number of retry loops defaults to 1, thus a maximum of 
-1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMR 
-initialisation using the *rmr_set_stimeout()* function 
-allowing the user application to completely disable retires 
-(set to 0), or to increase the number of retry loops. 
- 
-Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The underlying transport mechanism used to send messages is 
-configured in *non-blocking* mode. This means that if a 
-message cannot be sent immediately the transport mechanism 
-will **not** pause with the assumption that the inability to 
-send will clear quickly (within a few milliseconds). This 
-means that when the retry loop is completely disabled (set to 
-0), that the failure to accept a message for sending by the 
-underlying mechanisms (software or hardware) will be reported 
-immediately to the user application. 
- 
-It should be noted that depending on the underlying transport 
-mechanism being used, it is extremely likely that retry 
-conditions will happen during normal operations. These are 
-completely out of RMR's control, and there is nothing that 
-RMR can do to avoid or mitigate these other than by allowing 
-RMR to retry the send operation, and even then it is possible 
-(e.g., during connection reattempts), that a single retry 
-loop is not enough to guarantee a successful send. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_mt_call function returns a pointer to a message 
-buffer with the state set to reflect the overall state of 
-call processing. If the state is RMR_OK then the buffer 
-contains the response message; otherwise the state indicates 
-the error encountered while attempting to send the message. 
- 
-If no response message is received when the timeout period 
-has expired, a nil pointer will be returned (NULL). 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-These values are reflected in the state field of the returned 
-message. 
- 
- 
- 
-RMR_OK 
-   
-  The call was successful and the message buffer references 
-  the response message. 
+  state is good; operation finished successfully 
    
  
 RMR_ERR_BADARG 
    
-  An argument passed to the function was invalid. 
-   
- 
-RMR_ERR_CALLFAILED 
-   
-  The call failed and the value of *errno,* as described 
-  below, should be checked for the specific reason. 
+  argument passed to function was unusable 
    
  
 RMR_ERR_NOENDPT 
    
-  An endpoint associated with the message type could not be 
-  found in the route table. 
+  send/call could not find an endpoint based on msg type 
+   
+ 
+RMR_ERR_EMPTY 
+   
+  msg received had no payload; attempt to send an empty 
+  message 
+   
+ 
+RMR_ERR_NOHDR 
+   
+  message didn't contain a valid header 
+   
+ 
+RMR_ERR_SENDFAILED 
+   
+  send failed; errno may contain the transport provider 
+  reason 
+   
+ 
+RMR_ERR_CALLFAILED 
+   
+  unable to send the message for a call function; errno may 
+  contain the transport provider reason 
+   
+ 
+RMR_ERR_NOWHOPEN 
+   
+  no wormholes are open 
+   
+ 
+RMR_ERR_WHID 
+   
+  the wormhole id provided was invalid 
+   
+ 
+RMR_ERR_OVERFLOW 
+   
+  operation would have busted through a buffer/field size 
    
  
 RMR_ERR_RETRY 
    
-  The underlying transport mechanism was unable to accept 
-  the message for sending. The user application can retry 
-  the call operation if appropriate to do so. 
- 
- 
-The global "variable" *errno* will be set to one of the 
-following values if the overall call processing was not 
-successful. 
- 
- 
- 
-ETIMEDOUT 
-   
-  Too many messages were queued before receiving the 
-  expected response 
-   
- 
-ENOBUFS 
-   
-  The queued message ring is full, messages were dropped 
-   
- 
-EINVAL 
-   
-  A parameter was not valid 
-   
- 
-EAGAIN 
-   
-  The underlying message system wsa interrupted or the 
-  device was busy; the message was **not** sent, and user 
-  application should call this function with the message 
-  again. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
-The following code bit shows one way of using the rmr_mt_call 
-function, and illustrates how the transaction ID must be set. 
- 
- 
-:: 
-  
-     int retries_left = 5;               // max retries on dev not available
-     static rmr_mbuf_t*  mbuf = NULL;    // response msg
-     msg_t*  pm;                         // appl message struct (payload)
-     // get a send buffer and reference the payload
-     mbuf = rmr_alloc_msg( mr, sizeof( pm->req ) );
-     pm = (msg_t*) mbuf->payload;
-     // generate an xaction ID and fill in payload with data and msg type
-     rmr_bytes2xact( mbuf, xid, RMR_MAX_XID );
-     snprintf( pm->req, sizeof( pm->req ), "{ \\"req\\": \\"num users\\"}" );
-     mbuf->mtype = MT_USR_RESP;
-     msg = rmr_mt_call( mr, msg, my_id, 100 );        // wait up to 100ms
-     if( ! msg ) {               // probably a timeout and no msg received
-         return NULL;            // let errno trickle up
-     }
-     if( mbuf->state != RMR_OK ) {
-         while( retries_left-- > 0 &&             // loop as long as eagain
-                mbuf->state == RMR_ERR_RETRY &&
-                (msg = rmr_mt_call( mr, msg )) != NULL &&
-                mbuf->state != RMR_OK ) {
-             usleep( retry_delay );
-         }
-         if( mbuf == NULL || mbuf->state != RMR_OK ) {
-             rmr_free_msg( mbuf );        // safe if nil
-             return NULL;
-         }
-     }
-     // do something with mbuf
- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_free_msg(3), rmr_init(3), 
-rmr_mt_rcv(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), 
-rmr_set_stimeout(3), rmr_tokenise(3), rmr_mk_ring(3), 
-rmr_ring_free(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_mt_rcv 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* old_msg, int timeout );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_mt_rcv function blocks until a message is received, 
-or the timeout period (milliseconds) has passed. The result 
-is an RMR message buffer which references a received message. 
-In the case of a timeout the state will be reflected in an 
-"empty buffer" (if old_msg was not nil, or simply with the 
-return of a nil pointer. If a timeout value of zero (0) is 
-given, then the function will block until the next message 
-received. 
- 
-The *vctx* pointer is the pointer returned by the rmr_init 
-function. *Old_msg* is a pointer to a previously used message 
-buffer or NULL. The ability to reuse message buffers helps to 
-avoid alloc/free cycles in the user application. When no 
-buffer is available to supply, the receive function will 
-allocate one. 
- 
-The *old_msg* parameter allows the user to pass a previously 
-generated RMR message back to RMR for reuse. Optionally, the 
-user application may pass a nil pointer if no reusable 
-message is available. When a timeout occurs, and old_msg was 
-not nil, the state will be returned by returning a pointer to 
-the old message with the state set. 
- 
-It is possible to use the *rmr_rcv_msg()* function instead of 
-this function. Doing so might be advantageous if the user 
-programme does not always start the multi-threaded mode and 
-the use of *rmr_rcv_msg()* would make the flow of the code 
-more simple. The advantages of using this function are the 
-ability to set a timeout without using epoll, and a small 
-performance gain (if multi-threaded mode is enabled, and the 
-*rmr_rcv_msg()* function is used, it simply invokes this 
-function without a timeout value, thus there is the small 
-cost of a second call that results). Similarly, the 
-*rmr_torcv_msg()* call can be used when in multi-threaded 
-mode with the same "pass through" overhead to using this 
-function directly. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-When a message is received before the timeout period expires, 
-a pointer to the RMR message buffer which describes the 
-message is returned. This will, with a high probability, be a 
-different message buffer than *old_msg;* the user application 
-should not continue to use *old_msg* after it is passed to 
-this function. 
- 
-In the event of a timeout the return value will be the old 
-msg with the state set, or a nil pointer if no old message 
-was provided. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-The *state* field in the message buffer will be set to one of 
-the following values: 
- 
- 
- 
-RMR_OK 
-   
-  The message was received without error. 
-   
- 
-RMR_ERR_BADARG 
-   
-  A parameter passed to the function was not valid (e.g. a 
-  nil pointer). indicate either RMR_OK or RMR_ERR_EMPTY if 
-  an empty message was received. 
-   
- 
-RMR_ERR_EMPTY 
-   
-  The message received had no associated data. The length of 
-  the message will be 0. 
-   
- 
-RMR_ERR_NOTSUPP 
-   
-  The multi-threaded option was not enabled when RMR was 
-  initialised. See the man page for *rmr_init()* for 
-  details. 
+  request (send/call/rts) failed, but caller should retry 
+  (EAGAIN for wrappers) 
    
  
 RMR_ERR_RCVFAILED 
    
-  A hard error occurred preventing the receive from 
-  completing. 
- 
-When a nil pointer is returned, or any other state value was 
-set in the message buffer, errno will be set to one of the 
-following: 
- 
- 
- 
-INVAL 
-   
-  Parameter(s) passed to the function were not valid. 
-   
- 
-EBADF 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-ENOTSUP 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-EFSM 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-EAGAIN 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-EINTR 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-ETIMEDOUT 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-ETERM 
-   
-  The underlying message transport is unable to process the 
-  request. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
- 
- 
-:: 
-  
-     rmr_mbuf_t*  mbuf = NULL;   // received msg
-     msg = rmr_mt_recv( mr, mbuf, 100 );     // wait up to 100ms
-     if( msg != NULL ) {
-         switch( msg->state ) {
-             case RMR_OK:
-                 printf( "got a good message\\n" );
-                 break;
-             case RMR_ERR_EMPTY:
-                 printf( "received timed out\\n" );
-                 break;
-             default:
-                 printf( "receive error: %d\\n", mbuf->state );
-                 break;
-         }
-     } else {
-         printf( "receive timeout (nil)\\n" );
-     }
- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_rcvfd(3), rmr_init(3), rmr_mk_ring(3), 
-rmr_mt_call(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_torcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_ring_free(3), rmr_torcv_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_payload_size 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- int rmr_payload_size( rmr_mbuf_t* msg );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-Given a message buffer, this function returns the amount of 
-space (bytes) available for the user application to consume 
-in the message payload. This is different than the message 
-length available as a field in the message buffer. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-The number of bytes available in the payload. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
- 
- 
-INVAL 
-   
-  Parameter(s) passed to the function were not valid. 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
-rmr_send_msg(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 
-rmr_rts_msg(3), rmr_ready(3), rmr_fib(3), rmr_has_str(3), 
-rmr_tokenise(3), rmr_mk_ring(3), rmr_ring_free(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_rcv_msg 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_rcv_msg( void* vctx, rmr_mbuf_t* old_msg );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_rcv_msg function blocks until a message is received, 
-returning the message to the caller via a pointer to a 
-rmr_mbuf_t structure type. If messages were queued while 
-waiting for the response to a previous invocation of 
-rmr_call, the oldest message is removed from the queue and 
-returned without delay. 
- 
-The *vctx* pointer is the pointer returned by the rmr_init 
-function. *Old_msg* is a pointer to a previously used message 
-buffer or NULL. The ability to reuse message buffers helps to 
-avoid alloc/free cycles in the user application. When no 
-buffer is available to supply, the receive function will 
-allocate one. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-The function returns a pointer to the rmr_mbuf_t structure 
-which references the message information (state, length, 
-payload), or a nil pointer in the case of an extreme error. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-The *state* field in the message buffer will indicate RMR_OK 
-when the message receive process was successful and the 
-message can be used by the caller. Depending on the 
-underlying transport mechanism, one of the following RMR 
-error stats may be returned: 
- 
- 
- 
-RMR_ERR_EMPTY 
-   
-  The message received had no payload, or was completely 
-  empty. 
+  receive failed (hard error) 
    
  
 RMR_ERR_TIMEOUT 
    
-  For some transport mechanisms, or if reading the receive 
-  queue from multiple threads, it is possible for one thread 
-  to find no data waiting when it queries the queue. When 
-  this state is reported, the message buffer does not 
-  contain message data and the user application should 
-  reinvoke the receive function. 
- 
- 
-When an RMR error state is reported, the underlying errno 
-value might provide more information. The following is a list 
-of possible values that might accompany the states listed 
-above: 
- 
-RMR_ERR_EMPTY if an empty message was received. If a nil 
-pointer is returned, or any other state value was set in the 
-message buffer, errno will be set to one of the following: 
- 
- 
- 
-INVAL 
-   
-  Parameter(s) passed to the function were not valid. 
-   
- 
-EBADF 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-ENOTSUP 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-EFSM 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-EAGAIN 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-EINTR 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-ETIMEDOUT 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-ETERM 
-   
-  The underlying message transport is unable to process the 
-  request. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_rcvfd(3), rmr_init(3), rmr_mk_ring(3), 
-rmr_payload_size(3), rmr_send_msg(3), rmr_torcv_msg(3), 
-rmr_rcv_specific(3), rmr_rts_msg(3), rmr_ready(3), 
-rmr_ring_free(3), rmr_torcv_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_ready 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- int rmr_ready( void* vctx );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_ready function checks to see if a routing table has 
-been successfully received and installed. The return value 
-indicates the state of readiness. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-A return value of 1 (true) indicates that the routing table 
-is in place and attempts to send messages can be made. When 0 
-is returned (false) the routing table has not been received 
-and thus attempts to send messages will fail with *no 
-endpoint* errors. 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
-rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 
-rmr_rcv_specific(3), rmr_rts_msg(3), rmr_fib(3), 
-rmr_has_str(3), rmr_tokenise(3), rmr_mk_ring(3), 
-rmr_ring_free(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_realloc_payload 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- extern rmr_mbuf_t* rmr_realloc_payload( rmr_mbuf_t* msg, int new_len, int copy, int clone );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_realloc_payload function will return a pointer to an 
-RMR message buffer struct (rmr_mbuf_t) which has a payload 
-large enough to accomodate *new_len* bytes. If necessary, the 
-underlying payload is reallocated, and the bytes from the 
-original payload are copied if the *copy* parameter is true 
-(1). If the message passed in has a payload large enough, 
-there is no additional memory allocation and copying. 
- 
-Cloning The Message Buffer 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-This function can also be used to generate a separate copy of 
-the original message, with the desired payload size, without 
-destroying the original message buffer or the original 
-payload. A standalone copy is made only when the *clone* 
-parameter is true (1). When cloning, the payload is copied to 
-the cloned message **only** if the *copy* parameter is true. 
- 
-Message Buffer Metadata 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The metadata in the original message buffer (message type, 
-subscription ID, and payload length) will be preserved if the 
-*copy* parameter is true. When this parameter is not true 
-(0), then these values are set to the uninitialised value 
-(-1) for type and ID, and the length is set to 0. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_realloc_payload function returns a pointer to the 
-message buffer with the payload which is large enough to hold 
-*new_len* bytes. If the *clone* option is true, this will be 
-a pointer to the newly cloned message buffer; the original 
-message buffer pointer may still be used to reference that 
-message. It is the calling application's responsibility to 
-free the memory associateed with both messages using the 
-rmr_free_msg() function. 
- 
-When the *clone* option is not used, it is still good 
-practice by the calling application to capture and use this 
-reference as it is possible that the message buffer, and not 
-just the payload buffer, was reallocated. In the event of an 
-error, a nil pointer will be returned and the value of 
-*errno* will be set to reflect the problem. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-These value of *errno* will reflect the error condition if a 
-nil pointer is returned: 
- 
- 
- 
-ENOMEM 
-   
-  Memory allocation of the new payload failed. 
-   
- 
-EINVAL 
-   
-  The pointer passed in was nil, or refrenced an invalid 
-  message, or the required length was not valid. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
-The following code bit illustrates how this function can be 
-used to reallocate a buffer for a return to sender 
-acknowledgement message which is larger than the message 
-received. 
- 
- 
-:: 
-  
-   if( rmr_payload_size( msg ) < ack_sz ) {              // received message too small for ack
-     msg = rmr_realloc_payload( msg, ack_sz, 0, 0 );     // reallocate the message with a payload big enough
-     if( msg == NULL ) {
-       fprintf( stderr, "[ERR] realloc returned a nil pointer: %s\\n", strerror( errno ) );
-     } else {
-       // populate and send ack message
-     }
- }
- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_free_msg(3), rmr_init(3), 
-rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 
-rmr_rcv_specific(3), rmr_rts_msg(3), rmr_ready(3), 
-rmr_fib(3), rmr_has_str(3), rmr_set_stimeout(3), 
-rmr_tokenise(3), rmr_mk_ring(3), rmr_ring_free(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_rts_msg 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_rts_msg function sends a message returning it to the 
-endpoint which sent the message rather than selecting an 
-endpoint based on the message type and routing table. Other 
-than this small difference, the behaviour is exactly the same 
-as rmr_send_msg. 
- 
-Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The send operations in RMR will retry *soft* send failures 
-until one of three conditions occurs: 
- 
- 
- 
-1. 
-   
-  The message is sent without error 
-   
- 
-2. 
-   
-  The underlying transport reports a *hard* failure 
-   
- 
-3. 
-   
-  The maximum number of retry loops has been attempted 
- 
- 
-A retry loop consists of approximately 1000 send attempts 
-**without** any intervening calls to *sleep()* or *usleep().* 
-The number of retry loops defaults to 1, thus a maximum of 
-1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMR 
-initialisation using the *rmr_set_stimeout()* function 
-allowing the user application to completely disable retires 
-(set to 0), or to increase the number of retry loops. 
- 
-Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The underlying transport mechanism used to send messages is 
-configured in *non-blocking* mode. This means that if a 
-message cannot be sent immediately the transport mechanism 
-will **not** pause with the assumption that the inability to 
-send will clear quickly (within a few milliseconds). This 
-means that when the retry loop is completely disabled (set to 
-0), that the failure to accept a message for sending by the 
-underlying mechanisms (software or hardware) will be reported 
-immediately to the user application. 
- 
-It should be noted that depending on the underlying transport 
-mechanism being used, it is extremely likely that retry 
-conditions will happen during normal operations. These are 
-completely out of RMR's control, and there is nothing that 
-RMR can do to avoid or mitigate these other than by allowing 
-RMR to retry the send operation, and even then it is possible 
-(e.g., during connection reattempts), that a single retry 
-loop is not enough to guarantee a successful send. 
- 
-PAYLOAD SIZE 
--------------------------------------------------------------------------------------------- 
- 
-When crafting a response based on a received message, the 
-user application must take care not to write more bytes to 
-the message payload than the allocated message has. In the 
-case of a received message, it is possible that the response 
-needs to be larger than the payload associated with the 
-inbound message. In order to use the return to sender 
-function, the source information in the original message must 
-be present in the response; information which cannot be added 
-to a message buffer allocated through the standard RMR 
-allocation function. To allocate a buffer with a larger 
-payload, and which retains the necessary sender data needed 
-by this function, the *rmr_realloc_payload()* function must 
-be used to extend the payload to a size suitable for the 
-response. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, a new message buffer, with an empty payload, is 
-returned for the application to use for the next send. The 
-state in this buffer will reflect the overall send operation 
-state and should be RMR_OK. 
- 
-If the state in the returned buffer is anything other than 
-RMR_OK, the user application may need to attempt a 
-retransmission of the message, or take other action depending 
-on the setting of errno as described below. 
- 
-In the event of extreme failure, a nil pointer is returned. 
-In this case the value of errno might be of some use, for 
-documentation, but there will be little that the user 
-application can do other than to move on. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-The following values may be passed back in the *state* field 
-of the returned message buffer. 
- 
- 
- 
-RMR_ERR_BADARG 
-   
-  The message buffer pointer did not refer to a valid 
-  message. 
- 
-RMR_ERR_NOHDR 
-   
-  The header in the message buffer was not valid or 
-  corrupted. 
- 
-RMR_ERR_NOENDPT 
-   
-  The message type in the message buffer did not map to a 
-  known endpoint. 
- 
-RMR_ERR_SENDFAILED 
-   
-  The send failed; errno has the possible reason. 
- 
- 
-The following values may be assigned to errno on failure. 
- 
- 
-INVAL 
-   
-  Parameter(s) passed to the function were not valid, or the 
-  underlying message processing environment was unable to 
-  interpret the message. 
-   
- 
-ENOKEY 
-   
-  The header information in the message buffer was invalid. 
-   
- 
-ENXIO 
-   
-  No known endpoint for the message could be found. 
-   
- 
-EMSGSIZE 
-   
-  The underlying transport refused to accept the message 
-  because of a size value issue (message was not attempted 
-  to be sent). 
-   
- 
-EFAULT 
-   
-  The message referenced by the message buffer is corrupt 
-  (nil pointer or bad internal length). 
-   
- 
-EBADF 
-   
-  Internal RMR error; information provided to the message 
-  transport environment was not valid. 
-   
- 
-ENOTSUP 
-   
-  Sending was not supported by the underlying message 
-  transport. 
-   
- 
-EFSM 
-   
-  The device is not in a state that can accept the message. 
-   
- 
-EAGAIN 
-   
-  The device is not able to accept a message for sending. 
-  The user application should attempt to resend. 
-   
- 
-EINTR 
-   
-  The operation was interrupted by delivery of a signal 
-  before the message was sent. 
-   
- 
-ETIMEDOUT 
-   
-  The underlying message environment timed out during the 
-  send process. 
-   
- 
-ETERM 
-   
-  The underlying message environment is in a shutdown state. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
-rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 
-rmr_rcv_specific(3), rmr_ready(3), rmr_fib(3), 
-rmr_has_str(3), rmr_set_stimeout(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_send_msg 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_send_msg( void* vctx, rmr_mbuf_t* msg );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_send_msg function accepts a message buffer from the 
-user application and attempts to send it. The destination of 
-the message is selected based on the message type specified 
-in the message buffer, and the matching information in the 
-routing tables which are currently in use by the RMR library. 
-This may actually result in the sending of the message to 
-multiple destinations which could degrade expected overall 
-performance of the user application. (Limiting excessive 
-sending of messages is the responsibility of the 
-application(s) responsible for building the routing table 
-used by the RMR library, and not the responsibility of the 
-library.) 
- 
-Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The send operations in RMR will retry *soft* send failures 
-until one of three conditions occurs: 
- 
- 
- 
-1. 
-   
-  The message is sent without error 
-   
- 
-2. 
-   
-  The underlying transport reports a *hard* failure 
-   
- 
-3. 
-   
-  The maximum number of retry loops has been attempted 
- 
- 
-A retry loop consists of approximately 1000 send attempts 
-**without** any intervening calls to *sleep()* or *usleep().* 
-The number of retry loops defaults to 1, thus a maximum of 
-1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMR 
-initialisation using the *rmr_set_stimeout()* function 
-allowing the user application to completely disable retires 
-(set to 0), or to increase the number of retry loops. 
- 
-Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The underlying transport mechanism used to send messages is 
-configured in *non-blocking* mode. This means that if a 
-message cannot be sent immediately the transport mechanism 
-will **not** pause with the assumption that the inability to 
-send will clear quickly (within a few milliseconds). This 
-means that when the retry loop is completely disabled (set to 
-0), that the failure to accept a message for sending by the 
-underlying mechanisms (software or hardware) will be reported 
-immediately to the user application. 
- 
-It should be noted that depending on the underlying transport 
-mechanism being used, it is extremely likely that retry 
-conditions will happen during normal operations. These are 
-completely out of RMR's control, and there is nothing that 
-RMR can do to avoid or mitigate these other than by allowing 
-RMR to retry the send operation, and even then it is possible 
-(e.g., during connection reattempts), that a single retry 
-loop is not enough to guarantee a successful send. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, a new message buffer, with an empty payload, is 
-returned for the application to use for the next send. The 
-state in this buffer will reflect the overall send operation 
-state and will be RMR_OK when the send was successful. 
- 
-When the message cannot be successfully sent this function 
-will return the unsent (original) message buffer with the 
-state set to indicate the reason for failure. The value of 
-*errno* may also be set to reflect a more detailed failure 
-reason if it is known. 
- 
-In the event of extreme failure, a nil pointer is returned. 
-In this case the value of errno might be of some use, for 
-documentation, but there will be little that the user 
-application can do other than to move on. 
- 
-**CAUTION:** In some cases it is extremely likely that the 
-message returned by the send function does **not** reference 
-the same memory structure. Thus is important for the user 
-programme to capture the new pointer for future use or to be 
-passed to rmr_free(). If you are experiencing either double 
-free errors or segment faults in either rmr_free() or 
-rmr_send_msg(), ensure that the return value from this 
-function is being captured and used. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-The following values may be passed back in the *state* field 
-of the returned message buffer. 
- 
- 
- 
-RMR_RETRY 
-   
-  The message could not be sent, but the underlying 
-  transport mechanism indicates that the failure is 
-  temporary. If the send operation is tried again it might 
-  be successful. 
- 
-RMR_SEND_FAILED 
-   
-  The send operation was not successful and the underlying 
-  transport mechanism indicates a permanent (hard) failure; 
-  retrying the send is not possible. 
- 
-RMR_ERR_BADARG 
-   
-  The message buffer pointer did not refer to a valid 
-  message. 
- 
-RMR_ERR_NOHDR 
-   
-  The header in the message buffer was not valid or 
-  corrupted. 
- 
-RMR_ERR_NOENDPT 
-   
-  The message type in the message buffer did not map to a 
-  known endpoint. 
- 
- 
-The following values may be assigned to errno on failure. 
- 
- 
-INVAL 
-   
-  Parameter(s) passed to the function were not valid, or the 
-  underlying message processing environment was unable to 
-  interpret the message. 
-   
- 
-ENOKEY 
+  response message not received in a reasonable amount of 
+  time 
    
-  The header information in the message buffer was invalid. 
-   
- 
-ENXIO 
-   
-  No known endpoint for the message could be found. 
-   
- 
-EMSGSIZE 
-   
-  The underlying transport refused to accept the message 
-  because of a size value issue (message was not attempted 
-  to be sent). 
-   
- 
-EFAULT 
-   
-  The message referenced by the message buffer is corrupt 
-  (nil pointer or bad internal length). 
-   
- 
-EBADF 
-   
-  Internal RMR error; information provided to the message 
-  transport environment was not valid. 
-   
- 
-ENOTSUP 
-   
-  Sending was not supported by the underlying message 
-  transport. 
-   
- 
-EFSM 
-   
-  The device is not in a state that can accept the message. 
-   
- 
-EAGAIN 
-   
-  The device is not able to accept a message for sending. 
-  The user application should attempt to resend. 
-   
- 
-EINTR 
-   
-  The operation was interrupted by delivery of a signal 
-  before the message was sent. 
-   
- 
-ETIMEDOUT 
-   
-  The underlying message environment timed out during the 
-  send process. 
-   
- 
-ETERM 
-   
-  The underlying message environment is in a shutdown state. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
-The following is a simple example of how the rmr_send_msg 
-function is called. In this example, the send message buffer 
-is saved between calls and reused eliminating alloc/free 
-cycles. 
- 
- 
-:: 
-  
-     static rmr_mbuf_t*  send_msg = NULL;        // message to send; reused on each call
-     msg_t*  send_pm;                            // payload for send
-     msg_t*  pm;                                 // our message format in the received payload
-     if( send_msg  == NULL ) {
-         send_msg = rmr_alloc_msg( mr, MAX_SIZE ); // new buffer to send
-     }
-     // reference payload and fill in message type
-     pm = (msg_t*) send_msg->payload;
-     send_msg->mtype = MT_ANSWER;
-     msg->len = generate_data( pm );       // something that fills the payload in
-     msg = rmr_send_msg( mr, send_msg );   // ensure new pointer used after send
-     if( ! msg ) {
-         return ERROR;
-     } else {
-         if( msg->state != RMR_OK ) {
-             // check for RMR_ERR_RETRY, and resend if needed
-             // else return error
-         }
-     }
-     return OK;
- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
-rmr_payload_size(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 
-rmr_rts_msg(3), rmr_ready(3), rmr_mk_ring(3), 
-rmr_ring_free(3), rmr_torcv_rcv(3), rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_set_fack 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- void rmr_set_fack( void* vctx );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_set_fack function enables *fast TCP acknowledgements* 
-if the underlying transport library supports it. This might 
-be useful for applications which must send messages at a 
-maximum rate. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-There is no return value. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-This function does not generate any errors. 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_init(3), 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_set_stimeout 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_set_stimeout( void* vctx, int rloops );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_set_stimeout function sets the configuration for how 
-RMR will retry message send operations which complete with 
-either a *timeout* or *again* completion value. (Send 
-operations include all of the possible message send 
-functions: *rmr_send_msg(), rmr_call(), rmr_rts_msg()* and 
-*rmr_wh_send_msg().* The *rloops* parameter sets the maximum 
-number of retry loops that will be attempted before giving up 
-and returning the unsuccessful state to the user application. 
-Each retry loop is approximately 1000 attempts, and RMR does 
-**not** invoke any sleep function between retries in the 
-loop; a small, 1 mu-sec, sleep is executed between loop sets 
-if the *rloops* value is greater than 1. 
- 
- 
-Disabling Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-By default, the send operations will execute with an *rloop* 
-setting of 1; each send operation will attempt to resend the 
-message approximately 1000 times before giving up. If the 
-user application does not want to have send operations retry 
-when the underlying transport mechanism indicates *timeout* 
-or *again,* the application should invoke this function and 
-pass a value of 0 (zero) for *rloops.* With this setting, all 
-RMR send operations will attempt a send operation only 
-**once,** returning immediately to the caller with the state 
-of that single attempt. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-This function returns a -1 to indicate that the *rloops* 
-value could not be set, and the value *RMR_OK* to indicate 
-success. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-Currently errno is **not** set by this function; the only 
-cause of a failure is an invalid context (*vctx*) pointer. 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
-The following is a simple example of how the rmr_set_stimeout 
-function is called. 
- 
- 
-:: 
-  
-     #define NO_FLAGS    0
-     char* port = "43086";     // port for message router listen
-     int   max_size = 4096;    // max message size for default allocations
-     void* mr_context;         // message router context
-     mr_context = rmr_init( port, max_size, NO_FLAGS );
-     if( mr_context != NULL ) {
-         rmr_set_stimeout( mr_context, 0 );    // turn off retries
-     }
- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
-rmr_payload_size(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 
-rmr_rts_msg(3), rmr_ready(3), rmr_mk_ring(3), 
-rmr_ring_free(3), rmr_send_msg(3), rmr_torcv_rcv(3), 
-rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_set_trace 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- int rmr_set_trace( rmr_mbuf_t* mbuf, unsigned char* data, int len )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_set_trace function will copy len bytes from data into 
-the trace portion of mbuf. If the trace area of mbuf is not 
-the correct size, the message buffer will be reallocated to 
-ensure that enough space is available for the trace data. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_set_trace function returns the number of bytes 
-successfully copied to the message. If 0 is returned either 
-the message pointer was nil, or the size in the parameters 
-was <= 0. 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_tralloc_msg(3), rmr_bytes2xact(3), 
-rmr_bytes2payload(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_rcvfd(3), rmr_get_meid(3), rmr_get_trace(3), 
-rmr_get_trlen(3), rmr_init(3), rmr_init_trace(3), 
-rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 
-rmr_rcv_specific(3), rmr_rts_msg(3), rmr_ready(3), 
-rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), rmr_mk_ring(3), 
-rmr_ring_free(3), rmr_str2meid(3), rmr_str2xact(3), 
-rmr_wh_open(3), rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_set_vlevel 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- #include <rmr/rmr_logging.h>
- void rmr_set_vlevel( int new_level )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_set_vlevel allows the user programme to set the 
-verbosity level which is used to determine the messages RMR 
-writes to standard error. The new_vlevel value must be one of 
-the following constants which have the indicated meanings: 
- 
- 
-RMR_VL_OFF 
-   
-  Turns off all message writing. This includes the stats and 
-  debugging messages generated by the route collector thread 
-  which are normally affected only by the externally managed 
-  verbose level file (and related environment variable). 
-   
- 
-RMR_VL_CRIT 
-   
-  Write only messages of critical importance. From the point 
-  of view of RMR, when a critical proper behaviour of the 
-  library cannot be expected or guaranteed. 
- 
-RMR_VL_ERR 
-   
-  Include error messages in the output. An error is an event 
-  from which RMR has no means to recover. Continued proper 
-  execution is likely except where the affected connection 
-  and/or component mentioned in the error is concerned. 
- 
-RMR_VL_WARN 
-   
-  Include warning messages in the output. A warning 
-  indicates an event which is not considered to be normal, 
-  but is expected and continued acceptable behaviour of the 
-  system is assured. 
- 
-RMR_VL_INFO 
-   
-  Include informational messagees in the output. 
-  Informational messages include some diagnostic information 
-  which explain the activities of RMR. 
- 
-RMR_VL_DEBUG 
-   
-  Include all debugging messages in the output. Debugging 
-  must have also been enabled during the build as a 
-  precaution to accidentally enabling this level of output 
-  as it can grossly affect performance. 
- 
- 
-Generally RMR does not write messages to the standard error 
-device from *critical path* functions, therefore it is 
-usually not harmful to enable a verbosity level of either 
-RMR_VL_CRIT or RMR_VL_ERR. 
- 
-Messages written from the route table collection thread are 
-still governed by the value placed into the verbose level 
-control file (see the man page for rmr_init()); those 
-messages are affected only when logging is completely 
-disabled by passing RMR_VL_OFF to this function. 
- 
-The verbosity level can also be set via an environment 
-variable prior to the start of the RMR based application. The 
-environment variable is read only during initialisation; if 
-the programme must change the value during execution, this 
-function must be used. The default value, if this function is 
-never called, and the environment variable is not present, is 
-RMR_VL_ERR. 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_init(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_str2meid 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char* src, int len )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_str2meid function will copy the string pointed to by 
-src to the managed entity ID (meid) field in the given 
-message. The field is a fixed length, gated by the constant 
-RMR_MAX_MEID and if string length is larger than this value, 
-then **nothing** will be copied. (Note, this differs slightly 
-from the behaviour of the lrmr_bytes2meid() function.) 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, the value RMR_OK is returned. If the string 
-cannot be copied to the message, the return value will be one 
-of the errors listed below. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-If the return value is not RMR_OK, then it will be set to one 
-of the values below. 
- 
- 
- 
-RMR_ERR_BADARG 
-   
-  The message, or an internal portion of the message, was 
-  corrupted or the pointer was invalid. 
-   
- 
-RMR_ERR_OVERFLOW 
-   
-  The length passed in was larger than the maximum length of 
-  the field; only a portion of the source bytes were copied. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_meid(3), rmr_get_rcvfd(3), rmr_payload_size(3), 
-rmr_send_msg(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 
-rmr_rts_msg(3), rmr_ready(3), rmr_fib(3), rmr_has_str(3), 
-rmr_tokenise(3), rmr_mk_ring(3), rmr_ring_free(3), 
-rmr_bytes2meid(3), rmr_wh_open(3), rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_str2xact 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- int rmr_str2xact( rmr_mbuf_t* mbuf, unsigned char* src, int len )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_str2xact function will copy the string pointed to by 
-src to the transaction ID (xaction) field in the given 
-message. The field is a fixed length, gated by the constant 
-RMR_MAX_XID and if string length is larger than this value, 
-then **nothing** will be copied. (Note, this differs slightly 
-from the behaviour of the lrmr_bytes2xact() function.) 
- 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, the value RMR_OK is returned. If the string 
-cannot be copied to the message, the return value will be 
-one of the errors listed below. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-If the return value is not RMR_OK, then it will be set to 
-one of the values below. 
- 
- 
-RMR_ERR_BADARG 
-   
-  The message, or an internal portion of the message, was 
-  corrupted or the pointer was invalid. 
-   
  
-RMR_ERR_OVERFLOW 
+RMR_ERR_UNSET 
    
-  The length passed in was larger than the maximum length of 
-  the field; only a portion of the source bytes were copied. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_bytes2meid(3), rmr_bytes2xact(3), 
-rmr_call(3), rmr_free_msg(3), rmr_get_meid(3), 
-rmr_get_rcvfd(3), rmr_get_xact(3), rmr_payload_size(3), 
-rmr_send_msg(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 
-rmr_rts_msg(3), rmr_ready(3), rmr_fib(3), rmr_has_str(3), 
-rmr_tokenise(3), rmr_mk_ring(3), rmr_ring_free(3), 
-rmr_str2meid(3), rmr_wh_open(3), rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-RMR support functions 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- #include <rmr/ring_inline.h>
- char* rmr_fib( char* fname );
- int rmr_has_str( char const* buf, char const* str, char sep, int max );
- int rmr_tokenise( char* buf, char** tokens, int max, char sep );
- void* rmr_mk_ring( int size );
- void rmr_ring_free( void* vr );
- static inline void* rmr_ring_extract( void* vr )
- static inline int rmr_ring_insert( void* vr, void* new_data )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-These functions support the RMR library, and are made 
-available to user applications as some (e.g. route table 
-generators) might need and/or want to make use of them. The 
-rmr_fib function accepts a file name and reads the entire 
-file into a single buffer. The intent is to provide an easy 
-way to load a static route table without a lot of buffered 
-I/O hoops. 
- 
-The rmr_has_str function accepts a *buffer* containing a set 
-of delimited tokens (e.g. foo,bar,goo) and returns true if 
-the target string, *str,* matches one of the tokens. The 
-*sep* parameter provides the separation character in the 
-buffer (e.g a comma) and *max* indicates the maximum number 
-of tokens to split the buffer into before checking. 
- 
-The rmr_tokenise function is a simple tokeniser which splits 
-*buf* into tokens at each occurrence of *sep*. Multiple 
-occurrences of the separator character (e.g. a,,b) result in 
-a nil token. Pointers to the tokens are placed into the 
-*tokens* array provided by the caller which is assumed to 
-have at least enough space for *max* entries. 
- 
-The rmr_mk_ring function creates a buffer ring with *size* 
-entries. 
- 
-The rmr_ring_free function accepts a pointer to a ring 
-context and frees the associated memory. 
- 
-The rmr_ring_insert and rmr_ring_extract functions are 
-provided as static inline functions via the 
-*rmr/ring_inline.h* header file. These functions both accept 
-the ring *context* returned by mk_ring, and either insert a 
-pointer at the next available slot (tail) or extract the data 
-at the head. 
- 
-RETURN VALUES 
--------------------------------------------------------------------------------------------- 
- 
-The following are the return values for each of these 
-functions. 
- 
-The rmr_fib function returns a pointer to the buffer 
-containing the contents of the file. The buffer is terminated 
-with a single nil character (0) making it a legitimate C 
-string. If the file was empty or nonexistent, a buffer with 
-an immediate nil character. If it is important to the calling 
-programme to know if the file was empty or did not exist, the 
-caller should use the system stat function call to make that 
-determination. 
- 
-The rmr_has_str function returns 1 if *buf* contains the 
-token referenced by &ita and false (0) if it does not. On 
-error, a -1 value is returned and errno is set accordingly. 
- 
-The rmr_tokenise function returns the actual number of token 
-pointers placed into *tokens* 
- 
-The rmr_mk_ring function returns a void pointer which is the 
-*context* for the ring. 
- 
-The rmr_ring_insert function returns 1 if the data was 
-successfully inserted into the ring, and 0 if the ring is 
-full and the pointer could not be deposited. 
- 
-The rmr_ring_extract will return the data which is at the 
-head of the ring, or NULL if the ring is empty. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-Not many of these functions set the value in errno, however 
-the value may be one of the following: 
- 
- 
-INVAL 
+  the message hasn't been populated with a transport buffer 
    
-  Parameter(s) passed to the function were not valid. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
-rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 
-rmr_rcv_specific(3), rmr_rts_msg(3), rmr_ready(3), 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_torcv_msg 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_torcv_msg function will pause for *ms_to* 
-milliseconds waiting for a message to arrive. If a message 
-arrives before the timeout expires the message buffer 
-returned will have a status of RMR_OK and the payload will 
-contain the data received. If the timeout expires before the 
-message is received, the status will have the value 
-RMR_ERR_TIMEOUT. When a received message is returned the 
-message buffer will also contain the message type and length 
-set by the sender. If messages were queued while waiting for 
-the response to a previous invocation of rmr_call, the oldest 
-message is removed from the queue and returned without delay. 
- 
-The *vctx* pointer is the pointer returned by the rmr_init 
-function. *Old_msg* is a pointer to a previously used message 
-buffer or NULL. The ability to reuse message buffers helps to 
-avoid alloc/free cycles in the user application. When no 
-buffer is available to supply, the receive function will 
-allocate one. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-The function returns a pointer to the rmr_mbuf_t structure 
-which references the message information (state, length, 
-payload), or a nil pointer in the case of an extreme error. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-The *state* field in the message buffer will be one of the 
-following: 
- 
- 
  
-RMR_OK 
+RMR_ERR_TRUNC 
    
-  The message buffer (payload) references the received data. 
+  length in the received buffer is longer than the size of 
+  the allocated payload, received message likely truncated 
+  (length set by sender could be wrong, but we can't know 
+  that) 
    
  
 RMR_ERR_INITFAILED 
    
-  The first call to this function must initialise an 
-  underlying system notification mechanism. On failure, this 
-  error is returned and errno will have the system error 
-  status set. If this function fails to intialise, the poll 
-  mechansim, it is likely that message receives will never 
-  be successful. 
+  initialisation of something (probably message) failed 
    
  
-RMR_ERR_TIMEOUT 
+RMR_ERR_NOTSUPP 
    
-  The timeout expired before a complete message was 
-  received. All other fields in the message buffer are not 
-  valid. 
-   
- 
-RMR_ERR_EMPTY 
-   
-  A message was received, but it had no payload. All other 
-  fields in the message buffer are not valid. 
+  the request is not supported, or RMR was not initialised 
+  for the request 
  
  
+Depending on the underlying transport mechanism, and the 
+nature of the call that RMR attempted, the system errno value 
+might reflect additional detail about the failure. 
+Applications should **not** rely on errno as some transport 
+mechanisms do not set it with any consistency. 
+ 
+Configuration and Control 
+============================================================================================ 
+ 
+With the assumption that most RMR based applications will be 
+executed in a containerised environment, there are some 
+underlying mechanics which the developer may need to know in 
+order to properly provide a configuration specification to 
+the container management system. The following paragraphs 
+briefly discuss these. 
  
  
-INVAL 
-   
-  Parameter(s) passed to the function were not valid. 
-   
- 
-EBADF 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-ENOTSUP 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-EFSM 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-EAGAIN 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-EINTR 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-ETIMEDOUT 
-   
-  The underlying message transport is unable to process the 
-  request. 
-   
- 
-ETERM 
-   
-  The underlying message transport is unable to process the 
-  request. 
- 
- 
-EXAMPLE 
+TCP Ports 
 -------------------------------------------------------------------------------------------- 
  
+RMR requires two (2) TCP listen ports: one for general 
+application-to-application communications and one for 
+route-table updates. The general communication port is 
+specified by the application at the time RMR is initialised. 
+The port used to listen for route table updates is likely to 
+be a constant port shared by all applications provided they 
+are running in separate containers. To that end, the port 
+number defaults to 4561, but can be configured with an 
+environment variable (see later paragraph in this section). 
  
-SEE ALSO 
+Host Names 
 -------------------------------------------------------------------------------------------- 
  
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_rcvfd(3), rmr_init(3), rmr_payload_size(3), 
-rmr_rcv_msg(3), rmr_send_msg(3), rmr_rcv_specific(3), 
-rmr_rts_msg(3), rmr_ready(3), rmr_fib(3), rmr_has_str(3), 
-rmr_tokenise(3), rmr_mk_ring(3), rmr_ring_free(3) 
+RMR is typically host name agnostic. Route table entries may 
+contain endpoints defined either by host name or IP address. 
+In the container world the concept of a *service name* might 
+exist, and likely is different than a host name. RMR's only 
+requirement with respect to host names is that a name used on 
+a route table entry must be resolvable via the gethostbyname 
+system call. 
  
- 
-NAME 
+Environment Variables 
 -------------------------------------------------------------------------------------------- 
  
-rmr_trace_ref 
+Several environment variables are recognised by RMR which, in 
+general, are used to define interfaces and listen ports (e.g. 
+the route table update listen port), or debugging 
+information. Generally this information is system controlled 
+and thus RMR expects this information to be defined in the 
+environment rather than provided by the application. The 
+following is a list of the environment variables which RMR 
+recognises: 
  
-SYNOPSIS 
+ 
+ 
+RMR_BIND_IF 
+   
+  The interface to bind to listen ports to. If not defined 
+  0.0.0.0 (all interfaces) is assumed. 
+   
+ 
+RMR_RTG_SVC 
+   
+  The port RMR will listen on for route manager connections. 
+  If not defined 4561 is used. 
+   
+ 
+RMR_SEED_RT 
+   
+  Where RMR expects to find the name of the seed (static) 
+  route table. If not defined no static table is read. 
+   
+ 
+RMR_RTG_ISRAW 
+   
+  If the value set to 0, RMR expects the route table manager 
+  messages to be messages with and RMR header. If this is 
+  not defined messages are assumed to be "raw" (without an 
+  RMR header. 
+   
+ 
+RMR_VCTL_FILE 
+   
+  Provides a file which is used to set the verbose level of 
+  the route table collection thread. The first line of the 
+  file is read and expected to contain an integer value to 
+  set the verbose level. The value may be changed at any 
+  time and the route table thread will adjust accordingly. 
+   
+ 
+RMR_SRC_NAMEONLY 
+   
+  If the value of this variable is greater than 0, RMR will 
+  not permit the IP address to be sent as the message 
+  source. Only the host name will be sent as the source in 
+  the message header. 
+ 
+ 
+ 
+Logging 
 -------------------------------------------------------------------------------------------- 
  
- 
-:: 
-  
- #include <rmr/rmr.h>
- int rmr_trace_ref( rmr_mbuf_t* mbuf, int* sizeptr )
+RMR does **not** use any logging libraries; any error or 
+warning messages are written to standard error. RMR messages 
+are written with one of three prefix strings: 
  
  
  
-DESCRIPTION 
+[CRI] 
+   
+  The event is of a critical nature and it is unlikely that 
+  RMR will continue to operate correctly if at all. It is 
+  almost certain that immediate action will be needed to 
+  resolve the issue. 
+   
+ 
+[ERR] 
+   
+  The event is not expected and RMR is not able to handle 
+  it. There is a small chance that continued operation will 
+  be negatively impacted. Eventual action to diagnose and 
+  correct the issue will be necessary. 
+   
+ 
+[WRN] 
+   
+  The event was not expected by RMR, but can be worked 
+  round. Normal operation will continue, but it is 
+  recommended that the cause of the problem be investigated. 
+ 
+ 
+ 
+_____________________________________________________________
+ 
+[1] It is entirely possible to design a routing table, and 
+application group, such that the same message type is is 
+left unchanged and the message is forwarded by an 
+application after updating the payload. This type of 
+behaviour is often referred to as service chaining, and can 
+be done without any "knowledge" by an application with 
+respect to where the message goes next. Service chaining is 
+supported by RMR in as much as it allows the message to be 
+resent, but the actual complexities of designing and 
+implementing service chaining lie with the route table 
+generator process. 
+ 
+ 
+ 
+[2] There is additional overhead to support multi-threaded 
+call as a special listener thread must be used in order to 
+deliver responses to the proper application thread. 
+ 
+ 
+ 
+ 
+ 
+ 
+Appendix A -- Quick Reference 
+============================================================================================ 
+ 
+Please  refer  to  the RMR manual pages on the Read the Docs 
+site 
+ 
+https://docs.o-ran-sc.org/projects/o-ran-sc-ric-plt-lib-rmr/en/latest/index.html 
+ 
+ 
+Appendix B -- Message Buffer Details 
+============================================================================================ 
+ 
+The RMR message buffer is a C structure which is exposed  in 
+the  rmr.h  header  file.  It  is  used  to manage a message 
+received from a peer endpoint, or a message  that  is  being 
+sent  to  a  peer.  Fields include payload length, amount of 
+payload actually  used,  status,  and  a  reference  to  the 
+payload.  There are also fields which the application should 
+ignore, and could be hidden in the header file, but we chose 
+not  to.  These fields include a reference to the RMR header 
+information,  and  to  the  underlying  transport  mechanism 
+message  struct  which may or may not be the same as the RMR 
+header reference. 
+ 
+The Structure 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_trace_ref function returns a pointer to the trace 
-area in the message, and optionally populates the user 
-programme supplied size integer with the trace area size, if 
-*sizeptr* is not nil. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, a void pointer to the trace area of the message 
-is returned. A nil pointer is returned if the message has no 
-trace data area allocated, or if the message itself is 
-invalid. 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_tralloc_msg(3), rmr_bytes2xact(3), 
-rmr_bytes2meid(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_rcvfd(3), rmr_get_trlen(3), rmr_init(3), 
-rmr_init_trace(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_str2meid(3), 
-rmr_str2xact(3), rmr_wh_open(3), rmr_wh_send_msg(3), 
-rmr_set_trace(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_tralloc_msg 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_tralloc_msg( void* vctx, int size,
-                              int trace_size, unsigned const char *tr_data );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_tralloc_msg function is used to allocate a buffer 
-which the user programme can write into and then send through 
-the library. The buffer is allocated such that sending it 
-requires no additional copying from the buffer as it passes 
-through the underlying transport mechanism. 
- 
-The *size* parameter is used to set the payload length in the 
-message. If it is 0, then the default size supplied on the 
-*rmr_init* call will be used. In addition to allocating the 
-payload, a space in the buffer is reserved for *trace* data 
-(tr_size bytes), and the bytes pointed to by *tr_data* are 
-copied into that portion of the message. The *vctx* parameter 
-is the void context pointer that was returned by the 
-*rmr_init* function. 
- 
-The pointer to the message buffer returned is a structure 
-which has some user application visible fields; the structure 
-is described in rmr.h, and is illustrated below. 
+The following is the C structure. Readers are  cautioned  to 
+examine the rmr.h header file directly; the information here 
+may be out of date (old document in some cache), and thus it 
+may be incorrect. 
  
  
 :: 
   
  typedef struct {
-     int state;
-     int mtype;
-     int len;
-     unsigned char* payload;
-     unsigned char* xaction;
+     int    state;            // state of processing
+     int    mtype;            // message type
+     int    len;              // length of data in the payload (send or received)
+     unsigned char* payload;  // transported data
+     unsigned char* xaction;  // pointer to fixed length transaction id bytes
+     int    sub_id;           // subscription id
+     int    tp_state;         // transport state (errno)
+                              // these things are off limits to the user application
+     void*    tp_buf;         // underlying transport allocated pointer (e.g. nng message)
+     void*    header;         // internal message header (whole buffer: header+payload)
+     unsigned char* id;       // if we need an ID in the message separate from the xaction id
+     int      flags;          // various MFL_ (private) flags as needed
+     int      alloc_len;      // the length of the allocated space (hdr+payload)
+     void*    ring;           // ring this buffer should be queued back to
+     int      rts_fd;         // SI fd for return to sender
+     int      cookie;         // cookie to detect user misuse of free'd msg
  } rmr_mbuf_t;
  
  
  
  
- 
-state 
-   
-  Is the current buffer state. Following a call to 
-  rmr_send_msg the state indicates whether the buffer was 
-  successfully sent which determines exactly what the 
-  payload points to. If the send failed, the payload 
-  referenced by the buffer is the message that failed to 
-  send (allowing the application to attempt a 
-  retransmission). When the state is a_OK the buffer 
-  represents an empty buffer that the application may fill 
-  in in preparation to send. 
-   
- 
-mtype 
-   
-  When sending a message, the application is expected to set 
-  this field to the appropriate message type value (as 
-  determined by the user programme). Upon send this value 
-  determines how the a library will route the message. For a 
-  buffer which has been received, this field will contain 
-  the message type that was set by the sending application. 
-   
- 
-len 
-   
-  The application using a buffer to send a message is 
-  expected to set the length value to the actual number of 
-  bytes that it placed into the message. This is likely less 
-  than the total number of bytes that the message can carry. 
-  For a message buffer that is passed to the application as 
-  the result of a receive call, this will be the value that 
-  the sending application supplied and should indicate the 
-  number of bytes in the payload which are valid. 
-   
- 
-payload 
-   
-  The payload is a pointer to the actual received data. The 
-  user programme may read and write from/to the memory 
-  referenced by the payload up until the point in time that 
-  the buffer is used on a rmr_send, rmr_call or rmr_reply 
-  function call. Once the buffer has been passed back to a a 
-  library function the user programme should **NOT** make 
-  use of the payload pointer. 
-   
- 
-xaction 
-   
-  The *xaction* field is a pointer to a fixed sized area in 
-  the message into which the user may write a transaction 
-  ID. The ID is optional with the exception of when the user 
-  application uses the rmr_call function to send a message 
-  and wait for the reply; the underlying processing expects 
-  that the matching reply message will also contain the same 
-  data in the *xaction* field. 
- 
- 
-RETURN VALUE 
+State vs Transport State 
 -------------------------------------------------------------------------------------------- 
  
-The function returns a pointer to a rmr_mbuf structure, or 
-NULL on error. 
+The  state  field reflects the state at the time the message 
+buffer is returned to the calling application.  For  a  send 
+operation, if the state is not RMR_OK then the message buffer 
+references the payload that could not be sent, and when  the 
+state is RMR_OK the buffer references a *fresh* payload that 
+the application may fill in. 
  
-ERRORS 
+When the state is not RMR_OK, C programmes may  examine  the 
+global  errno  value which RMR will have left set, if it was 
+set, by the underlying transport mechanism. In  some  cases, 
+wrapper modules are not able to directly access the C-library 
+errno value, and to assist  with  possible  transport  error 
+details,  the  send and receive operations populate tp_state 
+with the value of errno. 
+ 
+Regardless of whether  the  application  makes  use  of  the 
+tp_state,  or  the  errno value, it should be noted that the 
+underlying transport mechanism may not actually  update  the 
+errno  value;  in  other words: it might not be accurate. In 
+addition, RMR populates the tp_state value  in  the  message 
+buffer **only** when the state is not RMR_OK. 
+ 
+Field References 
 -------------------------------------------------------------------------------------------- 
  
+The  transaction  field  was exposed in the first version of 
+RMR, and in hindsight this shouldn't have been done.  Rather 
+than  break  any  existing  code the reference was left, but 
+additional fields such as  trace  data,  were  not  directly 
+exposed  to  the  application.  The application developer is 
+strongly encouraged to use the functions which get  and  set 
+the  transaction  ID rather than using the pointer directly; 
+any data overruns will not be detected if the  reference  is 
+used directly. 
+ 
+In contrast, the payload reference should be used directly by 
+the application  in  the  interest  of  speed  and  ease  of 
+programming.  The same care to prevent writing more bytes to 
+the payload buffer than it can hold must  be  taken  by  the 
+application.  By the nature of the allocation of the payload 
+in transport space, RMR is unable to add guard bytes  and/or 
+test for data overrun. 
+ 
+Actual Transmission 
+-------------------------------------------------------------------------------------------- 
+ 
+When RMR sends the application's message, the message buffer 
+is **not** transmitted. The transport buffer (tp_buf)  which 
+contains  the RMR header and application payload is the only 
+set of bytes which are transmitted. While it may seem to the 
+caller  like the function is returning a new message buffer, 
+the same struct is reused and only a new transport buffer is 
+allocated.  The intent is to keep the alloc/free cycles to a 
+minimum. 
  
  
-ENOMEM 
+Appendix C -- Glossary 
+============================================================================================ 
+ 
+Many terms in networking can be  interpreted  with  multiple 
+meanings,  and  several  terms used in this document are RMR 
+specific. The following definitions are the meanings of terms 
+used  within  this  document  and  should help the reader to 
+understand the intent of meaning. 
+ 
+ 
+ 
+application 
    
-  Unable to allocate memory. 
+  A programme which uses RMR to send and/or receive messages 
+  to/from another RMR based application. 
+   
+ 
+Critical error 
+   
+  An  error  that  RMR  has  encountered which will prevent 
+  further successful processing  by  RMR.  Critical  errors 
+  usually indicate that the application should abort. 
+   
+ 
+Endpoint 
+   
+  An RMR based application that is defined as being capable 
+  of receiving one or more types of messages (as defined by 
+  a *message key.*) 
+   
+ 
+Environment variable 
+   
+  A   key/value  pair  which  is  set  externally  to  the  
+  application, but which is available  to  the  application 
+  (and referenced libraries) through the getenv system call. 
+  Environment variables are the main method of communicating 
+  information such as port numbers to RMR. 
+   
+ 
+Error 
+   
+  An  abnormal condition that RMR has encountered, but will 
+  not affect the overall processing by RMR, but may  impact 
+  certain aspects such as the ability to communicate with a 
+  specific   endpoint.   Errors  generally  indicate  that  
+  something, usually external to RMR, must be addressed. 
+   
+ 
+Host name 
+   
+  The  name  of  the  host as returned by the gethostbyname 
+  system call. In a containerised environment this might be 
+  the  container  or  service  name  depending  on  how the 
+  container is started. From RMR's point of  view,  a  host 
+  name can be used to resolve an *endpoint* definition in a 
+  *route* table.) 
+   
+ 
+IP 
+   
+  Internet protocol. A low level transmission protocol which 
+  governs  the  transmission  of  datagrams  across network 
+  boundaries. 
+   
+ 
+Listen socket 
+   
+  A *TCP* socket used to await incoming connection requests. 
+  Listen sockets are defined by an interface and port number 
+  combination where the  port  number  is  unique  for  the 
+  interface. 
+   
+ 
+Message 
+   
+  A  series  of  bytes  transmitted from the application to 
+  another RMR based application. A message is comprised  of 
+  RMR  specific  data  (a  header), and application data (a 
+  payload). 
+   
+ 
+Message buffer 
+   
+  A data structure used to describe a message which is to be 
+  sent or has been received. The message buffer includes the 
+  payload length, message type, message source,  and  other 
+  information. 
+   
+ 
+Messgae type 
+   
+  A  signed  integer (0-32000) which identifies the type of 
+  message  being  transmitted,  and  is  one  of  the  two  
+  components of a *routing key.* See *Subscription ID.* 
+   
+ 
+Payload 
+   
+  The  portion of a message which holds the user data to be 
+  transmitted to the remote *endpoint.* The payload contents 
+  are completely application defined. 
+   
+ 
+RMR context 
+   
+  A  set  of information which defines the current state of 
+  the underlying transport connections that RMR is managing. 
+  The application will be give a context reference (pointer) 
+  that is supplied to  most  RMR  functions  as  the  first 
+  parameter. 
+   
+ 
+Round robin 
+   
+  The  method  of  selecting an *endpoint* from a list such 
+  that all *endpoints* are selected before starting at  the 
+  head of the list. 
+   
+ 
+Route table 
+   
+  A series of "rules" which define the possible *endpoints* 
+  for each *message key.* 
+   
+ 
+Route table manager 
+   
+  An application responsible for building a  *route  table* 
+  and  then  distributing  it  to  all applicable RMR based 
+  applications. 
+   
+ 
+Routing 
+   
+  The process of selecting an *endpoint* which will be  the 
+  recipient of a message. 
+   
+ 
+Routing key 
+   
+  A  combination  of  *message  type* and *subscription ID* 
+  which RMR uses to select the destination *endpoint*  when 
+  sending a message. 
+   
+ 
+Source 
+   
+  The sender of a message. 
+   
+ 
+Subscription ID 
+   
+  A  signed  integer  value  (0-32000) which identifies the 
+  subscription characteristic of a message. It is  used  in 
+  conjunction  with  the  *message  type*  to determine the 
+  *routing key.* 
+   
+ 
+Target 
+   
+  The *endpoint* selected to receive a message. 
+   
+ 
+TCP 
+   
+  Transmission Control Protocol. A connection based internet 
+  protocol    which    provides   for   lossless   packet   
+  transportation, usually over IP. 
+   
+ 
+Thread 
+   
+  Also called a *process thread, or  pthread.*  This  is  a 
+  lightweight  process  which executes in concurrently with 
+  the application and shares the same  address  space.  RMR 
+  uses  threads  to  manage  asynchronous functions such as 
+  route table updates. &Term An  optional  portion  of  the 
+  message buffer that the application may populate with data 
+  that allows for tracing the progress of the transaction or 
+  application  activity across components. RMR makes no use 
+  of this data. 
+   
+ 
+Transaction ID 
+   
+  A fixed number of bytes in the *message* buffer) which the 
+  application  may populate with information related to the 
+  transaction. RMR makes use  of  the  transaction  ID  for 
+  matching response messages with the &c function is used to 
+  send a message. 
+   
+ 
+Transient failure 
+   
+  An error state that is believed to be short lived and that 
+  the  operation,  if  retried by the application, might be 
+  successful. C programmers will recognise this as EAGAIN. 
+   
+ 
+Warning 
+   
+  A warning occurs when RMR has encountered something  that 
+  it believes isn't correct, but has a defined work round. 
+   
+ 
+Wormhole 
+   
+  A  direct  connection  managed  by  RMR  between the user 
+  application and a remote, RMR based, application. 
  
  
-SEE ALSO 
+ 
+Appendix D -- Code Examples 
+============================================================================================ 
+ 
+The following snippet of code illustrate some of  the  basic 
+operation  of  the RMR library. Please refer to the examples 
+and test directories in the RMR repository for complete  RMR 
+based programmes. 
+ 
+Sender Sample 
 -------------------------------------------------------------------------------------------- 
  
-rmr_alloc_msg(3), rmr_mbuf(3) rmr_call(3), rmr_free_msg(3), 
-rmr_init(3), rmr_init_trace(3), rmr_get_trace(3), 
-rmr_get_trlen(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_set_trace(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_wh_call 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
+The following code segment shows how a message buffer can be 
+allocated, populated, and sent. The snippet also illustrates 
+how  the  result  from the function is used to send the next 
+message. It does not illustrate error and/or retry handling. 
  
  
 :: 
   
- #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_wh_call( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg, int call_id, int max_wait )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_wh_call function accepts a message buffer (msg) from 
-the user application and attempts to send it using the 
-wormhole ID provided (whid). If the send is successful, the 
-call will block until either a response message is received, 
-or the max_wait number of milliseconds has passed. In order 
-for the response to be recognised as a response, the remote 
-process **must** use rmr_rts_msg() to send their response. 
- 
-Like *rmr_wh_send_msg,* this function attempts to send the 
-message directly to a process at the other end of a wormhole 
-which was created with *rmr_wh_open().* When sending message 
-via wormholes, the normal RMR routing based on message type 
-is ignored, and the caller may leave the message type 
-unspecified in the message buffer (unless it is needed by the 
-receiving process). The call_id parameter is a number in the 
-range of 2 through 255 and is used to identify the calling 
-thread in order to properly match a response message when it 
-arrives. Providing this value, and ensuring the proper 
-uniqueness, is the responsibility of the user application and 
-as such the ability to use the rmr_wh_call() function from 
-potentially non-threaded concurrent applications (such as 
-Go's goroutines) is possible. 
- 
-Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The send operations in RMR will retry *soft* send failures 
-until one of three conditions occurs: 
- 
- 
- 
-1. 
-   
-  The message is sent without error 
-   
- 
-2. 
-   
-  The underlying transport reports a *hard* failure 
-   
- 
-3. 
-   
-  The maximum number of retry loops has been attempted 
- 
- 
-A retry loop consists of approximately 1000 send attempts 
-**without** any intervening calls to *sleep()* or *usleep().* 
-The number of retry loops defaults to 1, thus a maximum of 
-1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMR 
-initialisation using the *rmr_set_stimeout()* function 
-allowing the user application to completely disable retires 
-(set to 0), or to increase the number of retry loops. 
- 
-Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The underlying transport mechanism used to send messages is 
-configured in *non-blocking* mode. This means that if a 
-message cannot be sent immediately the transport mechanism 
-will **not** pause with the assumption that the inability to 
-send will clear quickly (within a few milliseconds). This 
-means that when the retry loop is completely disabled (set to 
-0), that the failure to accept a message for sending by the 
-underlying mechanisms (software or hardware) will be reported 
-immediately to the user application. 
- 
-It should be noted that depending on the underlying transport 
-mechanism being used, it is extremely likely that retry 
-conditions will happen during normal operations. These are 
-completely out of RMR's control, and there is nothing that 
-RMR can do to avoid or mitigate these other than by allowing 
-RMR to retry the send operation, and even then it is possible 
-(e.g., during connection reattempts), that a single retry 
-loop is not enough to guarantee a successful send. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, new message buffer, with the payload containing 
-the response from the remote endpoint is returned. The state 
-in this buffer will reflect the overall send operation state 
-and should be RMR_OK. 
- 
-If a message is returned with a state which is anything other 
-than RMR_OK, the indication is that the send was not 
-successful. The user application must check the state and 
-determine the course of action. If the return value is NULL, 
-no message, the indication is that there was no response 
-received within the timeout (max_wait) period of time. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-The following values may be passed back in the *state* field 
-of the returned message buffer. 
- 
- 
- 
-RMR_ERR_WHID 
-   
-  The wormhole ID passed in was not associated with an open 
-  wormhole, or was out of range for a valid ID. 
- 
-RMR_ERR_NOWHOPEN 
-   
-  No wormholes exist, further attempt to validate the ID are 
-  skipped. 
- 
-RMR_ERR_BADARG 
-   
-  The message buffer pointer did not refer to a valid 
-  message. 
- 
-RMR_ERR_NOHDR 
-   
-  The header in the message buffer was not valid or 
-  corrupted. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
-The following is a simple example of how the a wormhole is 
-created (rmr_wh_open) and then how rmr_wh_send_msg function 
-is used to send messages. Some error checking is omitted for 
-clarity. 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>    // system headers omitted for clarity
- int main() {
-    rmr_whid_t whid = -1;   // wormhole id for sending
-    void* mrc;      //msg router context
-         int i;
-    rmr_mbuf_t*  sbuf;      // send buffer
-    int     count = 0;
-    int     norm_msg_size = 1500;    // most messages fit in this size
-    mrc = rmr_init( "43086", norm_msg_size, RMRFL_NONE );
-    if( mrc == NULL ) {
-       fprintf( stderr, "[FAIL] unable to initialise RMR environment\\n" );
-       exit( 1 );
-    }
-    while( ! rmr_ready( mrc ) ) {        // wait for routing table info
-       sleep( 1 );
-    }
-    sbuf = rmr_alloc_msg( mrc, 2048 );
-    while( 1 ) {
-      if( whid < 0 ) {
-        whid = rmr_wh_open( mrc, "localhost:6123" );  // open fails if endpoint refuses conn
-           if( RMR_WH_CONNECTED( wh ) ) {
-            snprintf( sbuf->payload, 1024, "periodic update from sender: %d", count++ );
-            sbuf->len =  strlen( sbuf->payload );
-            sbuf = rmr_wh_call( mrc, whid, sbuf, 1000 );        // expect a response in 1s or less
-            if( sbuf != NULL && sbuf->state = RMR_OK ) {
-              sprintf( stderr, "response: %s\\n", sbuf->payload );    // assume they sent a string
-            } else {
-              sprintf( stderr, "response not received, or send error\\n" );
-            }
-         }
-       }
-       sleep( 5 );
-    }
+ mrc = rmr_init( listen_port, MAX_BUF_SZ, RMRFL_NOFLAGS );
+ rmr_set_stimeout( mrc, rmr_retries );
+ while( ! rmr_ready( mrc ) ) {
+     sleep( 1 );
  }
- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
-rmr_payload_size(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 
-rmr_rts_msg(3), rmr_ready(3), rmr_fib(3), rmr_has_str(3), 
-rmr_tokenise(3), rmr_mk_ring(3), rmr_ring_free(3), 
-rmr_set_stimeout(3), rmr_wh_open(3), rmr_wh_close(3), 
-rmr_wh_state(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_wh_close 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- void rmr_close( void* vctx, rmr_whid_t whid )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_wh_close function closes the wormhole associated with 
-the wormhole id passed in. Future calls to rmr_wh_send_msg 
-with this ID will fail. 
- 
-The underlying TCP connection to the remote endpoint is 
-**not** closed as this session may be required for regularly 
-routed messages (messages routed based on message type). 
-There is no way to force a TCP session to be closed at this 
-point in time. 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_rcvfd(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_wh_open(3), 
-rmr_wh_send_msg(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_wh_open 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- void* rmr_wh_open( void* vctx, char* target )
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_wh_open function creates a direct link for sending, a 
-wormhole, to another RMR based process. Sending messages 
-through a wormhole requires that the connection be 
-established overtly by the user application (via this 
-function), and that the ID returned by rmr_wh_open be passed 
-to the rmr_wh_send_msg function. 
- 
-*Target* is the *name* or *IP-address* combination of the 
-processess that the wormhole should be connected to. *Vctx* 
-is the RMR void context pointer that was returned by the 
-rmr_init function. 
- 
-When invoked, this function immediatly attempts to connect to 
-the target process. If the connection cannot be established, 
-an error is returned to the caller, and no direct messages 
-can be sent to the target. Once a wormhole is connected, the 
-underlying transport mechanism (e.g. NNG) will provide 
-reconnects should the connection be lost, however the 
-handling of messages sent when a connection is broken is 
-undetermined as each underlying transport mechanism may 
-handle buffering and retries differently. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_wh_open function returns a type rmr_whid_t which must 
-be passed to the rmr_wh_send_msg function when sending a 
-message. The id may also be tested to determine success or 
-failure of the connection by using the RMR_WH_CONNECTED macro 
-and passing the ID as the parameter; a result of 1 indicates 
-that the connection was esablished and that the ID is valid. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-The following error values are specifically set by this RMR 
-function. In some cases the error message of a system call is 
-propagated up, and thus this list might be incomplete. 
- 
- 
-EINVAL 
-   
-  A parameter passed was not valid. 
- 
-EACCESS 
-   
-  The user application does not have the ability to 
-  establish a wormhole to the indicated target (or maybe any 
-  target). 
- 
-ECONNREFUSED 
-   
-  The connection was refused. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
-    void*  rmc;
-    rmr_whid_t wh;
-    rmc = rmr_init( "43086", 4096, 0 ); // init context
-    wh = rmr_wh_open( rmc, "localhost:6123" );
-    if( !RMR_WH_CONNECTED( wh ) ) {
-      fprintf( stderr, "unable to connect wormhole: %s\\n",
-              strerror( errno ) );
-    }
- 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
-rmr_get_rcvfd(3), rmr_payload_size(3), rmr_send_msg(3), 
-rmr_rcv_msg(3), rmr_rcv_specific(3), rmr_rts_msg(3), 
-rmr_ready(3), rmr_fib(3), rmr_has_str(3), rmr_tokenise(3), 
-rmr_mk_ring(3), rmr_ring_free(3), rmr_wh_close(3), 
-rmr_wh_send_msg(3), rmr_wh_state(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_wh_send_msg 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t id, rmr_mbuf_t* msg );
- 
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_wh_send_msg function accepts a message buffer from 
-the user application and attempts to send it using the 
-wormhole ID provided (id). Unlike *rmr_send_msg,* this 
-function attempts to send the message directly to a process 
-at the other end of a wormhole which was created with 
-*rmr_wh_open().* When sending message via wormholes, the 
-normal RMR routing based on message type is ignored, and the 
-caller may leave the message type unspecified in the message 
-buffer (unless it is needed by the receiving process). 
- 
-The message buffer (msg) used to send is the same format as 
-used for regular RMR send and reply to sender operations, 
-thus any buffer allocated by these means, or calls to 
-*rmr_rcv_msg()* can be passed to this function. 
- 
-Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The send operations in RMR will retry *soft* send failures 
-until one of three conditions occurs: 
- 
- 
- 
-1. 
-   
-  The message is sent without error 
-   
- 
-2. 
-   
-  The underlying transport reports a *hard* failure 
-   
- 
-3. 
-   
-  The maximum number of retry loops has been attempted 
- 
- 
-A retry loop consists of approximately 1000 send attempts 
-**without** any intervening calls to *sleep()* or *usleep().* 
-The number of retry loops defaults to 1, thus a maximum of 
-1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMR 
-initialisation using the *rmr_set_stimeout()* function 
-allowing the user application to completely disable retires 
-(set to 0), or to increase the number of retry loops. 
- 
-Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
-The underlying transport mechanism used to send messages is 
-configured in *non-blocking* mode. This means that if a 
-message cannot be sent immediately the transport mechanism 
-will **not** pause with the assumption that the inability to 
-send will clear quickly (within a few milliseconds). This 
-means that when the retry loop is completely disabled (set to 
-0), that the failure to accept a message for sending by the 
-underlying mechanisms (software or hardware) will be reported 
-immediately to the user application. 
- 
-It should be noted that depending on the underlying transport 
-mechanism being used, it is extremely likely that retry 
-conditions will happen during normal operations. These are 
-completely out of RMR's control, and there is nothing that 
-RMR can do to avoid or mitigate these other than by allowing 
-RMR to retry the send operation, and even then it is possible 
-(e.g., during connection reattempts), that a single retry 
-loop is not enough to guarantee a successful send. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
-On success, a new message buffer, with an empty payload, is 
-returned for the application to use for the next send. The 
-state in this buffer will reflect the overall send operation 
-state and should be RMR_OK. 
- 
-If the state in the returned buffer is anything other than 
-RMR_OK, the user application may need to attempt a 
-retransmission of the message, or take other action depending 
-on the setting of errno as described below. 
- 
-In the event of extreme failure, a nil pointer is returned. 
-In this case the value of errno might be of some use, for 
-documentation, but there will be little that the user 
-application can do other than to move on. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
-The following values may be passed back in the *state* field 
-of the returned message buffer. 
- 
- 
- 
-RMR_ERR_WHID 
-   
-  The wormhole ID passed in was not associated with an open 
-  wormhole, or was out of range for a valid ID. 
- 
-RMR_ERR_NOWHOPEN 
-   
-  No wormholes exist, further attempt to validate the ID are 
-  skipped. 
- 
-RMR_ERR_BADARG 
-   
-  The message buffer pointer did not refer to a valid 
-  message. 
- 
-RMR_ERR_NOHDR 
-   
-  The header in the message buffer was not valid or 
-  corrupted. 
- 
- 
-The following values may be assigned to errno on failure. 
- 
- 
-INVAL 
-   
-  Parameter(s) passed to the function were not valid, or the 
-  underlying message processing environment was unable to 
-  interpret the message. 
-   
- 
-ENOKEY 
-   
-  The header information in the message buffer was invalid. 
-   
- 
-ENXIO 
-   
-  No known endpoint for the message could be found. 
-   
- 
-EMSGSIZE 
-   
-  The underlying transport refused to accept the message 
-  because of a size value issue (message was not attempted 
-  to be sent). 
-   
- 
-EFAULT 
-   
-  The message referenced by the message buffer is corrupt 
-  (nil pointer or bad internal length). 
-   
- 
-EBADF 
-   
-  Internal RMR error; information provided to the message 
-  transport environment was not valid. 
-   
- 
-ENOTSUP 
-   
-  Sending was not supported by the underlying message 
-  transport. 
-   
- 
-EFSM 
-   
-  The device is not in a state that can accept the message. 
-   
- 
-EAGAIN 
-   
-  The device is not able to accept a message for sending. 
-  The user application should attempt to resend. 
-   
- 
-EINTR 
-   
-  The operation was interrupted by delivery of a signal 
-  before the message was sent. 
-   
- 
-ETIMEDOUT 
-   
-  The underlying message environment timed out during the 
-  send process. 
-   
- 
-ETERM 
-   
-  The underlying message environment is in a shutdown state. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
-The following is a simple example of how the a wormhole is 
-created (rmr_wh_open) and then how rmr_wh_send_msg function 
-is used to send messages. Some error checking is omitted for 
-clarity. 
- 
- 
-:: 
-  
- #include <rmr/rmr.h>    // system headers omitted for clarity
- int main() {
-    rmr_whid_t whid = -1;   // wormhole id for sending
-    void* mrc;      //msg router context
-         int i;
-    rmr_mbuf_t*  sbuf;      // send buffer
-    int     count = 0;
-    int     norm_msg_size = 1500;  // most msg fit in this size
-    mrc = rmr_init( "43086", norm_msg_size, RMRFL_NONE );
-    if( mrc == NULL ) {
-       fprintf( stderr, "[FAIL] unable to initialise RMR environment\\n" );
-       exit( 1 );
-    }
-    while( ! rmr_ready( mrc ) ) {        // wait for routing table info
-       sleep( 1 );
-    }
-    sbuf = rmr_alloc_msg( mrc, 2048 );
-    while( 1 ) {
-      if( whid < 0 ) {
-        whid = rmr_wh_open( mrc, "localhost:6123" );  // open fails if endpoint refuses conn
-           if( RMR_WH_CONNECTED( wh ) ) {
-            snprintf( sbuf->payload, 1024, "periodic update from sender: %d", count++ );
-            sbuf->len =  strlen( sbuf->payload );
-            sbuf = rmr_wh_send_msg( mrc, whid, sbuf );
-         }
-      }
-      sleep( 5 );
-    }
+ sbuf = rmr_alloc_msg( mrc, 256 );   // 1st send buffer
+ while( TRUE ) {
+     sbuf->len = gen_status( (status_msg *) sbuf->payload );
+     sbuf->mtype = STATUS_MSG;
+     sbuf->sub_id = RMR_VOID_SUBID;     // subscription not used
+     sbuf = rmr_send_msg( mrc, sbuf );
+     sleep( delay_sec );
  }
+ rmr_close( mrc );
  
  
  
-SEE ALSO 
+Receiver Sample 
 -------------------------------------------------------------------------------------------- 
  
-rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
-rmr_payload_size(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 
-rmr_rts_msg(3), rmr_ready(3), rmr_fib(3), rmr_has_str(3), 
-rmr_tokenise(3), rmr_mk_ring(3), rmr_ring_free(3), 
-rmr_set_stimeout(3), rmr_wh_open(3), rmr_wh_close(3), 
-rmr_wh_state(3) 
- 
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
-rmr_wh_state 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
+The receiver code is even simpler than the sender code as it 
+does  not  need  to  wait  for a route table to arrive (only 
+senders need to do that), nor does it need  to  allocate  an 
+initial  buffer.  The  example  assumes  that  the sender is 
+transmitting a zero terminated string as the payload. 
  
  
 :: 
   
- #include <rmr/rmr.h>
- int rmr_wh_state( void* vctx, rmr_whid_t whid )
+ rmr_mbuf_t* rbuf = NULL;
+ void* mrc = rmr_init( listen_port, MAX_BUF_SZ, RMRFL_NOFLAGS );
+ while( TRUE ) {
+     rbuf = rmr_rcv_msg( mrc, rbuf );    // reuse buffer on all but first loop
+     if( rbuf == NULL || rbuf->state != RMR_OK ) {
+         break;
+     }
+     fprintf( stdout, "mtype=%d sid=%d pay=%s\\n",
+         rbuf->mtype, rbuf->sub_id, rbuf->payload );
+     sleep( delay_sec );
+ }
+ fprintf( stderr, "receive error\\n" );
+ rmr_close( mrc );
  
  
  
-DESCRIPTION 
+Receive and Send Sample 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_wh_state function will return the current state of 
-the connection associated with the given wormhole (whid). The 
-return value indicates whether the connection is open 
-(RMR_OK), or closed (any other return value). 
+The following code snippet receives messages and responds to 
+the  sender if the message type is odd. The code illustrates 
+how the received message may be used to return a message  to 
+the source. Variable type definitions are omitted for clarity 
+and should be obvious. 
  
-When using some transport mechanisms (e.g. NNG), it may not 
-be possible for RMR to know the actual state and the 
-connection may always be reported as "open." 
- 
-RETURN 
--------------------------------------------------------------------------------------------- 
- 
-The following values are potential return values. 
+It should also be noted that things like  the  message  type 
+which  id returned to the sender (99) is a random value that 
+these applications would have agreed on in  advance  and  is 
+**not** an RMR definition. 
  
  
+:: 
+  
+ mrc = rmr_init( listen_port, MAX_BUF_SZ, RMRFL_NOFLAGS );
+ rmr_set_stimeout( mrc, 1 );        // allow RMR to retry failed sends for ~1ms
+ while( ! rmr_ready( mrc ) ) {        // we send, therefore we need a route table
+     sleep( 1 );
+ }
+ mbuf = NULL;                        // ensure our buffer pointer is nil for 1st call
+ while( TRUE ) {
+     mbuf = rmr_rcv_msg( mrc, mbuf );        // wait for message
+     if( mbuf == NULL || mbuf->state != RMR_OK ) {
+         break;
+     }
+     if( mbuf->mtype % 2 ) {                // respond to odd message types
+         plen = rmr_payload_size( mbuf );        // max size
+                                                 // reset necessary fields in msg
+         mbuf->mtype = 99;                       // response type
+         mbuf->sub_id = RMR_VOID_SUBID;          // we turn subid off
+         mbuf->len = snprintf( mbuf->payload, plen, "pong: %s", get_info() );
+         mbuf = rmr_rts_msg( mrc, mbuf );        // return to sender
+         if( mbuf == NULL || mbuf->state != RMR_OK ) {
+             fprintf( stderr, "return to sender failed\\n" );
+         }
+     }
+ }
+ fprintf( stderr, "abort: receive failure\\n" );
+ rmr_close( mrc );
  
-RMR_OK 
-   
-  The wormhole ID is valid and the connection is "open." 
-   
- 
-RMR_ERR_WHID 
-   
-  THe wormhole ID passed into the function was not valid. 
-   
- 
-RMR_ERR_NOENDPT 
-   
-  The wormhole is not open (not connected). 
-   
- 
-RMR_ERR_BADARG 
-   
-  The context passed to the function was nil or invalid. 
-   
- 
-RMR_ERR_NOWHOPEN 
-   
-  Wormholes have not been initialised (no wormhole open call 
-  has been made). 
-   
  
  
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
-rmr_wh_open(3), rmr_wh_send_msg(3), rmr_wh_close(3) 

@@ -34,7 +34,7 @@ SYNOPSIS
 DESCRIPTION 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_bytes2xact function will copy up to *len* butes from 
+The rmr_bytes2xact function will copy up to *len* bytes from 
 *src* to the transaction ID (xaction) field in the message. 
 The field is a fixed length, gated by the constant 
 RMR_MAX_XID and if len is larger than this value, only 

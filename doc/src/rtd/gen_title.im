@@ -36,7 +36,7 @@
 	.fi
 .fi
 
-.im license.im 
+.im license.im
 
 .gv e OUTPUT_TYPE ot
 .if doc_title
@@ -44,7 +44,8 @@
 		&many_equals .br
 		&doc_title .br
 		&many_equals .br
-		.if &doc_subtitle
+
+		.if doc_subtitle
 			&many_dashes .br
 			&doc_subtitle .br
 			&many_dashes .br
@@ -55,7 +56,7 @@
 		.st 18
 		.ce &doc_title
 		.st 12
-		.if &doc_subtitle
+		.if doc_subtitle
 			.ce &doc_subtitle
 		.fi
 		.st &textsize

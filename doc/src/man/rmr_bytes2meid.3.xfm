@@ -44,7 +44,7 @@ int rmr_bytes2meid( rmr_mbuf_t* mbuf, unsigned char* src, int len )
 &uindent
 
 &h2(DESCRIPTION)
-The &cw(rmr_bytes2meid) function will copy up to &ital(len) butes from &ital(src) to the
+The &cw(rmr_bytes2meid) function will copy up to &ital(len) bytes from &ital(src) to the
 managed entity ID (meid) field in the message.
 The field is a fixed length, gated by the constant &cw(RMR_MAX_MEID) and if len is larger
 than this value, only RMR_MAX_MEID bytes will actually be copied.

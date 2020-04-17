@@ -19,7 +19,7 @@
 # This is a stand-alone make file as the RTD documentation is NOT built and packaged
 # with the normal CMake process and thus isn't covered in the CMake files.
 
-# {X}fm is required to compile the source. 
+# {X}fm is required to compile the source.
 
 
 %.rst:: %.xfm	man_list.im
@@ -34,7 +34,7 @@
 %.md:: %.xfm	man_list.im
 	OUTPUT_TYPE=markdown tfm $<  | sed 's/^ //' >$@
 
-docs = config-deploy developer-guide user-guide rel-notes overview
+docs = config-deploy developer-guide rel-notes overview
 
 all:: $(docs:%=%.rst) $(docs:%=%.txt) $(docs:%=%.md)
 
@@ -57,6 +57,7 @@ $(docs:%=%.md): always
 # copy the .rst files which have changed into the docs (plural) directory at the root of the repo
 publish : $(docs:%=%.rst)
 	bash publish_man.sh;\
+	bash publish_lib.sh;\
 	for f in *.rst;\
 	do\
 		if ! diff -N -q $$f ../../../docs/$$f >/dev/null 2>&1;\
@@ -74,6 +75,9 @@ verify : $(docs:%=%.rst)
 			echo "$$f would be published";\
 		fi;\
 	done
+
+test:
+	bash publish_lib.sh;
 
 # ditch any intermediate files
 clean:

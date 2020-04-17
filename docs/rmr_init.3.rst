@@ -327,8 +327,8 @@ RMR_WARNINGS
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_init function returns a void pointer (a contex if you 
-will) that is passed as the first parameter to nearly all 
+The rmr_init function returns a void pointer (a context if 
+you will) that is passed as the first parameter to nearly all 
 other RMR functions. If rmr_init is unable to properly 
 initialise the environment, NULL is returned and errno is set 
 to an appropriate value. 
