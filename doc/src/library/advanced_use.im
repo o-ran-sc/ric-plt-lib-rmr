@@ -70,7 +70,7 @@ it is not possible to guarantee that a response message is delivered
 to the correct thread.  The RMR function &func(rmr_mt_call) accepts an
 additional parameter which identifies the calling thread in order to
 ensure that the response is delivered properly.  In addition, the
-application must specifically initialize the multi-threaded call
+application must specifically initialise the multi-threaded call
 environment by passing the &cw(RMRFL_MTCALL) flag as an option to the
 &func(rmr_init) function &note .sm .
 .if pfm
@@ -95,7 +95,7 @@ not responses to the call are continued to be delivered via normal
 
 &space
 While the process is blocked waiting for the response, it is entirely
-possible that asynchronous, nonmatching, messages will arrive.  When
+possible that asynchronous, non-matching, messages will arrive.  When
 this happens, RMR will queues the messages and return them to the
 application over the next calls to &func(rmr_rcv_msg:.)
 

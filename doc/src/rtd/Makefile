@@ -57,6 +57,7 @@ $(docs:%=%.md): always
 # copy the .rst files which have changed into the docs (plural) directory at the root of the repo
 publish : $(docs:%=%.rst)
 	bash publish_man.sh;\
+	bash publish_lib.sh;\
 	for f in *.rst;\
 	do\
 		if ! diff -N -q $$f ../../../docs/$$f >/dev/null 2>&1;\
@@ -74,6 +75,9 @@ verify : $(docs:%=%.rst)
 			echo "$$f would be published";\
 		fi;\
 	done
+
+test:
+	bash publish_lib.sh;
 
 # ditch any intermediate files
 clean:

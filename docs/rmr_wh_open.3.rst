@@ -35,7 +35,7 @@ DESCRIPTION
 -------------------------------------------------------------------------------------------- 
  
 The rmr_wh_open function creates a direct link for sending, a 
-wormhole, to another RMr based process. Sending messages 
+wormhole, to another RMR based process. Sending messages 
 through a wormhole requires that the connection be 
 established overtly by the user application (via this 
 function), and that the ID returned by rmr_wh_open be passed 
@@ -43,7 +43,7 @@ to the rmr_wh_send_msg function.
  
 *Target* is the *name* or *IP-address* combination of the 
 processess that the wormhole should be connected to. *Vctx* 
-is the RMr void context pointer that was returned by the 
+is the RMR void context pointer that was returned by the 
 rmr_init function. 
  
 When invoked, this function immediatly attempts to connect to 

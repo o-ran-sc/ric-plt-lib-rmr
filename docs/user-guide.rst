@@ -214,7 +214,7 @@ SYNOPSIS
 DESCRIPTION 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_bytes2meid function will copy up to *len* butes from 
+The rmr_bytes2meid function will copy up to *len* bytes from 
 *src* to the managed entity ID (meid) field in the message. 
 The field is a fixed length, gated by the constant 
 RMR_MAX_MEID and if len is larger than this value, only 
@@ -334,7 +334,7 @@ SYNOPSIS
 DESCRIPTION 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_bytes2xact function will copy up to *len* butes from 
+The rmr_bytes2xact function will copy up to *len* bytes from 
 *src* to the transaction ID (xaction) field in the message. 
 The field is a fixed length, gated by the constant 
 RMR_MAX_XID and if len is larger than this value, only 
@@ -465,7 +465,7 @@ A retry loop consists of approximately 1000 send attempts
 **without** any intervening calls to *sleep()* or *usleep().* 
 The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMr 
+application. This value can be set at any point after RMR 
 initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
@@ -925,14 +925,14 @@ DESCRIPTION
  
 The rmr_get_src function will copy the *source* information 
 from the message to a buffer (dest) supplied by the user. In 
-an RMr message, the source is the sender's information that 
+an RMR message, the source is the sender's information that 
 is used for return to sender function calls, and is generally 
 the hostname and port in the form *name*. The source might be 
 an IP address port combination; the data is populated by the 
 sending process and the only requirement is that it be 
 capable of being used to start a TCP session with the sender. 
  
-The maximum size allowed by RMr is 64 bytes (including the 
+The maximum size allowed by RMR is 64 bytes (including the 
 nil string terminator), so the user must ensure that the 
 destination buffer given is at least 64 bytes. 
  
@@ -991,19 +991,19 @@ DESCRIPTION
  
 The rmr_get_srcip function will copy the *source IP address* 
 from the message to a buffer (dest) supplied by the user. In 
-an RMr message, the source IP address is the sender's 
+an RMR message, the source IP address is the sender's 
 information that is used for return to sender function calls; 
 this function makes it available to the user application. The 
 address is maintained as IP:port where *IP* could be either 
 an IPv6 or IPv4 address depending on what was provided by the 
 sending application. 
  
-The maximum size allowed by RMr is 64 bytes (including the 
+The maximum size allowed by RMR is 64 bytes (including the 
 nil string terminator), so the user must ensure that the 
 destination buffer given is at least 64 bytes. The user 
-application should use the RMr constant RMR_MAX_SRC to ensure 
+application should use the RMR constant RMR_MAX_SRC to ensure 
 that the buffer supplied is large enough, and to protect 
-against future RMr enhancements which might increase the 
+against future RMR enhancements which might increase the 
 address buffer size requirement. 
  
 RETURN VALUE 
@@ -1256,9 +1256,9 @@ Similarly, the only penality to the application for over
 specifying the normal buffer size might be a larger memory 
 footprint. 
  
-*Flags* allows for selection of some RMr options at the time 
+*Flags* allows for selection of some RMR options at the time 
 of initialisation. These are set by ORing RMRFL constants 
-from the RMr header file. Currently the following flags are 
+from the RMR header file. Currently the following flags are 
 supported: 
  
  
@@ -1272,7 +1272,7 @@ RMRFL_NOTHREAD
    
   The route table collector thread is not to be started. 
   This should only be used by the route table generator 
-  application if it is based on RMr. 
+  application if it is based on RMR. 
    
  
 RMRFL_MTCALL 
@@ -1307,11 +1307,11 @@ additional support is implemented with the *rmr_mt_call()*
 and *rmr_mt_rcv()* function calls. 
  
 Multi-threaded call support requires the user application to 
-specifically enable it when RMr is initialised. This is 
+specifically enable it when RMR is initialised. This is 
 necessary because a second, dedicated, receiver thread must 
 be started, and requires all messages to be examined and 
 queued by this thread. The additional overhead is minimal, 
-queuing information is all in the RMr message header, but as 
+queuing information is all in the RMR message header, but as 
 an additional process is necessary the user application must 
 "opt in" to this approach. 
  
@@ -1517,8 +1517,8 @@ RMR_WARNINGS
 RETURN VALUE 
 -------------------------------------------------------------------------------------------- 
  
-The rmr_init function returns a void pointer (a contex if you 
-will) that is passed as the first parameter to nearly all 
+The rmr_init function returns a void pointer (a context if 
+you will) that is passed as the first parameter to nearly all 
 other RMR functions. If rmr_init is unable to properly 
 initialise the environment, NULL is returned and errno is set 
 to an appropriate value. 
@@ -1603,7 +1603,7 @@ RETURN VALUE
 -------------------------------------------------------------------------------------------- 
  
 A value of 1 is returned on success, and 0 on failure. A 
-failure indicates that the RMr context (a void pointer passed 
+failure indicates that the RMR context (a void pointer passed 
 to this function was not valid. 
  
 SEE ALSO 
@@ -1705,7 +1705,7 @@ A retry loop consists of approximately 1000 send attempts
 **without** any intervening calls to *sleep()* or *usleep().* 
 The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMr 
+application. This value can be set at any point after RMR 
 initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
@@ -1883,7 +1883,7 @@ DESCRIPTION
  
 The rmr_mt_rcv function blocks until a message is received, 
 or the timeout period (milliseconds) has passed. The result 
-is an RMr message buffer which references a received message. 
+is an RMR message buffer which references a received message. 
 In the case of a timeout the state will be reflected in an 
 "empty buffer" (if old_msg was not nil, or simply with the 
 return of a nil pointer. If a timeout value of zero (0) is 
@@ -1922,7 +1922,7 @@ RETURN VALUE
 -------------------------------------------------------------------------------------------- 
  
 When a message is received before the timeout period expires, 
-a pointer to the RMr message buffer which describes the 
+a pointer to the RMR message buffer which describes the 
 message is returned. This will, with a high probability, be a 
 different message buffer than *old_msg;* the user application 
 should not continue to use *old_msg* after it is passed to 
@@ -1960,7 +1960,7 @@ RMR_ERR_EMPTY
  
 RMR_ERR_NOTSUPP 
    
-  The multi-threaded option was not enabled when RMr was 
+  The multi-threaded option was not enabled when RMR was 
   initialised. See the man page for *rmr_init()* for 
   details. 
    
@@ -2457,7 +2457,7 @@ A retry loop consists of approximately 1000 send attempts
 **without** any intervening calls to *sleep()* or *usleep().* 
 The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMr 
+application. This value can be set at any point after RMR 
 initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
@@ -2694,7 +2694,7 @@ A retry loop consists of approximately 1000 send attempts
 **without** any intervening calls to *sleep()* or *usleep().* 
 The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMr 
+application. This value can be set at any point after RMR 
 initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
@@ -2954,7 +2954,7 @@ SYNOPSIS
 :: 
   
  #include <rmr/rmr.h>
- rmr_mbuf_t* rmr_set_stimeout( void* vctx, int rloops );
+ int rmr_set_stimeout( void* vctx, int rloops );
  
  
  
@@ -2962,14 +2962,14 @@ DESCRIPTION
 -------------------------------------------------------------------------------------------- 
  
 The rmr_set_stimeout function sets the configuration for how 
-RMr will retry message send operations which complete with 
+RMR will retry message send operations which complete with 
 either a *timeout* or *again* completion value. (Send 
 operations include all of the possible message send 
 functions: *rmr_send_msg(), rmr_call(), rmr_rts_msg()* and 
 *rmr_wh_send_msg().* The *rloops* parameter sets the maximum 
 number of retry loops that will be attempted before giving up 
 and returning the unsuccessful state to the user application. 
-Each retry loop is approximately 1000 attempts, and RMr does 
+Each retry loop is approximately 1000 attempts, and RMR does 
 **not** invoke any sleep function between retries in the 
 loop; a small, 1 mu-sec, sleep is executed between loop sets 
 if the *rloops* value is greater than 1. 
@@ -2985,7 +2985,7 @@ user application does not want to have send operations retry
 when the underlying transport mechanism indicates *timeout* 
 or *again,* the application should invoke this function and 
 pass a value of 0 (zero) for *rloops.* With this setting, all 
-RMr send operations will attempt a send operation only 
+RMR send operations will attempt a send operation only 
 **once,** returning immediately to the caller with the state 
 of that single attempt. 
  
@@ -3822,7 +3822,7 @@ A retry loop consists of approximately 1000 send attempts
 **without** any intervening calls to *sleep()* or *usleep().* 
 The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMr 
+application. This value can be set at any point after RMR 
 initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
@@ -4012,7 +4012,7 @@ DESCRIPTION
 -------------------------------------------------------------------------------------------- 
  
 The rmr_wh_open function creates a direct link for sending, a 
-wormhole, to another RMr based process. Sending messages 
+wormhole, to another RMR based process. Sending messages 
 through a wormhole requires that the connection be 
 established overtly by the user application (via this 
 function), and that the ID returned by rmr_wh_open be passed 
@@ -4020,7 +4020,7 @@ to the rmr_wh_send_msg function.
  
 *Target* is the *name* or *IP-address* combination of the 
 processess that the wormhole should be connected to. *Vctx* 
-is the RMr void context pointer that was returned by the 
+is the RMR void context pointer that was returned by the 
 rmr_init function. 
  
 When invoked, this function immediatly attempts to connect to 
@@ -4155,7 +4155,7 @@ A retry loop consists of approximately 1000 send attempts
 **without** any intervening calls to *sleep()* or *usleep().* 
 The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMr 
+application. This value can be set at any point after RMR 
 initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 

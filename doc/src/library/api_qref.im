@@ -24,6 +24,9 @@
 	Author:		E. Scott Daniels
 .fi
 
+
+
+
 &h1(Appendix &qr_appendix -- Quick Reference)
 
 The prototypes for all externally available functions which comprise
@@ -72,6 +75,21 @@ this function the application pause for a second or two to ensure that
 the pending transmissions have completed.
 
 &proto_start
+extern void rmr_set_fack( void* vctx );
+&proto_end
+Invoking this function causes RMR to enable fast acknowledgement on TCP sessions
+if the underlying transport mechanism supports this.
+If this is not invoked, the option is not enabled.
+
+&proto_start
+extern void rmr_set_vlevel( int new_level );
+&proto_end
+This function allows the user application to change the RMR verbosity level;
+the larger the &cw(vlevel) the more verbose RMR is with regard to writting
+messages to standard error.
+A value of minus 1 (-1) disables all RMR writing to the TTY.
+
+&proto_start
 int rmr_get_rcvfd( void* vctx );
 &proto_end
 When the underlying transport mechanism supports this, a file
@@ -80,11 +98,11 @@ system calls is returned.  The file descriptor may not be used for
 read or write operations; doing so will have unpredictable results.
 
 &proto_start
-void* rmr_init( char* proto_port, int max_msg_size, int flags );
+void* rmr_init( char* proto_port, int def_msg_size, int flags );
 &proto_end
 This function must be used before all other RMR functions to
-initialize the environment.  The &cw(max_msg_size) parameter defines
-the maximum receive buffer size which will be used if required by the
+initialize the environment.  The &cw(def_msg_size) parameter defines
+the &ital(normal,) or default, receive buffer size which will be used if required by the
 underlying transport mechanism.  The value is also used as the default
 payload size if a zero length is given to &func(rmr_alloc_msg:.)
 
@@ -185,6 +203,9 @@ success, a nil pointer is returned.
 &proto_start
 int rmr_set_rtimeout( void* vctx, int time );
 &proto_end
+This function became deprecated with the elimination of support for Nanomsg.
+See &cw(rmr_torcv_msg().)
+.if false
 This function provides the ability to return from a receive operation
 after a timeout threshold is reached before a message is received, and
 is intended only to support the underlying Nanomsg transport mechanism
@@ -198,10 +219,13 @@ operations.  If a call to &func(rmr_rcv_msg) does not complete before
 a nil message buffer.  This may not be supported by the underlying
 transport mechanism, and if it is not the return from this function
 will be -1.
+.fi
 
 &proto_start
 int rmr_set_stimeout( void* vctx, int rounds );
 &proto_end
+This function became deprecated with the elimination of support for Nanomsg.
+.if false
 This function allows the application to set a maximum number of retry
 &ital(rounds) that RMR will attempt when send operations report a
 transient (retry) failure.  Each &ital(round) of retries requires
@@ -209,6 +233,7 @@ approximately 1 millisecond, and setting the number of rounds to zero
 (0) causes RMR to report the transient failure to the application
 without any retry attempts.  If the user application does not invoke
 this function, the default is one (1) round of retries.
+.fi
 
 &proto_start
 rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to );
@@ -220,8 +245,7 @@ period expires (ms_to milliseconds), a message buffer is returned with
 the state set to &cw(RMR_ERR_TIMEOUT.)
 
 &proto_start
-rmr_mbuf_t*  rmr_tralloc_msg( void* context, int msize, int trsize,
-     unsigned const char* data );
+rmr_mbuf_t*  rmr_tralloc_msg( void* context, int msize, int trsize, unsigned const char* data );
 &proto_end
 Similar to the &func(rmr_alloc_msg) this function allocates a message
 buffer, and adds the referenced trace data to the buffer.  The new
@@ -231,6 +255,13 @@ message buffer is returned.
 void rmr_wh_close( void* vctx, int whid );
 &proto_end
 This function closes an existing wormhole connection.
+
+&proto_start
+extern rmr_mbuf_t* rmr_wh_call( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg, int call_id, int max_wait );
+&proto_end
+This provides the same synchronous &ital(procedure call) as the &cw(rmr_call()) function
+provides, excerpt that the message is sent to a specific endpoint as defined by an
+open wormhole.
 
 &proto_start
 rmr_whid_t rmr_wh_open( void* vctx, char const* target );
@@ -253,6 +284,13 @@ application may opt not to supply the message type or subscription ID
 in the message as neither are used by RMR; they may be required by the
 peer application depending on the application level protocol(s) in
 use.
+
+&proto_start
+extern int rmr_wh_state( void* vctx, rmr_whid_t whid );
+&proto_end
+This function returns an indication of whether or not the connection referenced by
+the wormhole ID (whid) is open or closed.
+
 
 .** ------------------------------------
 &space
@@ -355,6 +393,16 @@ This function allows the application to reallocate a message buffer
 with a different trace data size.  The contents of the message buffer
 supplied are copied to the new buffer, and a reference to the new
 buffer is returned.
+
+&proto_start
+extern rmr_mbuf_t* rmr_realloc_payload( rmr_mbuf_t* old_msg, int new_len, int copy, int clone );
+&proto_end
+This function allows the user programme to realloc the payload with a
+larger length.
+Optionally, the user programme may use this function to clone an existing
+message while extending the payload size.
+In both cases the message can be passed to a return to sender call as
+the source information from the original message is preserved.
 
 &proto_start
 int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size );
