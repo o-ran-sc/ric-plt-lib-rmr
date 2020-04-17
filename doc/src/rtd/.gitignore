@@ -1,2 +1,5 @@
-
 man_list.im
+*.md
+*.rst
+*.ps
+*.pdf

@@ -132,7 +132,7 @@ The following variables are used if found.
 .im &{lib}/man/env_var_list.im
 
 &h2(RETURN VALUE)
-The &cw(rmr_init) function returns a void pointer (a contex if you will) that is passed
+The &cw(rmr_init) function returns a void pointer (a context if you will) that is passed
 as the first parameter to nearly all other RMR functions.
 If &cw(rmr_init) is unable to properly initialise the environment, NULL is returned and
 errno is set to an appropriate value.
