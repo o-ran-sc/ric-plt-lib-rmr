@@ -36,19 +36,19 @@ DESCRIPTION
  
 The rmr_get_srcip function will copy the *source IP address* 
 from the message to a buffer (dest) supplied by the user. In 
-an RMr message, the source IP address is the sender's 
+an RMR message, the source IP address is the sender's 
 information that is used for return to sender function calls; 
 this function makes it available to the user application. The 
 address is maintained as IP:port where *IP* could be either 
 an IPv6 or IPv4 address depending on what was provided by the 
 sending application. 
  
-The maximum size allowed by RMr is 64 bytes (including the 
+The maximum size allowed by RMR is 64 bytes (including the 
 nil string terminator), so the user must ensure that the 
 destination buffer given is at least 64 bytes. The user 
-application should use the RMr constant RMR_MAX_SRC to ensure 
+application should use the RMR constant RMR_MAX_SRC to ensure 
 that the buffer supplied is large enough, and to protect 
-against future RMr enhancements which might increase the 
+against future RMR enhancements which might increase the 
 address buffer size requirement. 
  
 RETURN VALUE 

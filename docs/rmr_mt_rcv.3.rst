@@ -36,7 +36,7 @@ DESCRIPTION
  
 The rmr_mt_rcv function blocks until a message is received, 
 or the timeout period (milliseconds) has passed. The result 
-is an RMr message buffer which references a received message. 
+is an RMR message buffer which references a received message. 
 In the case of a timeout the state will be reflected in an 
 "empty buffer" (if old_msg was not nil, or simply with the 
 return of a nil pointer. If a timeout value of zero (0) is 
@@ -75,7 +75,7 @@ RETURN VALUE
 -------------------------------------------------------------------------------------------- 
  
 When a message is received before the timeout period expires, 
-a pointer to the RMr message buffer which describes the 
+a pointer to the RMR message buffer which describes the 
 message is returned. This will, with a high probability, be a 
 different message buffer than *old_msg;* the user application 
 should not continue to use *old_msg* after it is passed to 
@@ -113,7 +113,7 @@ RMR_ERR_EMPTY
  
 RMR_ERR_NOTSUPP 
    
-  The multi-threaded option was not enabled when RMr was 
+  The multi-threaded option was not enabled when RMR was 
   initialised. See the man page for *rmr_init()* for 
   details. 
    

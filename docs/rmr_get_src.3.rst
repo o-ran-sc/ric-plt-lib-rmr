@@ -36,14 +36,14 @@ DESCRIPTION
  
 The rmr_get_src function will copy the *source* information 
 from the message to a buffer (dest) supplied by the user. In 
-an RMr message, the source is the sender's information that 
+an RMR message, the source is the sender's information that 
 is used for return to sender function calls, and is generally 
 the hostname and port in the form *name*. The source might be 
 an IP address port combination; the data is populated by the 
 sending process and the only requirement is that it be 
 capable of being used to start a TCP session with the sender. 
  
-The maximum size allowed by RMr is 64 bytes (including the 
+The maximum size allowed by RMR is 64 bytes (including the 
 nil string terminator), so the user must ensure that the 
 destination buffer given is at least 64 bytes. 
  

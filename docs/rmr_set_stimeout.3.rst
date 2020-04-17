@@ -35,14 +35,14 @@ DESCRIPTION
 -------------------------------------------------------------------------------------------- 
  
 The rmr_set_stimeout function sets the configuration for how 
-RMr will retry message send operations which complete with 
+RMR will retry message send operations which complete with 
 either a *timeout* or *again* completion value. (Send 
 operations include all of the possible message send 
 functions: *rmr_send_msg(), rmr_call(), rmr_rts_msg()* and 
 *rmr_wh_send_msg().* The *rloops* parameter sets the maximum 
 number of retry loops that will be attempted before giving up 
 and returning the unsuccessful state to the user application. 
-Each retry loop is approximately 1000 attempts, and RMr does 
+Each retry loop is approximately 1000 attempts, and RMR does 
 **not** invoke any sleep function between retries in the 
 loop; a small, 1 mu-sec, sleep is executed between loop sets 
 if the *rloops* value is greater than 1. 
@@ -58,7 +58,7 @@ user application does not want to have send operations retry
 when the underlying transport mechanism indicates *timeout* 
 or *again,* the application should invoke this function and 
 pass a value of 0 (zero) for *rloops.* With this setting, all 
-RMr send operations will attempt a send operation only 
+RMR send operations will attempt a send operation only 
 **once,** returning immediately to the caller with the state 
 of that single attempt. 
  

@@ -66,9 +66,9 @@ Similarly, the only penality to the application for over
 specifying the normal buffer size might be a larger memory 
 footprint. 
  
-*Flags* allows for selection of some RMr options at the time 
+*Flags* allows for selection of some RMR options at the time 
 of initialisation. These are set by ORing RMRFL constants 
-from the RMr header file. Currently the following flags are 
+from the RMR header file. Currently the following flags are 
 supported: 
  
  
@@ -82,7 +82,7 @@ RMRFL_NOTHREAD
    
   The route table collector thread is not to be started. 
   This should only be used by the route table generator 
-  application if it is based on RMr. 
+  application if it is based on RMR. 
    
  
 RMRFL_MTCALL 
@@ -117,11 +117,11 @@ additional support is implemented with the *rmr_mt_call()*
 and *rmr_mt_rcv()* function calls. 
  
 Multi-threaded call support requires the user application to 
-specifically enable it when RMr is initialised. This is 
+specifically enable it when RMR is initialised. This is 
 necessary because a second, dedicated, receiver thread must 
 be started, and requires all messages to be examined and 
 queued by this thread. The additional overhead is minimal, 
-queuing information is all in the RMr message header, but as 
+queuing information is all in the RMR message header, but as 
 an additional process is necessary the user application must 
 "opt in" to this approach. 
  

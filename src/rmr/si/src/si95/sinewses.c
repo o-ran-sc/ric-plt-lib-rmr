@@ -61,7 +61,7 @@ extern int SInewsession( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 
 	newtp = SInew( TP_BLK );			      //  get a new tp block for the session
 	if( newtp == NULL ) {
-		close( status );						// must disconnect the other side
+		CLOSE( status );						// must disconnect the other side
 		free( addr );
 		return SI_ERROR;
 	}

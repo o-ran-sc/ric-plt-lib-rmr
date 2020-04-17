@@ -34,10 +34,6 @@
 #ifndef _SOCKET_IF_H
 #define _SOCKET_IF_H
 
-#ifndef PARANOID_CHECKS
-#	define PARANOID_CHECKS 0
-#endif
-
 #define TCP_DEVICE	0     	//  device type of socket
 #define UDP_DEVICE	1
 

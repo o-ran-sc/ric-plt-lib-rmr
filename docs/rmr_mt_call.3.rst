@@ -103,7 +103,7 @@ A retry loop consists of approximately 1000 send attempts
 **without** any intervening calls to *sleep()* or *usleep().* 
 The number of retry loops defaults to 1, thus a maximum of 
 1000 send attempts is performed before returning to the user 
-application. This value can be set at any point after RMr 
+application. This value can be set at any point after RMR 
 initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 

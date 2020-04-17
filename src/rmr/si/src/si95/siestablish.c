@@ -36,7 +36,7 @@
 */
 
 
-#include "sisetup.h"       //  include the necessary setup stuff 
+#include "sisetup.h"       //  include the necessary setup stuff
 #include "sitransport.h"
 #include <errno.h>
 #include <netinet/tcp.h>
@@ -65,21 +65,21 @@
 	Returns a transport struct which is the main context for the listener.
 */
 extern struct tp_blk *SIlisten_prep( struct ginfo_blk *gptr, int type, char* abuf, int family ) {
-	struct tp_blk *tptr;         //  pointer at new tp block 
-	int status = SI_OK;             //  processing status 
-	struct sockaddr *addr;    	//  IP address we are requesting 
-	int protocol;                //  protocol for socket call 
-	char buf[256];               //  buffer to build request address in 
+	struct tp_blk *tptr;         //  pointer at new tp block
+	int status = SI_OK;             //  processing status
+	struct sockaddr *addr;    	//  IP address we are requesting
+	int protocol;                //  protocol for socket call
+	char buf[256];               //  buffer to build request address in
 	int optval = 0;
 	int alen = 0;
 
-	tptr = (struct tp_blk *) SInew( TP_BLK );     //  new transport info block 
+	tptr = (struct tp_blk *) SInew( TP_BLK );     //  new transport info block
 
 	if( tptr != NULL )
 	{
 		addr = NULL;
 
-		switch( type )			//  things specifc to tcp or udp 
+		switch( type )			//  things specifc to tcp or udp
 		{
 			case UDP_DEVICE:
 				tptr->type = SOCK_DGRAM;
@@ -92,7 +92,7 @@ extern struct tp_blk *SIlisten_prep( struct ginfo_blk *gptr, int type, char* abu
 				protocol = IPPROTO_TCP;
 		}
 
-		alen = SIgenaddr( abuf, protocol, family, tptr->type, &addr );	//  family == 0 for type that suits the address passed in 
+		alen = SIgenaddr( abuf, protocol, family, tptr->type, &addr );	//  family == 0 for type that suits the address passed in
 		if( alen <= 0 ) {
 			return NULL;
 		}
@@ -107,25 +107,48 @@ extern struct tp_blk *SIlisten_prep( struct ginfo_blk *gptr, int type, char* abu
 
 			status = BIND( tptr->fd, (struct sockaddr *) addr, alen );
 			if( status == SI_OK ) {
-				tptr->addr = addr;         	//  save address 
+				tptr->addr = addr;         	//  save address
 			} else {
 				fprintf( stderr, ">>>>> siestablish: bind failed: fam=%d type=%d pro=%d %s\n", tptr->family, tptr->type, protocol, strerror( errno ) );
 				close( tptr->fd );
 			}
 		} else {
-			status = ! SI_OK;       		//  force bad return later 
+			status = ! SI_OK;       		//  force bad return later
 			fprintf( stderr, ">>>>> siestablish: socket not esablished: fam=%d type=%d pro=%d %s\n", tptr->family, tptr->type, protocol, strerror( errno ) );
 		}
 
-		if( status != SI_OK ) {    			//  socket or bind call failed - clean up stuff 
+		if( status != SI_OK ) {    			//  socket or bind call failed - clean up stuff
 			fprintf( stderr, ">>>>> siestablish: bad state -- returning nil pointer\n" );
 			free( addr );
-			SItrash( TP_BLK, tptr );	//  free the trasnsport block 
-			tptr = NULL;        		//  set to return nothing 
+			SItrash( TP_BLK, tptr );	//  free the trasnsport block
+			tptr = NULL;        		//  set to return nothing
 		}
 	}
 
 	return tptr;
+}
+
+/*
+	Look at the address and determine if the connect attempt to this address must
+	use safe_connect() rather than the system connect() call. On linux, a smart
+	connect is needed if the target port is >32K and is even. This makes the assumption
+	that the local port rage floor is 32K; we could read something in /proc, but
+	at this point won't bother.  Returns true if we determine that it is best to
+	use safe_connect().
+*/
+static int need_smartc( char* abuf ) {
+	char*	tok;
+	int		state = 1;
+	int		v;
+
+	if( (tok = strchr( abuf, ':')) != NULL ) {
+		v = atoi( tok+1 );
+		if( v < 32767  || v % 2 != 0 ) {
+			state = 0;
+		}
+	}
+
+	return state;
 }
 
 /*
@@ -139,20 +162,20 @@ extern struct tp_blk *SIlisten_prep( struct ginfo_blk *gptr, int type, char* abu
 	family of 0 (AF_ANY) is usually the best choice.
 */
 extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf, int family ) {
-	struct tp_blk *tptr;         //  pointer at new tp block 
-	struct sockaddr *addr;    	//  IP address we are requesting 
-	int protocol;                //  protocol for socket call 
-	char buf[256];               //  buffer to build request address in 
+	struct tp_blk *tptr;         //  pointer at new tp block
+	struct sockaddr *addr;    	//  IP address we are requesting
+	int protocol;                //  protocol for socket call
+	char buf[256];               //  buffer to build request address in
 	int optval = 0;
 	int alen = 0;
 
-	tptr = (struct tp_blk *) SInew( TP_BLK );     //  new transport info block 
+	tptr = (struct tp_blk *) SInew( TP_BLK );     //  new transport info block
 
 	if( tptr != NULL )
 	{
 		addr = NULL;
 
-		switch( type )			//  things specifc to tcp or udp 
+		switch( type )			//  things specifc to tcp or udp
 		{
 			case UDP_DEVICE:
 				tptr->type = SOCK_DGRAM;
@@ -165,7 +188,7 @@ extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf,
 				protocol = IPPROTO_TCP;
 		}
 
-		alen = SIgenaddr( abuf, protocol, family, tptr->type, &addr );	//  family == 0 for type that suits the address passed in 
+		alen = SIgenaddr( abuf, protocol, family, tptr->type, &addr );	//  family == 0 for type that suits the address passed in
 		if( alen <= 0 )
 		{
 			//fprintf( stderr, ">>>>> siconn_prep: error generating an address struct for %s(abuf) %d(proto) %d(type): %s\n",
@@ -179,16 +202,11 @@ extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf,
 		if( (tptr->fd = SOCKET( tptr->family, tptr->type, protocol )) >= SI_OK ) {
 			optval = 1;
 
-			if( SO_REUSEPORT ) {
-				SETSOCKOPT( tptr->fd, SOL_SOCKET, SO_REUSEPORT, (char *)&optval, sizeof( optval) );
-			}
-
 			if( gptr->tcp_flags & SI_TF_NODELAY ) {
 				optval = 1;
 			} else {
 				optval = 0;
 			}
-			//fprintf( stderr, ">>>>> conn_prep: setting no delay = %d\n", optval );
 			SETSOCKOPT( tptr->fd, SOL_TCP, TCP_NODELAY, (void *)&optval, sizeof( optval) ) ;
 
 			if( gptr->tcp_flags & SI_TF_FASTACK ) {
@@ -196,14 +214,15 @@ extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf,
 			} else {
 				optval = 0;
 			}
-			//fprintf( stderr, ">>>>> conn_prep: setting quick ack = %d\n", optval );
 			SETSOCKOPT( tptr->fd, SOL_TCP, TCP_QUICKACK, (void *)&optval, sizeof( optval) ) ;
 
 			tptr->paddr = addr;				// tuck the remote peer address away
+			if( need_smartc( abuf ) ) {
+				tptr->flags |= TPF_SAFEC;
+			}
 		} else {
-			//fprintf( stderr, ">>>>> conn_prep: bad socket create: %s\n", strerror( errno ) );
 			free( addr );
-			SItrash( TP_BLK, tptr );       	//  free the trasnsport block 
+			SItrash( TP_BLK, tptr );       	// free the trasnsport block
 			tptr = NULL;					// we'll return nil
 		}
 	}

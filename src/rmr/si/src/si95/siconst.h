@@ -38,6 +38,9 @@
 #define DEBUG 0
 #endif 
 
+#ifndef PARANOID_CHECKS
+#	define PARANOID_CHECKS 0
+#endif
 
 //#define EOS   '\000'		 //  end of string marker 
 
@@ -51,6 +54,8 @@
 #define TPF_UNBIND		0x04   //  SIterm should unbind the fd 
 #define TPF_DRAIN		0x08   //  session is being drained 
 #define TPF_DELETE		0x10	//  block is ready for deletion -- when safe 
+#define TPF_SAFEC		0x20	// use safe connect when connecting
+#define TPF_ABORT		0x40	// connection should be aborted at termination
 
 #define MAX_CBS			8	 //  number of supported callbacks in table 
 #define MAX_RBUF		8192   //  max size of receive buffer 
