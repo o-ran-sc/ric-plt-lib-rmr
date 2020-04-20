@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "92cc9c2b_3b198cca",
+        "filename": "CHANGES_CORE.txt",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-20T13:53:47Z",
+      "side": 1,
+      "message": "concatEnation",
+      "range": {
+        "startLine": 9,
+        "startChar": 35,
+        "endLine": 9,
+        "endChar": 48
+      },
+      "revId": "9d7d95146aaadd63c6982f4ea2e7f505c9fb5553",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3e554b97_7036c796",
+        "filename": "CHANGES_CORE.txt",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-20T13:53:47Z",
+      "side": 1,
+      "message": "man pages",
+      "range": {
+        "startLine": 9,
+        "startChar": 52,
+        "endLine": 9,
+        "endChar": 59
+      },
+      "revId": "9d7d95146aaadd63c6982f4ea2e7f505c9fb5553",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a3e56bde_da78b018",
+        "filename": "doc/src/library/license.im",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-20T13:53:47Z",
+      "side": 1,
+      "message": "maybe the dates on the Nokia/AT\u0026T lines 42 \u0026 43 should be similar?  And include 2020?",
+      "range": {
+        "startLine": 42,
+        "startChar": 17,
+        "endLine": 42,
+        "endChar": 21
+      },
+      "revId": "9d7d95146aaadd63c6982f4ea2e7f505c9fb5553",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7be0b36d_c51509d4",
+        "filename": "doc/src/rtd/publish_lib.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-20T13:53:47Z",
+      "side": 1,
+      "message": "maybe should be called publish_user.sh ?",
+      "revId": "9d7d95146aaadd63c6982f4ea2e7f505c9fb5553",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
