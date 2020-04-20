@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb09c0c3_370ba0fe",
+        "filename": "doc/src/library/license.im",
+        "patchSetId": 4
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-20T14:43:00Z",
+      "side": 1,
+      "message": "2020?",
+      "range": {
+        "startLine": 5,
+        "startChar": 20,
+        "endLine": 5,
+        "endChar": 24
+      },
+      "revId": "fb2e53beee1e93c9d901912e5a6a12be9cedecfd",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "223b7b94_5b29a41d",
+        "filename": "doc/src/rtd/Makefile",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-20T14:43:00Z",
+      "side": 1,
+      "message": "user-guide doesn\u0027t belong here?",
+      "range": {
+        "startLine": 37,
+        "startChar": 47,
+        "endLine": 37,
+        "endChar": 55
+      },
+      "revId": "fb2e53beee1e93c9d901912e5a6a12be9cedecfd",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d083f314_20772dc8",
+        "filename": "docs/rel-notes.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-20T14:43:00Z",
+      "side": 1,
+      "message": "concatEnation",
+      "range": {
+        "startLine": 36,
+        "startChar": 40,
+        "endLine": 36,
+        "endChar": 41
+      },
+      "revId": "fb2e53beee1e93c9d901912e5a6a12be9cedecfd",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2a75876_573a203c",
+        "filename": "docs/rel-notes.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-20T14:43:00Z",
+      "side": 1,
+      "message": "man pages",
+      "range": {
+        "startLine": 36,
+        "startChar": 51,
+        "endLine": 36,
+        "endChar": 58
+      },
+      "revId": "fb2e53beee1e93c9d901912e5a6a12be9cedecfd",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
