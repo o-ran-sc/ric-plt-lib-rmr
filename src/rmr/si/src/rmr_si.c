@@ -623,7 +623,7 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 		port = proto_port;			// assume something like "1234" was passed
 	}
 
-	if( (tok = getenv( ENV_RTG_PORT )) != NULL && atoi( tok ) < 1 ) { 	// must check here -- if < 1 then we just start static file 'listener'
+	if( (tok = getenv( ENV_RTG_PORT )) != NULL && atoi( tok ) < 0 ) {	// must check here -- if < 0 then we just start static file 'listener'
 		static_rtc = 1;
 	}
 

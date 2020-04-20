@@ -5,6 +5,10 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 April 20; version 3.8.2
+	Fix bug which was preventing an instance receiving dynamic route
+	table updates. (RIC-336)
+
 2020 April 20; version 3.8.1
 	Add user guide which replaces the concatenation of man pages (RIC-328)
 
