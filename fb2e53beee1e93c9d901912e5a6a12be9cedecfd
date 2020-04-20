@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9c3dabc8_a453e161",
+        "filename": "doc/src/library/license.im",
+        "patchSetId": 4
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-20T15:01:37Z",
+      "side": 1,
+      "message": "Yea, I caught this; see other note about needing to find a way to not waste your time til I\u0027ve vetted what I fatfingered in the upload.",
+      "parentUuid": "bb09c0c3_370ba0fe",
+      "range": {
+        "startLine": 5,
+        "startChar": 20,
+        "endLine": 5,
+        "endChar": 24
+      },
+      "revId": "fb2e53beee1e93c9d901912e5a6a12be9cedecfd",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "223b7b94_5b29a41d",
         "filename": "doc/src/rtd/Makefile",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "fb2e53beee1e93c9d901912e5a6a12be9cedecfd",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4130bdfa_540f0b9b",
+        "filename": "doc/src/rtd/Makefile",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-20T15:01:37Z",
+      "side": 1,
+      "message": "Nope.  It\u0027s built in the library directory and published from there.  The others are more or less place holders mandated by the project and thus have no source in doc/src.   The original build in this directory was a simple pull of the man page source into a single file, again to comply with the project mandate that a user-guide.rst exist.\n\nThe specification in this list is what was causing the wrong .rst to be pushed into gerrit; that and the stub source in this directory was not removed; that now is gone.\n\nThe idea here is that one command, \u0027make publish\u0027  will build any project mandated docs (e.g. config-deploy) from this directory, and drive the build/publication of doc from document source.  All of the resulting output to be copied into the directory that RTD/Jenkins scrapes.   I still abhor committing something that can be built, but I\u0027ll never win that battle.",
+      "parentUuid": "223b7b94_5b29a41d",
+      "range": {
+        "startLine": 37,
+        "startChar": 47,
+        "endLine": 37,
+        "endChar": 55
+      },
+      "revId": "fb2e53beee1e93c9d901912e5a6a12be9cedecfd",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -91,6 +139,54 @@
       "revId": "fb2e53beee1e93c9d901912e5a6a12be9cedecfd",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea92661f_80b75181",
+        "filename": "docs/rel-notes.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-20T15:01:37Z",
+      "side": 1,
+      "message": "Right.  I changed in the source, but didn\u0027t rebuild into the scraped directory.\n\nI caught it, but haven\u0027t uploaded as I found another set of typos (dates, and debugging accidentally in the scripts).\n\nI need to figure out a way not to pester you with the intermediate uploads until I\u0027m satisfied and think it worth your time again.",
+      "parentUuid": "d083f314_20772dc8",
+      "range": {
+        "startLine": 36,
+        "startChar": 40,
+        "endLine": 36,
+        "endChar": 41
+      },
+      "revId": "fb2e53beee1e93c9d901912e5a6a12be9cedecfd",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb924d05_15a57f6b",
+        "filename": "docs/rel-notes.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-20T15:01:37Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e2a75876_573a203c",
+      "range": {
+        "startLine": 36,
+        "startChar": 51,
+        "endLine": 36,
+        "endChar": 58
+      },
+      "revId": "fb2e53beee1e93c9d901912e5a6a12be9cedecfd",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
