@@ -85,6 +85,23 @@
       "revId": "9d7d95146aaadd63c6982f4ea2e7f505c9fb5553",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4daeb195_e17098f1",
+        "filename": "docs/user-guide.rst",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-20T13:55:18Z",
+      "side": 1,
+      "message": "Ok I think I see what you\u0027re saying, this RST file should have beautiful sentences and paragraphs of explanation, but instead it\u0027s still just a concatEnation of man pages.  I\u0027ll wait on merge.",
+      "revId": "9d7d95146aaadd63c6982f4ea2e7f505c9fb5553",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
