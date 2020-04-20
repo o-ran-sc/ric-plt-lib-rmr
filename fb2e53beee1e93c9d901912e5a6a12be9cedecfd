@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "b713c992_724529cb",
+        "filename": "doc/src/rtd/Makefile",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-20T15:05:04Z",
+      "side": 1,
+      "message": "Well, you\u0027ve chosen to fight the XFM battle here instead of using RTD so yeah there\u0027s no way to win",
+      "parentUuid": "4130bdfa_540f0b9b",
+      "range": {
+        "startLine": 37,
+        "startChar": 47,
+        "endLine": 37,
+        "endChar": 55
+      },
+      "revId": "fb2e53beee1e93c9d901912e5a6a12be9cedecfd",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d083f314_20772dc8",
         "filename": "docs/rel-notes.rst",
         "patchSetId": 4
