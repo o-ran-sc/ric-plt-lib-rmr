@@ -102,6 +102,24 @@
       "revId": "9d7d95146aaadd63c6982f4ea2e7f505c9fb5553",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0059e7fa_58a0271e",
+        "filename": "docs/user-guide.rst",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-20T14:00:30Z",
+      "side": 1,
+      "message": "Right.  The correct .rst is being built, but it\u0027s missed in the git push.\n\nI\u0027ll fix the other suggestions and get this sorted as it is, I think, a manual git add failing and not the build process.",
+      "parentUuid": "4daeb195_e17098f1",
+      "revId": "9d7d95146aaadd63c6982f4ea2e7f505c9fb5553",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
