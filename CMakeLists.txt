@@ -22,6 +22,7 @@
 #	-DDEBUG=n			Enable debugging level n
 #	-DDEV_PKG=1			Development package configuration
 #	-DBUILD_DOC=1		Man pages generated
+#	-DBUILD_NNG=1		Enable building of NNG based libraries
 #	-DIGNORE_LIBDIR=1	Installation of rmr libries is into /usr/local/lib and ignores
 #						value in CMAKE_INSTALL_LIBDIR.
 #						system preferred (typically /usr/local/lib64).
@@ -38,9 +39,9 @@
 project( rmr LANGUAGES C )
 cmake_minimum_required( VERSION 3.5 )
 
-set( major_version "3" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
-set( minor_version "8" )
-set( patch_level "2" )
+set( major_version "4" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
+set( minor_version "0" )
+set( patch_level "0" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_inc "include/rmr" )
@@ -50,11 +51,10 @@ else()
 	set( install_man "/usr/share/man" )			# this needs to be fixed so it's not hard coded
 endif()
 
-# Must use GNUInstallDirs to install libraries into correct
-# locations on all platforms.
+# Must use GNUInstallDirs to install libraries into correct locations on all platforms.
 include( GNUInstallDirs )
 
-# nng installs using LIBDIR as established by the gnu include; it varies from system
+# We install using LIBDIR as established by the gnu include; it varies from system
 # to system, and we don't trust that it is always set, so we default to lib if it is missing.
 #
 if( NOT CMAKE_INSTALL_LIBDIR )
@@ -165,56 +165,60 @@ else()
 endif()
 
 # ---------------- setup nano/nng things ---------------------------------------
-if( NOT SKIP_EXTERNALS )
-	set( need_ext 1 )				# we force dependences on these for right build order
-    execute_process( COMMAND  git submodule update --init -- ext/nng
-            WORKING_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-
-    if( NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ext/nng/CMakeLists.txt )
-        message( FATAL_ERROR "cannot find nng in our git source as a submodule: Giving up" )	# this will abort which seems wrong, but tdam.
-    endif()
-
-	include( ExternalProject )
-	ExternalProject_Add(
-		ext_nng
-		SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/nng"
-		CMAKE_ARGS "-DBUILD_SHARED_LIBS=1"
-		CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}"
-		BUILD_COMMAND "make"
-		UPDATE_COMMAND ""
-		TEST_COMMAND ""
-		STEP_TARGETS build
-	)
-
-	# it seems impossible to install everything that lands in {bin}/lib, so we need to
-	# hard code (shudder) some things. Even worse, we have to make exceptions for
-	# builds on apple (osx) since their naming convention wandered off the path.
-	set( nng_major 1 )
-	set( nng_minor 1.0 )
-	set( so ${CMAKE_SHARED_LIBRARY_SUFFIX} )	# cmake variables are impossibly long :(
-	if( NOT APPLE ) 				# probably breaks in windows, but idc
-		set( nng_so_suffix ${so} )
-		set( nng_so_suffix_m ${so}.${nng_major} )
-		set( nng_so_suffix_mm ${so}.${nng_major}.${nng_minor} )
-	else()
-		# of course apple puts versions before the suffix :(
-		set( nng_so_suffix ${so} )									# so has a lead dot, so NOT needed
-		set( nng_so_suffix_m ".${nng_major}${so}" )					# these need leading dots
-		set( nng_so_suffix_mm ".${nng_major}.${nng_minor}${so}" )
-	endif()
-
-	message( "+++ building with nng: ${nng_major}.${nng_minor}" )
+if( NOT BUILD_NNG )
+	set( PACK_EXTERNALS 0 )
 else()
-	if( PACK_EXTERNALS )
-		# This makes some stand-alone unit testing possible for bindings and transport layer testing;
-		# it is not meant for production packages.
-		#
-		unset( SKIP_EXTERNALS  CACHE )	# must remove so as not to trap user into a never ending failure
-		unset( PACK_EXTERNALS  CACHE )
-		message( FATAL_ERROR "ERROR: PACK_EXTERNALS can be set only if SKIP_EXTERNALS is unset (=0, or not supplied on command line)" )
+	if( NOT SKIP_EXTERNALS )
+		set( need_ext 1 )				# we force dependences on these for right build order
+		execute_process( COMMAND  git submodule update --init -- ext/nng
+				WORKING_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}
+		)
+
+		if( NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ext/nng/CMakeLists.txt )
+			message( FATAL_ERROR "cannot find nng in our git source as a submodule: Giving up" )	# this will abort which seems wrong, but tdam.
+		endif()
+
+		include( ExternalProject )
+		ExternalProject_Add(
+			ext_nng
+			SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/nng"
+			CMAKE_ARGS "-DBUILD_SHARED_LIBS=1"
+			CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}"
+			BUILD_COMMAND "make"
+			UPDATE_COMMAND ""
+			TEST_COMMAND ""
+			STEP_TARGETS build
+		)
+
+		# it seems impossible to install everything that lands in {bin}/lib, so we need to
+		# hard code (shudder) some things. Even worse, we have to make exceptions for
+		# builds on apple (osx) since their naming convention wandered off the path.
+		set( nng_major 1 )
+		set( nng_minor 1.0 )
+		set( so ${CMAKE_SHARED_LIBRARY_SUFFIX} )	# cmake variables are impossibly long :(
+		if( NOT APPLE )								# probably breaks in windows, but idc
+			set( nng_so_suffix ${so} )
+			set( nng_so_suffix_m ${so}.${nng_major} )
+			set( nng_so_suffix_mm ${so}.${nng_major}.${nng_minor} )
+		else()
+			# of course apple puts versions before the suffix :(
+			set( nng_so_suffix ${so} )									# so has a lead dot, so NOT needed
+			set( nng_so_suffix_m ".${nng_major}${so}" )					# these need leading dots
+			set( nng_so_suffix_mm ".${nng_major}.${nng_minor}${so}" )
+		endif()
+
+		message( "+++ building with nng: ${nng_major}.${nng_minor}" )
+	else()
+		if( PACK_EXTERNALS )
+			# This makes some stand-alone unit testing possible for bindings and transport layer testing;
+			# it is not meant for production packages.
+			#
+			unset( SKIP_EXTERNALS  CACHE )	# must remove so as not to trap user into a never ending failure
+			unset( PACK_EXTERNALS  CACHE )
+			message( FATAL_ERROR "ERROR: PACK_EXTERNALS can be set only if SKIP_EXTERNALS is unset (=0, or not supplied on command line)" )
+		endif()
+		set( need_ext 0 )
 	endif()
-	set( need_ext 0 )
 endif()
 
 
@@ -249,24 +253,26 @@ add_subdirectory( doc )				# this will auto skip if {X}fm is not available
 
 
 # shared and static libraries are built from the same object files.
-# librmr_nng is a combination of common and nng specific rmr functions.
+# librmr_* is a combination of common and * specific rmr functions.
 #
 
-add_library( rmr_nng_shared SHARED "$<TARGET_OBJECTS:nng_objects>;$<TARGET_OBJECTS:common_objects>" )
-set_target_properties( rmr_nng_shared
-	PROPERTIES
-	OUTPUT_NAME "rmr_nng"
-	SOVERSION ${major_version}
-	VERSION ${major_version}.${minor_version}.${patch_level} )
-
-# we only build/export the static archive (.a) if generating a dev package
-if( DEV_PKG )
-	add_library( rmr_nng_static STATIC "$<TARGET_OBJECTS:nng_objects>;$<TARGET_OBJECTS:common_objects>" )
-	set_target_properties( rmr_nng_static
+if( BUILD_NNG )
+	add_library( rmr_nng_shared SHARED "$<TARGET_OBJECTS:nng_objects>;$<TARGET_OBJECTS:common_objects>" )
+	set_target_properties( rmr_nng_shared
 		PROPERTIES
 		OUTPUT_NAME "rmr_nng"
 		SOVERSION ${major_version}
 		VERSION ${major_version}.${minor_version}.${patch_level} )
+
+	# we only build/export the static archive (.a) if generating a dev package
+	if( DEV_PKG )
+		add_library( rmr_nng_static STATIC "$<TARGET_OBJECTS:nng_objects>;$<TARGET_OBJECTS:common_objects>" )
+		set_target_properties( rmr_nng_static
+			PROPERTIES
+			OUTPUT_NAME "rmr_nng"
+			SOVERSION ${major_version}
+			VERSION ${major_version}.${minor_version}.${patch_level} )
+	endif()
 endif()
 
 add_library( rmr_si_shared SHARED "$<TARGET_OBJECTS:rmr_si_objects>;$<TARGET_OBJECTS:common_objects>" )
@@ -276,7 +282,7 @@ set_target_properties( rmr_si_shared
 	SOVERSION ${major_version}
 	VERSION ${major_version}.${minor_version}.${patch_level} )
 
-# even if not generating a development package we still need to generate the .a so that health check 
+# even if not generating a development package we still need to generate the .a so that health check
 # can link against it to avoid RPM install issues.
 #
 add_library( rmr_si_static STATIC "$<TARGET_OBJECTS:rmr_si_objects>;$<TARGET_OBJECTS:common_objects>" )
@@ -286,12 +292,14 @@ set_target_properties( rmr_si_static
 	SOVERSION ${major_version}
 	VERSION ${major_version}.${minor_version}.${patch_level} )
 
-# if externals need to be built, then we must force them to be built first by depending on them
-if( need_ext )
-	if( DEV_PKG )
-		add_dependencies( rmr_nng_shared;rmr_nng_static ext_nng )
-	else()
-		add_dependencies( rmr_nng_shared ext_nng )
+if( BUILD_NNG )
+	# if externals need to be built, then we must force them to be built first by depending on them
+	if( need_ext )
+		if( DEV_PKG )
+			add_dependencies( rmr_nng_shared;rmr_nng_static ext_nng )
+		else()
+			add_dependencies( rmr_nng_shared ext_nng )
+		endif()
 	endif()
 endif()
 
@@ -319,32 +327,43 @@ add_subdirectory( src/support )
 # ------------- packaging -----------------------------------------------------
 
 #
-if( APPLE  )
-	message( "### apple hack: forcing hard coded library paths for nng/nano dynamic libraries" )
-	target_link_libraries( rmr_nng_shared ${CMAKE_CURRENT_BINARY_DIR}/lib/libnng${nng_so_suffix} )
+if( BUILD_NNG )
+	if( APPLE  )
+		message( "### apple hack: forcing hard coded library paths for nng/nano dynamic libraries" )
+		target_link_libraries( rmr_nng_shared ${CMAKE_CURRENT_BINARY_DIR}/lib/libnng${nng_so_suffix} )
+	endif()
 endif()
 
 # Define what should be installed, and where they should go. For dev package we install
 # only the RMr headers, man pages and archive (.a) files.  The run-time package gets just
 # the library (.so) files and nothing more.
 #
-if( DEV_PKG )
-	set( target_list "rmr_nng_static;rmr_si_static" )
+if( BUILD_NNG )
+	if( DEV_PKG )
+		set( target_list "rmr_nng_static;rmr_si_static" )
+	else()
+		set( target_list "rmr_nng_shared;rmr_si_shared" )
+	endif()
 else()
-	set( target_list "rmr_nng_shared;rmr_si_shared" )
+	if( DEV_PKG )
+		set( target_list "rmr_si_static" )
+	else()
+		set( target_list "rmr_si_shared" )
+	endif()
 endif()
 
 install( TARGETS ${target_list} EXPORT LibraryConfig
-   	LIBRARY  DESTINATION ${install_lib}
-   	ARCHIVE  DESTINATION ${install_lib}
-   	PUBLIC_HEADER DESTINATION ${install_inc}
+	LIBRARY  DESTINATION ${install_lib}
+	ARCHIVE  DESTINATION ${install_lib}
+	PUBLIC_HEADER DESTINATION ${install_inc}
 )
 
 
 unset( DEV_PKG  CACHE )			# prevent from being a hidden setting if user redoes things
 
 # install any nano/nng libraries in to the deb as well, but ONLY if asked for on the 'cmake ..' command
-# (sure would be nice if FILEs allowed for globbing; sadly it does not.)
+# (sure would be nice if FILEs allowed for globbing; sadly it does not.) Disabled by default if BUILD_NNG
+# is turned off.
 #
 if( PACK_EXTERNALS )
 	message( "+++ including nano and nng libraries in the deb" )

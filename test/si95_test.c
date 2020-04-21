@@ -21,7 +21,7 @@
 /*
 	Mmemonic:	si95_test.c
 	Abstract:	This is the main driver to test the si95 core functions
-				(within rmr/src/si/src/si95). 
+				(within rmr/src/si/src/si95).
 
 	Author:		E. Scott Daniels
 	Date:		6 March 2018
@@ -58,7 +58,7 @@
 #define DEBUG 1
 
 											// specific test tools in this directory
-#undef NNG_UNDER_TEST 						// NNG is NOT under test so undefine if set
+#undef NNG_UNDER_TEST						// NNG is NOT under test so undefine if set
 #define NO_EMULATION 1						// no emulation of transport functions
 #define NO_PRIVATE_HEADERS 1				// no rmr_si or rmr_nng headers
 #define NO_DUMMY_RMR 1						// no msg things
@@ -127,7 +127,7 @@ static int memory( ) {
 		((struct tp_blk *)ptr)->squeue = iptr;
 		SItrash(  TP_BLK, ptr );
 	}
-	
+
 	ptr = SInew( GI_BLK );
 	errors += fail_if_nil( ptr, "memory: sinew returned nil when given giblk request" );
 	SItrash(  GI_BLK, ptr );		// GI block cannot be trashed, ensure this (valgind will complain about a leak)
@@ -155,7 +155,7 @@ static int init() {
 
 static int cleanup() {
 	int errors = 0;
-	
+
 	if( ! si_ctx ) {
 		return 0;
 	}
@@ -163,8 +163,9 @@ static int cleanup() {
 	SItp_stats( si_ctx );		// drive for coverage only
 	SItp_stats( NULL );
 
-	SIconnect( si_ctx, "localhost:43086" ); 	// ensure context has a tp block to free on shutdown
-	SIshutdown( si_ctx );
+	SIconnect( si_ctx, "localhost:43086" );	// ensure context has a tp block to free on shutdown
+	SIshutdown( NULL );
+	SIabort( si_ctx );
 
 
 	fprintf( stderr, "<INFO> cleanup  module finished with %d errors\n", errors );
@@ -222,11 +223,11 @@ static int conn( ) {
 	state = SIconnect( si_ctx, "localhost:4567" );		// driver regular connect
 	errors += fail_if_true( state < 0, "connect to low port failed" );
 
-	state = SIconnect( si_ctx, "localhost:43086" ); 	// drive save connect with good return code
+	state = SIconnect( si_ctx, "localhost:43086" );		// drive save connect with good return code
 	errors += fail_if_true( state < 0, "connect to high port failed" );
 
 	tpem_set_addr_dup_state( 1 );				// force get sockket name emulation to return a duplicate address
-	state = SIconnect( si_ctx, "localhost:43086" ); 	// drive save connect with good return code
+	state = SIconnect( si_ctx, "localhost:43086" );		// drive save connect with good return code
 	errors += fail_if_true( state >= 0, "forced dup connect did not return error" );
 
 	tpem_set_addr_dup_state( 0 );				// force get sockket name emulation to return a duplicate address

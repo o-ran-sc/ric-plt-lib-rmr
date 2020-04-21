@@ -63,10 +63,12 @@ static inline uta_ctx_t *mk_dummy_ctx() {
 	}
 
 	memset( ctx, 0, sizeof( *ctx ) );
-	
+
 	ctx->mring = uta_mk_ring( 4096 );				// message ring is always on for si
 	ctx->zcb_mring = uta_mk_ring( 128 );		// zero copy buffer mbuf ring to reduce malloc/free calls
 	ctx->si_ctx = malloc( 1024 );
+	ctx->my_name = strdup( "hostname1" );
+	ctx->my_ip = strdup( "123.45.67.89" );
 
 	return ctx;
 }

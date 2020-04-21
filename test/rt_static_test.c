@@ -98,6 +98,7 @@ fprintf( stderr, "<INFO> build key: %x %x --> %llx\n", (int) mtype, (int) sid, (
 */
 static int rt_test( ) {
 	uta_ctx_t* ctx;			// context needed to test load static rt
+	uta_ctx_t* pctx;		// "private" context for route manager communication tests
 	route_table_t* rt;		// route table
 	route_table_t* crt;		// cloned route table
 	rtable_ent_t*	rte;	// route table entries from table
@@ -520,6 +521,36 @@ static int rt_test( ) {
 		state = epsock_meid( ctx, ctx->rtable,  mbuf, NULL, &ep );
 		errors += fail_not_equal( state, 0, "epsock_meid returned true when given nil socket pointer" );
 	#endif
+
+	// ------------  debugging and such; coverage only calls ----------------------------------------------------------
+		ep_stats( ctx->rtable, NULL, "name", NULL, NULL );			// ensure no crash when given nil pointer
+		rt_epcounts( ctx->rtable, "testing" );
+		rt_epcounts( NULL, "testing" );
+
+		buf = ensure_nlterm( strdup( "Stand up and cheer!" ) );					// force addition of newline
+		if( buf ) {
+			errors += fail_not_equal( strcmp( buf, "Stand up and cheer!\n" ), 0, "ensure nlterm didn't add newline" );
+			free( buf );
+			buf = NULL;
+		}
+
+
+	// ------------- route manager request/response funcitons -------------------------------------------------------
+		{
+			rmr_mbuf_t*	smsg;
+
+			smsg = rmr_alloc_msg( ctx, 1024 );
+			send_rt_ack( ctx, smsg, "123456", 0, "no reason" );
+
+			pctx = mk_dummy_ctx();
+			ctx->rtg_whid = -1;
+			state = send_update_req( pctx, ctx );
+			errors += fail_not_equal( state, 0, "send_update_req did not return 0" );
+
+			ctx->rtg_whid = rmr_wh_open( ctx, "localhost:19289" );
+			state = send_update_req( pctx, ctx );
+			errors += fail_if_equal( state, 0, "send_update_req to an open whid did not return 0" );
+		}
 
 
 	// ------------- si only; fd to ep conversion functions ---------------------------------------------------------

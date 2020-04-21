@@ -150,6 +150,7 @@ static int rmr_rcv_test( ) {
 	}
 
 	rmr_rts_msg( NULL, NULL );			// drive for coverage
+	errors += fail_if( errno == 0, "rmr_rts_msg did not set errno when given a nil context "  );
 	rmr_rts_msg( rmc, NULL );
 	errors += fail_if( errno == 0, "rmr_rts_msg did not set errno when given a nil message "  );
 
@@ -224,6 +225,42 @@ static int rmr_rcv_test( ) {
 	rmr_close( NULL );			// drive for coverage
 	rmr_close( rmc );			// no return to check; drive for coverage
 
+
+	// ------- receive specific is deprecated, but we still test to keep sonar happy ---------------
+
+	rmr_rcv_specific( NULL, NULL, "12345", 0 );		// drive for error handling coverage
+	rmr_rcv_specific( NULL, msg, "12345", 2 );
+
+	strncpy( wbuf, "dummy message", sizeof( wbuf ) );
+	msg = mk_populated_msg( 1024, 0, 0, -1, strlen( wbuf ) + 1 );
+	strncpy( msg->payload, wbuf, msg->len );
+	msg = rmr_send_msg( rmc, msg );						// give specific something to chew on
+
+	strncpy( msg->payload, wbuf, msg->len );
+	msg->mtype = 0;
+	rmr_str2xact( msg, "12345" );						// should allow rcv to find it
+	msg = rmr_send_msg( rmc, msg );
+
+	msg = rmr_rcv_specific( rmc, NULL, "12345", 2 );
+	if( msg ) {
+		errors += fail_if( msg->state != 0, "receive specific failed to find the expected message" );
+	} else {
+		errors++;
+		fprintf( stderr, "<FAIL> rcv specific expected to return a message and did not\n" );
+	}
+
+	strncpy( wbuf, "dummy message", sizeof( wbuf ) );
+	msg = mk_populated_msg( 1024, 0, 0, -1, strlen( wbuf ) + 1 );
+	strncpy( msg->payload, wbuf, msg->len );
+	msg = rmr_send_msg( rmc, msg );						// give specific something to chew on
+
+	fprintf( stderr, "<INFO> starting receive specific test for no expected message\n" );
+	strncpy( msg->payload, wbuf, msg->len );
+	msg->mtype = 0;
+	rmr_str2xact( msg, "72345" );						// rcv should not find it
+	msg = rmr_send_msg( rmc, msg );
+	msg = rmr_rcv_specific( rmc, msg, "12345", 2 );
+	fail_if_nil( msg, "receive speciifc expected to retun nil message did  not" );
 
 	// --------------- phew, done ------------------------------------------------------------------------------
 

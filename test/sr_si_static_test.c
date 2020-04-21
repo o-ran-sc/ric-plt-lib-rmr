@@ -41,7 +41,7 @@
 #include "rmr_agnostic.h"
 
 // ----------- local test support ----------------------------------------------------------
-#define CLONE 	1			// convenience constants for payload realloc tests
+#define CLONE	1			// convenience constants for payload realloc tests
 #define NO_CLONE 0
 #define COPY 1
 #define NO_COPY 0
@@ -59,21 +59,24 @@
 	have been included by the test module(s) which include this.
 */
 static int sr_si_test() {
-	uta_ctx_t* ctx;			// context needed to test load static rt
+	uta_ctx_t* ctx;			// two context structs needed to test route table collector
+	uta_ctx_t* pctx;
 	uta_ctx_t*	real_ctx;	// real one to force odd situations for error testing
 	int errors = 0;			// number errors found
 	rmr_mbuf_t*	mbuf;		// mbuf to send/receive
 	rmr_mbuf_t*	mb2;		// second mbuf when needed
 	int		whid = -1;
 	int		last_whid;
-	int 	state;
-	int 	nn_dummy_sock;					// dummy needed to drive send
+	int		state;
+	int		nn_dummy_sock;					// dummy needed to drive send
 	int		size;
 	int		i;
+	int		flags = 0;						// flags needed to pass to rtc funcitons
 	void*	p;
 	char*	payload_str;
 
 	ctx = mk_dummy_ctx();									// in the si world we need some rings in the context
+	pctx = mk_dummy_ctx();
 
 	ctx->max_plen = RMR_MAX_RCV_BYTES + sizeof( uta_mhdr_t );
 	ctx->max_mlen = ctx->max_plen + sizeof( uta_mhdr_t );
@@ -114,8 +117,7 @@ static int sr_si_test() {
 	if( mbuf ) {
 		errors += fail_not_equal( mbuf->state, RMR_ERR_BADARG, "send with buffer but nil context didn't return right state" );
 	} else {
-		//mbuf = rmr_rcv_msg( ctx, NULL );
-mbuf = rmr_alloc_msg( ctx, 2048 );
+		mbuf = rmr_alloc_msg( ctx, 2048 );
 	}
 
 	//size = 2048 - em_hdr_size();		// emulated receive allocates 2K buffers -- subtract off header size
@@ -126,7 +128,12 @@ mbuf = rmr_alloc_msg( ctx, 2048 );
 	rmr_free_msg( mbuf );
 
 
-	// ---- drive rtc in a 'static' (not pthreaded) mode to get some coverage; no 'results' to be verified -----
+	// -------- drive rtc in a 'static' (not pthreaded) mode to get some coverage; no 'results' to be verified -----
+	/*
+		It is impossible to drive the message loop of the rtc from a unit test because
+		we cannot generate a message that will arrive on it's private RMR context.
+	*/
+
 	setenv( ENV_RTG_RAW, "0", 1 );								// rtc is never raw under SI
 	setenv( ENV_VERBOSE_FILE, ".ut_rmr_verbose", 1 );			// allow for verbose code in rtc to be driven
 	i = open( ".ut_rmr_verbose", O_RDWR | O_CREAT, 0654 );
@@ -136,7 +143,10 @@ mbuf = rmr_alloc_msg( ctx, 2048 );
 	}
 	ctx->shutdown = 1;			// should force rtc to quit on first pass
 	rtc( NULL );				// coverage test with nil pointer
-/*
+
+	rtc_file( NULL );			// the static file only collector
+	rtc_file( ctx );
+
 	rtc( ctx );
 
 	setenv( "RMR_RTG_SVC", "4567", 1 );		// drive for edge case coverage to ensure no nil pointer etc
@@ -145,7 +155,17 @@ mbuf = rmr_alloc_msg( ctx, 2048 );
 	rtc( ctx );
 	setenv( "RMR_RTG_SVC", "tcp:4567:error", 1 );
 	rtc( ctx );
-*/
+	setenv( "RMR_RTG_SVC", "localhost:4589", 1 );		// should force a request to be sent though no reponse back.
+	rtc( ctx );
+
+	payload_str = "newrt|start|abc-def\nmse|10|-1|host1:43086\nmse|20|-1|host1:43086\nnewrt|end|2\n";
+	mbuf = mk_populated_msg( 1024, 0, 20, -2, strlen( payload_str ) );
+	memcpy( mbuf->payload, payload_str, mbuf->len );
+	rtc_parse_msg( ctx, pctx, mbuf, 5, &flags );
+
+	mbuf = mk_populated_msg( 1024, 0, 90, -2, strlen( payload_str ) );		// drive with invalid message type for coverage
+	rtc_parse_msg( ctx, pctx, mbuf, 5, &flags );
+
 
 	// ------------- reallocation tests ------------------------------------------------------------
 	// we use mk_populated_msg() to create a message with mid/sid/plen pushed into the transport
