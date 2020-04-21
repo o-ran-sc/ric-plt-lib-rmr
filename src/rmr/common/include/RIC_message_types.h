@@ -20,19 +20,19 @@
 
 
 
-/* 
+/*
 	Header  file defining  message types for various RMR messages
 */
 
 #define RIC_UNDEFINED				-1
 
-/* 
+/*
 ---------------------------------------------------------
 	RMR Reserved types
 		All message types 0 - 99 are reserved for RMM.
 ---------------------------------------------------------
 */
-		
+
 #define RMRRM_TABLE_DATA			20		// table data from route manger
 #define	RMRRM_REQ_TABLE				21		// request for table update to route mangager
 #define RMRRM_TABLE_STATE			22		// state of table to route mgr
@@ -147,18 +147,22 @@
 #define DC_ADM_GET_POLICY			20002
 #define DC_ADM_GET_POLICY_ACK		20003
 
-#define A1_POLICY_REQ      			20010
-#define A1_POLICY_RESP    			20011
+#define A1_POLICY_REQ				20010
+#define A1_POLICY_RESP				20011
 #define A1_POLICY_QUERY				20012
 
 
 // --- application specific message numbers 30000 - 39999
-    
+
 #define TS_UE_LIST					30000		// traffic steering
 #define TS_QOE_PRED_REQ				30001
 #define TS_QUE_PREDICTION			30002
 
 #define MC_REPORT					30010		// Measurement campaign xApp reports
+
+#define	DCAPTERM_RTPM_RMR_MSGTYPE	33001
+#define	DCAPTERM_GEO_RMR_MSGTYPE	33002
+
 
 
 // ---- these are old (release 0) definitions and should not be used ------
