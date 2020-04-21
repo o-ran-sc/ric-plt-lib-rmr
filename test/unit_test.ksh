@@ -190,7 +190,7 @@ function discount_an_checks {
 		}
 	}
 
-	/-:/ { 				# skip unexecutable lines
+	/-:/ {				# skip unexecutable lines
 		spit_line()
 		seq++					# allow blank lines in a sequence group
 		next
@@ -345,7 +345,8 @@ show_output=0									# show output from each test execution (-S)
 quiet=0
 gen_xml=0
 replace_flags=1									# replace ##### in gcov for discounted lines
-run_nano_tests=0
+run_nano_tests=0								# can nolonger be turned on
+run_nng_tests=0									# -N will enable
 always_gcov=0									# -a sets to always run gcov even if failure
 save_gcov=1										# -o turns this off
 out_dir=${UT_COVERAGE_DIR:-/tmp/rmr_gcov}		# -O changes output directory
@@ -360,7 +361,7 @@ do
 		-C)	builder="$2"; shift;;		# custom build command
 		-G)	builder="gmake %s";;
 		-M)	builder="mk -a %s";;		# use plan-9 mk (better, but sadly not widly used)
-		-N)	run_nano_tests=1;;
+		-N)	run_nng_tests=1;;
 		-O)	out_dir=$2; shift;;
 
 		-a)	always_gcov=1;;
@@ -385,9 +386,9 @@ do
 			;;
 
 
-		-h) 	usage; exit 0;;
+		-h)		usage; exit 0;;
 		--help) usage; exit 0;;
-		-\?) 	usage; exit 0;;
+		-\?)	usage; exit 0;;
 
 		*)	echo "unrecognised option: $1" >&2
 			usage >&2
@@ -399,7 +400,7 @@ do
 done
 
 
-if (( strict )) 		# if in strict mode, coverage shortcomings are failures
+if (( strict ))			# if in strict mode, coverage shortcomings are failures
 then
 	cfail="FAIL"
 else
@@ -418,7 +419,11 @@ then
 	do
 		if [[ $tfile != *"static_test.c" ]]
 		then
-			if(( ! run_nano_tests )) && [[ $tfile == *"nano"* ]]
+			if (( ! run_nng_tests )) && [[ $tfile == *"nng"* ]]		# drop any nng file unless -N given
+			then
+				continue
+			fi
+			if [[ $tfile == *"nano"* ]]			# no longer support nano tests; drop regardless
 			then
 				continue
 			fi
@@ -462,7 +467,7 @@ do
 		then
 			echo "[FAIL] cannot build $tfile"
 			cat /tmp/PID$$.log
-			rm -f /tmp/PID$$
+			rm -f /tmp/PID$$.*
 			exit 1
 		fi
 
@@ -623,7 +628,7 @@ do
 		rc=$?
 		cat /tmp/PID$$.log
 
-		if (( rc  || force_discounting )) 	# didn't pass, or forcing, see if discounting helps
+		if (( rc  || force_discounting ))	# didn't pass, or forcing, see if discounting helps
 		then
 			if (( ! verbose ))
 			then
@@ -645,7 +650,7 @@ do
 
 				tail -1 /tmp/PID$$.disc | grep '\['
 
-				if (( verbose > 1 )) 			# updated file was generated, keep here
+				if (( verbose > 1 ))			# updated file was generated, keep here
 				then
 					echo "[INFO] discounted coverage info in: ${tfile##*/}.dcov"
 				fi
@@ -653,7 +658,7 @@ do
 				mv /tmp/PID$$.disc ${name##*/}.dcov
 			done
 		fi
- 	)>/tmp/PID$$.noise 2>&1
+	)>/tmp/PID$$.noise 2>&1
 	if (( $? != 0 ))
 	then
 		(( ut_errors++ ))
@@ -685,7 +690,7 @@ do
 	if [[ $xx != *"test"* ]]
 	then
 		of=${xx%.gcov}.dcov
-	 	discount_an_checks $xx  >$of
+		discount_an_checks $xx  >$of
 		if [[ -n $of ]]
 		then
 			tail -1 $of |  grep '\['

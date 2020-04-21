@@ -72,6 +72,7 @@ static void buf2mbuf( uta_ctx_t* ctx, char *raw_msg, int msg_size, int sender_fd
 	}
 
 	if( (mbuf = alloc_mbuf( ctx, RMR_ERR_UNSET )) != NULL ) {
+		//fprintf( stderr, ">>>>>>> queueing message on context: %p\n", ctx );
 		mbuf->tp_buf = raw_msg;
 		mbuf->rts_fd = sender_fd;
 		if( msg_size > ctx->max_ibm + 1024 ) {
@@ -234,7 +235,7 @@ static int mt_data_cb( void* vctx, int fd, char* buf, int buflen ) {
 			remain = 0;
 		} else {
 			need = river->msg_size - river->ipt;						// bytes from transport we need to have complete message
-			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "data callback enough in the buffer size=%d need=%d remain=%d\n", river->msg_size, need, remain );
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "data callback enough in the buffer size=%d need=%d remain=%d flgs=%02x\n", river->msg_size, need, remain, river->flags );
 			if( (river->flags & RF_DROP) == 0  ) {
 				memcpy( &river->accum[river->ipt], buf+bidx, need );				// grab just what is needed (might be more)
 				buf2mbuf( ctx, river->accum, river->nbytes, fd );					// build an RMR mbuf and queue
@@ -242,7 +243,7 @@ static int mt_data_cb( void* vctx, int fd, char* buf, int buflen ) {
 				river->accum = (char *) malloc( sizeof( char ) *  river->nbytes );	// fresh accumulator
 			} else {
 				if( !(river->flags & RF_NOTIFIED) ) {
-					rmr_vlog( RMR_VL_WARN, "message larger than max (%d) have arrived on fd %d\n", river->nbytes, fd );
+					rmr_vlog( RMR_VL_WARN, "message larger than allocated buffer (%d) arrived on fd %d\n", river->nbytes, fd );
 					river->flags |= RF_NOTIFIED;
 				}
 			}
