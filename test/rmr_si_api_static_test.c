@@ -96,8 +96,8 @@ static int rmr_api_test( ) {
 	v = strcmp( ((uta_ctx_t *) rmc2)->my_name, "somehost:6789" );
 	errors += fail_not_equal( v, 0, "source name not set from environment variable (see previous info)" );
 	free_ctx( rmc2 );			// coverage
-	
-	unsetenv( "RMR_SRC_ID" );												// context should NOT have our artificial name 
+
+	unsetenv( "RMR_SRC_ID" );												// context should NOT have our artificial name
 	if( (rmc2 = rmr_init( NULL, 1024, FL_NOTHREAD )) == NULL ) {			// drive default port selector code
 		errors += fail_if_nil( rmc, "rmr_init returned a nil pointer when driving for default port "  );
 	}
@@ -112,7 +112,7 @@ static int rmr_api_test( ) {
 	msg = rmr_alloc_msg( NULL,  1024 );									// should return nil pointer
 	errors += fail_not_nil( msg, "rmr_alloc_msg didn't return nil when given nil context "  );
 
-	
+
 	msg = rmr_alloc_msg( rmc, 2048 );				// allocate larger than default size given on init
 	errors += fail_if_nil( msg, "rmr_alloc_msg returned nil msg pointer "  );
 	if( msg ) {
@@ -210,9 +210,8 @@ static int rmr_api_test( ) {
 		max_tries--;
 	}
 
-
 	// ----- the queue load and disc cb tests should be last! -----------------------------
-	for( i = 0; i < 4000; i++ ) {			// test ring drop 
+	for( i = 0; i < 4000; i++ ) {			// test ring drop
 		if( msg == NULL ) {
 			msg = rmr_alloc_msg( rmc, 2048 );				// get a buffer with a transport header
 		}
@@ -257,6 +256,13 @@ static int rmr_api_test( ) {
 	rmr_close( rmc );			// no return to check; drive for coverage
 
 
+	// --------------- nil pointer exception checks
+	rmr_rcv_specific( NULL, NULL, "foo", 0 );
+	rmr_mt_rcv( NULL, NULL, 0 );
+	mt_call( NULL, NULL, 0, 1, NULL );
+	rmr_mt_call( NULL, NULL, 0, 1 );
+	rmr_set_low_latency( NULL );
+	rmr_set_fack( NULL );
 
 	// --------------- phew, done ------------------------------------------------------------------------------
 
