@@ -57,4 +57,4 @@ do
 	shift
 done
 
-bash ./unit_test.ksh -q
+bash ./unit_test.ksh

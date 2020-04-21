@@ -419,6 +419,10 @@ extern rmr_mbuf_t* rmr_torcv_msg( void* vctx, rmr_mbuf_t* old_msg, int ms_to ) {
 }
 
 /*
+	DEPRECATED -- this function is not needed in the SI world, and when NNG goes away this will
+		too.  This function likely will not behave as expected in SI, and we are pretty sure it
+		isn't being used as there was an abort triggering reference to rmr_rcv() until now.
+
 	This blocks until the message with the 'expect' ID is received. Messages which are received
 	before the expected message are queued onto the message ring.  The function will return
 	a nil message and set errno to ETIMEDOUT if allow2queue messages are received before the
@@ -455,22 +459,25 @@ extern rmr_mbuf_t* rmr_rcv_specific( void* vctx, rmr_mbuf_t* msg, char* expect, 
 	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, " rcv_specific waiting for id=%s\n",  expect );
 
 	while( queued < allow2queue ) {
-		msg = rcv_msg( ctx, msg );					// hard wait for next
-		if( msg->state == RMR_OK ) {
-			if( memcmp( msg->xaction, expect, exp_len ) == 0 ) {			// got it -- return it
-				if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, " rcv-specific matched (%s); %d messages were queued\n", msg->xaction, queued );
-				return msg;
-			}
+		msg = rmr_rcv_msg( ctx, msg );					// hard wait for next
+		if( msg != NULL ) {
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, " rcv_specific checking message; queued=%d allowed=%d state=%d\n",  queued, allow2queue, msg->state );
+			if( msg->state == RMR_OK ) {
+				if( memcmp( msg->xaction, expect, exp_len ) == 0 ) {			// got it -- return it
+					if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, " rcv-specific matched (%s); %d messages were queued\n", msg->xaction, queued );
+					return msg;
+				}
 
-			if( ! uta_ring_insert( ctx->mring, msg ) ) {					// just queue, error if ring is full
-				if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, " rcv_specific ring is full\n" );
-				errno = ENOBUFS;
-				return NULL;
-			}
+				if( ! uta_ring_insert( ctx->mring, msg ) ) {					// just queue, error if ring is full
+					if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, " rcv_specific ring is full\n" );
+					errno = ENOBUFS;
+					return NULL;
+				}
 
-			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, " rcv_specific queued message type=%d\n", msg->mtype );
-			queued++;
-			msg = NULL;
+				if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, " rcv_specific queued message type=%d\n", msg->mtype );
+				queued++;
+				msg = NULL;
+			}
 		}
 	}
 
@@ -1079,8 +1086,10 @@ extern rmr_mbuf_t* rmr_mt_call( void* vctx, rmr_mbuf_t* mbuf, int call_id, int m
 
 	// must vet call_id here, all others vetted by workhorse mt_call() function
 	if( call_id > MAX_CALL_ID || call_id < 2 ) {		// 0 and 1 are reserved; user app cannot supply them
-		mbuf->state = RMR_ERR_BADARG;
-		mbuf->tp_state = EINVAL;
+		if( mbuf != NULL ) {
+			mbuf->state = RMR_ERR_BADARG;
+			mbuf->tp_state = EINVAL;
+		}
 		return mbuf;
 	}
 

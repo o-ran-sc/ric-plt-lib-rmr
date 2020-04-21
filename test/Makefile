@@ -22,10 +22,8 @@
 CC = gcc
 coverage_opts = -ftest-coverage -fprofile-arcs
 
-libs = -lnng -lpthread -lm
+libs = -lpthread -lm
 ipaths = -I ../src/rmr/common/src/ -I ../src/rmr/common/include  \
-	-I ../src/rmr/nng/include/ -I ../src/rmr/nng/src/  \
-	-I ../src/rmr/nanomsg/include/ -I ../src/rmr/nanomsg/src/  \
 	-I ../src/rmr/si/include -I ../src/rmr/si/src -I ../src/rmr/si/si95
 
 #sa_tests = sa_tools_test.o
