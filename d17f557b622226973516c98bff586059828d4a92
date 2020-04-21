@@ -1,0 +1,326 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "720b2467_bb628d31",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "perhaps mention that flag here?",
+      "range": {
+        "startLine": 11,
+        "startChar": 22,
+        "endLine": 11,
+        "endChar": 38
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9feb2d9a_bbd1cbd3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "not \"will result in\".  just \"is\"",
+      "range": {
+        "startLine": 18,
+        "startChar": 12,
+        "endLine": 18,
+        "endChar": 26
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e16a7109_f42bd58c",
+        "filename": "CHANGES_CORE.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "drop \"being\"",
+      "range": {
+        "startLine": 9,
+        "startChar": 39,
+        "endLine": 9,
+        "endChar": 44
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d20adb3f_03ef5867",
+        "filename": "CHANGES_CORE.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "underlying (or \"supporting\")",
+      "range": {
+        "startLine": 13,
+        "startChar": 40,
+        "endLine": 13,
+        "endChar": 49
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4180f3e7_ba9df2c1",
+        "filename": "CHANGES_CORE.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "Its",
+      "range": {
+        "startLine": 17,
+        "startChar": 36,
+        "endLine": 17,
+        "endChar": 40
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eab3b9be_e16a8d92",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "NNG *and* the libraries, only the libraries, or ?\n\nI\u0027m trying to ask, what happened to the NNG submodule, is that still present?",
+      "range": {
+        "startLine": 25,
+        "startChar": 36,
+        "endLine": 25,
+        "endChar": 39
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b057e320_c517bade",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "haha, unlikely.",
+      "range": {
+        "startLine": 42,
+        "startChar": 28,
+        "endLine": 42,
+        "endChar": 83
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "88e27aa6_b169ca59",
+        "filename": "src/rmr/common/src/rtc_static.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "required",
+      "range": {
+        "startLine": 110,
+        "startChar": 32,
+        "endLine": 110,
+        "endChar": 39
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e6a3538_e4c7f0fc",
+        "filename": "src/rmr/si/src/rmr_si.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "underscore?",
+      "range": {
+        "startLine": 467,
+        "startChar": 46,
+        "endLine": 467,
+        "endChar": 47
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd61d6e6_cb5bb8be",
+        "filename": "test/rmr_si_rcv_static_test.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "rcv or receive?",
+      "range": {
+        "startLine": 246,
+        "startChar": 39,
+        "endLine": 246,
+        "endChar": 46
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc2cbb14_fd5cbc73",
+        "filename": "test/rmr_si_rcv_static_test.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 257,
+        "startChar": 35,
+        "endLine": 257,
+        "endChar": 42
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "addf234d_ec57edf1",
+        "filename": "test/rmr_si_rcv_static_test.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "specific",
+      "range": {
+        "startLine": 263,
+        "startChar": 28,
+        "endLine": 263,
+        "endChar": 36
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "77b62965_a62db609",
+        "filename": "test/sr_si_static_test.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "its",
+      "range": {
+        "startLine": 134,
+        "startChar": 51,
+        "endLine": 134,
+        "endChar": 56
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "74310c8a_376b6f19",
+        "filename": "test/unit_test.ksh",
+        "patchSetId": 7
+      },
+      "lineNbr": 674,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-04-21T21:37:52Z",
+      "side": 1,
+      "message": "not indented; is this a leftover that should have been removed?",
+      "range": {
+        "startLine": 674,
+        "startChar": 0,
+        "endLine": 674,
+        "endChar": 1
+      },
+      "revId": "d17f557b622226973516c98bff586059828d4a92",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
