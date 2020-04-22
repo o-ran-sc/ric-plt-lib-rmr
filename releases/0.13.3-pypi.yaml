@@ -1,5 +1,0 @@
-# Trigger test and push to (test.)pypi.org
----
-distribution_type: pypi
-project: ric-plt/lib/rmr
-version: 0.13.3
