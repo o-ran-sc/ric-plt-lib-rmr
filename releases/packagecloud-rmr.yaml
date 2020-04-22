@@ -1,10 +1,10 @@
 ---
 package_name: rmr
 log_dir: "ric-plt-lib-rmr-c-docker-ci-pc-merge-master/14"
-ref: 338fe5e46223df8145b53cdf52dab358f18c7f26
-version: 3.6.3
+ref: e3a021c1e7bc4bdb877cd12601a55c7e3f74437e
+version: 3.8.2
 packages:
-    - name: rmr_3.6.3_amd64.deb
-    - name: rmr-dev_3.6.3_amd64.deb
-    - name: rmr-devel-3.6.3-1.x86_64.rpm
-    - name: rmr-3.6.3-1.x86_64.rpm
+    - name: rmr_3.8.2_amd64.deb
+    - name: rmr-dev_3.8.2_amd64.deb
+    - name: rmr-devel-3.8.2-1.x86_64.rpm
+    - name: rmr-3.8.2-1.x86_64.rpm
