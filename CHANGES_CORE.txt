@@ -5,6 +5,9 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 April 22; version 4.0.1
+	Correct message type constant for Traffic Steering predication (RIC-342)
+
 2020 April 21; version 4.0.0
 	The NNG based libraries are no longer included in the RMR packages.
 	This is considered a breaking change as NNG will not be supported by
