@@ -110,14 +110,26 @@ static void buf2mbuf( uta_ctx_t* ctx, char *raw_msg, int msg_size, int sender_fd
 	byte order. If <mark> is not present, we use <int1>. This allows
 	old versions of RMR to continue to work with new versions that now
 	do the right thing with byte ordering.
+
+	If the receiver of a message is a backlevel RMR, and it uses RTS to
+	return a message, it will only update the old size, but when the
+	message is received back at a new RMR application it will appear that
+	the message came from a new instance.  Therefore, we must compare
+	the old and new sizes and if they are different we must use the old
+	size assuming that this is the case.
 */
 static inline uint32_t extract_mlen( unsigned char* buf ) {
 	uint32_t	size;		// adjusted (if needed) size for return
+	uint32_t	osize;		// old size
 	uint32_t*	blen;		// length in the buffer to extract
 
 	blen = (uint32_t *) buf;
 	if( *(buf + sizeof( int ) * 2 ) == TP_SZ_MARKER ) {
+		osize = *blen;							// old size
 		size = ntohl( *(blen+1) );				// pick up the second integer
+		if( osize != size ) {					// assume back level return to sender
+			size = osize;						// MUST use old size
+		}
 		if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "extract msg len converted from net order to: %d\n", size );
 	} else {
 		size = *blen;							// old sender didn't encode size
