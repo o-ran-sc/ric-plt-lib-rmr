@@ -126,7 +126,7 @@ table.
 :: 
   
  newrt | start
- mse | <message-type>[,<sender-endpoint>] | <sub-id> <roud-robin-grp>[;<round-robin-grp>]...
+ mse | <message-type>[,<sender-endpoint>] | <sub-id> | <round-robin-grp>[;<round-robin-grp>]...
  newrt | end
  
  

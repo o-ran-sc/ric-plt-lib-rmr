@@ -124,7 +124,7 @@ The following illustrates the syntax for both the route table.
 &space
 &ex_start
 newrt | start
-mse | <message-type>[,<sender-endpoint>] | <sub-id> <roud-robin-grp>[;<round-robin-grp>]...
+mse | <message-type>[,<sender-endpoint>] | <sub-id> | <round-robin-grp>[;<round-robin-grp>]...
 newrt | end
 &ex_end
 &space
