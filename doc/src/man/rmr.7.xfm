@@ -53,22 +53,50 @@ response relationship when needed.
 
 
 &h3(The Route Table)
-The library must be given a route table which maps message numbers to
-endpoint groups such that each time a message of type T is sent, the message
-is delivered to one member of each group associated with T.
-For example, message type 2 might route to two different groups where
-group A consists of worker1 and worker2, while group B consists only of
-logger1.
+The library must be given a route table which maps message types
+(integers) to endpoint groups such that each time a message of type T
+is sent, the message is delivered to one member of each group
+associated with T. For example, message type 2 might route to two
+different groups where group A has two members, worker1 and worker2,
+while group B has only one member, logger1.
 
 &space
-It is the responsibility of the route table generator to know which endpoints
-belong to which groups, and which groups accept which message types.
-Once understood, the route table generator publishes a table that is ingested
-by RMR and used for mapping messages to end points.
+The route table consists of a start record, one or more table entry
+records, and an end record.  All table records contain fields
+separated with vertical bars (|), and allow for trailing comments with
+the standard shell comment symbol (hash, #) provided that the start of
+the comment is separated from the last token on the record by one or
+more spaces. Leading and trailing white space in each field is
+ignored. The route table supports two entry types: &ital(rte) and
+&ital(mse).
+
+&space
+A &ital(rte) entry defines a message type, an optional sender
+application, and the endpoint(s) which accept the indicated message
+type.  However, this format is deprecated and may be removed in a
+future version. An example record appears next.
+&ex_start
+    rte | 1 | app10:4560
+&ex_end
+
+&space
+The second type of entry is &ital(mse).  This entry defines a message
+type, an optional sender application, a subscription ID, and a
+collection of endpoints. An example record appears next.
+&ex_start
+    mse | 1000,forwarder:43086 | 10 | app2:43086
+&ex_end
+
+&space
+It is the responsibility of the route table generator to know which
+endpoints belong to which groups, and which groups accept which
+message types.  Once understood, the route table generator publishes a
+table that is ingested by RMR and used for mapping messages to end
+points.
 
 .sp
-The following is a simple route table which causes message types 0 through 9 to
-be routed to specific applications:
+The following is a simple route table which causes message types 0
+through 9 to be routed to specific applications:
 
 &ex_start
 newrt|start
@@ -84,12 +112,13 @@ newrt|start
    mse|9|-1|app05:4560
 newrt|end
 &ex_end
+
 &space
-The special endpoint "%meid" indicates that the message type (0 in this case) is
-to be routed to the endpoint which has been listed as the "owner" for the meid
-appearing in the message.
-MEID ownership is communicated to RMR using the same Route Table Manager interface
-and by supplying a "table" such as the one below:
+The special endpoint "%meid" indicates that the message type (0 in
+this case) is to be routed to the endpoint which has been listed as
+the "owner" for the meid appearing in the message.  MEID ownership is
+communicated to RMR using the same Route Table Manager interface and
+by supplying a "table" such as the one below:
 
 &ex_start
 meid_map | start
@@ -98,17 +127,17 @@ meid_map | start
 meid_map | end | 2
 &ex_end
 
-This table indicates that the application (endpoint) &ital(control1) "owns" 6 MEIDs
-and &ital(control2) owns 4.
-When message type 0 is sent, the MEID in the message will be used to select the
-endpoint via this table.
+This table indicates that the application (endpoint) &ital(control1)
+"owns" 6 MEIDs and &ital(control2) owns 4.  When message type 0 is
+sent, the MEID in the message will be used to select the endpoint via
+this table.
 
 &space
-The MEID table will update the existing owner relationships, and add new ones; it
-is necessary to send only the changes with the add/replace (mme_ar) entries in
-the table.
-When necessary, MEIDs can be deleted by adding an &cw(mme_del) record to the table.
-The following example illustrates how this might look:
+The MEID table will update the existing owner relationships, and add
+new ones; it is necessary to send only the changes with the
+add/replace (mme_ar) entries in the table.  When necessary, MEIDs can
+be deleted by adding an &cw(mme_del) record to the table.  The
+following example illustrates how this might look:
 
 &ex_start
 meid_map | start
@@ -119,27 +148,29 @@ meid_map | end | 3
 &ex_end
 
 &h3(Route Table Syntax)
-The following illustrates the syntax for both the route table.
+The following illustrates the syntax for both types of route table entries.
 
 &space
 &ex_start
 newrt | start
+rte | <message-type>[,<sender-endpoint>] | <round-robin-grp>[;<round-robin-grp>]...
 mse | <message-type>[,<sender-endpoint>] | <sub-id> | <round-robin-grp>[;<round-robin-grp>]...
 newrt | end
 &ex_end
+
 &space
-A round robin group is one or more endpoints from which one will be selected to receive
-the message.
-When multiple endpoints are given in a group, they must be separated with a comma.
-An endpoint is the IP address and port (e.g. 192.158.4.30:8219) or DNS name and port of the
-application that should receive the message type.
-If multiple round-robin groups are given, they must be separated by a semicolon, and
+A round robin group is one or more endpoints from which one will be
+selected to receive the message.  When multiple endpoints are given in
+a group, they must be separated with a comma.  An endpoint is an IP
+address and port (e.g. 192.158.4.30:8219), or DNS name and port, of
+the application that should receive the message type.  If multiple
+round-robin groups are given, they must be separated by a semicolon.
 
 &h3(MEID Map Syntax)
-The MEID map is similar to the route table.
-Entries are used to add or replace the ownership of one or more MEIDs (mme_ar) or to
-delete one or more MEIDs (mme_del).
-The following is the syntax for the MEID map.
+The MEID map is similar to the route table.  Entries are used to add
+or replace the ownership of one or more MEIDs (mme_ar) or to delete
+one or more MEIDs (mme_del).  The following is the syntax for the MEID
+map.
 
 &space
 &ex_start
