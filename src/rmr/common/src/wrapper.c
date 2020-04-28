@@ -32,7 +32,7 @@
 
 #include "../include/rmr.h"
 
-#define ADD_SEP 	1
+#define ADD_SEP	1
 #define	NO_SEP		0
 
 /*
@@ -74,7 +74,7 @@ static int bang_on( char* target, char* src, int max ) {
 	if( src && target ) {
 		len = strlen( src );
 		if( (rc = len <= max ? len : 0 ) > 0 ) {	// if it fits, add it.
-			strcat( target, src );
+			strncat( target, src, len );
 		}
 	}
 
@@ -155,6 +155,6 @@ extern char* rmr_get_consts( ) {
 	phrase = build_ival( "RMR_ERR_INITFAILED", RMR_ERR_INITFAILED, NO_SEP );
 	remain -= bang_on( wbuf, phrase, remain );
 
-	strcat( wbuf, " }" );
+	strncat( wbuf, " }", remain );
 	return strdup( wbuf );			// chop unused space and return
 }
