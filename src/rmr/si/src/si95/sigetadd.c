@@ -24,7 +24,8 @@
 *  Mnemonic: SIgetaddr
 *  Abstract: This routine will get the address of the first listening
 *            block on the tp list and return it in ASCII format to the
-*            caller.
+*            caller. The dest buffer is assumed to be at least 256 bytes
+*			 long.
 *  Parms:    gptr - Pointer to the global information block
 *            buf  - Pointer to the buffer to hold the ascii string
 *  Returns:  NI_OK if block found, NI_ERROR if no listen block exists
@@ -33,23 +34,23 @@
 *
 ******************************************************************************
 */
-#include "sisetup.h"        //  get the standard include stuff 
+#include "sisetup.h"        //  get the standard include stuff
 
 extern int SIgetaddr( struct ginfo_blk *gptr, char *buf ) {
-	struct tp_blk *tpptr;       //  Pointer into tp list 
-	int status = SI_ERROR;       //  return status 
-	char	*ibuf;		//  SIaddr now points us at a string, rather than filling ours 
+	struct tp_blk *tpptr;       //  Pointer into tp list
+	int status = SI_ERROR;       //  return status
+	char	*ibuf;		//  SIaddr now points us at a string, rather than filling ours
 
- 	for( tpptr = gptr->tplist; tpptr != NULL && !(tpptr->flags & TPF_LISTENFD);
-      		tpptr = tpptr->next );
+	for( tpptr = gptr->tplist; tpptr != NULL && !(tpptr->flags & TPF_LISTENFD);
+		tpptr = tpptr->next );
 
- 	if( tpptr != NULL )
-  	{
-   		SIaddress( tpptr->addr, (void *) &ibuf, AC_TODOT );   //  convert to dot fmt 
-		strcpy( buf, ibuf );				//  copy into caller's buffer 
+	if( tpptr != NULL )
+	{
+		SIaddress( tpptr->addr, (void *) &ibuf, AC_TODOT );   //  convert to dot fmt
+		strncpy( buf, ibuf, 256 );				//  copy into caller's buffer
 		free( ibuf );
-   		status = SI_OK;                               //  ok status for return 
-  	}
+		status = SI_OK;                               //  ok status for return
+	}
 
- 	return status;
-}          
+	return status;
+}
