@@ -23,7 +23,7 @@
 	Abstract:	These are common functions which work only on the mbuf and
 				thus (because they do not touch an endpoint or context)
 				can be agnostic to the underlying transport, or the transport
-				layer provides a transport specific function (e.g. payload 
+				layer provides a transport specific function (e.g. payload
 				reallocation).
 
 	Author:		E. Scott Daniels
@@ -72,7 +72,7 @@ extern int rmr_bytes2meid( rmr_mbuf_t* mbuf, unsigned char const* src, int len )
 	if( len > RMR_MAX_MEID ) {
 		len = RMR_MAX_MEID;
 		errno = EOVERFLOW;
-	} 
+	}
 
 	hdr = (uta_mhdr_t *) mbuf->header;
 	memcpy( hdr->meid, src, len );
@@ -429,7 +429,7 @@ extern unsigned char* rmr_get_src( rmr_mbuf_t* msg, unsigned char* dest ) {
 
 	if( dest != NULL ) {
 		hdr = msg->header;
-		strcpy( dest, hdr->src );
+		strncpy( dest, hdr->src, RMR_MAX_SRC );
 	}
 
 	return dest;
@@ -453,11 +453,11 @@ extern unsigned char* rmr_get_srcip( rmr_mbuf_t* msg, unsigned char* dest ) {
 		hdr = msg->header;
 		if( HDR_VERSION( msg->header ) > 2 ) {		// src ip was not present in hdr until ver 3
 			errno = 0;
-			strcpy( dest, hdr->srcip );
+			strncpy( dest, hdr->srcip, RMR_MAX_SRC );
 			rstr = dest;
 		} else  {
 			errno = 0;
-			strcpy( dest, hdr->src );				// reutrn the name:port for old messages
+			strncpy( dest, hdr->src, RMR_MAX_SRC );				// reutrn the name:port for old messages
 			rstr = dest;
 		}
 	}

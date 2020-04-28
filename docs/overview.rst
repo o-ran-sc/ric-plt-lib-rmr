@@ -47,11 +47,43 @@ The Route Table
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
 The library must be given a route table which maps message 
-numbers to endpoint groups such that each time a message of 
-type T is sent, the message is delivered to one member of 
-each group associated with T. For example, message type 2 
-might route to two different groups where group A consists of 
-worker1 and worker2, while group B consists only of logger1. 
+types (integers) to endpoint groups such that each time a 
+message of type T is sent, the message is delivered to one 
+member of each group associated with T. For example, message 
+type 2 might route to two different groups where group A has 
+two members, worker1 and worker2, while group B has only one 
+member, logger1. 
+ 
+The route table consists of a start record, one or more table 
+entry records, and an end record. All table records contain 
+fields separated with vertical bars (|), and allow for 
+trailing comments with the standard shell comment symbol 
+(hash, #) provided that the start of the comment is separated 
+from the last token on the record by one or more spaces. 
+Leading and trailing white space in each field is ignored. 
+The route table supports two entry types: *rte* and *mse*. 
+ 
+A *rte* entry defines a message type, an optional sender 
+application, and the endpoint(s) which accept the indicated 
+message type. However, this format is deprecated and may be 
+removed in a future version. An example record appears next. 
+ 
+:: 
+  
+     rte | 1 | app10:4560
+ 
+ 
+ 
+The second type of entry is *mse*. This entry defines a 
+message type, an optional sender application, a subscription 
+ID, and a collection of endpoints. An example record appears 
+next. 
+ 
+:: 
+  
+     mse | 1000,forwarder:43086 | 10 | app2:43086
+ 
+ 
  
 It is the responsibility of the route table generator to know 
 which endpoints belong to which groups, and which groups 
@@ -119,13 +151,14 @@ might look:
 Route Table Syntax 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  
-The following illustrates the syntax for both the route 
-table. 
+The following illustrates the syntax for both types of route 
+table entries. 
  
  
 :: 
   
  newrt | start
+ rte | <message-type>[,<sender-endpoint>] | <round-robin-grp>[;<round-robin-grp>]...
  mse | <message-type>[,<sender-endpoint>] | <sub-id> | <round-robin-grp>[;<round-robin-grp>]...
  newrt | end
  
@@ -134,10 +167,10 @@ table.
 A round robin group is one or more endpoints from which one 
 will be selected to receive the message. When multiple 
 endpoints are given in a group, they must be separated with a 
-comma. An endpoint is the IP address and port (e.g. 
-192.158.4.30:8219) or DNS name and port of the application 
+comma. An endpoint is an IP address and port (e.g. 
+192.158.4.30:8219), or DNS name and port, of the application 
 that should receive the message type. If multiple round-robin 
-groups are given, they must be separated by a semicolon, and 
+groups are given, they must be separated by a semicolon. 
  
 MEID Map Syntax 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 

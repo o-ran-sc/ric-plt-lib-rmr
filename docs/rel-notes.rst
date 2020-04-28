@@ -30,6 +30,49 @@ Core RMR Changes
 -------------------------------------------------------------------------------------------- 
  
  
+2020 April 28; version 4.0.3 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Fix sonar flagged bugs (RIC-78) 
+ 
+ 
+2020 April 24; version 4.0.2 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Correct bug in SI95 transport header length validation 
+(RIC-341) 
+ 
+ 
+2020 April 22; version 4.0.1 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Correct message type constant for Traffic Steering 
+predication (RIC-342) 
+ 
+ 
+2020 April 21; version 4.0.0 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+The NNG based libraries are no longer included in the RMR 
+packages. This is considered a breaking change as NNG will 
+not be supported by default. It is still possible to build 
+with RMR-NNG libraries, but that is the exception. The API 
+between 3.8.2 and 4.0.0 is the SAME. Upgrading to 4.0.0 only 
+means that the underlying transport mechanism is limited only 
+to SI95. 
+ 
+The rmr_rcv_specific() function has been deprecated as it was 
+necessary only for NNG and Nanomsg support. Its use should be 
+discontinued. 
+ 
+ 
+2020 April 20; version 3.8.2 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Fix bug which was preventing an instance receiving dynamic 
+route table updates. (RIC-336) 
+ 
+ 
 2020 April 20; version 3.8.1 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
  

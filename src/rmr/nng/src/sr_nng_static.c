@@ -290,7 +290,8 @@ static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  ) {
 	v1hdr = (uta_v1mhdr_t *) old_msg->header;		// v1 will work to dig header out of any version
 	switch( ntohl( v1hdr->rmr_ver ) ) {
 		case 1:
-			memcpy( v1hdr, old_msg->header, sizeof( *v1hdr ) );	 	// copy complete header
+			hdr = nm->header;
+			memcpy( hdr, old_msg->header, sizeof( *v1hdr ) );		// copy complete header
 			nm->payload = (void *) v1hdr + sizeof( *v1hdr );
 			break;
 
