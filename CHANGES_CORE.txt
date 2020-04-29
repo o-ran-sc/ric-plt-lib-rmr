@@ -5,6 +5,9 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 April 29; version 4.0.4
+	Fix the traffic steering message type constants (again) (RIC-342)
+
 2020 April 28; version 4.0.3
 	Fix sonar flagged bugs (RIC-78)
 
