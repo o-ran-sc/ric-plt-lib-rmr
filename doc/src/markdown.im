@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -103,7 +103,8 @@
 .dv bd  .sp 1
 .dv end_dlist .sp 1
 .dv ed .sp 1
-.dv di ^&break  **$1:**
+.dv ditem ^&break  **$1:**
+.dv ditem_nosp ^&break  **$1:**
 
 .dv beg_list .bl *
 .dv item .li

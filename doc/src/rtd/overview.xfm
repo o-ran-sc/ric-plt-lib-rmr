@@ -27,8 +27,12 @@
 	Author:		E. Scott Daniels
 .fi
 
+.dv GEN_TITLE 1
+.dv doc_title RMR Overview
 .im setup.im
 
-&h1(RMR Overview)
+.sp
+Please refer to the main RMR manual page for an overview of the library:
 
-.im &{lib}/man/rmr.7.xfm
+&space
+https://docs.o-ran-sc.org/projects/o-ran-sc-ric-plt-lib-rmr/en/latest/index.html

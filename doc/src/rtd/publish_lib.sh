@@ -18,7 +18,7 @@
 #   limitations under the License.
 #==================================================================================
 
-# Build the user doc in ../library and if there are changes publish it into
+# Build the documents in ../library and if there are changes publish it into
 # the scraper (../../../docs) directory.
 
 sdir="../../../docs"	# the scraper dir
@@ -31,12 +31,17 @@ fi
 
 set -e
 cd ../library
-make -B user.rst
+make -B docs	# make all documents pushed to scraper dir
 
-new_m5=$( md5sum user.rst | sed 's/ .*//' )
-old_md5=$( md5sum $sdir/user-guide.rst | sed 's/ .*//' )
-if [[ $new_m5 != $old_m5 ]]
-then
-	echo "publishing user-guide.rst"
-	cp user.rst $sdir/user-guide.rst
-fi
+for f in *.rst
+do
+	touch $sdir/$f							# must ensure it is there if new
+	new_md5=$( md5sum $f | sed 's/ .*//' )
+	old_md5=$( md5sum $sdir/$f | sed 's/ .*//' )
+
+	if [[ $new_md5 != $old_md5 ]]
+	then
+		echo "publishing $f"
+		cp $f $sdir/$f
+	fi
+done

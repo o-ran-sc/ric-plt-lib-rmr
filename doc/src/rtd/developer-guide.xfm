@@ -1,8 +1,8 @@
 .** vim: ts=4 noet sw=4:
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,9 +26,12 @@
 	Author:		E. Scott Daniels
 .fi
 
+.dv GEN_TITLE=1
+.dv doc_title Developer's Guide
+
 .im setup.im
 
-&h1(RMR Developer Guide)
+&h1(Overview)
 
 The RIC Message Router (RMR) is a library for peer-to-peer
 communication.  Applications use the library to send and receive
@@ -62,17 +65,17 @@ As such the library source is organised into multiple components:
 
 &beg_dlist(.75i : ^&bold_font )
 
-&di(common) Source in the common directory is agnostic to the
+&ditem(common) Source in the common directory is agnostic to the
 	underlying transport mechanism (Nanomsg, NNG, SI95, ..), and
 	thus can be used when generating either library.
 
-&di(nano) Source which is tightly coupled with the underlying Nanomsg library.
+&ditem(nano) Source which is tightly coupled with the underlying Nanomsg library.
 	(Nanomsg has been deprecated, but the RMR source remains as an example.)
 
-&di(nng) Source which is tightly coupled with the underlying NNG library.
+&ditem(nng) Source which is tightly coupled with the underlying NNG library.
 	(NNG has been deprecated, but the RMR source remains as an example.)
 
-&di(si) Source which is tightly coupled with the underlying SI95 library.
+&ditem(si) Source which is tightly coupled with the underlying SI95 library.
 
 &end_dlist
 

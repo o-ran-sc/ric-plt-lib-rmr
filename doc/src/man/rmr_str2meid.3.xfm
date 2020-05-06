@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -57,14 +57,12 @@ errors listed below.
 
 &h2(ERRORS)
 If the return value is not RMR_OK, then it will be set to one of the values below.
-&half_space
 
 
 &beg_dlist(.75i : ^&bold_font )
-&di(RMR_ERR_BADARG) The message, or an internal portion of the message, was corrupted or the pointer was invalid.
+&ditem(RMR_ERR_BADARG) The message, or an internal portion of the message, was corrupted or the pointer was invalid.
 
-&half_space
-&di(RMR_ERR_OVERFLOW) The length passed in was larger than the maximum length of the field; only a portion of
+&ditem(RMR_ERR_OVERFLOW) The length passed in was larger than the maximum length of the field; only a portion of
     the source bytes were copied.
 &end_dlist
 

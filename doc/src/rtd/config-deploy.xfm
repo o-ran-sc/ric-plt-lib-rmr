@@ -26,9 +26,15 @@
 	Author:		E. Scott Daniels
 .fi
 
+.gv e LIB lib
+.dv lib &{lib!..}
+
+.dv GEN_TITLE 1
+.dv doc_title Configuration and Deployment
+
 .im setup.im
 
-&h1(RMR Configuration and Deployment)
+&h1(Overview)
 
 The RIC Message Router (RMR) is a library for peer-to-peer
 communication.  Applications use the library to send and receive

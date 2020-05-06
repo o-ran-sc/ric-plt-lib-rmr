@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -69,10 +69,10 @@ error stats may be returned:
 &half_space
 
 &beg_dlist(.75i : ^&bold_font )
-&di(RMR_ERR_EMPTY) The message received had no payload, or was completely empty.
+&ditem(RMR_ERR_EMPTY) The message received had no payload, or was completely empty.
 
 &half_space
-&di(RMR_ERR_TIMEOUT) For some transport mechanisms, or if reading the receive
+&ditem(RMR_ERR_TIMEOUT) For some transport mechanisms, or if reading the receive
 queue from multiple threads, it is possible for one thread to find no data
 waiting when it queries the queue.  When this state is reported, the
 message buffer does not contain message data and the user application should
@@ -93,28 +93,21 @@ buffer,  &cw(errno) will be set to one of the following:
 &space
 
 &beg_dlist(.75i : ^&bold_font )
-&di(INVAL) Parameter(s) passed to the function were not valid.
+&ditem(INVAL) Parameter(s) passed to the function were not valid.
 
-&half_space
-&di(EBADF) The underlying message transport is unable to process the request.
+&ditem(EBADF) The underlying message transport is unable to process the request.
 
-&half_space
-&di(ENOTSUP) The underlying message transport is unable to process the request.
+&ditem(ENOTSUP) The underlying message transport is unable to process the request.
 
-&half_space
-&di(EFSM) The underlying message transport is unable to process the request.
+&ditem(EFSM) The underlying message transport is unable to process the request.
 
-&half_space
-&di(EAGAIN) The underlying message transport is unable to process the request.
+&ditem(EAGAIN) The underlying message transport is unable to process the request.
 
-&half_space
-&di(EINTR) The underlying message transport is unable to process the request.
+&ditem(EINTR) The underlying message transport is unable to process the request.
 
-&half_space
-&di(ETIMEDOUT) The underlying message transport is unable to process the request.
+&ditem(ETIMEDOUT) The underlying message transport is unable to process the request.
 
-&half_space
-&di(ETERM) The underlying message transport is unable to process the request.
+&ditem(ETERM) The underlying message transport is unable to process the request.
 &end_dlist
 
 &h2(EXAMPLE)

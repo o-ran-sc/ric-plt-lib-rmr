@@ -10,19 +10,19 @@
 RIC Message Router -- RMR
 ==========================
 
-
 .. toctree::
    :maxdepth: 1
    :caption: Documents:
+   :titlesonly:
 
-   overview.rst
    config-deploy.rst
    user-guide.rst
    developer-guide.rst
+   rt_tables.rst
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Misc:
 
    rel-notes.rst
@@ -31,6 +31,7 @@ RIC Message Router -- RMR
    :maxdepth: 1
    :caption: Manual Pages:
 
+   rmr.7.rst
    rmr_alloc_msg.3.rst
    rmr_bytes2meid.3.rst
    rmr_bytes2payload.3.rst

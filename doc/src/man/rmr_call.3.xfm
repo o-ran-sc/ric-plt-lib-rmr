@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ function from blocking forever.
 The timeout period is &bold(not) based on time (calls to clock are deemed too expensive
 for a low latency system level library), but instead the period is based on the number of
 received messages which are not the response.
-Using a non-time mechanism for &ital(timeout) prevents the async queue from filling
+Using a mechanism which is not time based for &ital(timeout) prevents the async queue from filling
 (which would lead to message drops) in an environment where there is heavy message traffic.
 
 &space
@@ -87,9 +87,9 @@ These values are reflected in the state field of the returned message.
 
 &half_space
 &beg_dlist(.75i : ^&bold_font )
-&di(RMR_OK) The call was successful and the message buffer references the response message.
-&half_space
-&di(RMR_ERR_CALLFAILED) The call failed and the value of &ital(errno,) as described below,
+&ditem(RMR_OK) The call was successful and the message buffer references the response message.
+
+&ditem(RMR_ERR_CALLFAILED) The call failed and the value of &ital(errno,) as described below,
     should be checked for the specific reason.
 &end_dlist
 
@@ -99,13 +99,13 @@ overall call processing was not successful.
 &half_space
 
 &beg_dlist(.75i : ^&bold_font )
-&di(ETIMEDOUT) Too many messages were queued before receiving the expected response
-&half_space
-&di(ENOBUFS)   The queued message ring is full, messages were dropped
-&half_space
-&di(EINVAL)     A parameter was not valid
-&half_space
-&di(EAGAIN)    The underlying message system was interrupted or the device was busy;
+&ditem(ETIMEDOUT) Too many messages were queued before receiving the expected response
+
+&ditem(ENOBUFS) The queued message ring is full, messages were dropped
+
+&ditem(EINVAL) A parameter was not valid
+
+&ditem(EAGAIN) The underlying message system was interrupted or the device was busy;
                the message was &bold(not) sent, and the user application should call
                this function with the message again.
 &end_dlist
