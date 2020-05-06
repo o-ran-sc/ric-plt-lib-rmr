@@ -40,7 +40,7 @@ if( BUILD_DOC )
 		if( NOT EXISTS ${tfm} )					# not yet built here, pull and build
 			# pull and build {X}fm tools needed to generate manpages
 			execute_process(
-				COMMAND "bash" "-c" "git clone https://github.com/ScottDaniels/xfm.git && cd xfm && mkdir .build && cd .build && cmake .. && make"
+				COMMAND "bash" "-c" "git clone https://gitlab.com/rouxware/xfm.git && cd xfm && mkdir .build && cd .build && cmake .. && make"
 				WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}
 			)
 			message( "+++ xfm  pulled and built" )
@@ -70,7 +70,7 @@ if( BUILD_DOC )
 		rmr_get_xact.3
 		rmr_init.3
 		rmr_init_trace.3
- 		rmr_mt_call.3
+		rmr_mt_call.3
 		rmr_mt_rcv.3
 		rmr_payload_size.3
 		rmr_rcv_msg.3
@@ -102,7 +102,7 @@ if( BUILD_DOC )
 	# for each source, build a specific command that runs tfm to generate the
 	# troff output as a gzipped file. Sed is needed to remove the leading blank
 	# that tfm likes to insert even if indention is 0. We also generate postscript
-	# markdown, plain ascii and rts output which are left in the build directory 
+	# markdown, plain ascii and rts output which are left in the build directory
 	# for the developer to use as needed.
 	#
 	foreach( nm IN LISTS man_names )

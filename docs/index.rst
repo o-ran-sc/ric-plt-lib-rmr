@@ -19,6 +19,7 @@ RIC Message Router -- RMR
    config-deploy.rst
    user-guide.rst
    developer-guide.rst
+   rt_tables.rst
 
 
 .. toctree::

@@ -29,14 +29,18 @@
 
 .if  ! _setup_im
 
+.** get lib, default to ..
 .gv e LIB lib
-.if ! lib
-    .dv lib ..
-.fi
+.dv lib &{lib!..}
+
+.hn off
+.ju on
 
 .** CAUTION:  xfm comparisons are reverse polish so  "a b ="  is true if a == b.
 .if pfm
     .im &{lib}/generic_ps.im
+	.cd 1 6.5i i=.75i
+	.pn on center noline f=%d
 .ei
     .gv e OUTPUT_TYPE ot
     .if "&ot" "txt" =

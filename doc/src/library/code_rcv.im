@@ -1,8 +1,8 @@
 
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 ==================================================================================
 .fi
 
-.** example sender code
+.** example sender code is pulled directly from the exaple directory
 
 &h2(Receiver Sample)
 The receiver code is even simpler than the sender code as it does not
@@ -29,24 +29,6 @@ the payload.
 
 &space
 
-&indent
 &ex_start
-rmr_mbuf_t* rbuf = NULL;
-void* mrc = rmr_init( listen_port, MAX_BUF_SZ, RMRFL_NOFLAGS );
-
-while( TRUE ) {
-    rbuf = rmr_rcv_msg( mrc, rbuf );    // reuse buffer on all but first loop
-    if( rbuf == NULL || rbuf->state != RMR_OK ) {
-        break;
-    }
-
-    fprintf( stdout, "mtype=%d sid=%d pay=%s\n",
-        rbuf->mtype, rbuf->sub_id, rbuf->payload );
-    sleep( delay_sec );
-}
-
-fprintf( stderr, "receive error\n" );
-rmr_close( mrc );
-
+.im  j=start_example ../../../examples/receiver.c
 &ex_end
-&uindent

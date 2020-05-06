@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ If the value passed in &cw(size) is less than or equal to 0, then the
 When &ital(size) is greater than zero, the message allocated will have at least
 the indicated number of bytes in the payload.
 There is no maximum size imposed by RMR, however the underlying system memory
-managerment (e.g. malloc) functions may impose a limit.
+management (e.g. malloc) functions may impose a limit.
 
 &space
 The &ital(ctx) parameter is the void context pointer that was returned by
@@ -75,6 +75,7 @@ typedef struct {
 &ex_end
 
 &space
+Where:
 &beg_dlist(.75i : ^&bold_font )
 &diitem(state)  Is the current buffer state.  Following a call to &cw(rmr_send_msg)
 the state indicates whether the buffer was successfully sent which determines
