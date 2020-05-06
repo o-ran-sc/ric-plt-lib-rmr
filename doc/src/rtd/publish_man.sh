@@ -23,7 +23,7 @@
 # scarper directory we will copy it over there.  We inject a title so that the
 # RTD scripts won't object.
 
-sdir="../../../docs"	# the scraper dir
+sdir="${RTD_SCRAPER_DIR:-../../../docs}"		# the scraper dir (allow for testing/alternate)
 
 if [[ ! -d $sdir ]]
 then
@@ -39,14 +39,14 @@ do
 		out=stuff/${x%.*}.rst
 		target=${sdir}/${out##*/}
 
-		INPUT_FILE=${x%%.*} GEN_TITLE=1 LIB=".." OUTPUT_TYPE=rst tfm ../man/$x stdout 2>/dev/null | sed 's/^ //' >$out 
+		INPUT_FILE=${x%%.*} GEN_TITLE=1 LIB=".." OUTPUT_TYPE=rst tfm ../man/$x stdout 2>/dev/null | sed 's/^ //' >$out
 		new_m5=$( md5sum $out | sed 's/ .*//' )
 		if [[ ! -f $target || $new_m5 != $( md5sum $target | sed 's/ .*//' ) ]]
 		then
+			echo "publishing to: ${target##*/}"
 			cp $out $target
 		fi
 
-		echo "${target##*/}"
 
 		rm $out
 	fi

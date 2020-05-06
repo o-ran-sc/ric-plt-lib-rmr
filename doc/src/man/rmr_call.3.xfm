@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ function from blocking forever.
 The timeout period is &bold(not) based on time (calls to clock are deemed too expensive
 for a low latency system level library), but instead the period is based on the number of
 received messages which are not the response.
-Using a non-time mechanism for &ital(timeout) prevents the async queue from filling
+Using a mechanism which is not time based for &ital(timeout) prevents the async queue from filling
 (which would lead to message drops) in an environment where there is heavy message traffic.
 
 &space

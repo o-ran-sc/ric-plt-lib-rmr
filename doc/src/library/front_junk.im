@@ -18,27 +18,54 @@
 .fi
 
 .if false
-	Title page, toc and license for page oriented output
+	Mnemonic:	front_junk.im
+	Abstract:	This will generate a title page, table of contents and
+				license/copyright page (between title page and toc).
+				It should only be embedded for postscript output
+
+				Expected to be defined before imbedding this:
+					doc_title
+					col_width
+					col_indent
+					pass
+					textfont
+					textsize
+					indent_size
+					toc_file
+
+				Optional vars that are used if set
+					doc_subtitle
+					orig_date
+
+	Date:		August 2019
+	Author:		E. Scott Daniels
 .fi
 
 
 .if ! _front_junk
+
+
 .sp 20
 .st 24
 .bc start
 &doc_title
 .br
-&doc_subtitle
+.if doc_subtitle
+	&doc_subtitle
+.fi
 .bc end
 .st &textsize
 
 .sp 25
-Original: 30 July 2019 .br
+.if orig_date
+	Original: &orig_date .br
+.fi
 .gv Date
 Revised: &_date
 .pa
 
 
+.** this will imbed the rtd licence to stuff licence things into rts output
 .im license.im
 .pa
 
@@ -48,13 +75,17 @@ Revised: &_date
 	.tc off
 	.pn on noline center roman 0
 
-	.im user.toc	.** initial page eject inside
+	.im &toc_file
 	.pa
+	.pn on 0
 .fi
 
-.** ensure this is restored after toc spits
+.** ensure these are restored after toc spits
 .if pfm
-	.cd 1 6.0i
+	.cd 1  &col_width i=&col_indent
+	.in &indent_size
+	.sf &textfont
+	.st &textsize
 .fi
 
 .dv _front_junk 1
