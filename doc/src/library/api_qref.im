@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -242,7 +242,8 @@ period expires (ms_to milliseconds), a message buffer is returned with
 the state set to &cw(RMR_ERR_TIMEOUT.)
 
 &proto_start
-rmr_mbuf_t*  rmr_tralloc_msg( void* context, int msize, int trsize, unsigned const char* data );
+rmr_mbuf_t*  rmr_tralloc_msg( void* context, int msize, int trsize,
+    unsigned const char* data );
 &proto_end
 Similar to the &func(rmr_alloc_msg) this function allocates a message
 buffer, and adds the referenced trace data to the buffer.  The new
@@ -254,9 +255,10 @@ void rmr_wh_close( void* vctx, int whid );
 This function closes an existing wormhole connection.
 
 &proto_start
-extern rmr_mbuf_t* rmr_wh_call( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg, int call_id, int max_wait );
+extern rmr_mbuf_t* rmr_wh_call( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg,
+    int call_id, int max_wait );
 &proto_end
-This provides the same synchronous &ital(procedure call) as the &cw(rmr_call()) function
+This provides the same synchronous &ital(procedure call) as the &func(rmr_call()) function
 provides, excerpt that the message is sent to a specific endpoint as defined by an
 open wormhole.
 
@@ -392,7 +394,8 @@ supplied are copied to the new buffer, and a reference to the new
 buffer is returned.
 
 &proto_start
-extern rmr_mbuf_t* rmr_realloc_payload( rmr_mbuf_t* old_msg, int new_len, int copy, int clone );
+extern rmr_mbuf_t* rmr_realloc_payload( rmr_mbuf_t* old_msg, int new_len,
+    int copy, int clone );
 &proto_end
 This function allows the user programme to realloc the payload with a
 larger length.

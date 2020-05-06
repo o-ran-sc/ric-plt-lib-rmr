@@ -22,46 +22,41 @@
 #				RTD file is created.
 
 cat <<endKat
-.im setup.im
-&h1(RMR Release Notes)
-The following is a list of release highlights for the core RMR library and 
-wrappers which are housed in the same repository.
-These are extracted directly from the CHANGES_*.txt files at the repo root; 
-please refer to those files for a completely up to date listing of
-API changes (as generated documents may lag).  
-&space
 
-The RMR repo houses two distinct release entities: the core RMR package
-and the python wrapper package.
-To avoid naming conflicts (tags mostly) The core package uses odd 
-major version numbers (e.g. 3.2.1) and the wrapper package uses even
-major version numbers. 
-The release notes are split into two sections; please be sure to 
-scroll to the section that is appropriate.
+.dv GEN_TITLE 1
+.dv doc_title RMR Release Notes
+.im setup.im
+.dh 1 u=off
+
+&h1(RMR Release Notes)
+The following is a list of release highlights for the RMR library.
+At one point in time the RMR repo also housed a wrapper library with a
+separate version and release cycle.
+This resulted in &ital(leap frogging) versions for each package; the
+RMR core library was assigned odd major numbers (e.g. 3.1.0).
+When the wrapper code was moved to a different repo the need to leap frog
+versions ceased, and beginning with version 4.0.0, the RMR versions should
+no longer skip.
+&space
 
 endKat
 
 for x in ../../../CHANGES*.txt
 do
-	case $x in 
-		*CORE*) printf "&h2(Core RMR Changes)\n" ;;
-		*)	printf "&h2(Wrapper Changes)\n" ;;
-	esac
+	sed 's/^/!/' $x | awk '
+		print_raw && /^!$/ {
+			printf( "&space\n\n" );
+			next
+		}
 
-	sed 's/^/!/' $x | awk ' 
-		print_raw && /^!$/ { 
-			printf( "&space\n\n" ); 
-			next 
-		} 
-	
 		{ gsub ( "!", "", $1 ) }
-	
+
 		$1 + 0 >= 2019 {
 			print_raw = 1
-			printf( "&h3(%s)\n", $0 )
-			next 
+			printf( "&h2(%s)\n", $0 )
+			next
 		}
-	
-		print_raw { print } 
+
+		print_raw { print }
 		' ###
 done

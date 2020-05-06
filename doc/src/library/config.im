@@ -62,28 +62,22 @@ application.  The following is a list of the environment variables
 which RMR recognises:
 
 &half_space
-.st 8p
 &indent
 &beg_dlist( 1.25i &ditext )
-	&di(RMR_BIND_IF)	The interface to bind to listen ports to. If not defined 0.0.0.0 (all interfaces) is assumed.
-	&half_space
+	&ditem(RMR_BIND_IF)	The interface to bind to listen ports to. If not defined 0.0.0.0 (all interfaces) is assumed.
 
-	&di(RMR_RTG_SVC)	The port RMR will listen on for route manager connections. If not defined 4561 is used.
-	&half_space
+	&ditem(RMR_RTG_SVC)	The port RMR will listen on for route manager connections. If not defined 4561 is used.
 
-	&di(RMR_SEED_RT)	Where RMR expects to find the name of the seed (static) route table. If not defined no static table is read.
-	&half_space
+	&ditem(RMR_SEED_RT)	Where RMR expects to find the name of the seed (static) route table. If not defined no static table is read.
 
-	&di(RMR_RTG_ISRAW)	If the value set to 0, RMR expects the route table manager messages to be messages with and RMR header.
+	&ditem(RMR_RTG_ISRAW)	If the value set to 0, RMR expects the route table manager messages to be messages with and RMR header.
 						If this is not defined messages are assumed to be "raw" (without an RMR header.
-	&half_space
 
-	&di(RMR_VCTL_FILE)	Provides a file which is used to set the verbose level of the route table collection thread.
+	&ditem(RMR_VCTL_FILE)	Provides a file which is used to set the verbose level of the route table collection thread.
 						The first line of the file is read and expected to contain an integer value to set the verbose level.
 						The value may be changed at any time and the route table thread will adjust accordingly.
-	&half_space
 
-	&di(RMR_SRC_NAMEONLY) If the value of this variable is greater than 0, RMR will not permit the IP address to be
+	&ditem(RMR_SRC_NAMEONLY) If the value of this variable is greater than 0, RMR will not permit the IP address to be
 						sent as the message source. Only the host name will be sent as the source in the message header.
 &end_dlist
 &uindent
@@ -104,16 +98,14 @@ RMR messages are written with one of three prefix strings:
 &half_space
 &indent
 &beg_dlist( .6i &ditext )
-	&di(^[CRI]) The event is of a critical nature and it is unlikely that RMR will continue to operate correctly if at all.
+	&ditem(^[CRI]) The event is of a critical nature and it is unlikely that RMR will continue to operate correctly if at all.
 				It is almost certain that immediate action will be needed to resolve the issue.
-	&half_space
 
-	&di(^[ERR]) The event is not expected and RMR is not able to handle it.  There is a small chance that continued operation
+	&ditem(^[ERR]) The event is not expected and RMR is not able to handle it.  There is a small chance that continued operation
 				will be negatively impacted.
 				Eventual action to diagnose and correct the issue will be necessary.
-	&half_space
 
-	&di(^[WRN]) The event was not expected by RMR, but can be worked round. Normal operation will continue, but it is recommended
+	&ditem(^[WRN]) The event was not expected by RMR, but can be worked round. Normal operation will continue, but it is recommended
 				that the cause of the problem be investigated.
 &end_dlist
 &space

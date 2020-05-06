@@ -1,8 +1,8 @@
 .** vim: ts=4 noet sw=42
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@
 .fi
 
 
+&indent
 &beg_dlist(.75i : ^&bold_font )
 &ditem(RMR_ASYNC_CONN) Allows the async connection mode to be turned off (by setting the
     value to 0). When set to 1, or missing from the environment, RMR will invoke the
@@ -37,13 +38,11 @@
     mode.  This will likely result in many "soft failures" (retry) until the connection
     is established, but allows the application to continue unimpeded should the
     connection be slow to set up.
-    &half_space
 
 &ditem(RMR_BIND_IF) This provides the interface that RMR will bind listen ports to, allowing
     for a single interface to be used rather than listening across all interfaces.
     This should be the IP address assigned to the interface that RMR should listen
     on, and if not defined RMR will listen on all interfaces.
-    &half_space
 
 &ditem(RMR_CTL_PORT)
     This variable defines the port that RMR should open for communications
@@ -79,7 +78,6 @@
     be defined.
     In the case where both variables are defined, RMR will behave exactly as is
     communicated with the variable's values.
-    &half_space
 
 &ditem(RMR_RTG_SVC)
     The value of this variable depends on the Route Manager in use.
@@ -92,12 +90,11 @@
     When the Route Manager is expecting RMR to connect and request a
     table update during initialisation, the variable should be the
     &cw(host:port) of the Route Manager process.
-    
+
     &space
     The &cw(RMR_CTL_PORT) variable (added with the support of sending table update
     requests to Route manager), controls the behaviour if this variable is not set.
     See the description of that variable for details.
-    &half_space
 
 &ditem(RMR_HR_LOG)
     By default RMR writes messages to standard error (incorrectly referred to as log messages)
@@ -105,7 +102,6 @@
     If this environment variable is set to 0, the format of standard error messages might
     be written in some format not easily read by humans.
     If missing, a value of 1 is assumed.
-    &half_space
 
 &ditem(RMR_LOG_VLEVEL)
     This is a numeric value which corresponds to the verbosity level used to limit messages
@@ -114,20 +110,23 @@
     The following is the current relationship between the value set on this variable and
     the messages written:
 
+	&half_space
+	&indent
     &beg_dlist(.25i : &bold_font )
         &ditem(0)    Off; no messages of any sort are written.
-        &half_space
+
         &ditem(1)    Only critical messages are written (default if this variable does not exist)
-        &half_space
+
         &ditem(2)    Errors and all messages written with a lower value.
-        &half_space
+
         &ditem(3)    Warnings and all messages written with a lower value.
-        &half_space
+
         &ditem(4)    Informational and all messages written with a lower value.
-        &half_space
-        &ditem(5)    Debugging mode -- all messages written, however this requires RMR to have been compiled with debugging support enabled.
+
+        &ditem(5)    Debugging mode -- all messages written, however this requires RMR to have
+						been compiled with debugging support enabled.
     &end_dlist
-    &half_space
+	&uindent
 
 &ditem(RMR_RTG_ISRAW)
     &bold(Deprecated.)
@@ -155,7 +154,7 @@
     the rmr_rts_msg() function to return a response to the sender. If not supplied
     RMR will use the hostname which in some container environments might not be
     routable.
-    &half_space
+    &space
     The value of this variable is also used for Route Manager messages which are
     sent via an RMR connection.
 
@@ -173,3 +172,4 @@
     additional warnings.
 
 &end_dlist
+&uindent
