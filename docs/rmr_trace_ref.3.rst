@@ -1,55 +1,59 @@
- 
- 
 .. This work is licensed under a Creative Commons Attribution 4.0 International License. 
 .. SPDX-License-Identifier: CC-BY-4.0 
 .. CAUTION: this document is generated from source in doc/src/rtd. 
 .. To make changes edit the source and recompile the document. 
 .. Do NOT make changes directly to .rst or .md files. 
  
- 
 ============================================================================================ 
 Man Page: rmr_trace_ref 
 ============================================================================================ 
  
-RMR Library Functions 
-============================================================================================ 
  
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
+
+
+1. RMR LIBRARY FUNCTIONS
+========================
+
+
+
+1.1. NAME
+---------
+
 rmr_trace_ref 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
+
+
+1.2. SYNOPSIS
+-------------
+
  
 :: 
-  
+ 
  #include <rmr/rmr.h>
  int rmr_trace_ref( rmr_mbuf_t* mbuf, int* sizeptr )
  
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_trace_ref function returns a pointer to the trace 
+
+
+1.3. DESCRIPTION
+----------------
+
+The ``rmr_trace_ref`` function returns a pointer to the trace 
 area in the message, and optionally populates the user 
 programme supplied size integer with the trace area size, if 
 *sizeptr* is not nil. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
+
+
+1.4. RETURN VALUE
+-----------------
+
 On success, a void pointer to the trace area of the message 
 is returned. A nil pointer is returned if the message has no 
 trace data area allocated, or if the message itself is 
 invalid. 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
+
+
+1.5. SEE ALSO
+-------------
+
 rmr_alloc_msg(3), rmr_tralloc_msg(3), rmr_bytes2xact(3), 
 rmr_bytes2meid(3), rmr_call(3), rmr_free_msg(3), 
 rmr_get_rcvfd(3), rmr_get_trlen(3), rmr_init(3), 

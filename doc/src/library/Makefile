@@ -15,20 +15,32 @@
 #   limitations under the License.
 #==================================================================================
 
-# most things here require a two pass build, but these might be useful
+XP = XFM_PATH=".:.."
+P1 = $(XP) XFM_PASS=1
+P2 = $(XP) XFM_PASS=2
 
+# two pass builds in order to forward reference variables for figures and to insert
+# table of contents in postscript output
+#
+#%.ps: %.xfm
+#	pfm $< $@
 %.ps: %.xfm
-	pfm $< $@
+	$(P1) pfm $< /dev/null
+	$(P2) pfm $< $@
 
 %.md: %.xfm
-	OUTPUT_TYPE=markdown tfm $< stdout | sed 's/^ //' >$@
+	$(P1) OUTPUT_TYPE=markdown tfm $< /dev/null
+	$(P2) OUTPUT_TYPE=markdown tfm $< stdout | sed 's/^ //' >$@
 
+#%.rst: %.xfm
+#	OUTPUT_TYPE=rst tfm $< stdout | sed 's/^ //' >$@
 %.rst: %.xfm
-	OUTPUT_TYPE=rst tfm $< stdout | sed 's/^ //' >$@
+	$(P1) OUTPUT_TYPE=rst tfm $< /dev/null
+	$(P2) OUTPUT_TYPE=rst tfm $< stdout | sed 's/^ //' >$@
 
 %.txt: %.xfm
-	OUTPUT_TYPE=txt tfm  $< stdout
-	OUTPUT_TYPE=txt tfm  $< $@
+	$(P1) OUTPUT_TYPE=txt tfm  $< /dev/null
+	$(P2) OUTPUT_TYPE=txt tfm  $< $@
 
 %.pdf: %.ps
 	gs -dQUIET -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -sOutputFile=$@ $<
@@ -41,20 +53,20 @@ all:	user.pdf  user.txt user.rst user.md
 
 # two pass build for pfm to allow for toc insertion
 user.ps: $(src) $(code_src)
-	XFM_PASS=1 pfm $< /dev/null
-	XFM_PASS=2 pfm $< $@
+	$(P1) pfm $< /dev/null
+	$(P2) pfm $< $@
 
 user.md: $(src) $(code_src)
-	OUTPUT_TYPE=markdown XFM_PASS=1 tfm $< /dev/null
-	OUTPUT_TYPE=markdown XFM_PASS=2 tfm $< | sed 's/^ //' >$@
+	$(P1) OUTPUT_TYPE=markdown tfm $< /dev/null
+	$(P2) OUTPUT_TYPE=markdown tfm $< | sed 's/^ //' >$@
 
 user.rst: $(src) $(code_src)
-	OUTPUT_TYPE=rst XFM_PASS=1 tfm $< /dev/null
-	GEN_TITLE=1 OUTPUT_TYPE=rst XFM_PASS=2 tfm $< | sed 's/^ //' >$@
+	$(P1) OUTPUT_TYPE=rst tfm $< /dev/null
+	$(P2) OUTPUT_TYPE=rst GEN_TITLE=1 tfm $< | sed 's/^ //' >$@
 
 user.txt: $(src) $(code_src)
-	OUTPUT_TYPE=txt XFM_PASS=1 tfm $< /dev/null
-	OUTPUT_TYPE=txt XFM_PASS=2 tfm $< $@
+	$(P1) OUTPUT_TYPE=txt tfm $< /dev/null
+	$(P2) OUTPUT_TYPE=txt tfm $< $@
 
 # intermeidate junk that might straggle
 clean:

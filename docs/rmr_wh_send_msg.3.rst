@@ -1,41 +1,43 @@
- 
- 
 .. This work is licensed under a Creative Commons Attribution 4.0 International License. 
 .. SPDX-License-Identifier: CC-BY-4.0 
 .. CAUTION: this document is generated from source in doc/src/rtd. 
 .. To make changes edit the source and recompile the document. 
 .. Do NOT make changes directly to .rst or .md files. 
  
- 
 ============================================================================================ 
 Man Page: rmr_wh_send_msg 
 ============================================================================================ 
  
-RMR Library Functions 
-============================================================================================ 
  
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
+
+
+1. RMR LIBRARY FUNCTIONS
+========================
+
+
+
+1.1. NAME
+---------
+
 rmr_wh_send_msg 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
+
+
+1.2. SYNOPSIS
+-------------
+
  
 :: 
-  
+ 
  #include <rmr/rmr.h>
  rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t id, rmr_mbuf_t* msg );
  
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_wh_send_msg function accepts a message buffer from 
-the user application and attempts to send it using the 
+
+
+1.3. DESCRIPTION
+----------------
+
+The ``rmr_wh_send_msg`` function accepts a message buffer 
+from the user application and attempts to send it using the 
 wormhole ID provided (id). Unlike *rmr_send_msg,* this 
 function attempts to send the message directly to a process 
 at the other end of a wormhole which was created with 
@@ -48,29 +50,23 @@ The message buffer (msg) used to send is the same format as
 used for regular RMR send and reply to sender operations, 
 thus any buffer allocated by these means, or calls to 
 *rmr_rcv_msg()* can be passed to this function. 
- 
-Retries 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
+
+
+1.4. Retries
+------------
+
 The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
  
  
- 
 1. 
-   
   The message is sent without error 
    
- 
 2. 
-   
   The underlying transport reports a *hard* failure 
    
- 
 3. 
-   
   The maximum number of retry loops has been attempted 
- 
  
 A retry loop consists of approximately 1000 send attempts 
 **without** any intervening calls to *sleep()* or *usleep().* 
@@ -80,10 +76,11 @@ application. This value can be set at any point after RMR
 initialisation using the *rmr_set_stimeout()* function 
 allowing the user application to completely disable retires 
 (set to 0), or to increase the number of retry loops. 
- 
-Transport Level Blocking 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
- 
+
+
+1.5. Transport Level Blocking
+-----------------------------
+
 The underlying transport mechanism used to send messages is 
 configured in *non-blocking* mode. This means that if a 
 message cannot be sent immediately the transport mechanism 
@@ -102,138 +99,107 @@ RMR can do to avoid or mitigate these other than by allowing
 RMR to retry the send operation, and even then it is possible 
 (e.g., during connection reattempts), that a single retry 
 loop is not enough to guarantee a successful send. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
+
+
+1.6. RETURN VALUE
+-----------------
+
 On success, a new message buffer, with an empty payload, is 
 returned for the application to use for the next send. The 
 state in this buffer will reflect the overall send operation 
-state and should be RMR_OK. 
+state and should be ``RMR_OK.`` 
  
 If the state in the returned buffer is anything other than 
-RMR_OK, the user application may need to attempt a 
+``RMR_OK,`` the user application may need to attempt a 
 retransmission of the message, or take other action depending 
-on the setting of errno as described below. 
+on the setting of ``errno`` as described below. 
  
 In the event of extreme failure, a nil pointer is returned. 
-In this case the value of errno might be of some use, for 
+In this case the value of ``errno`` might be of some use, for 
 documentation, but there will be little that the user 
 application can do other than to move on. 
- 
-ERRORS 
--------------------------------------------------------------------------------------------- 
- 
+
+
+1.7. ERRORS
+-----------
+
 The following values may be passed back in the *state* field 
 of the returned message buffer. 
  
  
- 
 RMR_ERR_WHID 
-   
   The wormhole ID passed in was not associated with an open 
   wormhole, or was out of range for a valid ID. 
- 
 RMR_ERR_NOWHOPEN 
-   
   No wormholes exist, further attempt to validate the ID are 
   skipped. 
- 
 RMR_ERR_BADARG 
-   
   The message buffer pointer did not refer to a valid 
   message. 
- 
 RMR_ERR_NOHDR 
-   
   The header in the message buffer was not valid or 
   corrupted. 
  
- 
-The following values may be assigned to errno on failure. 
- 
+The following values may be assigned to ``errno`` on failure. 
  
 INVAL 
-   
   Parameter(s) passed to the function were not valid, or the 
   underlying message processing environment was unable to 
   interpret the message. 
    
- 
 ENOKEY 
-   
   The header information in the message buffer was invalid. 
    
- 
 ENXIO 
-   
   No known endpoint for the message could be found. 
    
- 
 EMSGSIZE 
-   
   The underlying transport refused to accept the message 
   because of a size value issue (message was not attempted 
   to be sent). 
    
- 
 EFAULT 
-   
   The message referenced by the message buffer is corrupt 
   (nil pointer or bad internal length). 
    
- 
 EBADF 
-   
   Internal RMR error; information provided to the message 
   transport environment was not valid. 
    
- 
 ENOTSUP 
-   
   Sending was not supported by the underlying message 
   transport. 
    
- 
 EFSM 
-   
   The device is not in a state that can accept the message. 
    
- 
 EAGAIN 
-   
   The device is not able to accept a message for sending. 
   The user application should attempt to resend. 
    
- 
 EINTR 
-   
   The operation was interrupted by delivery of a signal 
   before the message was sent. 
    
- 
 ETIMEDOUT 
-   
   The underlying message environment timed out during the 
   send process. 
    
- 
 ETERM 
-   
   The underlying message environment is in a shutdown state. 
- 
- 
-EXAMPLE 
--------------------------------------------------------------------------------------------- 
- 
+
+
+1.8. EXAMPLE
+------------
+
 The following is a simple example of how the a wormhole is 
-created (rmr_wh_open) and then how rmr_wh_send_msg function 
-is used to send messages. Some error checking is omitted for 
-clarity. 
+created (rmr_wh_open) and then how ``rmr_wh_send_msg`` 
+function is used to send messages. Some error checking is 
+omitted for clarity. 
  
  
 :: 
-  
+ 
  #include <rmr/rmr.h>    // system headers omitted for clarity
  int main() {
     rmr_whid_t whid = -1;   // wormhole id for sending
@@ -264,11 +230,11 @@ clarity.
     }
  }
  
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
+
+
+1.9. SEE ALSO
+-------------
+
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
 rmr_payload_size(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 
 rmr_rts_msg(3), rmr_ready(3), rmr_fib(3), rmr_has_str(3), 
