@@ -35,6 +35,8 @@
 	.dv lib ..
 .fi
 
+.hn off
+
 .** CAUTION:  xfm comparisons are reverse polish so  "a b ="  is true if a == b.
 .if pfm
 	.dv ot postscript
@@ -52,6 +54,9 @@
 	.fi
 	.if "&ot" "troff" =
 		.im &{lib}/roff.im
+	.fi
+	.if "&ot" "html" =
+		.im &{lib}/html.im
 	.fi
 .fi
 

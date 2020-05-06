@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -86,49 +86,39 @@ buffer.
 
 &space
 &beg_dlist(.75i : ^&bold_font )
-&di(RMR_ERR_BADARG) The message buffer pointer did not refer to a valid message.
-&di(RMR_ERR_NOHDR)  The header in the message buffer was not valid or corrupted.
-&di(RMR_ERR_NOENDPT)  The message type in the message buffer did not map to a known endpoint.
-&di(RMR_ERR_SENDFAILED)  The send failed; &cw(errno) has the possible reason.
+&ditem(RMR_ERR_BADARG) The message buffer pointer did not refer to a valid message.
+&ditem(RMR_ERR_NOHDR)  The header in the message buffer was not valid or corrupted.
+&ditem(RMR_ERR_NOENDPT)  The message type in the message buffer did not map to a known endpoint.
+&ditem(RMR_ERR_SENDFAILED)  The send failed; &cw(errno) has the possible reason.
 &end_dlist
 
 &space
 The following values may be assigned to &cw(errno) on failure.
+
 &beg_dlist(.75i : ^&bold_font )
-&di(INVAL) Parameter(s) passed to the function were not valid, or the underlying message processing environment was unable to interpret the message.
+&ditem(INVAL) Parameter(s) passed to the function were not valid, or the underlying message processing environment was unable to interpret the message.
 
-&half_space
-&di(ENOKEY) The header information in the message buffer was invalid.
+&ditem(ENOKEY) The header information in the message buffer was invalid.
 
-&half_space
-&di(ENXIO) No known endpoint for the message could be found.
+&ditem(ENXIO) No known endpoint for the message could be found.
 
-&half_space
-&di(EMSGSIZE) The underlying transport refused to accept the message because of a size value issue (message was not attempted to be sent).
+&ditem(EMSGSIZE) The underlying transport refused to accept the message because of a size value issue (message was not attempted to be sent).
 
-&half_space
-&di(EFAULT) The message referenced by the message buffer is corrupt (nil pointer or bad internal length).
+&ditem(EFAULT) The message referenced by the message buffer is corrupt (nil pointer or bad internal length).
 
-&half_space
-&di(EBADF) Internal RMR error; information provided to the message transport environment was not valid.
+&ditem(EBADF) Internal RMR error; information provided to the message transport environment was not valid.
 
-&half_space
-&di(ENOTSUP) Sending was not supported by the underlying message transport.
+&ditem(ENOTSUP) Sending was not supported by the underlying message transport.
 
-&half_space
-&di(EFSM) The device is not in a state that can accept the message.
+&ditem(EFSM) The device is not in a state that can accept the message.
 
-&half_space
-&di(EAGAIN) The device is not able to accept a message for sending. The user application should attempt to resend.
+&ditem(EAGAIN) The device is not able to accept a message for sending. The user application should attempt to resend.
 
-&half_space
-&di(EINTR) The operation was interrupted by delivery of a signal before the message was sent.
+&ditem(EINTR) The operation was interrupted by delivery of a signal before the message was sent.
 
-&half_space
-&di(ETIMEDOUT) The underlying message environment timed out during the send process.
+&ditem(ETIMEDOUT) The underlying message environment timed out during the send process.
 
-&half_space
-&di(ETERM) The underlying message environment is in a shutdown state.
+&ditem(ETERM) The underlying message environment is in a shutdown state.
 &end_dlist
 
 &h2(EXAMPLE)

@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,41 +21,86 @@
 	Mnemonic:	setup.im
 	Abstract:	Look at environment variables and pull in the correct setup prep
 				imbed file based on the desired output type (when running tfm).
-				Obviously, when running pfm we are always generating postscript
-				so this isn't really doing much.
+
+				This also sets up the front junk (table of contents, copyright page
+				and page numbering) when generating postscript. For non-postscript
+				output a licence/caution are added if the output type supports
+				comments.  Document title is also added.
+
+				These variables are expected to be defined:
+					pass (current parsing pass over the source)
+
+				See front_junk.im for the list of variables it expects.
+
 	Date:		29 July 2019
 .fi
 
+
+.if ! _setup_im
 
 .gv e LIB lib
 .if ! lib
 	.dv lib ..
 .fi
 
-.** sane default for everything except rst
-.dv col_width 6.5i
+.if ! ot
+	.gv e OUTPUT_TYPE ot
+.fi
 
-.** CAUTION:  xfm comparisons are reverse polish so  "a b ="  is true if a == b.
+.** sane default for everything except rst and markdown which override later
+.dv col_width 6.5i
+.dv col_indent .75i
+.dv indent_size .5i
+.dv line_size 6i
+.hn off
+.dv col_width 7i
+
+.dv ditext Helvetica-bold
 .if pfm
 	.im &{lib}/generic_ps.im
+	.dv lic1 n
+	.dv lic2 m
 .ei
+	.dv lic1 *
+	.dv lic2 +
+
 	.gv e OUTPUT_TYPE ot
 
+	.** CAUTION:  xfm comparisons are reverse polish so  "a b ="  is true if a == b.
 	.if "&ot" "txt" =
 		.im &{lib}/txt.im
 	.fi
 	.if "&ot" "rst" =
-		.** bleeding rst needs bullet lists to have no line breaks
-		.dv col_width 20i
+		.if &reverse_titles 1 =
+			.** for some RST output reversing disambiguates the generated document list
+			.dv _hold &doc_title
+			.dv doc_title &doc_subtitle
+			.dv doc_subtitle &_hold
+		.fi
+
+		.dv col_indent 0i
+		.dv indent_size 0i
 		.im &{lib}/rst.im
 	.fi
 	.if "&ot" "markdown" =
+		.dv col_indent 0i
+		.dv indent_size 0i
 		.im &{lib}/markdown.im
 	.fi
 	.if "&ot" "troff" =
 		.im &{lib}/roff.im
 	.fi
+	.if "&ot" "html" =
+		.im &{lib}/html.im
+	.fi
 .fi
+
+.** do not force header level 1s to all upper case
+.dh 1 u=off
+
+.cd 1 &col_width i=&col_indent
+.in &indent_size
+.ll &line_size
 
 .** set up for an index when using pfm and snare file is defined
 .if pfm
@@ -74,4 +119,43 @@
 	.fi
 .fi
 
+.if &pass 2 =
+	.** two pass mode -- pull in variables captured during pass 1 for forward references
+	.im p1var_setup.ca
+.ei
+	.** clear the capture file if it was there (end must be in col 0)
+	.ca start p1var_setup.ca
+.ca end
+.fi
 
+.gv e GEN_TITLE gen_title
+.if "&gen_title" "1" =
+	.im ../rtd/gen_title.im
+.fi
+
+
+.** func allows us to force an index entry for the function without having to
+.** define function names in the capture file. func is a bit odd; if punct
+.** needs to be added, it must be supplied as the second .** parm because
+.** we add () to the first. E.g. &func(foo_bar:.) will add a full stop.
+.**
+.if pfm
+	.dv func .ix force ${1} ^:  ^&cw(${1}()$2 )
+.ei
+	.dv func ^&cw(${1}()$2)
+.fi
+
+.** license/copyright, table of contents, title page, start index capture
+.im front_junk.im
+
+.if pfm
+	.** page numbering
+	.pn on noline center f=%d 0
+.fi
+
+.** work around bug until change made (RouxWare issue #4)
+.if tfm
+	.in 7p
+.fi
+
+.dv _setup_im

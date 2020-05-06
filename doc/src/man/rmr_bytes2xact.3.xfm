@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -47,9 +47,8 @@ int rmr_bytes2xact( rmr_mbuf_t* mbuf, unsigned char* src, int len )
 The &cw(rmr_bytes2xact) function will copy up to &ital(len) bytes from &ital(src) to the
 transaction ID (xaction) field in the message.
 The field is a fixed length, gated by the constant &cw(RMR_MAX_XID) and if len is larger
-than this value, only RMR_MAX_XID bytes will actually be copied.
+than this value, only &cw(RMR_MAX_XID) bytes will actually be copied.
 
-&beg_dlist(.75i : ^&bold_font )
 &h2(RETURN VALUE)
 On success, the actual number of bytes copied is returned, or -1 to indicate a hard error.
 If the length is less than 0, or not the same as length passed in, &cw(errno) is set
@@ -59,12 +58,11 @@ to one of the errors described in the &ital(Errors) section.
 If the returned length does not match the length passed in, &cw(errno) will be set to one
 of the following constants with the meaning listed below.
 
-&half_space
-&di(EINVAL) The message, or an internal portion of the message, was corrupted or the pointer was invalid.
+&beg_dlist(1i : &bold_font )
+	&ditem(EINVAL) The message, or an internal portion of the message, was corrupted or the pointer was invalid.
 
-&half_space
-&di(EOVERFLOW) The length passed in was larger than the maximum length of the field; only a portion of
-    the source bytes were copied.
+	&ditem(EOVERFLOW) The length passed in was larger than the maximum length of the field; only a portion of
+	the source bytes were copied.
 &end_dlist
 
 &h2(EXAMPLE)

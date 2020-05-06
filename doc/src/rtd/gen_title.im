@@ -29,6 +29,7 @@
 	Date:		10 April 2020
 .fi
 
+.** special man page title generator
 .gv e INPUT_FILE in
 .if in
 	.if ! doc_title
@@ -36,6 +37,7 @@
 	.fi
 .fi
 
+.** add license to the document as a comment; where possible
 .im license.im
 
 .gv e OUTPUT_TYPE ot
@@ -50,17 +52,29 @@
 			&doc_subtitle .br
 			&many_dashes .br
 		.fi
-	.ei
-		.sf Helvetica
-		.sp 5
-		.st 18
-		.ce &doc_title
-		.st 12
-		.if doc_subtitle
-			.ce &doc_subtitle
-		.fi
-		.st &textsize
-		.sf &txtfont
 		.sp 2
+	.ei
+		if pfm
+			.sf Helvetica-bold
+			.sp 5
+			.st 18
+			.ce &doc_title
+			.st 12
+			.if doc_subtitle
+				.ce &doc_subtitle
+			.fi
+			.st &textsize
+			.sf &txtfont
+			.sp 2
+		.ei
+			.sp 1
+			.ce &doc_title
+			.br
+			.if doc_subtitle
+				.ce &doc_subtitle
+			.fi
+
+			.sp 2
+		.fi
 	.fi
 .fi
