@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ return to sender and wormhole functions.
 
 &h2(The Call Function)
 The RMR function &func(rmr_call) sends a message in the exact same
-manner as the &cw(rmr_send_msg()) function, with the endpoint
+manner as the &func(rmr_send_msg()) function, with the endpoint
 selection based on the message key.  But unlike the send function,
 &func(rmr_call) will block and wait for a response from the
 application that is selected to receive the message.  The matching
@@ -64,7 +64,6 @@ information and use that to select the connection on which to write
 the response.
 
 &h3(Multi-threaded Calls)
-
 The basic call mechanism described above is &bold(not) thread safe, as
 it is not possible to guarantee that a response message is delivered
 to the correct thread.  The RMR function &func(rmr_mt_call) accepts an
@@ -72,19 +71,7 @@ additional parameter which identifies the calling thread in order to
 ensure that the response is delivered properly.  In addition, the
 application must specifically initialise the multi-threaded call
 environment by passing the &cw(RMRFL_MTCALL) flag as an option to the
-&func(rmr_init) function &note .sm .
-.if pfm
-.dv cnopts l=&cn_line_len i=&cn_indent
-.dv cncmd .cn start &cnopts &atbot Times-roman 8p .7i
-.ei
-.dv cncmd .cn start &atbot Times-roman 8p .7i
-.fi
-
-&cncmd
-	There is additional overhead to support multi-threaded call as
-	a special listener thread must be used in order to deliver
-	responses to the proper application thread.
-.cn end
+&func(rmr_init) function.
 
 &space
 One advantage of the multi-threaded call capability in RMR is the fact

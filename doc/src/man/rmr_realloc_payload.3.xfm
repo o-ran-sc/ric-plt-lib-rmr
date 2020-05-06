@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ These value of &ital(errno) will reflect the error condition if a nil pointer is
 &di(ENOMEM) Memory allocation of the new payload failed.
 &half_space
 
-&di(EINVAL) The pointer passed in was nil, or refrenced an invalid message, or the required
+&di(EINVAL) The pointer passed in was nil, or referenced an invalid message, or the required
     length was not valid.
 &end_dlist
 

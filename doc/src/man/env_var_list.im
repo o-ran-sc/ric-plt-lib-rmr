@@ -1,8 +1,8 @@
 .** vim: ts=4 noet sw=42
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@
     When the Route Manager is expecting RMR to connect and request a
     table update during initialisation, the variable should be the
     &cw(host:port) of the Route Manager process.
-    
+
     &space
     The &cw(RMR_CTL_PORT) variable (added with the support of sending table update
     requests to Route manager), controls the behaviour if this variable is not set.
