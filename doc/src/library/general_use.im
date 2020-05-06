@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ with this port.  If the port is already in use RMR will report a
 failure; the application will need to reinitialise with a different
 port number, abort, or take some other action appropriate for the
 application.
-.sp
+&space
+
 In addition to creating a TCP listen port, RMR will start a process
 thread which will be responsible for receiving dynamic updates to the
 route table.  This thread also causes a TCP listen port to be opened
@@ -173,8 +174,8 @@ type and subscription ID fields.  The buffer must be preallocated in
 order to allow the underlying transport mechanism to allocate the
 payload space from its internal memory pool; this eliminates multiple
 copies as the message is sent, and thus is more efficient.
+&space
 
-.sp
 If a message buffer has been received, and the application wishes to
 use the buffer to send a response, or to forward the buffer to another
 application, a new buffer does &bold(not) need to be allocated.  The
@@ -188,37 +189,33 @@ The application has direct access to several of the message buffer
 fields, and should set them appropriately.
 &half_space
 &indent
-&beg_dlist( 1i &ditext )
-	&di(len) This is the number of bytes that the application
-		 	placed into the payload. Setting length to 0
+&beg_dlist( 1i &ditext : : 15,80 )
+	&ditem(len) This is the number of bytes that the application
+			placed into the payload. Setting length to 0
 			is allowed, and length may be less than the
 			allocated payload size.
 
-	&half_space
-	&di(mtype) The message type that RMR will use to determine the
-		   	endpoint used as the target of the send.
+	&ditem(mtype) The message type that RMR will use to determine the
+			endpoint used as the target of the send.
 
-	&half_space
-	&di(sub_id) The subscription ID if the message is to be routed
-		    	based on the combination of message type and
+	&ditem(sub_id) The subscription ID if the message is to be routed
+			based on the combination of message type and
 			subscription ID. If no subscription ID is
 			valid for the message, the application should
 			set the field with the RMR constant
 			&cw(RMR_VOID_SUBID.)
 
-	&half_space
-	&di(payload) The application should obtain the reference
-		     	(pointer) to the payload from the message
+	&ditem(payload) The application should obtain the reference
+			(pointer) to the payload from the message
 			buffer and place any data into the payload.
 			The application is responsible for ensuring
 			that the maximum payload size is not exceeded.
 			The application may obtain the maximum size
 			via the &func(rmr_payload_size:) function.
 
-	&half_space
-	&di(trace data) Optionally, the application may add trace
-		  	information to the message buffer.
-			
+	&ditem(trace data) Optionally, the application may add trace
+			 information to the message buffer.
+
 &end_dlist
 &space
 &uindent
