@@ -5,6 +5,10 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 May 06; version 4.0.5
+	Fix the bug in SI95 receive message management semaphore count
+	issue. (RIC-355)
+
 2020 April 29; version 4.0.4
 	Fix the traffic steering message type constants (again) (RIC-342)
 
