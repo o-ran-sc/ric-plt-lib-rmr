@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -104,56 +104,40 @@ and a brief description of their meaning.
 .st 8p
 &indent
 &beg_dlist( 1.5i &ditext )
-	&di(RMR_OK) 			state is good; operation finished successfully
-	&half_space
+	&ditem(RMR_OK) 			state is good; operation finished successfully
 
-	&di(RMR_ERR_BADARG)		argument passed to function was unusable
-	&half_space
+	&ditem(RMR_ERR_BADARG)		argument passed to function was unusable
 
-	&di(RMR_ERR_NOENDPT)	send/call could not find an endpoint based on msg type
-	&half_space
+	&ditem(RMR_ERR_NOENDPT)	send/call could not find an endpoint based on msg type
 
-	&di(RMR_ERR_EMPTY)		msg received had no payload; attempt to send an empty message
-	&half_space
+	&ditem(RMR_ERR_EMPTY)		msg received had no payload; attempt to send an empty message
 
-	&di(RMR_ERR_NOHDR)		message didn't contain a valid header
-	&half_space
+	&ditem(RMR_ERR_NOHDR)		message didn't contain a valid header
 
-	&di(RMR_ERR_SENDFAILED) send failed; errno may contain the transport provider reason
-	&half_space
+	&ditem(RMR_ERR_SENDFAILED) send failed; errno may contain the transport provider reason
 
-	&di(RMR_ERR_CALLFAILED) unable to send the message for a call function; errno may contain the transport provider reason
-	&half_space
+	&ditem(RMR_ERR_CALLFAILED) unable to send the message for a call function; errno may contain the transport provider reason
 
-	&di(RMR_ERR_NOWHOPEN)	no wormholes are open
-	&half_space
+	&ditem(RMR_ERR_NOWHOPEN)	no wormholes are open
 
-	&di(RMR_ERR_WHID)		the wormhole id provided was invalid
-	&half_space
+	&ditem(RMR_ERR_WHID)		the wormhole id provided was invalid
 
-	&di(RMR_ERR_OVERFLOW)	operation would have busted through a buffer/field size
-	&half_space
+	&ditem(RMR_ERR_OVERFLOW)	operation would have busted through a buffer/field size
 
-	&di(RMR_ERR_RETRY)		request (send/call/rts) failed, but caller should retry (EAGAIN for wrappers)
-	&half_space
+	&ditem(RMR_ERR_RETRY)		request (send/call/rts) failed, but caller should retry (EAGAIN for wrappers)
 
-	&di(RMR_ERR_RCVFAILED)	receive failed (hard error)
-	&half_space
+	&ditem(RMR_ERR_RCVFAILED)	receive failed (hard error)
 
-	&di(RMR_ERR_TIMEOUT)	response message not received in a reasonable amount of time
-	&half_space
+	&ditem(RMR_ERR_TIMEOUT)	response message not received in a reasonable amount of time
 
-	&di(RMR_ERR_UNSET)		the message hasn't been populated with a transport buffer
-	&half_space
+	&ditem(RMR_ERR_UNSET)		the message hasn't been populated with a transport buffer
 
-	&di(RMR_ERR_TRUNC)		length in the received buffer is longer than the size of the allocated payload,
+	&ditem(RMR_ERR_TRUNC)		length in the received buffer is longer than the size of the allocated payload,
 							received message likely truncated (length set by sender could be wrong, but we can't know that)
-	&half_space
 
-	&di(RMR_ERR_INITFAILED) initialisation of something (probably message) failed
-	&half_space
+	&ditem(RMR_ERR_INITFAILED) initialisation of something (probably message) failed
 
-	&di(RMR_ERR_NOTSUPP)	the request is not supported, or RMR was not initialised for the request
+	&ditem(RMR_ERR_NOTSUPP)	the request is not supported, or RMR was not initialised for the request
 &end_dlist
 &uindent
 .st &textsize

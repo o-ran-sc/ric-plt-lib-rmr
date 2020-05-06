@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -99,21 +99,17 @@ These values are reflected in the state field of the returned message.
 
 &half_space
 &beg_dlist(.75i : ^&bold_font )
-&di(RMR_OK) The call was successful and the message buffer references the response message.
+&ditem(RMR_OK) The call was successful and the message buffer references the response message.
 
-&half_space
-&di(RMR_ERR_BADARG) An argument passed to the function was invalid.
+&ditem(RMR_ERR_BADARG) An argument passed to the function was invalid.
 
-&half_space
-&di(RMR_ERR_CALLFAILED) The call failed and the value of &ital(errno,) as described below,
+&ditem(RMR_ERR_CALLFAILED) The call failed and the value of &ital(errno,) as described below,
     should be checked for the specific reason.
 
-&half_space
-&di(RMR_ERR_NOENDPT) An endpoint associated with the message type could not be found in the
+&ditem(RMR_ERR_NOENDPT) An endpoint associated with the message type could not be found in the
     route table.
 
-&half_space
-&di(RMR_ERR_RETRY) The underlying transport mechanism was unable to accept the message
+&ditem(RMR_ERR_RETRY) The underlying transport mechanism was unable to accept the message
     for sending. The user application can retry the call operation if appropriate to
     do so.
 
@@ -125,16 +121,13 @@ overall call processing was not successful.
 &half_space
 
 &beg_dlist(.75i : ^&bold_font )
-&di(ETIMEDOUT) Too many messages were queued before receiving the expected response
+&ditem(ETIMEDOUT) Too many messages were queued before receiving the expected response
 
-&half_space
-&di(ENOBUFS)   The queued message ring is full, messages were dropped
+&ditem(ENOBUFS)   The queued message ring is full, messages were dropped
 
-&half_space
-&di(EINVAL)     A parameter was not valid
+&ditem(EINVAL)     A parameter was not valid
 
-&half_space
-&di(EAGAIN)    The underlying message system wsa interrupted or the device was busy;
+&ditem(EAGAIN)    The underlying message system wsa interrupted or the device was busy;
     the message was &bold(not) sent, and user application should call
     this function with the message again.
 &end_dlist

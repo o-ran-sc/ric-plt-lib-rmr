@@ -20,7 +20,7 @@
     Mnemonic    rmr_set_fack.3.xfm
     Abstract    The manual page for the set fast ack function.
     Author      E. Scott Daniels
-    Date        19 Fabruary 2020
+    Date        19 February 2020
 .fi
 
 .gv e LIB lib

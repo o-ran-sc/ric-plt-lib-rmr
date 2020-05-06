@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -94,24 +94,20 @@ values:
 &space
 
 &beg_dlist(.75i : ^&bold_font )
-&di(RMR_OK) The message was received without error.
+&ditem(RMR_OK) The message was received without error.
 
-&half_space
-&di(RMR_ERR_BADARG) A parameter passed to the function was not valid (e.g. a nil pointer).
+&ditem(RMR_ERR_BADARG) A parameter passed to the function was not valid (e.g. a nil pointer).
 
 indicate either &cw(RMR_OK) or
 &cw(RMR_ERR_EMPTY) if an empty message was received.
 
-&half_space
-&di(RMR_ERR_EMPTY) The message received had no associated data. The length of the
+&ditem(RMR_ERR_EMPTY) The message received had no associated data. The length of the
     message will be 0.
 
-&half_space
-&di(RMR_ERR_NOTSUPP) The multi-threaded option was not enabled when RMR was
+&ditem(RMR_ERR_NOTSUPP) The multi-threaded option was not enabled when RMR was
 initialised.  See the man page for &ital(rmr_init()) for details.
 
-&half_space
-&di(RMR_ERR_RCVFAILED) A hard error occurred preventing the receive from completing.
+&ditem(RMR_ERR_RCVFAILED) A hard error occurred preventing the receive from completing.
 &end_dlist
 
 
@@ -120,28 +116,21 @@ buffer,  &cw(errno) will be set to one of the following:
 &space
 
 &beg_dlist(.75i : ^&bold_font )
-&di(INVAL) Parameter(s) passed to the function were not valid.
+&ditem(INVAL) Parameter(s) passed to the function were not valid.
 
-&half_space
-&di(EBADF) The underlying message transport is unable to process the request.
+&ditem(EBADF) The underlying message transport is unable to process the request.
 
-&half_space
-&di(ENOTSUP) The underlying message transport is unable to process the request.
+&ditem(ENOTSUP) The underlying message transport is unable to process the request.
 
-&half_space
-&di(EFSM) The underlying message transport is unable to process the request.
+&ditem(EFSM) The underlying message transport is unable to process the request.
 
-&half_space
-&di(EAGAIN) The underlying message transport is unable to process the request.
+&ditem(EAGAIN) The underlying message transport is unable to process the request.
 
-&half_space
-&di(EINTR) The underlying message transport is unable to process the request.
+&ditem(EINTR) The underlying message transport is unable to process the request.
 
-&half_space
-&di(ETIMEDOUT) The underlying message transport is unable to process the request.
+&ditem(ETIMEDOUT) The underlying message transport is unable to process the request.
 
-&half_space
-&di(ETERM) The underlying message transport is unable to process the request.
+&ditem(ETERM) The underlying message transport is unable to process the request.
 &end_dlist
 
 &h2(EXAMPLE)

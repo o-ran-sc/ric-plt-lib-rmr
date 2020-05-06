@@ -22,24 +22,24 @@
 # {X}fm is required to compile the source.
 
 
-%.rst:: %.xfm	man_list.im
+%.rst:: %.xfm
 	OUTPUT_TYPE=rst tfm $< | sed 's/^ //' >$@
 
-%.ps:: %.xfm	man_list.im
+%.ps:: %.xfm
 	OUTPUT_TYPE=ps pfm $< $@
 
-%.txt:: %.xfm	man_list.im
+%.txt:: %.xfm
 	OUTPUT_TYPE=txt tfm $< $@
 
-%.md:: %.xfm	man_list.im
+%.md:: %.xfm
 	OUTPUT_TYPE=markdown tfm $<  | sed 's/^ //' >$@
+
+%.html:: %.xfm
+	OUTPUT_TYPE=html hfm $< $@
 
 docs = config-deploy developer-guide rel-notes overview
 
 all:: $(docs:%=%.rst) $(docs:%=%.txt) $(docs:%=%.md)
-
-man_list.im:: always
-	bash gen_man_list.sh >man_list.im
 
 rel-notes.xfm:: always
 	ksh fmt_changes.ksh >rel-notes.xfm
@@ -52,6 +52,7 @@ rel-notes.xfm:: always
 $(docs:%=%.rst): always
 $(docs:%=%.txt): always
 $(docs:%=%.md): always
+$(docs:%=%.html): always
 
 
 # copy the .rst files which have changed into the docs (plural) directory at the root of the repo

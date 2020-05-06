@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -69,48 +69,42 @@ of an extreme error.
 &h2(ERRORS)
 The &ital(state) field in the message buffer will be one of the following:
 &space
+
 &beg_dlist(.75i : ^&bold_font )
-&di(RMR_OK) The message buffer (payload) references the received data.
+&ditem(RMR_OK) The message buffer (payload) references the received data.
 
-&space
-&di(RMR_ERR_INITFAILED) The first call to this function must initialise an underlying
+&ditem(RMR_ERR_INITFAILED) The first call to this function must initialise an underlying
     system notification mechanism. On failure, this error is returned and errno
-    will have the system error status set.  If this function fails to intialise,
-    the poll mechansim, it is likely that message receives will never be successful.
+    will have the system error status set.  If this function fails to initialise,
+    the poll mechanism, it is likely that message receives will never be successful.
 
-&space
-&di(RMR_ERR_TIMEOUT) The timeout expired before a complete message was received.
+&ditem(RMR_ERR_TIMEOUT) The timeout expired before a complete message was received.
     All other fields in the message buffer are not valid.
 
-&space
-&di(RMR_ERR_EMPTY) A message was received, but it had no payload. All other
+&ditem(RMR_ERR_EMPTY) A message was received, but it had no payload. All other
     fields in the message buffer are not valid.
 &end_dlist
-&space
+
+Upon return the system error number, &ital(errno) might be set with a value that
+can help to explain the meaning of the state indicated in the message.
+The following are possible:
 
 &beg_dlist(.75i : ^&bold_font )
-&di(INVAL) Parameter(s) passed to the function were not valid.
+&ditem(INVAL) Parameter(s) passed to the function were not valid.
 
-&half_space
-&di(EBADF) The underlying message transport is unable to process the request.
+&ditem(EBADF) The underlying message transport is unable to process the request.
 
-&half_space
-&di(ENOTSUP) The underlying message transport is unable to process the request.
+&ditem(ENOTSUP) The underlying message transport is unable to process the request.
 
-&half_space
-&di(EFSM) The underlying message transport is unable to process the request.
+&ditem(EFSM) The underlying message transport is unable to process the request.
 
-&half_space
-&di(EAGAIN) The underlying message transport is unable to process the request.
+&ditem(EAGAIN) The underlying message transport is unable to process the request.
 
-&half_space
-&di(EINTR) The underlying message transport is unable to process the request.
+&ditem(EINTR) The underlying message transport is unable to process the request.
 
-&half_space
-&di(ETIMEDOUT) The underlying message transport is unable to process the request.
+&ditem(ETIMEDOUT) The underlying message transport is unable to process the request.
 
-&half_space
-&di(ETERM) The underlying message transport is unable to process the request.
+&ditem(ETERM) The underlying message transport is unable to process the request.
 &end_dlist
 
 &h2(EXAMPLE)
