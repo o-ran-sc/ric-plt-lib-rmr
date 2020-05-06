@@ -867,6 +867,7 @@ extern rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* mbuf, int max_wait ) {
 
 	if( max_wait == 0 ) {						// one shot poll; handle wihtout sem check as that is SLOW!
 		if( (mbuf = (rmr_mbuf_t *) uta_ring_extract( ctx->mring )) != NULL ) {			// pop if queued
+			state = sem_wait( &chute->barrier );	// must pop the count
 			if( ombuf ) {
 				rmr_free_msg( ombuf );				// can't reuse, caller's must be trashed now
 			}
