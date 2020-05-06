@@ -1,77 +1,88 @@
- 
- 
 .. This work is licensed under a Creative Commons Attribution 4.0 International License. 
 .. SPDX-License-Identifier: CC-BY-4.0 
 .. CAUTION: this document is generated from source in doc/src/rtd. 
 .. To make changes edit the source and recompile the document. 
 .. Do NOT make changes directly to .rst or .md files. 
  
- 
 ============================================================================================ 
 Man Page: rmr_get_src 
 ============================================================================================ 
  
-RMR Library Functions 
-============================================================================================ 
  
- 
-NAME 
--------------------------------------------------------------------------------------------- 
- 
+
+
+RMR LIBRARY FUNCTIONS
+=====================
+
+
+
+NAME
+----
+
 rmr_get_src 
- 
-SYNOPSIS 
--------------------------------------------------------------------------------------------- 
- 
+
+
+SYNOPSIS
+--------
+
  
 :: 
-  
+ 
  #include <rmr/rmr.h>
+  
  unsigned char* rmr_get_src( rmr_mbuf_t* mbuf, unsigned char* dest )
  
- 
- 
-DESCRIPTION 
--------------------------------------------------------------------------------------------- 
- 
-The rmr_get_src function will copy the *source* information 
-from the message to a buffer (dest) supplied by the user. In 
-an RMR message, the source is the sender's information that 
-is used for return to sender function calls, and is generally 
-the hostname and port in the form *name*. The source might be 
-an IP address port combination; the data is populated by the 
-sending process and the only requirement is that it be 
-capable of being used to start a TCP session with the sender. 
+
+
+DESCRIPTION
+-----------
+
+The ``rmr_get_src`` function will copy the *source* 
+information from the message to a buffer (dest) supplied by 
+the user. In an RMR message, the source is the sender's 
+information that is used for return to sender function calls, 
+and is generally the hostname and port in the form *name*. 
+The source might be an IP address port combination; the data 
+is populated by the sending process and the only requirement 
+is that it be capable of being used to start a TCP session 
+with the sender. 
  
 The maximum size allowed by RMR is 64 bytes (including the 
 nil string terminator), so the user must ensure that the 
 destination buffer given is at least 64 bytes. 
- 
-RETURN VALUE 
--------------------------------------------------------------------------------------------- 
- 
+
+
+RETURN VALUE
+------------
+
 On success, a pointer to the destination buffer is given as a 
 convenience to the user programme. On failure, a nil pointer 
 is returned and the value of errno is set. 
+
+
+ERRORS
+------
+
+If an error occurs, the value of the global variable 
+``errno`` will be set to one of the following with the 
+indicated meaning. 
  
-ERRORS 
--------------------------------------------------------------------------------------------- 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **EINVAL** 
+       - 
+         The message, or an internal portion of the message, was 
+         corrupted or the pointer was invalid. 
+          
  
-If an error occurs, the value of the global variable errno 
-will be set to one of the following with the indicated 
-meaning. 
- 
- 
- 
-EINVAL 
-   
-  The message, or an internal portion of the message, was 
-  corrupted or the pointer was invalid. 
- 
- 
-SEE ALSO 
--------------------------------------------------------------------------------------------- 
- 
+
+
+SEE ALSO
+--------
+
 rmr_alloc_msg(3), rmr_bytes2xact(3), rmr_bytes2meid(3), 
 rmr_call(3), rmr_free_msg(3), rmr_get_rcvfd(3), 
 rmr_get_srcip(3), rmr_payload_size(3), rmr_send_msg(3), 

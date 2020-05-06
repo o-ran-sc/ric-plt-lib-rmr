@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-   Copyright (c) 2019 Nokia
-   Copyright (c) 2018-2019 AT&T Intellectual Property.
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -50,7 +50,6 @@ The field is a fixed length, gated by the constant &cw(RMR_MAX_XID) and if strin
 than this value, then &bold(nothing) will be copied. (Note, this differs slightly from the
 behaviour of the &cw(lrmr_bytes2xact()) function.)
 
-&beg_dlist(.75i : ^&bold_font )
 &h2(RETURN VALUE)
 On success, the value RMR_OK is returned.
 If the string cannot be copied to the message, the return value will be one of the
@@ -59,12 +58,11 @@ errors listed below.
 &h2(ERRORS)
 If the return value is not RMR_OK, then it will be set to one of the values below.
 
-&half_space
-&di(RMR_ERR_BADARG) The message, or an internal portion of the message, was corrupted or the pointer was invalid.
+&beg_dlist(.75i : ^&bold_font )
+	&ditem(RMR_ERR_BADARG) The message, or an internal portion of the message, was corrupted or the pointer was invalid.
 
-&half_space
-&di(RMR_ERR_OVERFLOW) The length passed in was larger than the maximum length of the field; only a portion of
-    the source bytes were copied.
+	&ditem(RMR_ERR_OVERFLOW) The length passed in was larger than the maximum length of the field; only a portion of
+	the source bytes were copied.
 &end_dlist
 
 &h2(EXAMPLE)
