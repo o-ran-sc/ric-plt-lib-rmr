@@ -6,27 +6,27 @@ into the docs directory at the repo root.  Then the generated .rst
 files must be checked into the repo and committed with changes to the
 source (maybe not the best practice).
 
-The command 'make all' should be all that is needed to build the 
+The command 'make all' should be all that is needed to build the
 rtd documentation. Follow that with 'make publish' to actually move
 the .rst files into the docs directory at the root; only the changed
 files are moved.
 
 Adding A New Man Page
-When a new manual page is added to the source (../man), it must be 
+When a new manual page is added to the source (../man), it must be
 added to the list in the user's guide source in this directory.
 
 Rationale
 Documentation is just code, and by maintaining the documentation as
-source is is possible to generate various forms of output with a 
+source is is possible to generate various forms of output with a
 single make.  While it is possible to convert X to Y, a true document
 composition language is far better at generating readable Postscript
-output with embedded figures as well as text and tables. 
+output with embedded figures as well as text and tables.
 
 CAUTION:
 The RST syntax is as bad as python when it comes to dealing with
 spaces.  For example &bold( foo ) will insert spaces after the initial
 bold trigger, and before the trailing bold trigger which will throw
-the tox validation into a tizzy.  Further,  something like 'void *' 
+the tox validation into a tizzy.  Further,  something like 'void *'
 and 'rmr_ '  does as well.  If needed, use the defined escape macro
 to add an escape in such situations; it should only generate for RST
 and not impact other output formats.

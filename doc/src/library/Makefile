@@ -1,6 +1,6 @@
-#==================================================================================
-#	Copyright (c) 2019 Nokia
-#	Copyright (c) 2018-2019 AT&T Intellectual Property.
+#=================================================================================2
+#	Copyright (c) 2019-2020 Nokia
+#	Copyright (c) 2018-2020 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -15,52 +15,75 @@
 #   limitations under the License.
 #==================================================================================
 
-# most things here require a two pass build, but these might be useful
+XP = XFM_PATH=".:.."
+P1 = $(XP) XFM_PASS=1
+P2 = $(XP) XFM_PASS=2
 
+# ----- generics  --------------------------------------------------------
+# two pass builds in order to forward reference variables for figures and to insert
+# table of contents in postscript output
+#
 %.ps: %.xfm
-	pfm $< $@
+	$(P1) pfm $< /dev/null
+	$(P2) pfm $< $@
 
 %.md: %.xfm
-	OUTPUT_TYPE=markdown tfm $< stdout | sed 's/^ //' >$@
+	$(P1) OUTPUT_TYPE=markdown tfm $< /dev/null
+	$(P2) OUTPUT_TYPE=markdown tfm $< stdout | sed 's/^ //' >$@
 
 %.rst: %.xfm
-	OUTPUT_TYPE=rst tfm $< stdout | sed 's/^ //' >$@
+	$(P1) OUTPUT_TYPE=rst tfm $< /dev/null
+	$(P2) OUTPUT_TYPE=rst tfm $< stdout | sed 's/^ //' >$@
 
 %.txt: %.xfm
-	OUTPUT_TYPE=txt tfm  $< stdout
-	OUTPUT_TYPE=txt tfm  $< $@
+	$(P1) OUTPUT_TYPE=txt tfm  $< /dev/null
+	$(P2) OUTPUT_TYPE=txt tfm  $< $@
+
+%.html: %.xfm
+	$(P1) OUTPUT_TYPE=html hfm  $< /dev/null
+	$(P2) OUTPUT_TYPE=html hfm  $< $@
 
 %.pdf: %.ps
 	gs -dQUIET -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -sOutputFile=$@ $<
 
 
-src = user.xfm advanced_use.im api_qref.im code_appendix.im code_send.im config.im failures.im general_use.im glossary.im index_snatch.im setup.im mbuf.im front_junk.im license.im
+# ----- lists  --------------------------------------------------------
+# source common to all documents
+common_src = index_snatch.im setup.im mbuf.im front_junk.im license.im
+
+user_src = user.xfm advanced_use.im api_qref.im code_appendix.im code_send.im \
+	config.im failures.im general_use.im glossary.im
+
+# user guide code examples
 code_src = $(shell ls code_*.im)
 
-all:	user.pdf  user.txt user.rst user.md
+rt_src = rt_tables.xfm
 
-# two pass build for pfm to allow for toc insertion
-user.ps: $(src) $(code_src)
-	XFM_PASS=1 pfm $< /dev/null
-	XFM_PASS=2 pfm $< $@
+# output types for different builds
+all_types = pdf md rst txt html
+rtd_types = rst
 
-user.md: $(src) $(code_src)
-	OUTPUT_TYPE=markdown XFM_PASS=1 tfm $< /dev/null
-	OUTPUT_TYPE=markdown XFM_PASS=2 tfm $< | sed 's/^ //' >$@
 
-user.rst: $(src) $(code_src)
-	OUTPUT_TYPE=rst XFM_PASS=1 tfm $< /dev/null
-	GEN_TITLE=1 OUTPUT_TYPE=rst XFM_PASS=2 tfm $< | sed 's/^ //' >$@
+# ------ rules --------------------------------------------------------
+all:	$(all_types:%=user.%) $(all_types:%=rt_tables.%)
+	mv user.rst user-guide.rst
 
-user.txt: $(src) $(code_src)
-	OUTPUT_TYPE=txt XFM_PASS=1 tfm $< /dev/null
-	OUTPUT_TYPE=txt XFM_PASS=2 tfm $< $@
+# just the things which are pushed to the docs scraper dirctory,
+# renames to expected filenames where required.
+docs:	$(rtd_types:%=user.%) $(rtd_types:%=rt_tables.%)
+	mv user.rst user-guide.rst
 
-# intermeidate junk that might straggle
+# dependencies; actual recipes are generic
+$(all_types:%=user.%): $(user_src) $(code_src) $(common_src)
+$(all_types:%=rt_tables.%): $(rt_src)  $(common_src)
+
+
+# ---------- housekeeping ----------------------------------------------
+# remove only intermeidate junk that might straggle; leave output
 clean:
-	rm -fr *.bcnfile *.ca *.ecnfile
+	rm -fr *.bcnfile *.ca *.ecnfile *.sp *.toc
 
-# Anything that can be built
+# Remove anything that can be built
 nuke: clean
-	rm -fr *.ps *.pdf *.txt *.rst
+	rm -fr *.ps *.pdf *.txt *.rst *.md *.html
 

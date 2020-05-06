@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,14 +24,20 @@
 	Author:		E. Scott Daniels
 .fi
 
+.dv textfont Helvetica
+.dv textsize 10p
+.gv e XFM_PASS pass
+
+.** vars picked up by front_junk or gen_title as it's a generic module
+.dv doc_title RIC Message Router -- RMR
+.dv doc_subtitle User's Guide
+.dv orig_date 30 July 2019
+.** must reverse titles when generating rst to disambiguate in the doc list
+.dv reverse_titles 1
+
 .** setup will do the right thing with the index configuration
 .dv index_snare_file index_snatch.im
 .im ./setup.im
-
-.** func is a bit odd; if punct needs to be added, it must be supplied as the second
-.** parm because we add () to the first. E.g. &func(foo_bar:.) will add a parm
-.**
-.dv func .ix force ${1} ^:  ^&cw(${1}()$2 )
 
 .dv mtsid message type and subscription ID
 .dv Mtsid Message type and subscription ID
@@ -39,40 +45,9 @@
 .dv Mt Message type
 .dv mts message types
 
-.dv textfont Helvetica
-.dv textsize 10p
-.hn off
-
-
-.gv e XFM_PASS pass
-.if &pass 2 =
-	.** two pass mode -- pull in variables captured during pass 1 for forward references
-	.im p1var_setup.ca
-.fi
-
-.if pfm
-	.** add licence,  a title page, and table of contents
-	.im front_junk.im
-.ei
-	.** for text based things, nothing more than license
-	.im license.im
-.fi
-
-.** vars picked up by gen_title as it's a generic module
-.dv doc_title RIC Message Router -- RMR
-.dv doc_subtitle User's Manual
-
-.gv e GEN_TITLE gen_title
-.if "&gen_title" "1" =
-	.im ../rtd/gen_title.im
-.fi
-
-.if pfm
-	.pn on noline center f=%d 0
-.fi
-
 .** --------------------------------------------------------------------------------------
 
+&line_len( &line_size )
 &h1(Overview)
 
 The RIC Message Router (RMR) is a library for peer-to-peer
@@ -172,6 +147,7 @@ document.
 
 .if tfm
 	.** show all column/foot notes
+	&h1(Notes)
 	.cn showend
 	&mult_space( 3 )
 .fi
@@ -182,11 +158,11 @@ document.
 .pa
 .if "&ot" "rst" =
 &h1(Appendix &qr_appendix -- Quick Reference)
-Please refer to the RMR manual pages on the Read the Docs site
-&space
-https://docs.o-ran-sc.org/projects/o-ran-sc-ric-plt-lib-rmr/en/latest/index.html
+	Please refer to the RMR manual pages on the Read the Docs site
+	&space
+	https://docs.o-ran-sc.org/projects/o-ran-sc-ric-plt-lib-rmr/en/latest/index.html
 .ei
-.im api_qref.im
+	.im api_qref.im
 .fi
 
 .dv mbuf_appendix B

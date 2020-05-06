@@ -59,25 +59,20 @@ The following values are potential return values.
 
 &space
 &beg_dlist(.75i : ^&bold_font )
-&di(RMR_OK)
+&ditem(RMR_OK)
     The wormhole ID is valid and the connection is "open."
-    &half_space
 
-&di(RMR_ERR_WHID)
+&ditem(RMR_ERR_WHID)
     THe wormhole ID passed into the function was not valid.
-    &half_space
 
-&di(RMR_ERR_NOENDPT)
+&ditem(RMR_ERR_NOENDPT)
     The wormhole is not open (not connected).
-    &half_space
 
-&di(RMR_ERR_BADARG)
+&ditem(RMR_ERR_BADARG)
     The context passed to the function was nil or invalid.
-    &half_space
 
-&di(RMR_ERR_NOWHOPEN)
+&ditem(RMR_ERR_NOWHOPEN)
     Wormholes have not been initialised (no wormhole open call has been made).
-    &half_space
 &end_dlist
 
 

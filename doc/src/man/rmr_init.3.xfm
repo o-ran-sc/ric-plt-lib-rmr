@@ -142,7 +142,7 @@ The following error values are specifically set by this RMR function. In some ca
 error message of a system call is propagated up, and thus this list might be incomplete.
 
 &beg_dlist(.75i : ^&bold_font )
-&di(ENOMEM) Unable to allocate memory.
+&ditem(ENOMEM) Unable to allocate memory.
 &end_dlist
 
 &h2(EXAMPLE)

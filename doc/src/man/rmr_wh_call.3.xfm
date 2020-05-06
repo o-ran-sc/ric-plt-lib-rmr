@@ -86,10 +86,10 @@ buffer.
 
 &space
 &beg_dlist(.75i : ^&bold_font )
-&di(RMR_ERR_WHID) The wormhole ID passed in was not associated with an open wormhole, or was out of range for a valid ID.
-&di(RMR_ERR_NOWHOPEN) No wormholes exist, further attempt to validate the ID are skipped.
-&di(RMR_ERR_BADARG) The message buffer pointer did not refer to a valid message.
-&di(RMR_ERR_NOHDR)  The header in the message buffer was not valid or corrupted.
+&ditem(RMR_ERR_WHID) The wormhole ID passed in was not associated with an open wormhole, or was out of range for a valid ID.
+&ditem(RMR_ERR_NOWHOPEN) No wormholes exist, further attempt to validate the ID are skipped.
+&ditem(RMR_ERR_BADARG) The message buffer pointer did not refer to a valid message.
+&ditem(RMR_ERR_NOHDR)  The header in the message buffer was not valid or corrupted.
 &end_dlist
 
 &h2(EXAMPLE)
