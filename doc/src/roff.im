@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia 
+	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +40,7 @@
 .dv h2 .sp 1 ^&bold($1) .br ^&space
 .dv h3 .sp 1 ^&bold($1) .br ^&space
 
-.dv fig 
+.dv fig
 .dv set_font_cw .br ^^.ft CW
 
 .dv nf ^^.nf .br .nf
@@ -58,13 +58,16 @@
 .dv mult_space .br ^^.sp $1 .br
 .dv beg_list
 .dv end_list
+.dv item ^&space \(bu
+.dv li ^&space \(bu
+.dv li_sp ^&space \(bu
+
 .dv beg_dlist .dv udi -$1 ^: ^^.in +$1 .br ^^.sp 1 .br
 .dv end_dlist .br ^^.in &udi .br
 .dv ditem ^^.ti ^&udi  .br ^&space .br \fB$1\fR .br
-.dv item ^&space \(bu
-.dv li ^&space \(bu
-.** .dv di ^&ditem
-.dv di ^^.ti ^&udi  .br ^&space .br \fB$1\fR .br
+.** deprecated, but needed til doc cleaned up
+.dv diitem ^^.ti ^&udi  .br ^&space .br \fB$1\fR .br
+.dv di     ^^.ti ^&udi  .br ^&space .br \fB$1\fR .br
 
 .dv ex_start ^^.IP .br ^^.nf .br ^^.ft CW .br .nf
 .dv ex_end .fo on .br ^^.ft P .br ^^.fi .br ^&space

@@ -91,7 +91,7 @@ These value of &ital(errno) will reflect the error condition if a nil pointer is
 &di(ENOMEM) Memory allocation of the new payload failed.
 &half_space
 
-&di(EINVAL) The pointer passed in was nil, or refrenced an invalid message, or the required
+&di(EINVAL) The pointer passed in was nil, or referenced an invalid message, or the required
     length was not valid.
 &end_dlist
 

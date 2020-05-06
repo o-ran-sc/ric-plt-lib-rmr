@@ -63,7 +63,7 @@ function from blocking forever.
 The timeout period is &bold(not) based on time (calls to clock are deemed too expensive
 for a low latency system level library), but instead the period is based on the number of
 received messages which are not the response.
-Using a non-time mechanism for &ital(timeout) prevents the async queue from filling
+Using a mechanism which is not time based for &ital(timeout) prevents the async queue from filling
 (which would lead to message drops) in an environment where there is heavy message traffic.
 
 &space

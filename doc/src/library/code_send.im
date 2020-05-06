@@ -1,8 +1,8 @@
 
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 ==================================================================================
 .fi
 
-.** example sender code
+.** example sender code is included directly from the examples directory
 
 &h2(Sender Sample)
 The following code segment shows how a message buffer can be
@@ -27,27 +27,6 @@ result from the &func(rmr_send_msg) function is used to send the next
 message.  It does not illustrate error and/or retry handling.
 &space
 
-&indent
 &ex_start
-mrc = rmr_init( listen_port, MAX_BUF_SZ, RMRFL_NOFLAGS );
-rmr_set_stimeout( mrc, rmr_retries );
-
-while( ! rmr_ready( mrc ) ) {
-    sleep( 1 );
-}
-
-sbuf = rmr_alloc_msg( mrc, 256 );   // 1st send buffer
-
-while( TRUE ) {
-    sbuf->len = gen_status( (status_msg *) sbuf->payload );
-    sbuf->mtype = STATUS_MSG;
-    sbuf->sub_id = RMR_VOID_SUBID;     // subscription not used
-    sbuf = rmr_send_msg( mrc, sbuf );
-
-    sleep( delay_sec );
-}
-
-rmr_close( mrc );
-
+.im  j=start_example ../../../examples/sender.c
 &ex_end
-&uindent

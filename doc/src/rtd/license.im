@@ -29,25 +29,32 @@
 
 .if ! _license_im
 
-.cd 1 14i i=0
-.ll 14i
-.in 0i
-
 .dv lic_comment_1 This work is licensed under a Creative Commons Attribution 4.0 International License.
 .dv lic_comment_2 SPDX-License-Identifier: CC-BY-4.0
 .dv caution_1 CAUTION: this document is generated from source in doc/src/rtd.
 .dv caution_2 To make changes edit the source and recompile the document.
 .dv caution_3 Do NOT make changes directly to .rst or ^.md files.
 
-.if &ot "postscript" =
-	.** this is native postscript, so as is
-	.ai
-	% &lic_comment_1
-	% &lic_comment_2
-	.fo
+.if pfm
+	.** this is native postscript, so as is and NO indention in this source
+.ai
+% &lic_comment_1
+% &lic_comment_2
+.fo
 	.** no caution because nobody will change the postscript
 .ei
+	.if ! ot
+		.gv e OUTPUT_TYPE ot
+	.fi
+
+	.** only rst supports comments
 	.if "&ot" "rst" =
+		.pu
+		.**  we have to ensure that our lines don't break as there is no block comment
+		.cd 1 14i i=0
+		.ll 14i
+		.in 0i
+
 		^.. &lic_comment_1
 		.br
 		^.. &lic_comment_2
@@ -57,6 +64,8 @@
 		^.. &caution_2
 		.br
 		^.. &caution_3
+
+		.po
 	.fi
 .fi
 
@@ -66,11 +75,12 @@
 .if ! col_width
 	.cd 1 8i i=0
 .ei
-	.cd 1 &col_width i=0
+	.if col_indent
+		.cd 1 &col_width i=&col_indent
+	.ei
+		.cd 1 &col_width i=.5i
+	.fi
 .fi
-
-.ll 8i
-.in 0
 
 .dv _license_im 1
 .fi

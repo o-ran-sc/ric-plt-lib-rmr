@@ -28,13 +28,19 @@
 					[listen_port [delay [stats-freq] [msg-type]]]]
 
 					Defaults:
-						listen_port 43086 
+						listen_port 43086
 						delay (mu-sec) 1000000 (1 sec)
 						stats-freq 10
 						msg-type 0
 
 	Date:		1 April 2019
+
+	CAUTION:	This example is now being pulled directly into the user documentation.
+				Because of this some altered line lengths and/or parameter list breaks
+				which seem strage have been applied to ensure that it formats nicely.
+				All code following the 'start_example' tag below is included.
 */
+// start_example
 
 #include <unistd.h>
 #include <errno.h>
@@ -47,22 +53,22 @@
 #include <rmr/rmr.h>
 
 int main( int argc, char** argv ) {
-	void* mrc;      						//msg router context
-	struct epoll_event events[1];			// list of events to give to epoll
-	struct epoll_event epe;                 // event definition for event to listen to
-	int     ep_fd = -1;						// epoll's file des (given to epoll_wait)
-	int rcv_fd;     						// file des that NNG tickles -- give this to epoll to listen on
-	int nready;								// number of events ready for receive
-	rmr_mbuf_t*		sbuf;					// send buffer
-	rmr_mbuf_t*		rbuf;					// received buffer
+	void* mrc;							// msg router context
+	struct epoll_event events[1];		// list of events to give to epoll
+	struct epoll_event epe;                // event definition for event to listen to
+	int     ep_fd = -1;					// epoll's file des (given to epoll_wait)
+	int rcv_fd;							// file des for epoll checks
+	int nready;							// number of events ready for receive
+	rmr_mbuf_t*		sbuf;				// send buffer
+	rmr_mbuf_t*		rbuf;				// received buffer
 	int	count = 0;
 	int	rcvd_count = 0;
 	char*	listen_port = "43086";
-	int		delay = 1000000;						// mu-sec delay between messages
+	int		delay = 1000000;			// mu-sec delay between messages
 	int		mtype = 0;
 	int		stats_freq = 100;
 
-	if( argc > 1 ) {
+	if( argc > 1 ) {					// simplistic arg picking
 		listen_port = argv[1];
 	}
 	if( argc > 2 ) {
@@ -72,14 +78,15 @@ int main( int argc, char** argv ) {
 		mtype = atoi( argv[3] );
 	}
 
-	fprintf( stderr, "<DEMO> listen port: %s; mtype: %d; delay: %d\n", listen_port, mtype, delay );
+	fprintf( stderr, "<DEMO> listen port: %s; mtype: %d; delay: %d\n",
+		listen_port, mtype, delay );
 
 	if( (mrc = rmr_init( listen_port, 1400, RMRFL_NONE )) == NULL ) {
-		fprintf( stderr, "<DEMO> unable to initialise RMr\n" );
+		fprintf( stderr, "<DEMO> unable to initialise RMR\n" );
 		exit( 1 );
 	}
 
-	rcv_fd = rmr_get_rcvfd( mrc );					// set up epoll things, start by getting the FD from MRr
+	rcv_fd = rmr_get_rcvfd( mrc );  // set up epoll things, start by getting the FD from RMR
 	if( rcv_fd < 0 ) {
 		fprintf( stderr, "<DEMO> unable to set up polling fd\n" );
 		exit( 1 );
@@ -96,39 +103,41 @@ int main( int argc, char** argv ) {
 		exit( 1 );
 	}
 
-	sbuf = rmr_alloc_msg( mrc, 256 );	// alloc first send buffer; subsequent buffers allcoated on send
+	sbuf = rmr_alloc_msg( mrc, 256 );	// alloc 1st send buf; subsequent bufs alloc on send
 	rbuf = NULL;						// don't need to alloc receive buffer
 
-	while( ! rmr_ready( mrc ) ) {		// must have a route table before we can send; wait til RMr say it has one
-		sleep( 1 );
+	while( ! rmr_ready( mrc ) ) {		// must have route table
+		sleep( 1 );						// wait til we get one
 	}
 	fprintf( stderr, "<DEMO> rmr is ready\n" );
-	
 
-	while( 1 ) {										// send messages until the cows come home
-		snprintf( sbuf->payload, 200, "count=%d received= %d ts=%lld %d stand up and cheer!", 	// create the payload
+
+	while( 1 ) {			// send messages until the cows come home
+		snprintf( sbuf->payload, 200,
+			"count=%d received= %d ts=%lld %d stand up and cheer!",	// create the payload
 			count, rcvd_count, (long long) time( NULL ), rand() );
 
 		sbuf->mtype = mtype;							// fill in the message bits
-		sbuf->len =  strlen( sbuf->payload ) + 1;		// our receiver likely wants a nice acsii-z string
+		sbuf->len =  strlen( sbuf->payload ) + 1;		// send full ascii-z string
 		sbuf->state = 0;
-		sbuf = rmr_send_msg( mrc, sbuf );				// send it (send returns an empty payload on success, or the original payload on fail/retry)
+		sbuf = rmr_send_msg( mrc, sbuf );				// send & get next buf to fill in
 		while( sbuf->state == RMR_ERR_RETRY ) {			// soft failure (device busy?) retry
-			sbuf = rmr_send_msg( mrc, sbuf );			// retry send until it's good (simple test; real programmes should do better)
+			sbuf = rmr_send_msg( mrc, sbuf );			// w/ simple spin that doesn't give up
 		}
 		count++;
 
-		while( (nready = epoll_wait( ep_fd, events, 1, 0 )) > 0 ) {	// if something ready to receive (non-blocking check)
-			if( events[0].data.fd == rcv_fd ) {             // we only are waiting on 1 thing, so [0] is ok
+		// check to see if anything was received and pull all messages in
+		while( (nready = epoll_wait( ep_fd, events, 1, 0 )) > 0 ) { // 0 is non-blocking
+			if( events[0].data.fd == rcv_fd ) {     // waiting on 1 thing, so [0] is ok
 				errno = 0;
-				rbuf = rmr_rcv_msg( mrc, rbuf );
+				rbuf = rmr_rcv_msg( mrc, rbuf );	// receive and ignore; just count
 				if( rbuf ) {
 					rcvd_count++;
 				}
 			}
 		}
 
-		if( (count % stats_freq) == 0 ) {
+		if( (count % stats_freq) == 0 ) {			// occasional stats out to tty
 			fprintf( stderr, "<DEMO> sent %d   received %d\n", count, rcvd_count );
 		}
 
