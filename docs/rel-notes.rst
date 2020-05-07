@@ -1,11 +1,8 @@
- 
- 
 .. This work is licensed under a Creative Commons Attribution 4.0 International License. 
 .. SPDX-License-Identifier: CC-BY-4.0 
 .. CAUTION: this document is generated from source in doc/src/rtd. 
 .. To make changes edit the source and recompile the document. 
 .. Do NOT make changes directly to .rst or .md files. 
- 
  
  
 RMR Release Notes 
@@ -28,6 +25,20 @@ appropriate.
  
 Core RMR Changes 
 -------------------------------------------------------------------------------------------- 
+ 
+ 
+2020 May 06; version 4.0.5 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Fix the bug in SI95 receive message management semaphore 
+count issue. (RIC-355) 
+ 
+ 
+2020 April 29; version 4.0.4 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ 
+Fix the traffic steering message type constants (again) 
+(RIC-342) 
  
  
 2020 April 28; version 4.0.3 
