@@ -57,19 +57,21 @@
 	.dv mult_space .sp $1
 	.dv half_space .sp .5
 
-	.dv beg_list .bl $1
+	.dv beg_list .bl ${1!n}
 	.dv end_list .el
 	.dv lic1 n
 	.dv lic2 m
 	.dv lic3 l
+	.dv li .cc 2 .li
+	.dv li_sp .cc 2 .sp .5 .li
+	.dv item .cc 2 .li
 
 	.dv beg_dlist .bd $1 $2
 	.dv end_dlist .ed
 	.dv ditem .cc 2 .di $1 ^:
-	.dv di .cc 2 .di $1 ^:
-	.dv li .cc 2 .li
-	.dv li_sp .cc 2 .sp .5 .li
-	.dv item .cc 2 .li
+	.** these are deprecated, but must be supported til doc cleaned up
+	.dv di    .cc 2 .di $1 ^:
+	.dv diitem .cc 2 .di $1 ^:
 
 	.dv proto_start .sp 1 .cc .5i .st 9 .sf Courier-bold .nf
 	.dv proto_end .fo on .sf ^&text_font .st ^&text_size .sp .3

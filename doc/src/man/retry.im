@@ -30,15 +30,19 @@ The send operations in RMR will retry &ital(soft) send failures until one of thr
 conditions occurs:
 &half_space
 &indent
-&beg_dlist( 0.3i : ^&bold_font )
-    &di(1.) The message is sent without error
+
+&beg_list(&lic1)
+&item
+    The message is sent without error
     &half_space
 
-    &di(2.) The underlying transport reports a &ital(hard) failure
+&item
+    The underlying transport reports a &ital(hard) failure
     &half_space
 
-    &di(3.) The maximum number of retry loops has been attempted
-    &end_dlist
+&item
+    The maximum number of retry loops has been attempted
+&end_list
 &uindent
 
 &space

@@ -11,30 +11,31 @@ Man Page: rmr_wh_open
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_wh_open 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  void* rmr_wh_open( void* vctx, char* target )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_wh_open`` function creates a direct link for 
 sending, a wormhole, to another RMR based process. Sending 
@@ -59,8 +60,8 @@ undetermined as each underlying transport mechanism may
 handle buffering and retries differently. 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 The ``rmr_wh_open`` function returns a type 
 ``rmr_whid_t`` which must be passed to the 
@@ -71,31 +72,47 @@ the ID as the parameter; a result of 1 indicates that the
 connection was esablished and that the ID is valid. 
 
 
-1.5. ERRORS
------------
+ERRORS
+------
 
 The following error values are specifically set by this RMR 
 function. In some cases the error message of a system call is 
 propagated up, and thus this list might be incomplete. 
  
-EINVAL 
-  A parameter passed was not valid. 
-EACCESS 
-  The user application does not have the ability to 
-  establish a wormhole to the indicated target (or maybe any 
-  target). 
-ECONNREFUSED 
-  The connection was refused. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **EINVAL** 
+       - 
+         A parameter passed was not valid. 
+          
+         | 
+      
+     * - **EACCESS** 
+       - 
+         The user application does not have the ability to establish a 
+         wormhole to the indicated target (or maybe any target). 
+          
+         | 
+      
+     * - **ECONNREFUSED** 
+       - 
+         The connection was refused. 
+          
+ 
 
 
-1.6. EXAMPLE
-------------
+EXAMPLE
+-------
 
  
 :: 
  
     void*  rmc;
     rmr_whid_t wh;
+  
     rmc = rmr_init( "43086", 4096, 0 ); // init context
     wh = rmr_wh_open( rmc, "localhost:6123" );
     if( !RMR_WH_CONNECTED( wh ) ) {
@@ -105,8 +122,8 @@ ECONNREFUSED
  
 
 
-1.7. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
 rmr_get_rcvfd(3), rmr_payload_size(3), rmr_send_msg(3), 

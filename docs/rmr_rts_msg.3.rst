@@ -11,30 +11,31 @@ Man Page: rmr_rts_msg
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_rts_msg 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg );
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_rts_msg`` function sends a message returning it to 
 the endpoint which sent the message rather than selecting an 
@@ -43,21 +44,19 @@ than this small difference, the behaviour is exactly the same
 as ``rmr_send_msg.`` 
 
 
-1.4. Retries
-------------
+Retries
+-------
 
 The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
  
  
-1. 
-  The message is sent without error 
-   
-2. 
-  The underlying transport reports a *hard* failure 
-   
-3. 
-  The maximum number of retry loops has been attempted 
+ &item The message is sent without error 
+  
+ &item The underlying transport reports a *hard* failure 
+  
+ &item The maximum number of retry loops has been attempted 
+ 
  
 A retry loop consists of approximately 1000 send attempts 
 **without** any intervening calls to *sleep()* or *usleep().* 
@@ -69,8 +68,8 @@ allowing the user application to completely disable retires
 (set to 0), or to increase the number of retry loops. 
 
 
-1.5. Transport Level Blocking
------------------------------
+Transport Level Blocking
+------------------------
 
 The underlying transport mechanism used to send messages is 
 configured in *non-blocking* mode. This means that if a 
@@ -92,8 +91,8 @@ RMR to retry the send operation, and even then it is possible
 loop is not enough to guarantee a successful send. 
 
 
-1.6. PAYLOAD SIZE
------------------
+PAYLOAD SIZE
+------------
 
 When crafting a response based on a received message, the 
 user application must take care not to write more bytes to 
@@ -111,8 +110,8 @@ be used to extend the payload to a size suitable for the
 response. 
 
 
-1.7. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 On success, a new message buffer, with an empty payload, is 
 returned for the application to use for the next send. The 
@@ -130,81 +129,151 @@ documentation, but there will be little that the user
 application can do other than to move on. 
 
 
-1.8. ERRORS
------------
+ERRORS
+------
 
 The following values may be passed back in the *state* field 
 of the returned message buffer. 
  
  
-RMR_ERR_BADARG 
-  The message buffer pointer did not refer to a valid 
-  message. 
-RMR_ERR_NOHDR 
-  The header in the message buffer was not valid or 
-  corrupted. 
-RMR_ERR_NOENDPT 
-  The message type in the message buffer did not map to a 
-  known endpoint. 
-RMR_ERR_SENDFAILED 
-  The send failed; ``errno`` has the possible reason. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **RMR_ERR_BADARG** 
+       - 
+         The message buffer pointer did not refer to a valid message. 
+          
+         | 
+      
+     * - **RMR_ERR_NOHDR** 
+       - 
+         The header in the message buffer was not valid or corrupted. 
+          
+         | 
+      
+     * - **RMR_ERR_NOENDPT** 
+       - 
+         The message type in the message buffer did not map to a known 
+         endpoint. 
+          
+         | 
+      
+     * - **RMR_ERR_SENDFAILED** 
+       - 
+         The send failed; ``errno`` has the possible reason. 
+          
+ 
  
 The following values may be assigned to ``errno`` on failure. 
  
-INVAL 
-  Parameter(s) passed to the function were not valid, or the 
-  underlying message processing environment was unable to 
-  interpret the message. 
-   
-ENOKEY 
-  The header information in the message buffer was invalid. 
-   
-ENXIO 
-  No known endpoint for the message could be found. 
-   
-EMSGSIZE 
-  The underlying transport refused to accept the message 
-  because of a size value issue (message was not attempted 
-  to be sent). 
-   
-EFAULT 
-  The message referenced by the message buffer is corrupt 
-  (nil pointer or bad internal length). 
-   
-EBADF 
-  Internal RMR error; information provided to the message 
-  transport environment was not valid. 
-   
-ENOTSUP 
-  Sending was not supported by the underlying message 
-  transport. 
-   
-EFSM 
-  The device is not in a state that can accept the message. 
-   
-EAGAIN 
-  The device is not able to accept a message for sending. 
-  The user application should attempt to resend. 
-   
-EINTR 
-  The operation was interrupted by delivery of a signal 
-  before the message was sent. 
-   
-ETIMEDOUT 
-  The underlying message environment timed out during the 
-  send process. 
-   
-ETERM 
-  The underlying message environment is in a shutdown state. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **INVAL** 
+       - 
+         Parameter(s) passed to the function were not valid, or the 
+         underlying message processing environment was unable to 
+         interpret the message. 
+          
+          
+         | 
+      
+     * - **ENOKEY** 
+       - 
+         The header information in the message buffer was invalid. 
+          
+          
+         | 
+      
+     * - **ENXIO** 
+       - 
+         No known endpoint for the message could be found. 
+          
+          
+         | 
+      
+     * - **EMSGSIZE** 
+       - 
+         The underlying transport refused to accept the message 
+         because of a size value issue (message was not attempted to 
+         be sent). 
+          
+          
+         | 
+      
+     * - **EFAULT** 
+       - 
+         The message referenced by the message buffer is corrupt (nil 
+         pointer or bad internal length). 
+          
+          
+         | 
+      
+     * - **EBADF** 
+       - 
+         Internal RMR error; information provided to the message 
+         transport environment was not valid. 
+          
+          
+         | 
+      
+     * - **ENOTSUP** 
+       - 
+         Sending was not supported by the underlying message 
+         transport. 
+          
+          
+         | 
+      
+     * - **EFSM** 
+       - 
+         The device is not in a state that can accept the message. 
+          
+          
+         | 
+      
+     * - **EAGAIN** 
+       - 
+         The device is not able to accept a message for sending. The 
+         user application should attempt to resend. 
+          
+          
+         | 
+      
+     * - **EINTR** 
+       - 
+         The operation was interrupted by delivery of a signal before 
+         the message was sent. 
+          
+          
+         | 
+      
+     * - **ETIMEDOUT** 
+       - 
+         The underlying message environment timed out during the send 
+         process. 
+          
+          
+         | 
+      
+     * - **ETERM** 
+       - 
+         The underlying message environment is in a shutdown state. 
+          
+ 
 
 
-1.9. EXAMPLE
-------------
+EXAMPLE
+-------
 
 
 
-1.10. SEE ALSO
---------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
 rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 

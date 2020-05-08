@@ -11,30 +11,31 @@ Man Page: rmr_payload_size
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_payload_size 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  int rmr_payload_size( rmr_mbuf_t* msg );
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 Given a message buffer, this function returns the amount of 
 space (bytes) available for the user application to consume 
@@ -42,22 +43,30 @@ in the message payload. This is different than the message
 length available as a field in the message buffer. 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 The number of bytes available in the payload. 
 
 
-1.5. ERRORS
------------
+ERRORS
+------
 
  
-INVAL 
-  Parameter(s) passed to the function were not valid. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **INVAL** 
+       - 
+         Parameter(s) passed to the function were not valid. 
+          
+ 
 
 
-1.6. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
 rmr_send_msg(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 

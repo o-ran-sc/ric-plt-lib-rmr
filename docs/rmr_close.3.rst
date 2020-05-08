@@ -11,30 +11,31 @@ Man Page: rmr_close
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_close 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  void rmr_close( void* vctx )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_close`` function closes the listen socket 
 effectively cutting the application off. The route table 
@@ -44,8 +45,8 @@ rmr_call(), and rmr_rts_msg() will have unknown results.
  
 
 
-1.4. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
 rmr_get_rcvfd(3), rmr_payload_size(3), rmr_send_msg(3), 

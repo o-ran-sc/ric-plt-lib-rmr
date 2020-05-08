@@ -31,9 +31,15 @@
 .fi
 
 
+.if ! _setup_im
+
 .gv e LIB lib
 .if ! lib
 	.dv lib ..
+.fi
+
+.if ! ot
+	.gv e OUTPUT_TYPE ot
 .fi
 
 .** sane default for everything except rst and markdown which override later
@@ -41,6 +47,8 @@
 .dv col_indent .75i
 .dv indent_size .5i
 .dv line_size 6i
+.hn off
+.dv col_width 7i
 
 .dv ditext Helvetica-bold
 .if pfm
@@ -58,15 +66,13 @@
 		.im &{lib}/txt.im
 	.fi
 	.if "&ot" "rst" =
-		.if reverse_titles 1 =
+		.if &reverse_titles 1 =
 			.** for some RST output reversing disambiguates the generated document list
 			.dv _hold &doc_title
 			.dv doc_title &doc_subtitle
 			.dv doc_subtitle &_hold
 		.fi
 
-		.** bleeding rst needs bullet lists to have no line breaks, so col width must allow lists to set wide lines
-		.dv col_width 20i
 		.dv col_indent 0i
 		.dv indent_size 0i
 		.im &{lib}/rst.im
@@ -111,3 +117,10 @@
 .ca end
 .fi
 
+.gv e GEN_TITLE gen_title
+.if "&gen_title" "1" =
+	.im ../rtd/gen_title.im
+.fi
+
+
+.dv _setup_im

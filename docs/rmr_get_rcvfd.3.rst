@@ -11,30 +11,31 @@ Man Page: rmr_get_rcvfd
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_get_rcvfd 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  void* rmr_get_rcvfd( void* ctx )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_get_rcvfd`` function returns a file descriptor 
 which may be given to epoll_wait() by an application that 
@@ -48,26 +49,34 @@ The context (ctx) pointer passed in is the pointer returned
 by the call to rmr_init(). 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 The ``rmr_get_rcvfd`` function returns a file descriptor 
 greater or equal to 0 on success and -1 on error. 
 
 
-1.5. ERRORS
------------
+ERRORS
+------
 
 The following error values are specifically set by this RMR 
 function. In some cases the error message of a system call is 
 propagated up, and thus this list might be incomplete. 
  
-EINVAL 
-  The use of this function is invalid in this environment. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **EINVAL** 
+       - 
+         The use of this function is invalid in this environment. 
+          
+ 
 
 
-1.6. EXAMPLE
-------------
+EXAMPLE
+-------
 
 The following short code bit illustrates the use of this 
 function. Error checking has been omitted for clarity. 
@@ -79,6 +88,7 @@ function. Error checking has been omitted for clarity.
  #include <stdlib.h>
  #include <sys/epoll.h>
  #include <rmr/rmr.h>
+  
  int main() {
      int rcv_fd;     // pollable fd
      void* mrc;      //msg router context
@@ -89,12 +99,15 @@ function. Error checking has been omitted for clarity.
      int nready;
      int i;
      int norm_msg_size = 1500;               // 95% messages are less than this
+  
      mrc = rmr_init( "43086", norm_msg_size, RMRFL_NONE );
      rcv_fd = rmr_get_rcvfd( mrc );
+  
      ep_fd = epoll_create1( 0 );             // initialise epoll environment
      epe.events = EPOLLIN;
      epe.data.fd = rcv_fd;
      epoll_ctl( ep_fd, EPOLL_CTL_ADD, rcv_fd, &epe );    // add our info to the mix
+  
      while( 1 ) {
          nready = epoll_wait( ep_fd, events, 10, -1 );   // -1 == block forever (no timeout)
          for( i = 0; i < nready && i < 10; i++ ) {       // loop through to find what is ready
@@ -104,6 +117,7 @@ function. Error checking has been omitted for clarity.
                      // do something with msg
                  }
              }
+  
              // check for other ready fds....
          }
      }
@@ -111,8 +125,8 @@ function. Error checking has been omitted for clarity.
  
 
 
-1.7. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
 rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 

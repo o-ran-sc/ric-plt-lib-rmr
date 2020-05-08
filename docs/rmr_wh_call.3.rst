@@ -11,30 +11,32 @@ Man Page: rmr_wh_call
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_wh_call 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  rmr_mbuf_t* rmr_wh_call( void* vctx, rmr_whid_t whid, rmr_mbuf_t* msg, int call_id, int max_wait )
+  
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_wh_call`` function accepts a message buffer (msg) 
 from the user application and attempts to send it using the 
@@ -62,21 +64,19 @@ concurrent applications (such as Go's goroutines) is
 possible. 
 
 
-1.4. Retries
-------------
+Retries
+-------
 
 The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
  
  
-1. 
-  The message is sent without error 
-   
-2. 
-  The underlying transport reports a *hard* failure 
-   
-3. 
-  The maximum number of retry loops has been attempted 
+ &item The message is sent without error 
+  
+ &item The underlying transport reports a *hard* failure 
+  
+ &item The maximum number of retry loops has been attempted 
+ 
  
 A retry loop consists of approximately 1000 send attempts 
 **without** any intervening calls to *sleep()* or *usleep().* 
@@ -88,8 +88,8 @@ allowing the user application to completely disable retires
 (set to 0), or to increase the number of retry loops. 
 
 
-1.5. Transport Level Blocking
------------------------------
+Transport Level Blocking
+------------------------
 
 The underlying transport mechanism used to send messages is 
 configured in *non-blocking* mode. This means that if a 
@@ -111,8 +111,8 @@ RMR to retry the send operation, and even then it is possible
 loop is not enough to guarantee a successful send. 
 
 
-1.6. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 On success, new message buffer, with the payload containing 
 the response from the remote endpoint is returned. The state 
@@ -127,29 +127,47 @@ no message, the indication is that there was no response
 received within the timeout (max_wait) period of time. 
 
 
-1.7. ERRORS
------------
+ERRORS
+------
 
 The following values may be passed back in the *state* field 
 of the returned message buffer. 
  
  
-RMR_ERR_WHID 
-  The wormhole ID passed in was not associated with an open 
-  wormhole, or was out of range for a valid ID. 
-RMR_ERR_NOWHOPEN 
-  No wormholes exist, further attempt to validate the ID are 
-  skipped. 
-RMR_ERR_BADARG 
-  The message buffer pointer did not refer to a valid 
-  message. 
-RMR_ERR_NOHDR 
-  The header in the message buffer was not valid or 
-  corrupted. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **RMR_ERR_WHID** 
+       - 
+         The wormhole ID passed in was not associated with an open 
+         wormhole, or was out of range for a valid ID. 
+          
+         | 
+      
+     * - **RMR_ERR_NOWHOPEN** 
+       - 
+         No wormholes exist, further attempt to validate the ID are 
+         skipped. 
+          
+         | 
+      
+     * - **RMR_ERR_BADARG** 
+       - 
+         The message buffer pointer did not refer to a valid message. 
+          
+         | 
+      
+     * - **RMR_ERR_NOHDR** 
+       - 
+         The header in the message buffer was not valid or corrupted. 
+          
+ 
 
 
-1.8. EXAMPLE
-------------
+EXAMPLE
+-------
 
 The following is a simple example of how the a wormhole is 
 created (rmr_wh_open) and then how ``rmr_wh_send_msg`` 
@@ -159,7 +177,9 @@ omitted for clarity.
  
 :: 
  
+  
  #include <rmr/rmr.h>    // system headers omitted for clarity
+  
  int main() {
     rmr_whid_t whid = -1;   // wormhole id for sending
     void* mrc;      //msg router context
@@ -167,15 +187,19 @@ omitted for clarity.
     rmr_mbuf_t*  sbuf;      // send buffer
     int     count = 0;
     int     norm_msg_size = 1500;    // most messages fit in this size
+  
     mrc = rmr_init( "43086", norm_msg_size, RMRFL_NONE );
     if( mrc == NULL ) {
        fprintf( stderr, "[FAIL] unable to initialise RMR environment\\n" );
        exit( 1 );
     }
+  
     while( ! rmr_ready( mrc ) ) {        // wait for routing table info
        sleep( 1 );
     }
+  
     sbuf = rmr_alloc_msg( mrc, 2048 );
+  
     while( 1 ) {
       if( whid < 0 ) {
         whid = rmr_wh_open( mrc, "localhost:6123" );  // open fails if endpoint refuses conn
@@ -190,14 +214,15 @@ omitted for clarity.
             }
          }
        }
+  
        sleep( 5 );
     }
  }
  
 
 
-1.9. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
 rmr_payload_size(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 

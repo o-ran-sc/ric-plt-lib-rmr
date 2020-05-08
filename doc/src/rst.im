@@ -37,6 +37,16 @@
 	.** convert {X}fm input into rts.
 	.** post processing is needed to strip the leading space that tfm insists on adding.
 
+	.** character offsets needed to provide bloody indention significant crap.
+	.** tfm converts points to characters using 7p/ch so these guarentee correct
+	.** spacing.
+	.**
+	.dv _ch2 14p
+	.dv _ch4 28p
+	.dv _ch6 42p
+	.dv _ch8 56p
+	.dv _ch10 70p
+
 	.** Long strings of equals and dashes needed to make title/subtitle easier to generate. Multi
 	.** line annotations for headers could be used, but the code is messy for what results in
 	.** 4 lines in the setup files.
@@ -81,9 +91,10 @@
 	.dv indent
 	.dv uindent
 
-	.dv lic1 +
+	.** list item characters
+	.dv lic1 *
 	.dv lic2 -
-	.dv lic3 *
+	.dv lic3 +
 
 	.in 0i						.** bloody rst is indention sensitive like markdown; sheesh
 
@@ -95,10 +106,13 @@
 	.dv mult_space .sp $1
 
 	.** ------- bullet lists -------------------------
-	.dv beg_list .ll 17i .sp 1 .dv lic $1 ^:
-	.dv end_list .ll 6i .sp 1
-	.dv item .br &lic
-	.dv li .br &lic
+	.** .dv beg_list .sp 1 .dv lic ${1!*} ^: .in +&{_ch4}
+	.** .dv end_list .in -&{_ch4} .sp 1
+	.** .dv item .br &lic
+	.** .dv li .br &lic
+	.dv beg_list .sp 1 .bl ${1!*} ^: .br
+	.dv end_list .el .sp 1
+	.dv li .br .li
 
 	.dv ex_start .sp 1 ^:^: .sp 1 .ll -2 .in +2 .nf
 	.dv ex_end .fo on .in -2 .ll +2 .sp 1
@@ -114,12 +128,8 @@
 	.dv ital *$1*
 	.dv bold **$1**
 	.dv cw ^^^`^^^`$1^^^`^^^`
+	.** global font changes seem impossible in RST
 	.dv set_font_prop
-
-	.dv table .sp 1 ^[table not supported in rst output]  .if false
-	.dv tab_cell
-	.dv tab_row
-	.dv end_table .fi
 
 	.dv super .sm ^[ .sm ^&{ss_num}]
 	.dv ss_num 1
@@ -139,27 +149,31 @@
 		but certainly not great. The output of these macros is extreamely  space
 		sensitive (leading spaces because python programmers believe these
 		kinds of "everythign must align" parsers are good).
+
+		In order to visually separate entries with a bit more space, a row separater
+		is used and is applied at the start of rows 2-n.
+
+		RST requires a blank line prior to the start of the list, so we force one.
 	.fi
 
-	.** character offsets needed to provide bloody indention significant crap.
-	.** tfm converts points to characters using 7p/ch so these guarentee correct
-	.** spacing.
+	.** beg_dlist parms 1 and 2 are for PFM, $3 is for rst and is optionally the term,def widths (e.g. 15,80)
+	.** mind the tildas (end of line escapes in {X}fm
 	.**
-	.dv _ch4 28p
-	.dv _ch6 42p
-	.dv _ch8 56p
-	.dv _ch10 70p
+	.dv beg_dlist   .dv di_term 1 ^: ~
+					.dv row_sep .sp 1 ^: ~
+					.sp 1 ~
+					.in +&_ch4 ~
+					^.. list-table^:^: .in +&_ch2 ^:widths^: ${3!auto} .br ^:header-rows^: 0  .br ^:class^: borderless ~
+					.in +&ch_6
 
-	.dv beg_dlist parms 1 and 2 are for PFM, $3 is for rst and is optionally the k,d widths (e.g. 15,80)
-	.** list set up configuring type, width etc
-	.dv beg_dlist  .dv row_term ^` ^` ^: .ll 6i .in &_ch4 ^.. list-table^:^: .in &_ch6 ^:widths^: ${3!auto} .br ^:header-rows^: 0  .br ^:class^: borderless
+	.dv ditem  ^&row_sep  * -  **$1** .in +&_ch2 - .in +&_ch2 .dv row_sep .sp 1 | .in -&{_ch4} .sp 1 ^:
+	.dv diitem  ^&row_sep  * -  **$1** .in +&_ch2 - .in +&_ch2 .dv row_sep .sp 1 | .in -&{_ch4} .sp 1 ^:
+	.dv di ^&row_sep  * -  **$1** .in +&_ch2 - .in +&_ch2 .dv row_sep .sp 1 | .in -&{_ch4} .sp 1 ^:
 
-	.dv ditem  ^&row_term .sp 1 .in &_ch6  * -  **$1** .in &_ch8 - .in &_ch10 .dv row_term | ^:
-	.** until the doc is cleaned and all use &ditem we need these
-	.dv diitem ^&row_term .sp 1 .in &_ch6  * -  **$1** .in &_ch8 - .in &_ch10 .dv row_term | ^:
-	.dv di     ^&row_term .sp 1 .in &_ch6  * -  **$1** .in &_ch8 - .in &_ch10 .dv row_term | ^:
+	.** auto numbering ditem has to be hacked in since we're completely unable to use {X}fm's list gen for RST
+	.dv aditem  ^&row_sep .in &_ch6  * -  **^&{di_term}** .in &_ch8 - .in &_ch10 .dv row_sep .sp 1 | .sp 1 ^: .dv di_term ^[ %.0f ^&di_term 1 + ]
 
-	.dv end_dlist .sp 1 .in 0i .sp 1
+	.dv end_dlist .sp 1 .in -&{_ch10} .sp 1
 
 	.** generate a table with borders
 	.dv beg_table ^.. list-table^:^: .br ^`   ^` ^:widths^: $1 .br ^`   ^` ^:header-rows^: 0 .sp 1
@@ -171,5 +185,7 @@
 	.dv col .in 0i .br ^` `   -` ^` .in 56p
 	.dv row .in 0i .sp 1 ^` ` * -` ^` .in 56p
 	.dv end_table .sp 1 .in 0i
+	.dv tab_cell ^&col
+	.dv tab_row ^&row
 
 	.ju off

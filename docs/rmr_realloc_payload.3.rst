@@ -11,30 +11,31 @@ Man Page: rmr_realloc_payload
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_realloc_payload 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  extern rmr_mbuf_t* rmr_realloc_payload( rmr_mbuf_t* msg, int new_len, int copy, int clone );
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_realloc_payload`` function will return a pointer to 
 an RMR message buffer struct (rmr_mbuf_t) which has a payload 
@@ -45,8 +46,8 @@ original payload are copied if the *copy* parameter is true
 there is no additional memory allocation and copying. 
 
 
-1.4. Cloning The Message Buffer
--------------------------------
+Cloning The Message Buffer
+--------------------------
 
 This function can also be used to generate a separate copy of 
 the original message, with the desired payload size, without 
@@ -56,8 +57,8 @@ parameter is true (1). When cloning, the payload is copied to
 the cloned message **only** if the *copy* parameter is true. 
 
 
-1.5. Message Buffer Metadata
-----------------------------
+Message Buffer Metadata
+-----------------------
 
 The metadata in the original message buffer (message type, 
 subscription ID, and payload length) will be preserved if the 
@@ -66,8 +67,8 @@ subscription ID, and payload length) will be preserved if the
 (-1) for type and ID, and the length is set to 0. 
 
 
-1.6. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 The ``rmr_realloc_payload`` function returns a pointer to the 
 message buffer with the payload which is large enough to hold 
@@ -86,23 +87,35 @@ error, a nil pointer will be returned and the value of
 *errno* will be set to reflect the problem. 
 
 
-1.7. ERRORS
------------
+ERRORS
+------
 
 These value of *errno* will reflect the error condition if a 
 nil pointer is returned: 
  
  
-ENOMEM 
-  Memory allocation of the new payload failed. 
-   
-EINVAL 
-  The pointer passed in was nil, or refrenced an invalid 
-  message, or the required length was not valid. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **ENOMEM** 
+       - 
+         Memory allocation of the new payload failed. 
+          
+          
+         | 
+      
+     * - **EINVAL** 
+       - 
+         The pointer passed in was nil, or refrenced an invalid 
+         message, or the required length was not valid. 
+          
+ 
 
 
-1.8. EXAMPLE
-------------
+EXAMPLE
+-------
 
 The following code bit illustrates how this function can be 
 used to reallocate a buffer for a return to sender 
@@ -120,11 +133,12 @@ received.
        // populate and send ack message
      }
  }
+  
  
 
 
-1.9. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_free_msg(3), rmr_init(3), 
 rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 

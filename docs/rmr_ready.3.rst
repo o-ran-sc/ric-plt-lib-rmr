@@ -11,38 +11,39 @@ Man Page: rmr_ready
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_ready 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  int rmr_ready( void* vctx );
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_ready`` function checks to see if a routing table 
 has been successfully received and installed. The return 
 value indicates the state of readiness. 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 A return value of 1 (true) indicates that the routing table 
 is in place and attempts to send messages can be made. When 0 
@@ -51,8 +52,8 @@ and thus attempts to send messages will fail with *no
 endpoint* errors. 
 
 
-1.5. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
 rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 

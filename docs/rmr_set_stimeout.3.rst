@@ -11,30 +11,32 @@ Man Page: rmr_set_stimeout
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_set_stimeout 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  int rmr_set_stimeout( void* vctx, int rloops );
+  
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_set_stimeout`` function sets the configuration for 
 how RMR will retry message send operations which complete 
@@ -51,8 +53,8 @@ if the *rloops* value is greater than 1.
  
 
 
-1.4. Disabling Retries
-----------------------
+Disabling Retries
+-----------------
 
 By default, the send operations will execute with an *rloop* 
 setting of 1; each send operation will attempt to resend the 
@@ -66,23 +68,23 @@ RMR send operations will attempt a send operation only
 of that single attempt. 
 
 
-1.5. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 This function returns a -1 to indicate that the *rloops* 
 value could not be set, and the value *RMR_OK* to indicate 
 success. 
 
 
-1.6. ERRORS
------------
+ERRORS
+------
 
 Currently errno is **not** set by this function; the only 
 cause of a failure is an invalid context (*vctx*) pointer. 
 
 
-1.7. EXAMPLE
-------------
+EXAMPLE
+-------
 
 The following is a simple example of how the 
 ``rmr_set_stimeout`` function is called. 
@@ -91,18 +93,21 @@ The following is a simple example of how the
 :: 
  
      #define NO_FLAGS    0
+  
      char* port = "43086";     // port for message router listen
      int   max_size = 4096;    // max message size for default allocations
      void* mr_context;         // message router context
+  
      mr_context = rmr_init( port, max_size, NO_FLAGS );
      if( mr_context != NULL ) {
          rmr_set_stimeout( mr_context, 0 );    // turn off retries
      }
+  
  
 
 
-1.8. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
 rmr_payload_size(3), rmr_rcv_msg(3), rmr_rcv_specific(3), 

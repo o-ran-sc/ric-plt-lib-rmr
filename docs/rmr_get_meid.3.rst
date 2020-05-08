@@ -11,30 +11,31 @@ Man Page: rmr_get_meid
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_get_meid 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  char* rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_get_meid`` function will copy the managed entity ID 
 (meid) field from the message into the *dest* buffer provided 
@@ -44,8 +45,8 @@ then a buffer is allocated (the calling application is
 expected to free when the buffer is no longer needed). 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 On success, a pointer to the extracted string is returned. If 
 *dest* was supplied, then this is just a pointer to the 
@@ -54,25 +55,37 @@ allocated buffer. If an error occurs, a nil pointer is
 returned and errno is set as described below. 
 
 
-1.5. ERRORS
------------
+ERRORS
+------
 
 If an error occurs, the value of the global variable 
 ``errno`` will be set to one of the following with the 
 indicated meaning. 
  
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+      
+     * - **EINVAL** 
+       - 
+         The message, or an internal portion of the message, was 
+         corrupted or the pointer was invalid. 
+          
+          
+         | 
+      
+     * - **ENOMEM** 
+       - 
+         A nil pointer was passed for *dest,* however it was not 
+         possible to allocate a buffer using malloc(). 
+          
  
-EINVAL 
-  The message, or an internal portion of the message, was 
-  corrupted or the pointer was invalid. 
-   
-ENOMEM 
-  A nil pointer was passed for *dest,* however it was not 
-  possible to allocate a buffer using malloc(). 
 
 
-1.6. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_bytes2xact(3), rmr_bytes2meid(3), 
 rmr_call(3), rmr_free_msg(3), rmr_get_rcvfd(3), 

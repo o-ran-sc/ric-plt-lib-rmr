@@ -11,30 +11,31 @@ Man Page: rmr_wh_state
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_wh_state 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  int rmr_wh_state( void* vctx, rmr_whid_t whid )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_wh_state`` function will return the current state 
 of the connection associated with the given wormhole (whid). 
@@ -46,31 +47,55 @@ be possible for RMR to know the actual state and the
 connection may always be reported as "open." 
 
 
-1.4. RETURN
------------
+RETURN
+------
 
 The following values are potential return values. 
  
  
-RMR_OK 
-  The wormhole ID is valid and the connection is "open." 
-   
-RMR_ERR_WHID 
-  THe wormhole ID passed into the function was not valid. 
-   
-RMR_ERR_NOENDPT 
-  The wormhole is not open (not connected). 
-   
-RMR_ERR_BADARG 
-  The context passed to the function was nil or invalid. 
-   
-RMR_ERR_NOWHOPEN 
-  Wormholes have not been initialised (no wormhole open call 
-  has been made). 
-   
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **RMR_OK** 
+       - 
+         The wormhole ID is valid and the connection is "open." 
+          
+          
+         | 
+      
+     * - **RMR_ERR_WHID** 
+       - 
+         THe wormhole ID passed into the function was not valid. 
+          
+          
+         | 
+      
+     * - **RMR_ERR_NOENDPT** 
+       - 
+         The wormhole is not open (not connected). 
+          
+          
+         | 
+      
+     * - **RMR_ERR_BADARG** 
+       - 
+         The context passed to the function was nil or invalid. 
+          
+          
+         | 
+      
+     * - **RMR_ERR_NOWHOPEN** 
+       - 
+         Wormholes have not been initialised (no wormhole open call 
+         has been made). 
+          
+          
+ 
 
 
-1.5. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_wh_open(3), rmr_wh_send_msg(3), rmr_wh_close(3) 

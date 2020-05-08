@@ -11,30 +11,31 @@ Man Page: rmr_get_const
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_get_const 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  unsigned char* rmr_get_const();
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_get_const`` function is a convenience function for 
 wrappers which do not have the ability to "compile in" RMR 
@@ -58,15 +59,15 @@ illustrated in the following (partial) example:
  
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 On success, a pointer to a string containing the JSON 
 defining constant and value pairs. On failure a nil pointer 
 is returned. 
 
 
-1.5. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr(7) 

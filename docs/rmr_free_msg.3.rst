@@ -11,30 +11,31 @@ Man Page: rmr_free_msg
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_free_msg 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  void rmr_free_msg( rmr_mbuf_t* mbuf );
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The message buffer is returned to the pool, or the associated 
 memory is released depending on the needs of the underlying 
@@ -48,8 +49,8 @@ the pointers (transaction ID, or payload) which were
 available. 
 
 
-1.4. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_init(3), 
 rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 

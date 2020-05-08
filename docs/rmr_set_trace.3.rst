@@ -11,30 +11,31 @@ Man Page: rmr_set_trace
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_set_trace 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  int rmr_set_trace( rmr_mbuf_t* mbuf, unsigned char* data, int len )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_set_trace`` function will copy ``len`` bytes from 
 ``data`` into the trace portion of ``mbuf.`` If the trace 
@@ -43,8 +44,8 @@ will be reallocated to ensure that enough space is available
 for the trace data. 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 The ``rmr_set_trace`` function returns the number of bytes 
 successfully copied to the message. If 0 is returned either 
@@ -52,8 +53,8 @@ the message pointer was nil, or the size in the parameters
 was <= 0. 
 
 
-1.5. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_tralloc_msg(3), rmr_bytes2xact(3), 
 rmr_bytes2payload(3), rmr_call(3), rmr_free_msg(3), 

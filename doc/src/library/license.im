@@ -18,7 +18,7 @@
 ==================================================================================
 .fi
 
-.if ! _license_im 
+.if ! _license_im
 
 .** this file is imbedded after the cover page for Postscript generated
 .** documents, and at the top for text based documents. It's purpose is

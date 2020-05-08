@@ -52,11 +52,11 @@ be passed to the &cw(rmr_wh_send_msg) function.
 
 &space
 &ital(Target) is the &ital(name:port,) or &ital(IP-address:port,) combination of the
-processess that the wormhole should be connected to.
+processes that the wormhole should be connected to.
 &ital(Vctx) is the RMR void context pointer that was returned by the &cw(rmr_init) function.
 
 &space
-When invoked, this function immediatly attempts to connect to the target process.
+When invoked, this function immediately attempts to connect to the target process.
 If the connection cannot be established, an error is returned to the caller, and no
 direct messages can be sent to the target.
 Once a wormhole is connected, the underlying transport mechanism (e.g. NNG) will provide
@@ -70,7 +70,7 @@ The &cw(rmr_wh_open) function returns a type &cw(rmr_whid_t) which must be passe
 the &cw(rmr_wh_send_msg) function when sending a message.
 The id may also be tested to determine success or failure of the connection by
 using the RMR_WH_CONNECTED macro and passing the ID as the parameter; a result of
-1 indicates that the connection was esablished and that the ID is valid.
+1 indicates that the connection was established and that the ID is valid.
 
 &h2(ERRORS)
 The following error values are specifically set by this RMR function. In some cases the

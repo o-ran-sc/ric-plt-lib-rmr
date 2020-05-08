@@ -11,30 +11,31 @@ Man Page: rmr_get_trace
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_get_trace 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  int rmr_get_trace( rmr_mbuf_t* mbuf, unsigned char* dest, int size )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_get_trace`` function will copy the trace 
 information from the message into the user's allocated memory 
@@ -43,8 +44,8 @@ be the maximum number of bytes which can be copied (size of
 the destination buffer). 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 On success, the number of bytes actually copied is returned. 
 If the return value is 0, no bytes copied, then the reason 
@@ -52,8 +53,8 @@ could be that the message pointer was nil, or the size
 parameter was <= 0. 
 
 
-1.5. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_tralloc_msg(3), rmr_bytes2xact(3), 
 rmr_bytes2meid(3), rmr_call(3), rmr_free_msg(3), 

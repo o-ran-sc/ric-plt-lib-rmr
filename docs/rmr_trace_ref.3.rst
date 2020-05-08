@@ -11,30 +11,31 @@ Man Page: rmr_trace_ref
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_trace_ref 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  int rmr_trace_ref( rmr_mbuf_t* mbuf, int* sizeptr )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_trace_ref`` function returns a pointer to the trace 
 area in the message, and optionally populates the user 
@@ -42,8 +43,8 @@ programme supplied size integer with the trace area size, if
 *sizeptr* is not nil. 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 On success, a void pointer to the trace area of the message 
 is returned. A nil pointer is returned if the message has no 
@@ -51,8 +52,8 @@ trace data area allocated, or if the message itself is
 invalid. 
 
 
-1.5. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_tralloc_msg(3), rmr_bytes2xact(3), 
 rmr_bytes2meid(3), rmr_call(3), rmr_free_msg(3), 

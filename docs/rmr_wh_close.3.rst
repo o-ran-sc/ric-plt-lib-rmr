@@ -11,30 +11,31 @@ Man Page: rmr_wh_close
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_wh_close 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  void rmr_close( void* vctx, rmr_whid_t whid )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_wh_close`` function closes the wormhole associated 
 with the wormhole id passed in. Future calls to 
@@ -47,8 +48,8 @@ There is no way to force a TCP session to be closed at this
 point in time. 
 
 
-1.4. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
 rmr_get_rcvfd(3), rmr_payload_size(3), rmr_send_msg(3), 

@@ -11,30 +11,31 @@ Man Page: rmr_call
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_call 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  extern rmr_mbuf_t* rmr_call( void* vctx, rmr_mbuf_t* msg );
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_call`` function sends the user application message 
 to a remote endpoint, and waits for a corresponding response 
@@ -51,8 +52,8 @@ are returned in the order received, one per call to
 ``rmr_rcv_msg.`` 
 
 
-1.4. Call Timeout
------------------
+Call Timeout
+------------
 
 The ``rmr_call`` function implements a timeout failsafe to 
 prevent, in most cases, the function from blocking forever. 
@@ -73,21 +74,19 @@ versions of the library this might be extended to be a
 parameter which the user application may set. 
 
 
-1.5. Retries
-------------
+Retries
+-------
 
 The send operations in RMR will retry *soft* send failures 
 until one of three conditions occurs: 
  
  
-1. 
-  The message is sent without error 
-   
-2. 
-  The underlying transport reports a *hard* failure 
-   
-3. 
-  The maximum number of retry loops has been attempted 
+ &item The message is sent without error 
+  
+ &item The underlying transport reports a *hard* failure 
+  
+ &item The maximum number of retry loops has been attempted 
+ 
  
 A retry loop consists of approximately 1000 send attempts 
 **without** any intervening calls to *sleep()* or *usleep().* 
@@ -99,8 +98,8 @@ allowing the user application to completely disable retires
 (set to 0), or to increase the number of retry loops. 
 
 
-1.6. Transport Level Blocking
------------------------------
+Transport Level Blocking
+------------------------
 
 The underlying transport mechanism used to send messages is 
 configured in *non-blocking* mode. This means that if a 
@@ -122,8 +121,8 @@ RMR to retry the send operation, and even then it is possible
 loop is not enough to guarantee a successful send. 
 
 
-1.7. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 The ``rmr_call`` function returns a pointer to a message 
 buffer with the state set to reflect the overall state of 
@@ -132,45 +131,76 @@ pointer will be returned; when this is the case only *errno*
 will be available to describe the reason for failure. 
 
 
-1.8. ERRORS
------------
+ERRORS
+------
 
 These values are reflected in the state field of the returned 
 message. 
  
  
-RMR_OK 
-  The call was successful and the message buffer references 
-  the response message. 
-   
-RMR_ERR_CALLFAILED 
-  The call failed and the value of *errno,* as described 
-  below, should be checked for the specific reason. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **RMR_OK** 
+       - 
+         The call was successful and the message buffer references the 
+         response message. 
+          
+          
+         | 
+      
+     * - **RMR_ERR_CALLFAILED** 
+       - 
+         The call failed and the value of *errno,* as described below, 
+         should be checked for the specific reason. 
+          
+ 
  
 The global "variable" *errno* will be set to one of the 
 following values if the overall call processing was not 
 successful. 
  
  
-ETIMEDOUT 
-  Too many messages were queued before receiving the 
-  expected response 
-   
-ENOBUFS 
-  The queued message ring is full, messages were dropped 
-   
-EINVAL 
-  A parameter was not valid 
-   
-EAGAIN 
-  The underlying message system was interrupted or the 
-  device was busy; the message was **not** sent, and the 
-  user application should call this function with the 
-  message again. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **ETIMEDOUT** 
+       - 
+         Too many messages were queued before receiving the expected 
+         response 
+          
+          
+         | 
+      
+     * - **ENOBUFS** 
+       - 
+         The queued message ring is full, messages were dropped 
+          
+          
+         | 
+      
+     * - **EINVAL** 
+       - 
+         A parameter was not valid 
+          
+          
+         | 
+      
+     * - **EAGAIN** 
+       - 
+         The underlying message system was interrupted or the device 
+         was busy; the message was **not** sent, and the user 
+         application should call this function with the message again. 
+          
+ 
 
 
-1.9. EXAMPLE
-------------
+EXAMPLE
+-------
 
 The following code snippet shows one way of using the 
 ``rmr_call`` function, and illustrates how the transaction ID 
@@ -183,35 +213,42 @@ must be set.
      int retry_delay = 50000;            // retry delay (usec)
      static rmr_mbuf_t*  mbuf = NULL;    // response msg
      msg_t*  pm;                         // application struct for payload
+  
      // get a send buffer and reference the payload
      mbuf = rmr_alloc_msg( mr, sizeof( pm->req ) );
      pm = (msg_t*) mbuf->payload;
+  
      // generate an xaction ID and fill in payload with data and msg type
      snprintf( mbuf->xaction, RMR_MAX_XID, "%s", gen_xaction() );
      snprintf( pm->req, sizeof( pm->req ), "{ \\"req\\": \\"num users\\"}" );
      mbuf->mtype = MT_REQ;
+  
      msg = rmr_call( mr, msg );
      if( ! msg ) {               // probably a timeout and no msg received
          return NULL;            // let errno trickle up
      }
+  
      if( mbuf->state != RMR_OK ) {
          while( retries_left-- > 0 &&             // loop as long as eagain
                 errno == EAGAIN &&
                 (msg = rmr_call( mr, msg )) != NULL &&
                 mbuf->state != RMR_OK ) {
+  
              usleep( retry_delay );
          }
+  
          if( mbuf == NULL || mbuf->state != RMR_OK ) {
              rmr_free_msg( mbuf );        // safe if nil
              return NULL;
          }
      }
+  
      // do something with mbuf
  
 
 
-1.10. SEE ALSO
---------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_free_msg(3), rmr_init(3), 
 rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 

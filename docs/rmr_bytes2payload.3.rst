@@ -11,30 +11,31 @@ Man Page: rmr_bytes2payload
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_bytes2payload 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  void rmr_bytes2payload( rmr_mbuf_t* mbuf, unsigned char* src, int len )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 This is a convenience function as some wrapper languages 
 might not have the ability to directly copy into the payload 
@@ -47,19 +48,19 @@ number of bytes copied.
 There is little error checking, and no error reporting. 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 None. 
 
 
-1.5. EXAMPLE
-------------
+EXAMPLE
+-------
 
 
 
-1.6. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_bytes2xact(3), rmr_bytes2payload(3), 
 rmr_call(3), rmr_free_msg(3), rmr_get_rcvfd(3), 

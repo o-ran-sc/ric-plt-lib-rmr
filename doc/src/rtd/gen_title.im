@@ -29,6 +29,7 @@
 	Date:		10 April 2020
 .fi
 
+.** special man page title generator
 .gv e INPUT_FILE in
 .if in
 	.if ! doc_title
@@ -36,6 +37,7 @@
 	.fi
 .fi
 
+.** add license to the document as a comment; where possible
 .im license.im
 
 .gv e OUTPUT_TYPE ot

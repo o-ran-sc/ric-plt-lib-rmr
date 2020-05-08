@@ -11,53 +11,62 @@ Man Page: rmr_get_trlen
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_get_trlen 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  int rmr_get_trlen( rmr_mbuf_t* msg );
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 Given a message buffer, this function returns the amount of 
 space (bytes) that have been allocated for trace data. If no 
 trace data has been allocated, then 0 is returned. 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 The number of bytes allocated for trace information in the 
 given message. 
 
 
-1.5. ERRORS
------------
+ERRORS
+------
 
  
-INVAL 
-  Parameter(s) passed to the function were not valid. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **INVAL** 
+       - 
+         Parameter(s) passed to the function were not valid. 
+          
+ 
 
 
-1.6. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
 rmr_get_trace(3), rmr_init(3), rmr_init_trace(3), 

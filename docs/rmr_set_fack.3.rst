@@ -11,30 +11,32 @@ Man Page: rmr_set_fack
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_set_fack 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  void rmr_set_fack( void* vctx );
+  
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_set_fack`` function enables *fast TCP 
 acknowledgements* if the underlying transport library 
@@ -42,19 +44,19 @@ supports it. This might be useful for applications which must
 send messages at a maximum rate. 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 There is no return value. 
 
 
-1.5. ERRORS
------------
+ERRORS
+------
 
 This function does not generate any errors. 
 
 
-1.6. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_init(3), 

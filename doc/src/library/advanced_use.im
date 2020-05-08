@@ -1,6 +1,6 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
+	Copyright (c) 2019-2020 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,7 @@ return to sender and wormhole functions.
 
 &h2(The Call Function)
 The RMR function &func(rmr_call) sends a message in the exact same
-manner as the &cw(rmr_send_msg()) function, with the endpoint
+manner as the &func(rmr_send_msg()) function, with the endpoint
 selection based on the message key.  But unlike the send function,
 &func(rmr_call) will block and wait for a response from the
 application that is selected to receive the message.  The matching

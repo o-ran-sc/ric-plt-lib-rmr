@@ -92,7 +92,7 @@
     When the Route Manager is expecting RMR to connect and request a
     table update during initialisation, the variable should be the
     &cw(host:port) of the Route Manager process.
-    
+
     &space
     The &cw(RMR_CTL_PORT) variable (added with the support of sending table update
     requests to Route manager), controls the behaviour if this variable is not set.

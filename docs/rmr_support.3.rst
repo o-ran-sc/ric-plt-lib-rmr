@@ -11,37 +11,39 @@ Man Page: rmr_support
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 RMR support functions 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
  #include <rmr/ring_inline.h>
+  
  char* rmr_fib( char* fname );
  int rmr_has_str( char const* buf, char const* str, char sep, int max );
  int rmr_tokenise( char* buf, char** tokens, int max, char sep );
  void* rmr_mk_ring( int size );
  void rmr_ring_free( void* vr );
+  
  static inline void* rmr_ring_extract( void* vr )
  static inline int rmr_ring_insert( void* vr, void* new_data )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 These functions support the RMR library, and are made 
 available to user applications as some (e.g. route table 
@@ -79,8 +81,8 @@ a pointer at the next available slot (tail) or extract the
 data at the head. 
 
 
-1.4. RETURN VALUES
-------------------
+RETURN VALUES
+-------------
 
 The following are the return values for each of these 
 functions. 
@@ -113,23 +115,31 @@ The ``rmr_ring_extract`` will return the data which is at the
 head of the ring, or NULL if the ring is empty. 
 
 
-1.5. ERRORS
------------
+ERRORS
+------
 
 Not many of these functions set the value in ``errno,`` 
 however the value may be one of the following: 
  
-INVAL 
-  Parameter(s) passed to the function were not valid. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **INVAL** 
+       - 
+         Parameter(s) passed to the function were not valid. 
+          
+ 
 
 
-1.6. EXAMPLE
-------------
+EXAMPLE
+-------
 
 
 
-1.7. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), rmr_init(3), 
 rmr_payload_size(3), rmr_send_msg(3), rmr_rcv_msg(3), 

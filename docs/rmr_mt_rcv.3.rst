@@ -11,30 +11,31 @@ Man Page: rmr_mt_rcv
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_mt_rcv 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  rmr_mbuf_t* rmr_mt_rcv( void* vctx, rmr_mbuf_t* old_msg, int timeout );
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_mt_rcv`` function blocks until a message is 
 received, or the timeout period (milliseconds) has passed. 
@@ -74,8 +75,8 @@ mode with the same "pass through" overhead to using this
 function directly. 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 When a message is received before the timeout period expires, 
 a pointer to the RMR message buffer which describes the 
@@ -89,87 +90,148 @@ msg with the state set, or a nil pointer if no old message
 was provided. 
 
 
-1.5. ERRORS
------------
+ERRORS
+------
 
 The *state* field in the message buffer will be set to one of 
 the following values: 
  
  
-RMR_OK 
-  The message was received without error. 
-   
-RMR_ERR_BADARG 
-  A parameter passed to the function was not valid (e.g. a 
-  nil pointer). indicate either ``RMR_OK`` or 
-  ``RMR_ERR_EMPTY`` if an empty message was received. 
-   
-RMR_ERR_EMPTY 
-  The message received had no associated data. The length of 
-  the message will be 0. 
-   
-RMR_ERR_NOTSUPP 
-  The multi-threaded option was not enabled when RMR was 
-  initialised. See the man page for *rmr_init()* for 
-  details. 
-   
-RMR_ERR_RCVFAILED 
-  A hard error occurred preventing the receive from 
-  completing. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **RMR_OK** 
+       - 
+         The message was received without error. 
+          
+          
+         | 
+      
+     * - **RMR_ERR_BADARG** 
+       - 
+         A parameter passed to the function was not valid (e.g. a nil 
+         pointer). indicate either ``RMR_OK`` or ``RMR_ERR_EMPTY`` if 
+         an empty message was received. 
+          
+          
+         | 
+      
+     * - **RMR_ERR_EMPTY** 
+       - 
+         The message received had no associated data. The length of 
+         the message will be 0. 
+          
+          
+         | 
+      
+     * - **RMR_ERR_NOTSUPP** 
+       - 
+         The multi-threaded option was not enabled when RMR was 
+         initialised. See the man page for *rmr_init()* for details. 
+          
+          
+         | 
+      
+     * - **RMR_ERR_RCVFAILED** 
+       - 
+         A hard error occurred preventing the receive from completing. 
+          
+ 
 When a nil pointer is returned, or any other state value was 
 set in the message buffer, ``errno`` will be set to one of 
 the following: 
  
  
-INVAL 
-  Parameter(s) passed to the function were not valid. 
-   
-EBADF 
-  The underlying message transport is unable to process the 
-  request. 
-   
-ENOTSUP 
-  The underlying message transport is unable to process the 
-  request. 
-   
-EFSM 
-  The underlying message transport is unable to process the 
-  request. 
-   
-EAGAIN 
-  The underlying message transport is unable to process the 
-  request. 
-   
-EINTR 
-  The underlying message transport is unable to process the 
-  request. 
-   
-ETIMEDOUT 
-  The underlying message transport is unable to process the 
-  request. 
-   
-ETERM 
-  The underlying message transport is unable to process the 
-  request. 
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+     * - **INVAL** 
+       - 
+         Parameter(s) passed to the function were not valid. 
+          
+          
+         | 
+      
+     * - **EBADF** 
+       - 
+         The underlying message transport is unable to process the 
+         request. 
+          
+          
+         | 
+      
+     * - **ENOTSUP** 
+       - 
+         The underlying message transport is unable to process the 
+         request. 
+          
+          
+         | 
+      
+     * - **EFSM** 
+       - 
+         The underlying message transport is unable to process the 
+         request. 
+          
+          
+         | 
+      
+     * - **EAGAIN** 
+       - 
+         The underlying message transport is unable to process the 
+         request. 
+          
+          
+         | 
+      
+     * - **EINTR** 
+       - 
+         The underlying message transport is unable to process the 
+         request. 
+          
+          
+         | 
+      
+     * - **ETIMEDOUT** 
+       - 
+         The underlying message transport is unable to process the 
+         request. 
+          
+          
+         | 
+      
+     * - **ETERM** 
+       - 
+         The underlying message transport is unable to process the 
+         request. 
+          
+ 
 
 
-1.6. EXAMPLE
-------------
+EXAMPLE
+-------
 
  
  
 :: 
  
      rmr_mbuf_t*  mbuf = NULL;   // received msg
+  
      msg = rmr_mt_recv( mr, mbuf, 100 );     // wait up to 100ms
      if( msg != NULL ) {
          switch( msg->state ) {
              case RMR_OK:
                  printf( "got a good message\\n" );
                  break;
+  
              case RMR_ERR_EMPTY:
                  printf( "received timed out\\n" );
                  break;
+  
              default:
                  printf( "receive error: %d\\n", mbuf->state );
                  break;
@@ -180,8 +242,8 @@ ETERM
  
 
 
-1.7. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_call(3), rmr_free_msg(3), 
 rmr_get_rcvfd(3), rmr_init(3), rmr_mk_ring(3), 

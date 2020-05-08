@@ -1,7 +1,7 @@
 .if false
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -39,19 +39,22 @@
 .dv index_snare_file index_snatch.im
 .im ./setup.im
 
-.** func is a bit odd; if punct needs to be added, it must be supplied as the second
-.** parm because we add () to the first. E.g. &func(foo_bar:.) will add a parm
+.** func allows us to force an index entry for the function without having to
+.** define function names in the capture file. func is a bit odd; if punct
+.** needs to be added, it must be supplied as the second .** parm because
+.** we add () to the first. E.g. &func(foo_bar:.) will add a full stop.
 .**
-.dv func .ix force ${1} ^:  ^&cw(${1}()$2 )
+.if pfm
+	.dv func .ix force ${1} ^:  ^&cw(${1}()$2 )
+.ei
+	.dv func ^&cw(${1}()$2)
+.fi
 
 .dv mtsid message type and subscription ID
 .dv Mtsid Message type and subscription ID
 .dv mt message type
 .dv Mt Message type
 .dv mts message types
-
-.hn off
-
 
 .if false
 .if &pass 3 =
@@ -69,13 +72,13 @@
 	.im license.im
 .fi
 
-.gv e GEN_TITLE gen_title
-.if "&gen_title" "1" =
-	.im ../rtd/gen_title.im
-.fi
-
 .if pfm
 	.pn on noline center f=%d 0
+.fi
+
+.** work around bug until change made (RouxWare issue #4)
+.if tfm
+	.in 7p
 .fi
 
 .** --------------------------------------------------------------------------------------
@@ -180,6 +183,7 @@ document.
 
 .if tfm
 	.** show all column/foot notes
+	&h1(Notes)
 	.cn showend
 	&mult_space( 3 )
 .fi

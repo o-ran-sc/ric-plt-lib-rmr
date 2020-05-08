@@ -11,30 +11,31 @@ Man Page: rmr_bytes2meid
  
 
 
-1. RMR LIBRARY FUNCTIONS
-========================
+RMR LIBRARY FUNCTIONS
+=====================
 
 
 
-1.1. NAME
----------
+NAME
+----
 
 rmr_bytes2meid 
 
 
-1.2. SYNOPSIS
--------------
+SYNOPSIS
+--------
 
  
 :: 
  
  #include <rmr/rmr.h>
+  
  int rmr_bytes2meid( rmr_mbuf_t* mbuf, unsigned char* src, int len )
  
 
 
-1.3. DESCRIPTION
-----------------
+DESCRIPTION
+-----------
 
 The ``rmr_bytes2meid`` function will copy up to *len* bytes 
 from *src* to the managed entity ID (meid) field in the 
@@ -43,8 +44,8 @@ message. The field is a fixed length, gated by the constant
 RMR_MAX_MEID bytes will actually be copied. 
 
 
-1.4. RETURN VALUE
------------------
+RETURN VALUE
+------------
 
 On success, the actual number of bytes copied is returned, or 
 -1 to indicate a hard error. If the length is less than 0, or 
@@ -52,30 +53,42 @@ not the same as length passed in, ``errno`` is set to one of
 the errors described in the *Errors* section. 
 
 
-1.5. ERRORS
------------
+ERRORS
+------
 
 If the returned length does not match the length passed in, 
 ``errno`` will be set to one of the following constants with 
 the meaning listed below. 
  
+   .. list-table:: 
+     :widths: auto 
+     :header-rows: 0 
+     :class: borderless 
+      
+      
+     * - **EINVAL** 
+       - 
+         The message, or an internal portion of the message, was 
+         corrupted or the pointer was invalid. 
+          
+          
+         | 
+      
+     * - **EOVERFLOW** 
+       - 
+         The length passed in was larger than the maximum length of 
+         the field; only a portion of the source bytes were copied. 
+          
  
-EINVAL 
-  The message, or an internal portion of the message, was 
-  corrupted or the pointer was invalid. 
-   
-EOVERFLOW 
-  The length passed in was larger than the maximum length of 
-  the field; only a portion of the source bytes were copied. 
 
 
-1.6. EXAMPLE
-------------
+EXAMPLE
+-------
 
 
 
-1.7. SEE ALSO
--------------
+SEE ALSO
+--------
 
 rmr_alloc_msg(3), rmr_bytes2xact(3), rmr_call(3), 
 rmr_free_msg(3), rmr_get_rcvfd(3), rmr_get_meid(3), 

@@ -51,6 +51,9 @@ code_src = $(shell ls code_*.im)
 
 all:	user.pdf  user.txt user.rst user.md
 
+# just the things which are pushed to the docs scraper dirctory
+docs: user.rst rt_tables.rst
+
 # two pass build for pfm to allow for toc insertion
 user.ps: $(src) $(code_src)
 	$(P1) pfm $< /dev/null
