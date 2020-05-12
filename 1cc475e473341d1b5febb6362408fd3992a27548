@@ -402,6 +402,30 @@
     },
     {
       "key": {
+        "uuid": "9413a780_c7a2cb18",
+        "filename": "docs/overview.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T21:11:39Z",
+      "side": 1,
+      "message": "Turns out that what ever tox uses to generate the html was adding spaces and table borders (compared to docutils.core which I was using to convert RST to html for verification).  This has been worked round and the space should be closed up.",
+      "parentUuid": "bbb13857_2c0f46d8",
+      "range": {
+        "startLine": 231,
+        "startChar": 0,
+        "endLine": 231,
+        "endChar": 1
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "89031265_ab61b8bf",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -611,6 +635,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd2cce73_3fce1fe1",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T21:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b5f62f70_2a92ea1a",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 25
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -1801,6 +1849,30 @@
     },
     {
       "key": {
+        "uuid": "40092f8a_81e9f8eb",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T21:11:39Z",
+      "side": 1,
+      "message": "Oops; said I\u0027d add a clarification and managed not to.",
+      "parentUuid": "0337fe88_4303e222",
+      "range": {
+        "startLine": 341,
+        "startChar": 0,
+        "endLine": 341,
+        "endChar": 2
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "133dae91_24432f39",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -1963,6 +2035,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f0b8afc9_6be4fafd",
+        "filename": "docs/user-guide.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T21:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9fb4954c_01194ea6",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 2
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
