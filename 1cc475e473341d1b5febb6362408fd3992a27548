@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "27b01524_13564891",
+        "filename": "doc/src/library/Makefile",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "The name user.* is internal and pushed to the docs directory into the required name user-guide.  However, this Makfile was crap as it was missing dependencies for the route table doc!   It also had several commented lines which needed to be removed.",
+      "parentUuid": "ded1d92e_723a7e46",
+      "range": {
+        "startLine": 55,
+        "startChar": 6,
+        "endLine": 55,
+        "endChar": 14
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "46742f2f_5fe0329a",
         "filename": "doc/src/library/user.xfm",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2020-05-10T11:56:06Z",
       "side": 1,
       "message": "I tried to find the heading \"User\u0027s Manual\" that appears in RST somewhere in this file, but no luck.",
+      "range": {
+        "startLine": 87,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 1
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c4d7115_a6f1b3f8",
+        "filename": "doc/src/library/user.xfm",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "The doc title/subtitle should be picked up and used in the RTD table of. These are defined on line 33 and added to the document in the common source included by setup.im.  \"User\u0027s Guide\" is what I thought we were supposed to call this.",
+      "parentUuid": "46742f2f_5fe0329a",
       "range": {
         "startLine": 87,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "4e631107_a4094f03",
+        "filename": "docs/index.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Agree. The depth 2 actually was showing the two different sets of release notes (core and wrapper) which were included as header-2s in the doc so it wasn\u0027t as bad as you feared :) \n\nHowever, I need to remove the wrapper section all together as that\u0027s no longer a part of the repo. Returning it to be the single \"core\" release notes does mean that depth 1 will be needed.",
+      "parentUuid": "e668fc65_152b7e6f",
+      "range": {
+        "startLine": 26,
+        "startChar": 2,
+        "endLine": 26,
+        "endChar": 15
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ae485278_96c375e5",
         "filename": "docs/index.rst",
         "patchSetId": 4
@@ -91,6 +163,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d75432f7_f6194636",
+        "filename": "docs/index.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Yes for completeness it should be here.  I left it out because the \"overview\" is generated from the rmr.7 man page directly (the reason there is a double h1 header.)",
+      "parentUuid": "ae485278_96c375e5",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 1
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "dee20ede_a0a303c2",
+        "filename": "docs/overview.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "This is because this text is generated directly from the rmr.7 man page; the \"overview\" should be a doc title and not header 1.\n\nI\u0027ve added rmr.7 to the man page list which means this is now a complete duplicate.  I think the right solution is to completely rewrite the overview to be an elevator pitch (tl;dr) summary.  In addition to the bit on the route table that you suggest dropping in a later comment, there are other bits of info which are duplicated between this and the User\u0027s Guide.\n\nI think I will address the \"overview rewrite\" as a separate change; this will be wonky for a few days, but letting it ride until completely redone is easiest.",
+      "parentUuid": "d9d5b931_6e15576c",
+      "range": {
+        "startLine": 9,
+        "startChar": 2,
+        "endLine": 15,
+        "endChar": 11
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bb02dc1c_6fa24f42",
         "filename": "docs/overview.rst",
         "patchSetId": 4
@@ -137,6 +257,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99418a19_e3584ed2",
+        "filename": "docs/overview.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "See earlier response.  Overview needs to be rewritten.",
+      "parentUuid": "bb02dc1c_6fa24f42",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 2
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "395cc511_58fc3036",
+        "filename": "docs/overview.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Yep; overview rewrite needed.",
+      "parentUuid": "7c6fe229_21add727",
+      "range": {
+        "startLine": 152,
+        "startChar": 0,
+        "endLine": 152,
+        "endChar": 2
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "31ff20e4_d32980d3",
         "filename": "docs/overview.rst",
         "patchSetId": 4
@@ -183,6 +351,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bbb13857_2c0f46d8",
+        "filename": "docs/overview.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "It is not intentional, and is unavoidable.  I want a single blank line between definitions (ideally as with a PDF doc I\u0027d want 1/2 space, but I could live with integer space here).  However, it\u0027s either two spaces or none when docutils formats the HTML.   The two blank lines here are \"compressed\", so reducing them to a single blank has no effect. \n\nIn RST, or at least RST\u003d\u003eHTML it is impossible to add a blank line after a paragraph because the \"language\" uses blank lines like indention as significant delimmeter.  \n\nWhen generating with no blanks the text is not easily separated, so for now there will just have to be a bigger gap than I\u0027d prefer.",
+      "parentUuid": "31ff20e4_d32980d3",
+      "range": {
+        "startLine": 231,
+        "startChar": 0,
+        "endLine": 231,
+        "endChar": 1
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "32997359_2d560585",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "For some reason the title/subtitle were dropped from the RST output.  That is now fixed.\n\nThe  index of documents should be titles only, so once the title is in place, that should look better, and should not show the header-1s in the index making them true major section headers.",
+      "parentUuid": "89031265_ab61b8bf",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 1
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11703785_a2a4176a",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -229,6 +445,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc248e5d_0ede6fcf",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11703785_a2a4176a",
+      "range": {
+        "startLine": 12,
+        "startChar": 51,
+        "endLine": 12,
+        "endChar": 59
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -255,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "4a840f4e_77997408",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "This was just confusing; it\u0027s the overview, so simply stating based on MT and SID is fine here.  Removed detail which is covered later.",
+      "parentUuid": "acf79ad8_a106e921",
+      "range": {
+        "startLine": 16,
+        "startChar": 10,
+        "endLine": 16,
+        "endChar": 19
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0cec5c82_438b1f31",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -266,6 +530,30 @@
       "writtenOn": "2020-05-10T11:56:06Z",
       "side": 1,
       "message": "this is a level 1 heading but should be level 2.",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 25
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d35ada9b_1944d27e",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "I guess I view header 1 as sections or chapters thus:\n\u0026h1(Overview)\n\u0026h1(Contents of a Route Table)\n\u0026h1(Table Mechanics)\n\u0026h1(Route Manager Communications)\n\u0026h1(Providing A Static Table)\n\u0026h1(Routing Using MEID)\n\u0026h1(Reserved Message Types)\n\nTo me header 1 is not the paper title.   With the correction of the missing title, I think this becomes moot.   For now, I\u0027m leaving it, but not marking resolved to allow you a rebuttal.",
+      "parentUuid": "0cec5c82_438b1f31",
       "range": {
         "startLine": 33,
         "startChar": 0,
@@ -324,6 +612,54 @@
     },
     {
       "key": {
+        "uuid": "39e542ea_f0902193",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "373671e3_a2ec46dc",
+      "range": {
+        "startLine": 43,
+        "startChar": 37,
+        "endLine": 43,
+        "endChar": 38
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a73ae032_fbad8f26",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "39ef3a39_e078e170",
+      "range": {
+        "startLine": 43,
+        "startChar": 23,
+        "endLine": 43,
+        "endChar": 24
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b92a7758_6a7fe336",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -338,6 +674,24 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "add234aa_e97994e3",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b92a7758_6a7fe336",
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -364,6 +718,30 @@
     },
     {
       "key": {
+        "uuid": "3889ad6e_629e9426",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "See previous comment about headers.",
+      "parentUuid": "1df54565_8d2e6126",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 1
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b4aa5d9_49b6f016",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -384,6 +762,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a75a8af0_b9d07f38",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2b4aa5d9_49b6f016",
+      "range": {
+        "startLine": 54,
+        "startChar": 11,
+        "endLine": 54,
+        "endChar": 12
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -410,6 +812,30 @@
     },
     {
       "key": {
+        "uuid": "1368f872_14192b3d",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "right, confusing.   Removed such that the sentence ends \"by all applications.\"",
+      "parentUuid": "1bfb64dd_0ef4dc69",
+      "range": {
+        "startLine": 92,
+        "startChar": 42,
+        "endLine": 92,
+        "endChar": 62
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "28ee309f_8b955de6",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -430,6 +856,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1949c4f4_24d2c5e7",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "28ee309f_8b955de6",
+      "range": {
+        "startLine": 99,
+        "startChar": 46,
+        "endLine": 99,
+        "endChar": 64
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -456,6 +906,30 @@
     },
     {
       "key": {
+        "uuid": "b6358cbb_dcb486c7",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Actually we do but I consider those systems to be broken :)   Oddly, it was a MAC (before epoll) that triggered the change to support non-UNIX line terminations as it was ending records with \\r and not \\n.   This is from the wiki, that was written before, so nice catch -- I need to change it.",
+      "parentUuid": "4967d79a_8ad79584",
+      "range": {
+        "startLine": 126,
+        "startChar": 10,
+        "endLine": 128,
+        "endChar": 25
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eca987b7_724c6a79",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -476,6 +950,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f34f13b_c6336fed",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Embarrassing.",
+      "parentUuid": "eca987b7_724c6a79",
+      "range": {
+        "startLine": 135,
+        "startChar": 47,
+        "endLine": 135,
+        "endChar": 50
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -502,6 +1000,30 @@
     },
     {
       "key": {
+        "uuid": "c8d84448_a1e03803",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f57bf757_57acaa61",
+      "range": {
+        "startLine": 136,
+        "startChar": 15,
+        "endLine": 136,
+        "endChar": 16
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "24afc2dc_c6a464e0",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -522,6 +1044,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8979773e_31dd9915",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "24afc2dc_c6a464e0",
+      "range": {
+        "startLine": 137,
+        "startChar": 15,
+        "endLine": 137,
+        "endChar": 16
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -548,6 +1094,30 @@
     },
     {
       "key": {
+        "uuid": "a438db4a_73e98cd0",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "I followed shell convention on this one which is the same; comments must be separated by at least one white space character unless it\u0027s the first character on the line.  \n\nI couldn\u0027t be sure that an MEID name wouldn\u0027t have an embedded hash  SMSUNG#4590 or something odd like that.",
+      "parentUuid": "d1a4f8bc_b72354cd",
+      "range": {
+        "startLine": 170,
+        "startChar": 0,
+        "endLine": 170,
+        "endChar": 2
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "431b0373_89c5b415",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -568,6 +1138,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dbcf5569_3cc27e93",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Yanked.  Likely the first write up for this was triggered by someone who was needing the info for a test setup.  Doesn\u0027t fit as you point out.",
+      "parentUuid": "431b0373_89c5b415",
+      "range": {
+        "startLine": 178,
+        "startChar": 7,
+        "endLine": 179,
+        "endChar": 53
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -594,6 +1188,30 @@
     },
     {
       "key": {
+        "uuid": "df923fb7_f03e3597",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4035f14_d7a95992",
+      "range": {
+        "startLine": 182,
+        "startChar": 6,
+        "endLine": 183,
+        "endChar": 41
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5407ff3a_066cc37d",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -614,6 +1232,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "014cc42a_71ec702d",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5407ff3a_066cc37d",
+      "range": {
+        "startLine": 192,
+        "startChar": 52,
+        "endLine": 193,
+        "endChar": 7
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -640,6 +1282,30 @@
     },
     {
       "key": {
+        "uuid": "bc9fd3db_773da021",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2f947ff1_766da7aa",
+      "range": {
+        "startLine": 195,
+        "startChar": 24,
+        "endLine": 195,
+        "endChar": 35
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d36b7611_60c592f1",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -660,6 +1326,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1374541e_f276aef1",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "The example is valid.  If route manager decides to send an all encompassing table there will be entries which are \"valid\" only for the application that matches the \u0027,\u003csender\u003e\u0027 portion of the message type.    I\u0027ve reworded:\n\n\"For this application the entry will override the more generic entry for the MT/SID combination.\"",
+      "parentUuid": "d36b7611_60c592f1",
+      "range": {
+        "startLine": 255,
+        "startChar": 7,
+        "endLine": 255,
+        "endChar": 11
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -686,6 +1376,30 @@
     },
     {
       "key": {
+        "uuid": "64749adb_afa24d48",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cd4db54d_45f6ea23",
+      "range": {
+        "startLine": 266,
+        "startChar": 36,
+        "endLine": 266,
+        "endChar": 37
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e30ec743_44983c2b",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -706,6 +1420,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b7a854e_303a3eff",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e30ec743_44983c2b",
+      "range": {
+        "startLine": 276,
+        "startChar": 54,
+        "endLine": 276,
+        "endChar": 56
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -732,6 +1470,30 @@
     },
     {
       "key": {
+        "uuid": "514406ae_9d922d2e",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da408446_a66156d3",
+      "range": {
+        "startLine": 293,
+        "startChar": 23,
+        "endLine": 293,
+        "endChar": 24
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6f10f0ed_c1531135",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -752,6 +1514,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0ca0f16b_d487046e",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Equal in my mind :)    Changed.",
+      "parentUuid": "6f10f0ed_c1531135",
+      "range": {
+        "startLine": 302,
+        "startChar": 13,
+        "endLine": 302,
+        "endChar": 18
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -778,6 +1564,30 @@
     },
     {
       "key": {
+        "uuid": "22142296_eaa55d44",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c9eb50b0_d4efaf9f",
+      "range": {
+        "startLine": 326,
+        "startChar": 51,
+        "endLine": 326,
+        "endChar": 61
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "516fff24_1f5673d9",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -798,6 +1608,30 @@
       "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b04022f_dec412cf",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "516fff24_1f5673d9",
+      "range": {
+        "startLine": 330,
+        "startChar": 0,
+        "endLine": 330,
+        "endChar": 11
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     },
     {
       "key": {
@@ -824,6 +1658,30 @@
     },
     {
       "key": {
+        "uuid": "dbb2daed_f6d67500",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "acfe8ca3_a6d6ab0c",
+      "range": {
+        "startLine": 333,
+        "startChar": 0,
+        "endLine": 334,
+        "endChar": 2
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3197df32_8d60b5f0",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -835,6 +1693,30 @@
       "writtenOn": "2020-05-10T11:56:06Z",
       "side": 1,
       "message": "Is this routing at all, or direct specification like wormhole?",
+      "range": {
+        "startLine": 341,
+        "startChar": 0,
+        "endLine": 341,
+        "endChar": 2
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3e5fc599_90c588e9",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "It\u0027s kind of like both.  The ME might be \"owned\" by different applications during its \"lifetime,\" and so the associated endpoint can change making this a routing.   However, as long as the ME\u0027s owner doesn\u0027t change, the routing is constant like a wormhole. \n\nThese messages are routed to the MEID \"owner\" not to the device with the MEID, that probably needs to be stated more clearly.",
+      "parentUuid": "3197df32_8d60b5f0",
       "range": {
         "startLine": 341,
         "startChar": 0,
@@ -870,6 +1752,30 @@
     },
     {
       "key": {
+        "uuid": "48189826_43866fe9",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "133dae91_24432f39",
+      "range": {
+        "startLine": 345,
+        "startChar": 45,
+        "endLine": 345,
+        "endChar": 50
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "47327d5c_34fcf886",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -893,6 +1799,30 @@
     },
     {
       "key": {
+        "uuid": "4ef2d21c_6dc9c30d",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "47327d5c_34fcf886",
+      "range": {
+        "startLine": 398,
+        "startChar": 27,
+        "endLine": 398,
+        "endChar": 31
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a22f61f6_3f75a1c3",
         "filename": "docs/user-guide.rst",
         "patchSetId": 4
@@ -904,6 +1834,30 @@
       "writtenOn": "2020-05-10T11:56:06Z",
       "side": 1,
       "message": "to be consistent with the other docs this should be ALL CAPS. but I cannot find the source for this string :/ so commented here in the generated file",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 2
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75144566_90f17bf7",
+        "filename": "docs/user-guide.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-12T14:01:26Z",
+      "side": 1,
+      "message": "I\u0027m a bit confused... all of the titles of the RMR docs are mixed case; are you talking about docs across LF?\n\nThe overview doesn\u0027t have a title; it seems that all of the header 1s were picked up and added to the TOC.   I plan to rewrite the overview, so that will change in the near future (next change). \n\nIt should be changed to User\u0027s Guide, for sure.",
+      "parentUuid": "a22f61f6_3f75a1c3",
       "range": {
         "startLine": 8,
         "startChar": 0,
