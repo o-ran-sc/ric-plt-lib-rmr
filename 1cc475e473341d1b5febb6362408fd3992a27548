@@ -590,6 +590,30 @@
     },
     {
       "key": {
+        "uuid": "b5f62f70_2a92ea1a",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-12T19:53:54Z",
+      "side": 1,
+      "message": "It looks fine now so I\u0027m not gonna argue absolute values 0/1/2",
+      "parentUuid": "d35ada9b_1944d27e",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 25
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "373671e3_a2ec46dc",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -1753,6 +1777,30 @@
     },
     {
       "key": {
+        "uuid": "0337fe88_4303e222",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-12T19:53:54Z",
+      "side": 1,
+      "message": "I don\u0027t see any new sentence here with MEID owner, maybe you wanna just copy your response to me over into the doc?",
+      "parentUuid": "3e5fc599_90c588e9",
+      "range": {
+        "startLine": 341,
+        "startChar": 0,
+        "endLine": 341,
+        "endChar": 2
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "133dae91_24432f39",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 4
@@ -1882,6 +1930,30 @@
       "side": 1,
       "message": "I\u0027m a bit confused... all of the titles of the RMR docs are mixed case; are you talking about docs across LF?\n\nThe overview doesn\u0027t have a title; it seems that all of the header 1s were picked up and added to the TOC.   I plan to rewrite the overview, so that will change in the near future (next change). \n\nIt should be changed to User\u0027s Guide, for sure.",
       "parentUuid": "a22f61f6_3f75a1c3",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 2
+      },
+      "revId": "1cc475e473341d1b5febb6362408fd3992a27548",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9fb4954c_01194ea6",
+        "filename": "docs/user-guide.rst",
+        "patchSetId": 4
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-12T19:53:54Z",
+      "side": 1,
+      "message": "Previously the headings were all caps, now they are mixed case, so all is well now.",
+      "parentUuid": "75144566_90f17bf7",
       "range": {
         "startLine": 8,
         "startChar": 0,
