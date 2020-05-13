@@ -140,6 +140,52 @@
       "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76c2a9bc_868b84d8",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 10
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-13T12:28:00Z",
+      "side": 1,
+      "message": "\"will establish\" probably should be just \"establishes\"..",
+      "range": {
+        "startLine": 289,
+        "startChar": 27,
+        "endLine": 289,
+        "endChar": 31
+      },
+      "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5b803fb_e9fa7598",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 10
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-13T12:28:00Z",
+      "side": 1,
+      "message": ".. to agree with tense here \"sends\"\n\njust trying to make tenses agree",
+      "range": {
+        "startLine": 290,
+        "startChar": 38,
+        "endLine": 290,
+        "endChar": 43
+      },
+      "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
