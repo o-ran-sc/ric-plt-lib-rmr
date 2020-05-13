@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2799b678_a507c0ff",
+        "filename": "docs/config-deploy.rst",
+        "patchSetId": 10
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-13T12:27:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df771b02_45464d56",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 3
+      },
+      "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a29ed39_df7f7103",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 10
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "8bc455b9_64b62676",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 10
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-13T12:27:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a29ed39_df7f7103",
+      "range": {
+        "startLine": 20,
+        "startChar": 51,
+        "endLine": 20,
+        "endChar": 52
+      },
+      "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5c2d5fe1_0203f6a8",
         "filename": "docs/rt_tables.rst",
         "patchSetId": 10
@@ -68,6 +116,30 @@
       "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d124eebe_bbdcdf72",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 10
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-13T12:27:26Z",
+      "side": 1,
+      "message": "Good catch.  Yes it should be.",
+      "parentUuid": "5c2d5fe1_0203f6a8",
+      "range": {
+        "startLine": 118,
+        "startChar": 0,
+        "endLine": 118,
+        "endChar": 5
+      },
+      "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
