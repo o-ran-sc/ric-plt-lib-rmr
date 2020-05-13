@@ -45,6 +45,29 @@
       "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c2d5fe1_0203f6a8",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 10
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-13T12:23:37Z",
+      "side": 1,
+      "message": "space?  should this be \u0026space ?",
+      "range": {
+        "startLine": 118,
+        "startChar": 0,
+        "endLine": 118,
+        "endChar": 5
+      },
+      "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
