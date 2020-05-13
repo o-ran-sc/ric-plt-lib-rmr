@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df771b02_45464d56",
+        "filename": "docs/config-deploy.rst",
+        "patchSetId": 10
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-13T12:20:21Z",
+      "side": 1,
+      "message": "Please remove \"RMR\" here, no other doc has it",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 3
+      },
+      "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
