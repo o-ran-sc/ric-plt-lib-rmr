@@ -186,6 +186,29 @@
       "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9bf04a50_d65a31bb",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 10
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-13T12:29:33Z",
+      "side": 1,
+      "message": "next time you visit this file, please chop this graph down by half to reduce its department of redundancy department feel",
+      "range": {
+        "startLine": 331,
+        "startChar": 1,
+        "endLine": 340,
+        "endChar": 1
+      },
+      "revId": "43d2fc0dac820f06187351b2b870adbf28552383",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
