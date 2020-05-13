@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ba538e0_fd7810fb",
+        "filename": "docs/rt_tables.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-13T12:46:22Z",
+      "side": 1,
+      "message": "Message",
+      "range": {
+        "startLine": 540,
+        "startChar": 11,
+        "endLine": 540,
+        "endChar": 18
+      },
+      "revId": "a3a121ca4a0426ec964fa684fb27c397f2ee9e24",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
