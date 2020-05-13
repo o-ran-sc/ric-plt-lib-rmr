@@ -17,7 +17,7 @@ Overview
 
 Messages sent via the RIC Message Router (RMR) are routed to 
 an endpoint (another application) based on a combination of 
-the *message type* (MT) and *subscription ID* (SID), supplied 
+the *message type* (MT) and *subscription ID* (SID) supplied 
 in the message. RMR determines the endpoint by matching the 
 MT and SID combination to an entry in a route table which has 
 been supplied dynamically by a *Route Manager* service, or as 
@@ -115,12 +115,13 @@ Where:
           is one or more, comma separated, endpoint descriptions. 
            
  
-space When an application sends a message with the indicated 
-type, the message will be sent to one endpoint in the group 
-in a round-robin ordering. If multiple endpoint groups are 
-given, then the message is sent to a member selected from 
-each group; 3 groups, then three messages will be sent. The 
-first group is required. 
+ 
+When an application sends a message with the indicated type, 
+the message will be sent to one endpoint in the group in a 
+round-robin ordering. If multiple endpoint groups are given, 
+then the message is sent to a member selected from each 
+group; 3 groups, then three messages will be sent. The first 
+group is required. 
 
 
 Line separation
@@ -286,12 +287,12 @@ requests and responses.
 Table Request
 -------------
 
-During initialisation, RMR will establish a wormhole 
-connection to the *Route Manager* and sends a message type of 
-21 to request a new table. RMR will continue to send table 
-requests until a table is received and accepted; in other 
-words it is fine for the *Route Manager* to ignore the 
-requests if it is not ready to respond. 
+During initialisation, RMR establishes a wormhole connection 
+to the *Route Manager* and sends a message type of 21 to 
+request a new table. RMR will continue to send table requests 
+until a table is received and accepted; in other words it is 
+fine for the *Route Manager* to ignore the requests if it is 
+not ready to respond. 
 
 
 Sending Tables To RMR
@@ -325,26 +326,22 @@ that RMR did not use the table and has dropped it; the
 previous table is still in use. 
 
 
-Providing A Static Table
-========================
+Using A Static Route Table
+--------------------------
 
-For testing, or possibly bootstrapping purposes, a static 
-route table can be supplied. During initialisation, RMR will 
-check the ``RMR_SEED_RT`` environment variable. If it exists, 
-and references a file, RMR will open and read the file 
-expecting to find a static route table. This route table is 
-used until an update is received from a *Route Manager*. 
-Normally, when the RMR initialisation function is invoked, a 
-listener is started to receive route table information from a 
-route manager process. During testing it is often useful to 
-supply a static table which is available should no route 
-management process exist, or to provide a seed table to use 
-before the first table is delivered. The environment variable 
-``RMR_SEED_RT`` can be set to provide the RMR initialisation 
-function with the name of the static table to use. If a 
-static table is provided, it will be loaded only once, and 
-will be overlaid if a dynamically delivered table is 
-received. 
+A static route table can be provided to assist with testing, 
+or to provide a bootstrap set of route information until a 
+dynamic table is received from a routing manager. The 
+environment variable ``RMR_SEED_RT`` is checked during RMR 
+initialisation and if set is expected to reference a file 
+containing a route table. This table will be loaded and used 
+until overlaid by a table sent by the *Route Manager*. 
+ 
+For testing, the static table will be reloaded periodically 
+if the ``RMR_RTG_SVC`` environment variable is set to -1. 
+When this testing feature is enabled RMR will not listen for 
+*Route Manager* connections, nor will it attempt to request a 
+dynamic table. 
 
 
 Routing Using MEID
@@ -485,7 +482,7 @@ reader to understand the intent of meaning.
        - 
          An RMR based application that is defined as being capable of 
          receiving one or more types of messages (as defined by a 
-         *message key.*) 
+         *routing key.*) 
       
      * - **Environment variable** 
        - 
@@ -537,7 +534,7 @@ reader to understand the intent of meaning.
          payload length, message type, message source, and other 
          information. 
       
-     * - **Messgae type** 
+     * - **Message type** 
        - 
          A signed integer (0-32000) which identifies the type of 
          message being transmitted, and is one of the two components 
@@ -565,7 +562,7 @@ reader to understand the intent of meaning.
      * - **Route table** 
        - 
          A series of "rules" which define the possible *endpoints* for 
-         each *message key.* 
+         each *routing key.* 
       
      * - **Route table manager** 
        - 
@@ -611,10 +608,14 @@ reader to understand the intent of meaning.
          lightweight process which executes in concurrently with the 
          application and shares the same address space. RMR uses 
          threads to manage asynchronous functions such as route table 
-         updates. &Term An optional portion of the message buffer that 
-         the application may populate with data that allows for 
-         tracing the progress of the transaction or application 
-         activity across components. RMR makes no use of this data. 
+         updates. 
+      
+     * - **Trace information** 
+       - 
+         An optional portion of the message buffer that the 
+         application may populate with data that allows for tracing 
+         the progress of the transaction or application activity 
+         across components. RMR makes no use of this data. 
       
      * - **Transaction ID** 
        - 

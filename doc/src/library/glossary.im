@@ -40,7 +40,7 @@ meaning.
 
 &ditem(Endpoint) An RMR based application that is defined as being
 			capable of receiving one or more types of
-			messages (as defined by a &ital(message key.)
+			messages (as defined by a &ital(routing key.)
 			.sm )
 
 &ditem(Environment variable) A key/value pair which is set externally
@@ -88,7 +88,7 @@ meaning.
 			message type, message source, and other
 			information.
 
-&ditem(Messgae type) A signed integer (0-32000) which identifies the
+&ditem(Message type) A signed integer (0-32000) which identifies the
 			type of message being transmitted, and is one
 			of the two components of a &ital(routing key.)
 			See &ital(Subscription ID.)
@@ -110,7 +110,7 @@ meaning.
 			selected before starting at the head of the list.
 
 &ditem(Route table) A series of "rules" which define the possible
-			&ital(endpoints) for each &ital(message key.)
+			&ital(endpoints) for each &ital(routing key.)
 
 &ditem(Route table manager) An application responsible for building a
 			&ital(route table) and then distributing it to
@@ -146,7 +146,7 @@ meaning.
 			manage asynchronous functions such as route
 			table updates.
 
-&Term(Trace information)  An optional portion of the message buffer
+&ditem(Trace information)  An optional portion of the message buffer
 			that the application may populate with data
 			that allows for tracing the progress of the
 			transaction or application activity across

@@ -2,13 +2,11 @@
 .. SPDX-License-Identifier: CC-BY-4.0
 
 
-.. who in bloody hell knows what format this should be; guessing!
-.. it does seem though that every .rst file in the directory must be listed here
-.. or tox will complain and fail.
-
-
 RIC Message Router -- RMR
-==========================
+=========================
+
+Please refer to the `main RMR manual page <https://docs.o-ran-sc.org/projects/o-ran-sc-ric-plt-lib-rmr/en/latest/rmr.7.html>`_ 
+for an overview of the library.
 
 .. toctree::
    :maxdepth: 1

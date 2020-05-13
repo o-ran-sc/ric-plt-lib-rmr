@@ -1001,7 +1001,7 @@ reader to understand the intent of meaning.
         - 
           An RMR based application that is defined as being capable of 
           receiving one or more types of messages  (as  defined  by  a 
-          *message key.*) 
+          *routing key.*) 
        
       * - **Environment variable** 
         - 
@@ -1053,7 +1053,7 @@ reader to understand the intent of meaning.
           payload length, message  type,  message  source,  and  other 
           information. 
        
-      * - **Messgae type** 
+      * - **Message type** 
         - 
           A  signed  integer  (0-32000)  which  identifies the type of 
           message being transmitted, and is one of the two  components 
@@ -1081,7 +1081,7 @@ reader to understand the intent of meaning.
       * - **Route table** 
         - 
           A series of "rules" which define the possible *endpoints* for 
-          each *message key.* 
+          each *routing key.* 
        
       * - **Route table manager** 
         - 
@@ -1127,10 +1127,14 @@ reader to understand the intent of meaning.
           lightweight process which executes in concurrently with  the 
           application  and  shares  the  same  address space. RMR uses 
           threads to manage asynchronous functions such as route table 
-          updates. &Term An optional portion of the message buffer that 
-          the application may  populate  with  data  that  allows  for 
-          tracing  the  progress  of  the  transaction  or application 
-          activity across components. RMR makes no use of this data. 
+          updates. 
+       
+      * - **Trace information** 
+        - 
+          An   optional  portion  of  the  message  buffer  that  the  
+          application may populate with data that allows  for  tracing 
+          the  progress  of  the  transaction  or application activity 
+          across components. RMR makes no use of this data. 
        
       * - **Transaction ID** 
         - 

@@ -5,7 +5,7 @@
 .. Do NOT make changes directly to .rst or .md files. 
  
 ============================================================================================ 
-RMR Configuration and Deployment 
+Configuration and Deployment 
 ============================================================================================ 
 
 
