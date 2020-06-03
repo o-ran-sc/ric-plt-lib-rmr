@@ -38,7 +38,7 @@
 &ex_start
 #include <rmr/rmr.h>
 
-void* rmr_wh_open( void* vctx, char* target )
+rmr_whid_t rmr_wh_open( void* vctx, char* target )
 &ex_end
 
 &uindent
@@ -51,9 +51,9 @@ by the user application (via this function), and that the ID returned by &cw(rmr
 be passed to the &cw(rmr_wh_send_msg) function.
 
 &space
-&ital(Target) is the &ital(name:port,) or &ital(IP-address:port,) combination of the
-processes that the wormhole should be connected to.
 &ital(Vctx) is the RMR void context pointer that was returned by the &cw(rmr_init) function.
+&ital(Target) is the &ital(name and port,) or &ital(IP-address and port,) combination for
+the process that the wormhole should be connected to.  For example, "localhost:6123". 
 
 &space
 When invoked, this function immediately attempts to connect to the target process.
