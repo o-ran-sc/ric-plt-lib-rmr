@@ -30,7 +30,7 @@ SYNOPSIS
  
  #include <rmr/rmr.h>
   
- void rmr_close( void* vctx, rmr_whid_t whid )
+ void rmr_wh_close( void* vctx, rmr_whid_t whid )
  
 
 

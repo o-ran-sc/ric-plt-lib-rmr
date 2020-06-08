@@ -30,7 +30,7 @@ SYNOPSIS
  
  #include <rmr/rmr.h>
   
- rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t id, rmr_mbuf_t* msg );
+ rmr_mbuf_t* rmr_wh_send_msg( void* vctx, rmr_whid_t id, rmr_mbuf_t* msg )
  
 
 
@@ -47,10 +47,12 @@ normal RMR routing based on message type is ignored, and the
 caller may leave the message type unspecified in the message 
 buffer (unless it is needed by the receiving process). 
  
-The message buffer (msg) used to send is the same format as 
-used for regular RMR send and reply to sender operations, 
-thus any buffer allocated by these means, or calls to 
-*rmr_rcv_msg()* can be passed to this function. 
+*Vctx* is the RMR void context pointer that was returned by 
+the ``rmr_init`` function. The message buffer (msg) used to 
+send is the same format as used for regular RMR send and 
+reply to sender operations, thus any buffer allocated by 
+these means, or calls to *rmr_rcv_msg()* can be passed to 
+this function. 
 
 
 Retries

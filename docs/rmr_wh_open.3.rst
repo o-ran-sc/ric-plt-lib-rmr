@@ -30,7 +30,7 @@ SYNOPSIS
  
  #include <rmr/rmr.h>
   
- void* rmr_wh_open( void* vctx, char* target )
+ rmr_whid_t rmr_wh_open( void* vctx, char* target )
  
 
 
@@ -44,10 +44,11 @@ established overtly by the user application (via this
 function), and that the ID returned by ``rmr_wh_open`` be 
 passed to the ``rmr_wh_send_msg`` function. 
  
-*Target* is the *name* or *IP-address* combination of the 
-processes that the wormhole should be connected to. *Vctx* is 
-the RMR void context pointer that was returned by the 
-``rmr_init`` function. 
+*Vctx* is the RMR void context pointer that was returned by 
+the ``rmr_init`` function. *Target* is the *name and port,* 
+or *IP-address and port,* combination for the process that 
+the wormhole should be connected to. For example, 
+"localhost:6123". 
  
 When invoked, this function immediately attempts to connect 
 to the target process. If the connection cannot be 
