@@ -13,6 +13,7 @@ for an overview of the library.
    :caption: Documents:
    :titlesonly:
 
+   installation-guide.rst
    config-deploy.rst
    user-guide.rst
    developer-guide.rst
