@@ -58,7 +58,7 @@ The library provides the following major features:
 
 &half_space
 &indent
-&beg_list( &lic1 )
+&beg_list(&lic1)
 	&li Routing and endpoint selection is based on &ital(message type.)
 	&half_space
 

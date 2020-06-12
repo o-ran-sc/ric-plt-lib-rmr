@@ -81,11 +81,11 @@ The send operations in RMR will retry *soft* send failures
 until one of three conditions occurs: 
  
  
- &item The message is sent without error 
+* The message is sent without error 
   
- &item The underlying transport reports a *hard* failure 
+* The underlying transport reports a *hard* failure 
   
- &item The maximum number of retry loops has been attempted 
+* The maximum number of retry loops has been attempted 
  
  
 A retry loop consists of approximately 1000 send attempts 
