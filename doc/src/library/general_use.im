@@ -80,7 +80,7 @@ either directly or indirectly:
 
 &half_space
 &indent
-&beg_list( &lic1 )
+&beg_list(&lic1)
 	&li The payload (actual data)
 	&half_space
 	&li The total payload length in bytes

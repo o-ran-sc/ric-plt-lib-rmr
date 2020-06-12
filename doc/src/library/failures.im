@@ -43,7 +43,7 @@ typically the underlying cause:
 
 &half_space
 &indent
-&beg_list( &lic1 )
+&beg_list(&lic1)
 	&li The session to the targeted recipient (endpoint) is not connected.
 	&half_space
 

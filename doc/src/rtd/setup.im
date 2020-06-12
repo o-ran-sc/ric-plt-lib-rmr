@@ -60,8 +60,6 @@
 	.fi
 .fi
 
-.dh u=off
-
 .** if we can set a license into the output, do it early
 .cd 1 11i
 &line_len(10i)

@@ -131,10 +131,10 @@ Table entries **must** end with a record termination sequence
 which may be one of the following three sequences: 
  
  
-* a single newline (\\n) 
-* a DOS style CRLF pair (\\r\\n) 
-* a single carriage return (\\r) 
- 
+ * a single newline (\\n) 
+ * a DOS style CRLF pair (\\r\\n) 
+ * a single carriage return (\\r) 
+  
  
 Care must be taken when manually editing a static table; some 
 editors do **not** add a final record termination sequence to 
