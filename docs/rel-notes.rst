@@ -20,7 +20,11 @@ the RMR core library was assigned odd major numbers (e.g.
 3.1.0). When the wrapper code was moved to a different repo 
 the need to leap frog versions ceased, and beginning with 
 version 4.0.0, the RMR versions should no longer skip. 
- 
+
+
+Bronze Release
+==============
+
 
 
 2020 May 06; version 4.0.5
@@ -384,8 +388,13 @@ combined with the message type/subscription-ID.
  
 
 
-2019 November 14; version 1.11.1 (Amber)
-----------------------------------------
+Amber Release
+=============
+
+
+
+2019 November 14; version 1.11.1
+--------------------------------
 
 Fix bug in payload reallocation function; correct length of 
 payload was not always copied. 
@@ -399,8 +408,8 @@ New message type constants added to support A1.
  
 
 
-2019 November 4; version 1.11.0 (Amber)
----------------------------------------
+2019 November 4; version 1.11.0
+-------------------------------
 
 Version bump to move away from the 1.10.* to distinguish 
 between release A and the trial. 

@@ -23,17 +23,17 @@ name-IP port combinations. The library provides the following
 major features: 
  
  
-* Routing and endpoint selection is based on *message type.* 
-   
-* Application is insulated from the underlying transport 
-  mechanism and/or protocols. 
-   
-* Message distribution (round robin or fanout) is selectable 
-  by message type. 
-   
-* Route management updates are received and processed 
-  asynchronously and without overt application involvement. 
- 
+ * Routing and endpoint selection is based on *message type.* 
+    
+ * Application is insulated from the underlying transport 
+   mechanism and/or protocols. 
+    
+ * Message distribution (round robin or fanout) is selectable 
+   by message type. 
+    
+ * Route management updates are received and processed 
+   asynchronously and without overt application involvement. 
+  
  
 
 
@@ -192,21 +192,21 @@ access to the following information either directly or
 indirectly: 
  
  
-* The payload (actual data) 
-   
-* The total payload length in bytes 
-   
-* The number of bytes of the payload which contain valid data 
-   
-* The message type and subscription ID values 
-   
-* The hostname and IP address of the source of the message 
-  (the sender) 
-   
-* The transaction ID 
-   
-* Tracing data (if provided) 
- 
+ * The payload (actual data) 
+    
+ * The total payload length in bytes 
+    
+ * The number of bytes of the payload which contain valid data 
+    
+ * The message type and subscription ID values 
+    
+ * The hostname and IP address of the source of the message 
+   (the sender) 
+    
+ * The transaction ID 
+    
+ * Tracing data (if provided) 
+  
  
 
 
@@ -539,13 +539,13 @@ types of failures can occur for various reasons; one of two
 reasons is typically the underlying cause: 
  
  
-* The session to the targeted recipient (endpoint) is not 
-  connected. 
-   
-* The transport mechanism buffer pool is full and cannot 
-  accept another buffer. 
-   
- 
+ * The session to the targeted recipient (endpoint) is not 
+   connected. 
+    
+ * The transport mechanism buffer pool is full and cannot 
+   accept another buffer. 
+    
+  
  
 Unfortunately, it is not possible for RMR to determine which 
 of these two cases is occurring, and equally as unfortunate 

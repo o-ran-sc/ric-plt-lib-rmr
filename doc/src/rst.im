@@ -108,8 +108,9 @@
 
 	.** ------- bullet lists -------------------------
 	.dv beg_list .sp 1 .bl ${1!*} ^: .br
-	.dv end_list .el .sp 1
+	.dv end_list .el .sp 1 .in -7p
 	.dv li .br .li
+	.dv item .br .li
 
 	.dv ex_start .sp 1 ^:^: .sp 1 .ll -2 .in +2 .nf
 	.dv ex_end .fo on .in -2 .ll +2 .sp 1
