@@ -5,6 +5,13 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 June 18; version 4.1.0
+	Bump version minor to move away from 4.0.* which will bump for any
+	patches applied back to bronze.
+
+	Add magic C++ goo to symtab header file allowing C++ xAPPs to use
+	the symbol table directly.
+
 2020 May 06; version 4.0.5
 	Fix the bug in SI95 receive message management semaphore count
 	issue. (RIC-355)
