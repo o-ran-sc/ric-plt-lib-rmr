@@ -5,6 +5,9 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 June 22; version 4.1.2
+	Fix typeo in RIC Message header file
+
 2020 June 22; version 4.1.1
 	Add new message types to RIC header file for
 		RIC_ALARM           (110)

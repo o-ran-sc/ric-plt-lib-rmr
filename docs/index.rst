@@ -18,6 +18,7 @@ for an overview of the library.
    user-guide.rst
    developer-guide.rst
    rt_tables.rst
+   msg_types.rst
 
 
 .. toctree::

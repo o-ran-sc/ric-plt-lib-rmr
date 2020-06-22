@@ -22,6 +22,13 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip. 
 
 
+2020 June 22; version 4.1.2
+---------------------------
+
+Fix typo in RIC Message header file 
+ 
+
+
 2020 June 22; version 4.1.1
 ---------------------------
 
