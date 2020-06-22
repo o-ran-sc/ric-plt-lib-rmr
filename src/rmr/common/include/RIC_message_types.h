@@ -42,7 +42,7 @@
 #define RIC_HEALTH_CHECK_REQ    100
 #define RIC_HEALTH_CHECK_RESP   101
 
-#define RIC_ALARMi				110
+#define RIC_ALARM				110
 #define RIC_ALARM_QUERY			111
 
 #define RIC_METRICS				120
