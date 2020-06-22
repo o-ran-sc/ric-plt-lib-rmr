@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "38648f62_f7515e1c",
+        "filename": "docs/rel-notes.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-22T13:34:03Z",
+      "side": 1,
+      "message": "Not keen on all the trailing WS",
+      "range": {
+        "startLine": 40,
+        "startChar": 58,
+        "endLine": 40,
+        "endChar": 59
+      },
+      "revId": "aedf8c659ddb2e56ab24490cccea75146cefd24a",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
