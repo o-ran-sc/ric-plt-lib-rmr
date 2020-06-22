@@ -54,7 +54,19 @@ do
 		/4\.0\.5$/  { printf( "&h1(Bronze Release)\n" ); rheader = 1 }
 		/1\.11\.1$/ { printf( "&h1(Amber Release)\n" ); rheader = 1 }
 
+		print_raw && /^\t\t/ {			# anything indented should be unformatted
+			gsub( "^\t\t", "    ", $0 )
+			if( ! format_off ) {
+				format_off = 1
+				printf( ".nf\n" )
+			}
+		}
+
 		print_raw && /^$/ {				# include blank lines after first real stuff
+			if( format_off ) {
+				format_off = 0
+				printf( ".fo\n" );
+			}
 			printf( "&space\n\n" );
 			next
 		}

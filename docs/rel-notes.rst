@@ -22,6 +22,29 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip. 
 
 
+2020 June 22; version 4.1.1
+---------------------------
+
+Add new message types to RIC header file for 
+    RIC_ALARM           (110)
+    RIC_ALARM_QUERY     (111)
+    RIC_METRICS         (120)
+    RAN_E2_RESET_REQ    (12008)
+    RAN_E2_RESET_RESP   (12009)
+ 
+
+
+2020 June 18; version 4.1.0
+---------------------------
+
+Bump version minor to move away from 4.0.* which will bump 
+for any patches applied back to bronze. 
+ 
+Add magic C++ goo to symtab header file allowing C++ xAPPs to 
+use the symbol table directly. 
+ 
+
+
 Bronze Release
 ==============
 
@@ -486,8 +509,8 @@ Correct missing constant for wrappers.
 2019 September 19; version 1.8.0
 --------------------------------
 
-New message types added: RAN_CONNECTED, RAN_RESTARTED, 
-RAN_RECONFIGURED 
+New message types added: 
+    RAN_CONNECTED, RAN_RESTARTED, RAN_RECONFIGURED
  
 
 
@@ -558,16 +581,17 @@ rmr_alloc_msg manual page for more details.
 ---------------------------------------------
 
 Support for the Nanomsg transport library has been dropped. 
-The library librmr.* will no longer be included in packages. 
+    The library librmr.* will no longer be included in packages.
  
 Packages will install RMR libraries into the system preferred 
-target directory. On some systems this is /usr/local/lib and 
-on others it is /usr/local/lib64. The diretory is determined 
-by the sytem on which the package is built and NOT by the 
-system installing the package, so it's possible that the RMR 
-libraries end up in a strange location if the .deb or .rpm 
-file was generated on a Linux flavour that has a different 
-preference than the one where the package is installed. 
+    target directory. On some systems this is /usr/local/lib
+    and on others it is /usr/local/lib64.  The diretory is
+    determined by the sytem on which the package is built and
+    NOT by the system installing the package, so it's possible
+    that the RMR libraries end up in a strange location if the
+    .deb or .rpm file was generated on a Linux flavour that
+    has a different preference than the one where the package
+    is installed.
  
 
 
@@ -596,9 +620,9 @@ Added new message types to RIC_message_types.h.
 ----------------------------
 
  
-librmr and librmr_nng - Add message buffer API function 
-rmr_trace_ref() (see rmr_trace_ref.3 manual page in dev 
-package). 
+librmr and librmr_nng 
+    - Add message buffer API function rmr_trace_ref()
+      (see rmr_trace_ref.3 manual page in dev package).
  
 
 

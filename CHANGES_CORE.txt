@@ -5,6 +5,14 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 June 22; version 4.1.1
+	Add new message types to RIC header file for
+		RIC_ALARM           (110)
+		RIC_ALARM_QUERY     (111)
+		RIC_METRICS         (120)
+		RAN_E2_RESET_REQ    (12008)
+		RAN_E2_RESET_RESP   (12009)
+
 2020 June 18; version 4.1.0
 	Bump version minor to move away from 4.0.* which will bump for any
 	patches applied back to bronze.

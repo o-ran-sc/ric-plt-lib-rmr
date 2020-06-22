@@ -42,6 +42,11 @@
 #define RIC_HEALTH_CHECK_REQ    100
 #define RIC_HEALTH_CHECK_RESP   101
 
+#define RIC_ALARMi				110
+#define RIC_ALARM_QUERY			111
+
+#define RIC_METRICS				120
+
 // --- please keep additions in numerical order ------
 
 #define RIC_SCTP_CONNECTION_FAILURE 1080
@@ -120,6 +125,9 @@
 #define RIC_E2_RESET_RESP			12005
 #define RIC_E2_RAN_ERROR_INDICATION	12006
 #define RIC_E2_RIC_ERROR_INDICATION	12007
+#define RAN_E2_RESET_REQ			12008
+#define RAN_E2_RESET_RESP			12009
+
 
 
 #define RIC_SUB_REQ					12010
