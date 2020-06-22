@@ -59,11 +59,12 @@ $(docs:%=%.html): always
 publish : $(docs:%=%.rst)
 	bash publish_man.sh;\
 	bash publish_lib.sh;\
+	bash scrape_types.sh;\
 	for f in *.rst;\
 	do\
 		if ! diff -N -q $$f ../../../docs/$$f >/dev/null 2>&1;\
 		then\
-			cp -p $$f ../../../docs/;\
+			sed 's/ *$$//' $$f >../../../docs/$${f##*/};\
 		fi;\
 	done
 

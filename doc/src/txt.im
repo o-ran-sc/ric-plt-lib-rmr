@@ -1,4 +1,4 @@
-f false
+.if false
 ==================================================================================
 	Copyright (c) 2019 Nokia
 	Copyright (c) 2018-2019 AT&T Intellectual Property.
@@ -60,6 +60,7 @@ f false
 .dv esc : .** rst needs an escape for some things
 
 .dv line_len .ll $1
+.dv break .br
 .dv space .sp 1
 .dv mult_space .sp $1
 .dv half_space .sp 1
