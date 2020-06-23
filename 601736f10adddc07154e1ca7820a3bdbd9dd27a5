@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7d0f0cf6_b5a5e0b8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-06-23T20:59:31Z",
+      "side": 1,
+      "message": "Will fix on next patch push.",
+      "parentUuid": "0587864d_ae51d5d7",
+      "range": {
+        "startLine": 9,
+        "startChar": 39,
+        "endLine": 9,
+        "endChar": 42
+      },
+      "revId": "601736f10adddc07154e1ca7820a3bdbd9dd27a5",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3375e667_6cd12341",
         "filename": "CHANGES_CORE.txt",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "336c8d7d_d173f5ff",
+        "filename": "CHANGES_CORE.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-06-23T20:59:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3375e667_6cd12341",
+      "range": {
+        "startLine": 9,
+        "startChar": 5,
+        "endLine": 9,
+        "endChar": 10
+      },
+      "revId": "601736f10adddc07154e1ca7820a3bdbd9dd27a5",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c71f562d_434f5171",
         "filename": "docs/rel-notes.rst",
         "patchSetId": 1
@@ -68,6 +116,30 @@
       "revId": "601736f10adddc07154e1ca7820a3bdbd9dd27a5",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3e7809d_2bcd05ea",
+        "filename": "docs/rel-notes.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-06-23T20:59:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c71f562d_434f5171",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 9
+      },
+      "revId": "601736f10adddc07154e1ca7820a3bdbd9dd27a5",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": false
     }
   ]
 }
