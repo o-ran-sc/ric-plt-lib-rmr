@@ -1,0 +1,274 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "673b6b0f_dd5eb841",
+        "filename": "CHANGES_CORE.txt",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "this \"e\" really hangs on",
+      "range": {
+        "startLine": 9,
+        "startChar": 8,
+        "endLine": 9,
+        "endChar": 9
+      },
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ccfbb165_4ba9f99a",
+        "filename": "doc/src/rtd/scrape_types.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "what is exi2 ??",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 4
+      },
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ab4dadc_0ab69f78",
+        "filename": "docs/msg_types.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "might be worth mentioning here that message type and subscription ID are both integers",
+      "range": {
+        "startLine": 15,
+        "startChar": 46,
+        "endLine": 15,
+        "endChar": 58
+      },
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "43c4d500_bc3089dd",
+        "filename": "docs/msg_types.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "are there any predefined/reserved subscription IDs?  The leading graph here mentions sub IDs, but the file name and all the content seem limited to msg types.",
+      "range": {
+        "startLine": 15,
+        "startChar": 31,
+        "endLine": 15,
+        "endChar": 42
+      },
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "485477bc_a0494b91",
+        "filename": "docs/msg_types.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "I suggest the word \"constants\" instead.",
+      "range": {
+        "startLine": 16,
+        "startChar": 27,
+        "endLine": 16,
+        "endChar": 32
+      },
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55c38cbe_1bc5d512",
+        "filename": "docs/msg_types.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "You might mention that this doc does not show the integer values by design, to avoid repeating them blah blah, and users must consult that file for those values blah blah.  Just to avoid the impression that types are strings.",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 1
+      },
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5aee2d22_33cc1e60",
+        "filename": "docs/msg_types.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "Message Types",
+      "range": {
+        "startLine": 21,
+        "startChar": 13,
+        "endLine": 21,
+        "endChar": 18
+      },
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53d0327d_d9244896",
+        "filename": "docs/msg_types.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "Message Types",
+      "range": {
+        "startLine": 40,
+        "startChar": 13,
+        "endLine": 40,
+        "endChar": 18
+      },
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a69317c_30c28211",
+        "filename": "docs/msg_types.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "also deprecated?",
+      "range": {
+        "startLine": 471,
+        "startChar": 0,
+        "endLine": 471,
+        "endChar": 1
+      },
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2dc3b2ab_a804008e",
+        "filename": "docs/msg_types.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "also deprecated?",
+      "range": {
+        "startLine": 475,
+        "startChar": 11,
+        "endLine": 475,
+        "endChar": 43
+      },
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb10f540_82c49b21",
+        "filename": "docs/rel-notes.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "pls trim extra/trailing white space",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 1
+      },
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2869e7a_795475d0",
+        "filename": "docs/rel-notes.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-06-24T13:01:51Z",
+      "side": 1,
+      "message": "+ Add document for message-type constants",
+      "revId": "1fdca9b811361d361ef0fccc7f4eb9e24f672062",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
