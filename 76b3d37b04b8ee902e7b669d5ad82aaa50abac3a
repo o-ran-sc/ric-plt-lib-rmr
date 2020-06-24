@@ -45,6 +45,30 @@
       "revId": "76b3d37b04b8ee902e7b669d5ad82aaa50abac3a",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "36aa0796_ac879549",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-06-24T18:43:59Z",
+      "side": 1,
+      "message": "Happy fingers make happy \"typeos\"  (Yes that \u0027e\u0027 was intentional).",
+      "parentUuid": "61a1a816_8787ba14",
+      "range": {
+        "startLine": 7,
+        "startChar": 3,
+        "endLine": 7,
+        "endChar": 4
+      },
+      "revId": "76b3d37b04b8ee902e7b669d5ad82aaa50abac3a",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
