@@ -753,9 +753,12 @@ static void* init(  char* uproto_port, int max_msg_size, int flags ) {
 		return NULL;
 	}
 
+	ctx->rtable = rt_clone_space( NULL, NULL, 0 );			// allows wormhole and rts calls to work before rt is received
 	if( flags & FL_NOTHREAD ) {								// if no rtc thread, we still need an empty route table for wormholes
-		ctx->rtable = rt_clone_space( NULL, NULL, 0 );		// so create one
+		ctx->rmr_ready = 1;									// for a nothread instance, rmr is ready to go here
 	} else {
+		ctx->rmr_ready = o;									// ensure not ready until static/dynamic table loaded
+
 		if( (tok = getenv( ENV_RTG_RAW )) != NULL  && *tok == '0' ) {			// use RMR for Rmgr comm only when specifically off
 			if( pthread_create( &ctx->rtc_th,  NULL, rtc, (void *) ctx ) ) { 	// kick the rmr based rt collector thread
 				rmr_vlog( RMR_VL_WARN, "rmr_init: unable to start route table collector thread: %s", strerror( errno ) );
@@ -830,11 +833,7 @@ extern int rmr_ready( void* vctx ) {
 		return FALSE;
 	}
 
-	if( ctx->rtable != NULL ) {
-		return TRUE;
-	}
-
-	return FALSE;
+	return ctx->rmr_ready;
 }
 
 /*

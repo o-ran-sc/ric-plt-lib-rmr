@@ -702,9 +702,12 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 												// finish all flag setting before threads to keep helgrind quiet
 	ctx->flags |= CFL_MTC_ENABLED;				// for SI threaded receiver is the only way
 
-	if( flags & RMRFL_NOTHREAD ) {				// thread set to off; no route table collector started (could be called by the rtc thread itself)
-		ctx->rtable = rt_clone_space( NULL, NULL, 0 );		// creates an empty route table so that wormholes still can be used
+	ctx->rtable = rt_clone_space( NULL, NULL, 0 );		// create an empty route table so that wormhole/rts calls can be used
+	if( flags & RMRFL_NOTHREAD ) {						// no thread prevents the collector start for very special cases
+		ctx->rtable_ready = 1;							// route based sends will always fail, but rmr is ready for the non thread case
 	} else {
+		ctx->rtable_ready = 0;							// no sends until a real route table is loaded in the rtc thread
+
 		if( static_rtc ) {
 			rmr_vlog( RMR_VL_INFO, "rmr_init: file based route table only for context on port %s\n", uproto_port );
 			if( pthread_create( &ctx->rtc_th,  NULL, rtc_file, (void *) ctx ) ) { 	// kick the rt collector thread as just file reader
@@ -777,11 +780,7 @@ extern int rmr_ready( void* vctx ) {
 		return FALSE;
 	}
 
-	if( ctx->rtable != NULL ) {
-		return TRUE;
-	}
-
-	return FALSE;
+	return ctx->rtable_ready;
 }
 
 /*

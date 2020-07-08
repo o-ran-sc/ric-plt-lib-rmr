@@ -786,6 +786,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 						}
 
 						send_rt_ack( pctx, mbuf, ctx->table_id, RMR_OK, NULL );
+						ctx->rtable_ready = 1;							// route based sends can now happen
 					} else {
 						if( DEBUG > 1 ) rmr_vlog_force( RMR_VL_DEBUG, "end of route table noticed, but one was not started!\n" );
 						ctx->new_rtable = NULL;

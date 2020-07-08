@@ -128,6 +128,7 @@ struct uta_ctx {
 	int d1_len;					// extra header data 1 length
 	int d2_len;					// extra header data 2 length	(future)
 	int	nn_sock;				// our general listen socket
+	int rtable_ready;			// set to true when rt is received or loaded
 	route_table_t* rtable;		// the active route table
 	route_table_t* old_rtable;	// the previously used rt, sits here to allow for draining
 	route_table_t* new_rtable;	// route table under construction

@@ -5,6 +5,12 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 July 9; version 4.1.3
+	Allow RTS messages to be sent before the arrival of the initial
+	route table. Calls to RTS (heart beat responses) prior to the
+	initial route table load could cause a crash if a framework
+	blindly assumes that RTS is valid. (RIC-589)
+
 2020 June 22; version 4.1.2
 	Fix typo in RIC Message header file.
 
