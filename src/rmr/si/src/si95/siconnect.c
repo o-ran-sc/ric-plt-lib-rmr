@@ -131,14 +131,12 @@ extern int SIconnect( struct ginfo_blk *gptr, char *abuf ) {
 		errno = 0;
 		if( tpptr->flags & TPF_SAFEC ) {
 			if( safe_connect( tpptr->fd, taddr, tpptr->palen ) != 0 ) {		// fd closed on failure
-				SItrash( TP_BLK, tpptr );
 				tpptr->fd = -1;
 			}
 		} else {
 			if( CONNECT( tpptr->fd, taddr, tpptr->palen ) != 0 ) {
 				CLOSE( tpptr->fd );     			// clean up fd and tp_block
 				tpptr->fd = -1;
-				SItrash( TP_BLK, tpptr );       	// free the trasnsport block
 			}
 		}
 
@@ -152,6 +150,8 @@ extern int SIconnect( struct ginfo_blk *gptr, char *abuf ) {
 			gptr->tplist = tpptr;           		//  point at new head
 			fd = tpptr->fd;                 		//  save for return value
 			SImap_fd( gptr, fd, tpptr );
+		} else {
+			SItrash( TP_BLK, tpptr );       	// free the trasnsport block
 		}
 	}
 

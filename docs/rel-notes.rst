@@ -22,6 +22,14 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2020 July 21; Version 4.2.4
+---------------------------
+
+Fix bug in SI95 -- possible use of pointer after free
+(RIC-626).
+
+
+
 2020 July 9; version 4.1.3
 --------------------------
 
