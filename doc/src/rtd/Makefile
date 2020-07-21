@@ -23,7 +23,7 @@
 
 
 %.rst:: %.xfm
-	OUTPUT_TYPE=rst tfm $< | sed 's/^ //' >$@
+	OUTPUT_TYPE=rst tfm $< | sed 's/^ //;  s/ *$$//' >$@
 
 %.ps:: %.xfm
 	OUTPUT_TYPE=ps pfm $< $@

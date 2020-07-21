@@ -158,9 +158,4 @@
 	.pn on noline center f=%d 0
 .fi
 
-.** work around bug until change made (RouxWare issue #4)
-.if tfm
-	.in 7p
-.fi
-
 .dv _setup_im

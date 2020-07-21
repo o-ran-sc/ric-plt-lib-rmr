@@ -5,6 +5,9 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 July 21; Version 4.2.4
+	Fix bug in SI95 -- possible use of pointer after free (RIC-626).
+
 2020 July 9; version 4.1.3
 	Allow RTS messages to be sent before the arrival of the initial
 	route table. Calls to RTS (heart beat responses) prior to the

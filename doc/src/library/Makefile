@@ -33,7 +33,7 @@ P2 = $(XP) XFM_PASS=2
 
 %.rst: %.xfm
 	$(P1) OUTPUT_TYPE=rst tfm $< /dev/null
-	$(P2) OUTPUT_TYPE=rst tfm $< stdout | sed 's/^ //' >$@
+	$(P2) OUTPUT_TYPE=rst tfm $< stdout | sed 's/^ //; s/ *$$//' >$@
 
 %.txt: %.xfm
 	$(P1) OUTPUT_TYPE=txt tfm  $< /dev/null
