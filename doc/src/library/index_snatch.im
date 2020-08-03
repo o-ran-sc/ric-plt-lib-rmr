@@ -78,6 +78,9 @@
 .ix snare RMR_RTG_ISRAW
 .ix snare RMR_VCTL_FILE
 .ix snare RMR_SRC_NAMEONLY
+.ix snare RMR_RTREQ_FREQ
+.ix snare RMR_CTL_PORT
+
 
 .** ----- errors -------------------
 .if false
@@ -140,7 +143,7 @@
 
 .ix group Functions rmr_call rmr_get_ip rmr_get_src rmr_init rmr_init_trace rmr_rcv_msg rmr_ready rmr_rts_msg rmr_send_msg rmr_wh_close rmr_wh_open rmr_wh_send_msg
 
-.ix group `Env Variables` RMR_BIND_IF RMR_RTG_SVC RMR_RTG_ISRAW RMR_SEED_RT RMR_SRC_NAMEONLY RMR_VCTL_FILE
+.ix group `Env Variables` RMR_BIND_IF RMR_CTL_PORT RMR_RTREQ_FREQ RMR_RTG_SVC RMR_RTG_ISRAW RMR_SEED_RT RMR_SRC_NAMEONLY RMR_VCTL_FILE 
 
 .ix group `Errors (RMR_ERR_*)` OK BADARG CALLFAILED EMPTY NOENDPT NOHDR NOTSUPP NOWHOPEN OVERFLOW SENDFAILED RETRY RCVFAILED TIMEOUT TRUNC UNSET WHID
 

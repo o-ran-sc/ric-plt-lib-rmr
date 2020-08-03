@@ -66,7 +66,18 @@ which RMR recognises:
 &beg_dlist( 1.25i &ditext )
 	&ditem(RMR_BIND_IF)	The interface to bind to listen ports to. If not defined 0.0.0.0 (all interfaces) is assumed.
 
-	&ditem(RMR_RTG_SVC)	The port RMR will listen on for route manager connections. If not defined 4561 is used.
+	&ditem(RMR_RTG_SVC)	 This variabe supplies the host:port (or address:port) of the Route Manager (route table generator)
+					process.  RMR will attempt to connect to this address port combination and request a route table.
+					If it is desired to prevent RMR from attempting to request a dynamic route table, the value of this
+					variable should be set to "-1."   If not set &cw(routemgr:4561) is assumed.
+
+	&ditem(RMR_CTL_PORT) This is the port which RMR's route table collector thread will use to listen for RMR messages
+					from the route manager (route table generator).  By default this is 4561, and must be unique for
+					each RMR process running on the host/container.
+
+	&ditem(RMR_RTREQ_FREQ) When a new route table is needed, the frequency that RMR sends a route table request to the
+					Route Manager defaults to 5 seconds.  This variable can be used to set the frequency to a value between
+					1 and 300  seconds inclusive.
 
 	&ditem(RMR_SEED_RT)	Where RMR expects to find the name of the seed (static) route table. If not defined no static table is read.
 

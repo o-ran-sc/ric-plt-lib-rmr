@@ -68,6 +68,7 @@ typedef struct uta_ctx  uta_ctx_t;
 #define ENV_LOG_HR 		"RMR_HR_LOG"		// set to 0 to turn off human readable logging and write using some formatting
 #define ENV_LOG_VLEVEL	"RMR_LOG_VLEVEL"	// set the verbosity level (0 == 0ff; 1 == crit .... 5 == debug )
 #define ENV_CTL_PORT	"RMR_CTL_PORT"		// route collector will listen here for control messages (4561 default)
+#define ENV_RTREQ_FREA  "RMR_RTREQ_FREQ"	// frequency we will request route table updates when we want one (1-300 inclusive)
 
 #define NO_FLAGS	0				// no flags to pass to a function
 
@@ -99,6 +100,7 @@ typedef struct uta_ctx  uta_ctx_t;
 #define DEF_COMM_PORT	"tcp:4560"		// default port we use for normal communications
 #define DEF_RTG_WK_ADDR	"routemgr:4561"	// well known address for the route manager
 #define DEF_TR_LEN		(-1)			// use default trace data len from context
+#define DEF_RTREQ_FREQ	5				// delay between route table requests
 
 #define UNSET_SUBID		(-1)			// initial value on msg allocation indicating not set
 #define UNSET_MSGTYPE	(-1)

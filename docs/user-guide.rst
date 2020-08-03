@@ -757,8 +757,27 @@ recognises:
 
       * - **RMR_RTG_SVC**
         -
-          The port RMR will listen on for route manager connections. If
-          not defined 4561 is used.
+          This variabe supplies the host:port (or address:port) of the
+          Route Manager (route table generator) process. RMR will
+          attempt to connect to this address port combination and
+          request a route table. If it is desired to prevent RMR from
+          attempting to request a dynamic route table, the value of
+          this variable should be set to "-1." If not set
+          ``routemgr`` is assumed.
+
+      * - **RMR_CTL_PORT**
+        -
+          This is the port which RMR's route table collector thread
+          will use to listen for RMR messages from the route manager
+          (route table generator). By default this is 4561, and must be
+          unique for each RMR process running on the host/container.
+
+      * - **RMR_RTREQ_FREQ**
+        -
+          When a new route table is needed, the frequency that RMR
+          sends a route table request to the Route Manager defaults to
+          5 seconds. This variable can be used to set the frequency to
+          a value between 1 and 300 seconds inclusive.
 
       * - **RMR_SEED_RT**
         -
