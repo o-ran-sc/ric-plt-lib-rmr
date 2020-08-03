@@ -147,6 +147,9 @@ extern void rmr_vlog( int write_level, char* fmt, ... ) {
 
 	memset( msg, 0, sizeof( msg ) );								// logging is slow; this ensures 0 term if msg is too large
 	hlen = snprintf( msg, sizeof( msg ), "%ld %d/RMR [%s] ", (long) time( NULL ), log_pid, log_situations[write_level] );
+	if( hlen > sizeof( msg ) - 1024 ) {								// should never happen, but be parinoid
+		return;
+	}
 	body = msg + hlen;
 
 	va_start( argp, fmt );		// suss out parm past fmt

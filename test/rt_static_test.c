@@ -427,9 +427,11 @@ static int rt_test( ) {
 
 
 	ep = (endpoint_t *) malloc( sizeof( *ep ) );
+	memset( ep, 0, sizeof( ep ) );
 	pthread_mutex_init( &ep->gate, NULL );
 	ep->name = strdup( "worm" );
 	ep->addr = NULL;
+	ep->notify = 1;
 	#ifdef NNG_UNDER_TEST
 		state = uta_link2( ep );
 	#else
@@ -458,6 +460,7 @@ static int rt_test( ) {
 
 	#ifndef NNG_UNDER_TEST
 		ep->open = 0;							// context is used only if ep not open, so to check this test close the ep
+		ep->notify = 1;
 		state = rt_link2_ep( NULL, ep );
 		errors += fail_if_true( state, "rt_link2_ep returned true when given bad context" );
 

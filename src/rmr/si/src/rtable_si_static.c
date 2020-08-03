@@ -218,7 +218,7 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 	endpoint cannot be found false (0) is returned.
 */
 static int uta_epsock_byname( uta_ctx_t* ctx, char* ep_name, int* nn_sock, endpoint_t** uepp ) {
-	route_table_t*	rt;
+	route_table_t*	rt = NULL;
 	si_ctx_t*		si_ctx;
 	endpoint_t*		ep;
 	int				state = FALSE;

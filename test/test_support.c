@@ -197,6 +197,7 @@ static rmr_mbuf_t* test_mk_msg( int len, int tr_len ) {
 	alen = sizeof( *hdr ) + tr_len + len + TP_HDR_LEN;	// this does no support allocating len2 and len3 data fields
 
 	new_msg = (rmr_mbuf_t *) malloc( sizeof *new_msg );
+	memset( new_msg, 0, sizeof( *new_msg ) );
 	new_msg->tp_buf = (void *) malloc( alen );
 	memset( new_msg->tp_buf, 0, alen );
 

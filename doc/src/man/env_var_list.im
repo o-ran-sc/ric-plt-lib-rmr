@@ -79,6 +79,12 @@
     In the case where both variables are defined, RMR will behave exactly as is
     communicated with the variable's values.
 
+&ditem(RMR_RTREQ_FREQ)
+	When RMR needs a new route table it will send a request once every &cw(n) seconds.
+	The default value for &cw(n) is 5, but can be changed if this variable is set prior
+	to invoking the process.
+	Accepted values are between 1 and 300 inclusive.
+
 &ditem(RMR_RTG_SVC)
     The value of this variable depends on the Route Manager in use.
     &space

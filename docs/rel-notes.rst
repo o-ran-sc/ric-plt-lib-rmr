@@ -22,7 +22,16 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
-2020 July 21; Version 4.2.4
+2020 August 3; Version 4.2.0
+----------------------------
+
+Add support for the RMR_RTREQ_FREQ environment variable to
+control the request frequency for a new route table (default
+5s if not supplied). (RIC-630)
+
+
+
+2020 July 21; Version 4.1.4
 ---------------------------
 
 Fix bug in SI95 -- possible use of pointer after free

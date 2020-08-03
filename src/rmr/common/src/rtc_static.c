@@ -261,6 +261,8 @@ static void* rtc( void* vctx ) {
 	int		count_delay = 30;			// number of seconds between writing count info; initially every 30s
 	int		bump_freq = 0;				// time at which we will bump count frequency to every 5 minutes
 	int		flags = 0;
+	int		rt_req_freq = DEF_RTREQ_FREQ;	// request frequency (sec) when wanting a new table
+	int		nxt_rt_req = 0;					// time of next request
 
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
@@ -272,6 +274,15 @@ static void* rtc( void* vctx ) {
 		vfd = open( eptr, O_RDONLY );
 		vlevel = refresh_vlevel( vfd );
 	}
+
+	if( (eptr = getenv( ENV_RTREQ_FREA )) != NULL ) {
+		rt_req_freq = atoi( eptr );
+		if( rt_req_freq < 1 || rt_req_freq > 300 ) {
+			rt_req_freq = DEF_RTREQ_FREQ;
+			rmr_vlog( RMR_VL_WARN, "rmr_rtc: RT request frequency (%s) out of range (1-300), using default", DEF_RTREQ_FREQ );
+		}
+	}
+	rmr_vlog( RMR_VL_INFO, "rmr_rtc: RT request frequency set to: %d seconds", rt_req_freq );
 
 	ctx->flags |= CFL_NO_RTACK;				// don't ack when reading from a file
 	read_static_rt( ctx, vlevel );			// seed the route table if one provided
@@ -331,11 +342,12 @@ static void* rtc( void* vctx ) {
 	blabber = 0;
 	while( 1 ) {														// until the cows return, pigs fly, or somesuch event likely not to happen
 		while( msg == NULL || msg->len <= 0 ) {							// until we actually have something from the other side
-			if( (flags & RTCFL_HAVE_UPDATE) == 0 ) {						// no route table updated from rt mgr; request one
+			if( (flags & RTCFL_HAVE_UPDATE) == 0 && time( NULL ) >= nxt_rt_req ) {			// no route table updated from rt mgr; request one
 				if( ctx->rtg_whid < 0 ) {
 					ctx->rtg_whid = rmr_wh_open( pvt_cx, rtg_addr );
 				}
 				send_update_req( pvt_cx, ctx );
+				nxt_rt_req = time( NULL ) + rt_req_freq;
 			}
 
 			msg = rmr_torcv_msg( pvt_cx, msg, 1000 );

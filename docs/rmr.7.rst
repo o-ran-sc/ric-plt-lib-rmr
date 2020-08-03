@@ -269,6 +269,13 @@ if undefined.
           case where both variables are defined, RMR will behave
           exactly as is communicated with the variable's values.
 
+      * - **RMR_RTREQ_FREQ**
+        -
+          When RMR needs a new route table it will send a request once
+          every ``n`` seconds. The default value for ``n`` is 5, but
+          can be changed if this variable is set prior to invoking the
+          process. Accepted values are between 1 and 300 inclusive.
+
       * - **RMR_RTG_SVC**
         -
           The value of this variable depends on the Route Manager in

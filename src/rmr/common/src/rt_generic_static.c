@@ -220,7 +220,7 @@ static int send_update_req( uta_ctx_t* pctx, uta_ctx_t* ctx ) {
 		snprintf( smsg->payload, 1024, "%s ts=%ld\n", ctx->my_name, (long) time( NULL ) );
 		rmr_vlog( RMR_VL_INFO, "rmr_rtc: requesting table: (%s) whid=%d\n", smsg->payload, ctx->rtg_whid );
 		smsg->len = strlen( smsg->payload ) + 1;
-	
+
 		smsg = rmr_wh_send_msg( pctx, ctx->rtg_whid, smsg );
 		if( (state = smsg->state) != RMR_OK ) {
 			rmr_vlog( RMR_VL_INFO, "rmr_rtc: send failed: %d whid=%d\n", smsg->state, ctx->rtg_whid );
@@ -236,7 +236,7 @@ static int send_update_req( uta_ctx_t* pctx, uta_ctx_t* ctx ) {
 
 /*
 	Send an ack to the route table manager for a table ID that we are
-	processing.	 State is 1 for OK, and 0 for failed. Reason might 
+	processing.	 State is 1 for OK, and 0 for failed. Reason might
 	be populated if we know why there was a failure.
 
 	Context should be the PRIVATE context that we use for messages
@@ -250,7 +250,7 @@ static int send_update_req( uta_ctx_t* pctx, uta_ctx_t* ctx ) {
 static void send_rt_ack( uta_ctx_t* ctx, rmr_mbuf_t* smsg, char* table_id, int state, char* reason ) {
 	int		use_rts = 1;
 	int		payload_size = 1024;
-	
+
 	if( ctx == NULL || ctx->rtg_whid < 0 ) {
 		return;
 	}
@@ -269,12 +269,12 @@ static void send_rt_ack( uta_ctx_t* ctx, rmr_mbuf_t* smsg, char* table_id, int s
 	if( smsg != NULL ) {
 		smsg->mtype = RMRRM_TABLE_STATE;
 		smsg->sub_id = -1;
-		snprintf( smsg->payload, payload_size-1, "%s %s %s\n", state == RMR_OK ? "OK" : "ERR", 
+		snprintf( smsg->payload, payload_size-1, "%s %s %s\n", state == RMR_OK ? "OK" : "ERR",
 			table_id == NULL ? "<id-missing>" : table_id, reason == NULL ? "" : reason );
 
 		smsg->len = strlen( smsg->payload ) + 1;
-	
-		rmr_vlog( RMR_VL_INFO, "rmr_rtc: sending table state: (%s) state=%d whid=%d\n", smsg->payload, smsg->state, ctx->rtg_whid );
+
+		rmr_vlog( RMR_VL_INFO, "rmr_rtc: sending table state: (%s) state=%d whid=%d\n", smsg->payload, state, ctx->rtg_whid );
 		if( use_rts ) {
 			smsg = rmr_rts_msg( ctx, smsg );
 		} else {
@@ -298,7 +298,7 @@ static void send_rt_ack( uta_ctx_t* ctx, rmr_mbuf_t* smsg, char* table_id, int s
 	must be at the start of a word (i.e. must be immediatly preceeded by whitespace).
 */
 static char* clip( char* buf ) {
-	char* 	tok;
+	char*	tok;
 
 	while( *buf && isspace( *buf ) ) {							// skip leading whitespace
 		buf++;
@@ -420,8 +420,8 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 	char*	tok;
 	int		ntoks;
 	uint64_t key = 0;			// the symtab key will be mtype or sub_id+mtype
-	char* 	tokens[128];
-	char* 	gtokens[64];
+	char*	tokens[128];
+	char*	gtokens[64];
 	int		i;
 	int		ngtoks;				// number of tokens in the group list
 	int		grp;				// index into group list
@@ -429,7 +429,7 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 	ts_field = clip( ts_field );				// ditch extra whitespace and trailing comments
 	rr_field = clip( rr_field );
 
-	if( ((tok = strchr( ts_field, ',' )) == NULL ) || 					// no sender names (generic entry for all)
+	if( ((tok = strchr( ts_field, ',' )) == NULL ) ||					// no sender names (generic entry for all)
 		(uta_has_str( ts_field,  ctx->my_name, ',', 127) >= 0) ||		// our name is in the list
 		has_myip( ts_field, ctx->ip_list, ',', 127 ) ) {				// the list has one of our IP addresses
 
@@ -474,7 +474,7 @@ static void trash_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, int vle
 	char*	tok;
 	int		ntoks;
 	uint64_t key = 0;			// the symtab key will be mtype or sub_id+mtype
-	char* 	tokens[128];
+	char*	tokens[128];
 
 	if( ctx == NULL || ctx->new_rtable == NULL || ctx->new_rtable->hash == NULL ) {
 		return;
@@ -482,7 +482,7 @@ static void trash_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, int vle
 
 	ts_field = clip( ts_field );				// ditch extra whitespace and trailing comments
 
-	if( ((tok = strchr( ts_field, ',' )) == NULL ) || 					// no sender names (generic entry for all)
+	if( ((tok = strchr( ts_field, ',' )) == NULL ) ||					// no sender names (generic entry for all)
 		(uta_has_str( ts_field,  ctx->my_name, ',', 127) >= 0) ||		// our name is in the list
 		has_myip( ts_field, ctx->ip_list, ',', 127 ) ) {				// the list has one of our IP addresses
 
@@ -518,7 +518,7 @@ static void trash_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, int vle
 static void parse_meid_ar( route_table_t* rtab, char* owner, char* meid_list, int vlevel ) {
 	char*	tok;
 	int		ntoks;
-	char* 	tokens[128];
+	char*	tokens[128];
 	int		i;
 	int		state;
 	endpoint_t*	ep;						// endpoint struct for the owner
@@ -549,7 +549,7 @@ static void parse_meid_ar( route_table_t* rtab, char* owner, char* meid_list, in
 static void parse_meid_del( route_table_t* rtab, char* meid_list, int vlevel ) {
 	char*	tok;
 	int		ntoks;
-	char* 	tokens[128];
+	char*	tokens[128];
 	int		i;
 
 	if( rtab->hash == NULL ) {
@@ -641,9 +641,9 @@ static void meid_parser( uta_ctx_t* ctx, uta_ctx_t* pctx, rmr_mbuf_t* mbuf, char
 		}
 
 		return;
-	}	
+	}
 
-	if( ! ctx->new_rtable ) { 			// for any other mmap entries, there must be a table in progress or we punt
+	if( ! ctx->new_rtable ) {			// for any other mmap entries, there must be a table in progress or we punt
 		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "meid update/delte (%s) encountered, but table update not started\n", tokens[0] );
 		return;
 	}
@@ -734,6 +734,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 	for( tok = buf + (strlen( buf ) - 1); tok > buf && isspace( *tok ); tok-- );	// trim trailing spaces too
 	*(tok+1) = 0;
 
+	memset( tokens, 0, sizeof( tokens ) );
 	if( (ntoks = uta_tokenise( buf, tokens, 128, '|' )) > 0 ) {
 		tokens[0] = clip( tokens[0] );
 		switch( *(tokens[0]) ) {
@@ -1048,7 +1049,7 @@ static char* uta_fib( char* fname ) {
 				fsize = stats.st_size;						// stat ok, save the file size
 			}
 		} else {
-			fsize = 8192; 								// stat failed, we'll leave the file open and try to read a default max of 8k
+			fsize = 8192;								// stat failed, we'll leave the file open and try to read a default max of 8k
 		}
 	}
 
@@ -1092,6 +1093,7 @@ static route_table_t* uta_rt_init( ) {
 	if( (rt = (route_table_t *) malloc( sizeof( route_table_t ) )) == NULL ) {
 		return NULL;
 	}
+	memset( rt, 0, sizeof( *rt ) );
 
 	if( (rt->hash = rmr_sym_alloc( RT_SIZE )) == NULL ) {
 		free( rt );
@@ -1128,7 +1130,9 @@ static route_table_t* rt_clone_space( route_table_t* srt, route_table_t* nrt, in
 	things.nalloc = 2048;
 	things.nused = 0;
 	things.things = (void **) malloc( sizeof( void * ) * things.nalloc );
+	memset( things.things, 0, sizeof( sizeof( void * ) * things.nalloc ) );
 	things.names = (const char **) malloc( sizeof( char * ) * things.nalloc );
+	memset( things.names, 0, sizeof( char * ) * things.nalloc );
 	if( things.things == NULL ) {
 		if( free_on_err ) {
 			free( nrt->hash );
@@ -1182,9 +1186,9 @@ static route_table_t* uta_rt_clone( route_table_t* srt ) {
 }
 
 /*
-	Creates a new route table and then clones  _all_ of the given route table (references 
-	both endpoints AND the route table entries. Needed to support a partial update where 
-	some route table entries will not be deleted if not explicitly in the update and when 
+	Creates a new route table and then clones  _all_ of the given route table (references
+	both endpoints AND the route table entries. Needed to support a partial update where
+	some route table entries will not be deleted if not explicitly in the update and when
 	we are adding/replacing meid references.
 */
 static route_table_t* uta_rt_clone_all( route_table_t* srt ) {
@@ -1243,7 +1247,7 @@ static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name ) {
 		return NULL;
 	}
 
-	if( (ep = uta_get_ep( rt, ep_name )) == NULL ) { 					// not there yet, make
+	if( (ep = uta_get_ep( rt, ep_name )) == NULL ) {					// not there yet, make
 		if( (ep = (endpoint_t *) malloc( sizeof( *ep ) )) == NULL ) {
 			rmr_vlog( RMR_VL_WARN, "rt_ensure:  malloc failed for endpoint creation: %s\n", ep_name );
 			errno = ENOMEM;
@@ -1291,7 +1295,7 @@ static inline endpoint_t*  get_meid_owner( route_table_t *rt, char* meid ) {
 		return NULL;
 	}
 
-	return (endpoint_t *) rmr_sym_get( rt->hash, meid, RT_ME_SPACE ); 
+	return (endpoint_t *) rmr_sym_get( rt->hash, meid, RT_ME_SPACE );
 }
 
 #endif
