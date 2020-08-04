@@ -264,6 +264,25 @@ static int rmr_api_test( ) {
 	rmr_set_low_latency( NULL );
 	rmr_set_fack( NULL );
 
+
+	msg2 = rmr_alloc_msg( rmc,  1024 );
+	msg2 = rmr_rcv_msg( NULL, msg2 );
+	if( msg2 != NULL ) {
+		errors += fail_if( msg2->state == RMR_OK, "nil context check for rcv msg returned OK" );
+	}
+	msg2 = rmr_torcv_msg( NULL, msg2, 200 );
+	if( msg2 != NULL ) {
+		errors += fail_if( msg2->state == RMR_OK, "nil context check for torcv msg returned OK" );
+	}
+
+	//  ----- thread start coverage ---------------------------------------------------------------------------
+	setenv( "RMR_WARNINGS", "1", 1 );	// force non-default branches during these tests
+	setenv( "RMR_SRC_NAMEONLY", "1", 1 );
+
+	rmr_init( ":6789", 1024, 0 );		// threaded mode with defined/default RM target
+	setenv( "RMR_RTG_SVC", "-1", 1 );	// force into static table mode
+	rmr_init( ":6789", 1024, 0 );		// threaded mode with static table
+
 	// --------------- phew, done ------------------------------------------------------------------------------
 
 	if( ! errors ) {

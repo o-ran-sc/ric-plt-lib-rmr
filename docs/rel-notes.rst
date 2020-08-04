@@ -22,6 +22,14 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2020 August 4; Version 4.2.1
+----------------------------
+
+Add additional environment variable dump if RMR_LOG_VLEVEL
+set to 4 at start.
+
+
+
 2020 August 3; Version 4.2.0
 ----------------------------
 

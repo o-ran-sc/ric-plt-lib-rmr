@@ -45,6 +45,7 @@
 #define NO_EMULATION
 #include "test_support.c"		// our private library of test tools
 
+#include "logging.c"		// tools references logging, so pull in too
 #include "tools_static.c"
 
 #include "tools_static_test.c"

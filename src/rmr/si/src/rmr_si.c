@@ -556,14 +556,16 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	int		old_vlevel;
 
 	old_vlevel = rmr_vlog_init();			// initialise and get the current level
-	rmr_set_vlevel( RMR_VL_INFO );		// we WILL announce our version etc
 
 	if( ! announced ) {
+		rmr_set_vlevel( RMR_VL_INFO );		// we WILL announce our version
 		rmr_vlog( RMR_VL_INFO, "ric message routing library on SI95/g mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
 			RMR_MSG_VER, flags, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
+
+		rmr_set_vlevel( old_vlevel );		// return logging to the desired state
+		uta_dump_env();							// spit out environment settings meaningful to us if in info mode
 	}
-	rmr_set_vlevel( old_vlevel );		// return logging to the desired state
 
 	errno = 0;
 	if( uproto_port == NULL ) {

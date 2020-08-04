@@ -147,6 +147,10 @@ static int sr_si_test() {
 	rtc_file( NULL );			// the static file only collector
 	rtc_file( ctx );
 
+	setenv( "RMR_RTREQ_FREQ", "400", 1 );	// force error checking code in rtc to resort to default
+	rtc( ctx );
+
+	setenv( "RMR_CTL_PORT", "43086", 1 );	// force defined branch in rtc
 	rtc( ctx );
 
 	setenv( "RMR_RTG_SVC", "4567", 1 );		// drive for edge case coverage to ensure no nil pointer etc
