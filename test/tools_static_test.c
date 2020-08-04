@@ -77,6 +77,8 @@ static int tools_test( ) {
 	void*	if_list;
 
 
+	uta_dump_env();
+
 	// ------------------ tokenise tests -----------------------------------------------------------
 	dbuf = strdup( buf );
 	i = uta_tokenise( dbuf, tokens, 127, ',' );

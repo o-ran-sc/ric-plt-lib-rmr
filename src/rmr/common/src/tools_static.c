@@ -29,6 +29,9 @@
 
 					uta_link2	-- establish a nanomsg connection to a host
 
+					uta_dump_env -- dump the environment variables to stdout that are
+								of importance to RMR.
+
 	Author:		E. Scott Daniels
 	Date:		30 November 2018
 */
@@ -88,9 +91,9 @@ static int uta_tokenise( char* buf, char** tokens, int max, char sep ) {
 	Given a buffer of 'sep' separated tokens, and a list of things,
 	return up to max tokens with any tokens that matched things in
 	the list. Toks is the user supplied array of char* which we will
-	fill in (up to max) with pointers to tokens from buf.  This 
-	damages buf, so the caller must dup the string if it must be 
-	preserved for later, original, use.  The pointers returned in 
+	fill in (up to max) with pointers to tokens from buf.  This
+	damages buf, so the caller must dup the string if it must be
+	preserved for later, original, use.  The pointers returned in
 	toks will reference portions of bufs.
 
 	Returns the number of tokens referenced by toks.
@@ -102,7 +105,7 @@ static int uta_rmip_tokenise( char* buf, if_addrs_t* iplist, char** toks, int ma
 	int i;
 	int j;
 
-	
+
 	all_toks = malloc( sizeof( char * ) * max );					// refernce to all tokens; we'll prune
 	pcount = ntoks = uta_tokenise( buf, all_toks, max, sep );		// split them up
 	j = 0;
@@ -284,7 +287,7 @@ static int uta_has_str( char const* buf, char const* str, char sep, int max ) {
 	to the list so that we don't pick up entries from the rtable that are for other
 	processes listening on different interfaces.
 
-	The ENV_BIN_IF environment variable may be either an IP address (v6 must be in 
+	The ENV_BIN_IF environment variable may be either an IP address (v6 must be in
 	square braces), or an interface name (e.g. eth0).
 */
 if_addrs_t*  mk_ip_list( char* port ) {
@@ -458,6 +461,39 @@ static char* get_default_ip( if_addrs_t* iplist ) {
 	}
 
 	return NULL;
+}
+
+/*
+	Write all environment variables that we consider to be important to stderr.
+*/
+static void uta_dump_env( ) {
+	char* token;
+	char* elist[] = {
+			ENV_BIND_IF,
+			ENV_RTG_PORT,
+			ENV_RTG_ADDR,
+			ENV_SEED_RT,
+			ENV_SEED_MEMAP,
+			ENV_RTG_RAW,
+			ENV_VERBOSE_FILE,
+			ENV_NAME_ONLY,
+			ENV_WARNINGS,
+			ENV_SRC_ID,
+			ENV_LOG_HR,
+			ENV_LOG_VLEVEL,
+			ENV_CTL_PORT,
+			ENV_RTREQ_FREA
+	};
+	int i;
+
+	for( i = 0; i < sizeof( elist ) / sizeof( char *); i ++ ) {
+		token = getenv( elist[i] );
+		if( token != NULL ) {
+			rmr_vlog( RMR_VL_INFO, "dump_env: %s = '%s'\n", elist[i], token );
+		} else {
+			rmr_vlog( RMR_VL_INFO, "dump_env: %s = <unset>\n", elist[i] );
+		}
+	}
 }
 
 #endif
