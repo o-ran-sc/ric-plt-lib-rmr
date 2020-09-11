@@ -22,6 +22,14 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2020 August 4; Version 4.2.2
+----------------------------
+
+Correct bug in the rmr_probe support utility when -r option
+is used on the command line (RIC-644)
+
+
+
 2020 August 4; Version 4.2.1
 ----------------------------
 

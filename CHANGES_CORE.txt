@@ -5,6 +5,10 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 August 4; Version 4.2.2
+	Correct bug in the rmr_probe support utility when -r option is used
+	on the command line (RIC-644)
+
 2020 August 4; Version 4.2.1
 	Add additional environment variable dump if RMR_LOG_VLEVEL set to
 	4 at start.

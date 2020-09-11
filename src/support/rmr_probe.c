@@ -21,16 +21,16 @@
 /*
 	Mnemonic:	rmr_probe.c
 	Abstract:	This sends probe messages to the indicated applications. The only
-				use currently is to send health check messages and wait for a 
+				use currently is to send health check messages and wait for a
 				response. It might be extended later and would cause a bit of
 				a redesign, but from the outside the switch to the name rmr_probe
-				makes sense. 
+				makes sense.
 
 				Original abstract which stands until the probe does more:
 				This is a generic, and very simplistic, health check application
 				which will send n RMR messages to an application (localhost:4560
 				by default) and expect to receive n responses.  Messages are sent
-				with the message type RIC_HEALTH_CHECK_REQ and responses are 
+				with the message type RIC_HEALTH_CHECK_REQ and responses are
 				expected to have a message type RIC_HEALTH_CHECK_RESP (defined in
 				the RIC message type header file).
 
@@ -41,7 +41,7 @@
 
 				to indicate the state of the response. The ERR token may optionally
 				be followed with a text string; when present it will be written on
-				standard error as an aide to problem determination if needed. 
+				standard error as an aide to problem determination if needed.
 
 				The programme exit code will be 0 on success (all received messages
 				had the OK token), or 1 to indicate failure. A failure reason will
@@ -114,11 +114,12 @@ static int elapsed( struct timespec* start_ts, struct timespec* end_ts ) {
 }
 
 static void usage( char* arg0 ) {
-	
+
 	fprintf( stderr,	"version 1.0.0\n"
-						"usage: %s [-h host:port] [-n msg-count] [-r] [-t seconds] [-v]\n"
+						"usage: %s [-h host:port] [-n msg-count] [-p port | -r] [-t seconds] [-v]\n"
 						"\thost:port may be ip-address:port or name:port of the application\n"
 						"\tmsg-count is the number of health check requests sent; default is 1\n"
+						"\t-p uses the given port instead of assigning a random port (-r ignored if given)\n"
 						"\t-r causes a random listen port NOT to be used; 43086 is used instead\n"
 						"\t-v enables some amount of extra verbose output to stderr\n", arg0 );
 }
@@ -127,7 +128,7 @@ int main( int argc, char** argv ) {
 	int		ai = 1;							// arg index
 	int		i;
 
-	void* mrc;      						// msg router context
+	void* mrc;								// msg router context
 	rmr_mbuf_t*		mbuf;					// message buffer
 	char*	payload;						// direct reference to msg payload
 	long	expiry;							// point at which we give up (expire)
@@ -169,7 +170,7 @@ int main( int argc, char** argv ) {
 
 				case 'r':					// generate random listen port
 					rand_port = 0;
-					;;
+					break;
 
 				case 't':					// timeout
 					ai++;
@@ -195,7 +196,7 @@ int main( int argc, char** argv ) {
 		}
 	}
 
-	
+
 	if( listen_port == NULL ) {
 		if( rand_port ) {				// generate a somewhat random listen port (RMR needs)
 			srand( time( NULL ) );
