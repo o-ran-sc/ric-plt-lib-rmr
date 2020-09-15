@@ -20,10 +20,8 @@
 
 
 /*
-	Mnemonic:	symtab_test.c
-	Abstract:	This is the unit test module that will drive tests against
-				the symbol table portion of RMr.  Run with:
-					ksh unit_test.ksh symtab_test.c
+	Mnemonic:	logging_test.c
+	Abstract:	This test drives logging related tests.
 	Date:		1 April 2019
 	Author: 	E. Scott Daniels
 */

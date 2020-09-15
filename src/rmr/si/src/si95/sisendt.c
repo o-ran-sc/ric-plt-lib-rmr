@@ -66,9 +66,8 @@ extern int SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 		tpptr = gptr->tp_map[fd];
 	} else {
 		// list should be locked before traversing
-		for( tpptr = gptr->tplist; tpptr != NULL && tpptr->fd != fd; tpptr = tpptr->next ); //  find the block if out of map's range
+		for( tpptr = gptr->tplist; tpptr != NULL && tpptr->fd != fd; tpptr = tpptr->next ) ; //  find the block if out of map's range
 	}
-
 	if( tpptr != NULL ) {
 		if( (fd = tpptr->fd) < 0 ) {			// fd user given might not be real, and this might be closed already
 			errno = EBADFD;

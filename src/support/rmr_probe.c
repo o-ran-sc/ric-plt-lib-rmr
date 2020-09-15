@@ -124,6 +124,20 @@ static void usage( char* arg0 ) {
 						"\t-v enables some amount of extra verbose output to stderr\n", arg0 );
 }
 
+/*
+	This validates the arg index is in range (< argc). If it is not
+	valid, the a message is issued and we abort.
+*/
+static void vet_ai( int ai, int argc, char* arg0 ) {
+	if( ai < argc && ai > 0 ) {
+		return;
+	}
+
+	fprintf( stderr, "abort: command line parameter(s) missing\n" );
+	usage( arg0 );
+	exit( 1 );
+}
+
 int main( int argc, char** argv ) {
 	int		ai = 1;							// arg index
 	int		i;
@@ -155,16 +169,19 @@ int main( int argc, char** argv ) {
 			switch( argv[ai][1] ) {
 				case 'h':					// host:port
 					ai++;
+					vet_ai( ai, argc, argv[0] );
 					target = strdup( argv[ai] );
 					break;
 
 				case 'n':					// num to send
 					ai++;
+					vet_ai( ai, argc, argv[0] );
 					num2send = atoi( argv[ai] );
 					break;
 
 				case 'p':					// num to send
 					ai++;
+					vet_ai( ai, argc, argv[0] );
 					listen_port = strdup( argv[ai] );
 					break;
 
@@ -174,6 +191,7 @@ int main( int argc, char** argv ) {
 
 				case 't':					// timeout
 					ai++;
+					vet_ai( ai, argc, argv[0] );
 					max_timeout = atoi( argv[ai] );
 					break;
 

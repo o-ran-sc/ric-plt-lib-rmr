@@ -159,6 +159,7 @@ static int fail_not_equal( int a, int b, char* what ) {
 }
 
 static int fail_if_equal( int a, int b, char* what ) {
+		fprintf( stderr, "<TESTING> %s %d\n", what, a==b );
 	if( a == b ) {
 		fprintf( stderr, "<FAIL> %s values were equal a=%d b=%d\n", what, a, b );
 	}

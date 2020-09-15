@@ -81,31 +81,7 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
     {                             //  poll fail or termination signal rcvd
      gptr->fdcount = 0;           //  prevent trying to look at a session
      gptr->flags |= GIF_SHUTDOWN; //  cause cleanup and exit at end
-     //deaths = 0;                  //  dont need to issue waits on dead child
-     //sigflags = 0;                //  who cares about signals now too
     }
-
-/*
-   while( deaths > 0 )  //  there have been death(s) - keep the dead
-    {                   //  from being zombies - send them to heaven
-     wait( NULL );                       //  issue wait on child
-     deaths--;
-    }                   //  end while dead children to send to heaven
-*/
-
-/*
-  if( sigflags &&        //  if signal received and processing them
-     (cbptr = gptr->cbtab[SI_CB_SIGNAL].cbrtn) != NULL )
-   {
-    while( sigflags != 0 )
-     {
-      i = sigflags;                  //  hold for call
-      sigflags = 0;                  //  incase we are interrupted while away
-      status = (*cbptr)( gptr->cbtab[SI_CB_SIGNAL].cbdata, i );
-      SIcbstat( gptr, status, SI_CB_SIGNAL );    //  handle status
-     }                                           //  end while
-   }
-*/
 
    if( pstat > 0  &&  (! (gptr->flags & GIF_SHUTDOWN)) )
     {
@@ -119,7 +95,6 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
         }                                 //  end if call back was defined
       }
 
-     // for( tpptr = gptr->tplist; tpptr != NULL; tpptr = tpptr->next )
 	tpptr = gptr->tplist; 
 	while( tpptr != NULL ) {
 		nextone = tpptr->next;					//  allow for a delete in loop

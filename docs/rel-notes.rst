@@ -22,6 +22,13 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2020 September 15; Version 4.2.3
+--------------------------------
+
+Correct arg processing bug in rmr_rpobe (RIC-645)
+
+
+
 2020 August 4; Version 4.2.2
 ----------------------------
 

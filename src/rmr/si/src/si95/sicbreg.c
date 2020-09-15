@@ -40,7 +40,7 @@ extern void SIcbreg( struct ginfo_blk *gptr, int type, int ((*fptr)()), void * d
 
 	if( gptr == NULL ) {
 		rmr_vlog( RMR_VL_ERR, "SIcbreg -- gptr was nil\n" );
-		exit( 1 );
+		return;
 	}
 
 	 if( gptr->magicnum == MAGICNUM ) {    			//  valid block from user ? 

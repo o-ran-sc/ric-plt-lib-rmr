@@ -35,44 +35,34 @@
 *  Returns:	Nothing.
 *  Date:	27 March 1995
 *  Author:	E. Scott Daniels
-*  Mod:		22 Feb 2002 - To support sendqueue tail 
+*  Mod:		22 Feb 2002 - To support sendqueue tail
 *
 ******************************************************************************
 */
-#include "sisetup.h"      //  get include files etc 
+#include "sisetup.h"      //  get include files etc
 #include "sitransport.h"
 
 extern void SIsend( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
-	struct t_unitdata *udata;      //  pointer at UDP unit data 
-	struct ioq_blk *qptr;          //  pointer at qio block for free 
+	struct t_unitdata *udata;      //  pointer at UDP unit data
+	struct ioq_blk *qptr;          //  pointer at qio block for free
 	int status;
 
-	if( tpptr->squeue == NULL )    //  who knows why we were called 
-		return;                        //  nothing queued - just leave 
-
-/*
-	if( tpptr->type == SOCK_DGRAM ) {                                //  udp send?  
-		sendto( tpptr->fd, tpptr->squeue->data, tpptr->squeue->dlen, 0, tpptr->squeue->addr, sizeof( struct sockaddr ) );
-		if( tpptr->squeue->addr != NULL )
-			free( tpptr->squeue->data );
-		tpptr->squeue->addr = NULL;
-	} else {
-*/
-		status= SEND( tpptr->fd, tpptr->squeue->data, tpptr->squeue->dlen, 0 );
-/*
+	if( tpptr->squeue == NULL ) {		//  who knows why we were called
+		return;							//  nothing queued - just leave
 	}
-*/
 
-	free( tpptr->squeue->data );           //  trash buffer or the udp block 
-	qptr = tpptr->squeue;                  //  hold pointer for free 
-	tpptr->squeue = tpptr->squeue->next;   //  next in queue becommes head 
-	if( !tpptr->squeue )
-		tpptr->sqtail = NULL;		//  no tail left either 
+	status= SEND( tpptr->fd, tpptr->squeue->data, tpptr->squeue->dlen, 0 );
+
+	free( tpptr->squeue->data );           //  trash buffer or the udp block
+	qptr = tpptr->squeue;                  //  hold pointer for free
+	tpptr->squeue = tpptr->squeue->next;   //  next in queue becommes head
+	if( !tpptr->squeue ) {
+		tpptr->sqtail = NULL;		//  no tail left either
+	}
 
 	free( qptr );
 
-	if( (tpptr->flags & TPF_DRAIN) && tpptr->squeue == NULL )  //  done w/ drain? 
-	{
+	if( (tpptr->flags & TPF_DRAIN) && tpptr->squeue == NULL ) {  //  done w/ drain?
 		SIterm( gptr, tpptr );     //  close the session and mark the block for delte
 	}
-}                      //  SIsend 
+}

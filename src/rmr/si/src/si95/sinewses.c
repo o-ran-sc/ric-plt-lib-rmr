@@ -71,33 +71,28 @@ extern int SInewsession( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 		newtp->next->prev = newtp;				//  back chain to us
 	}
 	gptr->tplist = newtp;
-	newtp->paddr = (struct sockaddr *) addr; 	//  partner address
+	newtp->paddr = (struct sockaddr *) addr;	//  partner address
 	newtp->fd = status;                         //  save the fd from accept
-	//fprintf( stderr, ">>>>> newsession: accepted session on fd %d\n", status );
 
-	if( gptr->tcp_flags & SI_TF_NODELAY ) {
+	if( gptr->tcp_flags & SI_TF_NODELAY ) {		// set on/off for no delay configuration
 		optval = 1;
 	} else {
 		optval = 0;
 	}
-	//fprintf( stderr, ">>>>> newsession: setting no delay = %d\n", optval );
-	SETSOCKOPT( tpptr->fd, SOL_TCP, TCP_NODELAY, (void *)&optval, sizeof( optval) ) ;
+	SETSOCKOPT( tpptr->fd, SOL_TCP, TCP_NODELAY, (void *)&optval, sizeof( optval) );
 
-
-	if( gptr->tcp_flags & SI_TF_FASTACK ) {
+	if( gptr->tcp_flags & SI_TF_FASTACK ) {		// set on/off for fast ack config
 		optval = 1;
 	} else {
 		optval = 0;
 	}
-	//fprintf( stderr, ">>>>> conn_prep: setting quick ack = %d\n", optval );
 	SETSOCKOPT( tpptr->fd, SOL_TCP, TCP_QUICKACK, (void *)&optval, sizeof( optval) ) ;
 
 	SIaddress( addr, (void **) &buf, AC_TODOT );				// get addr of remote side
 	if( (cbptr = gptr->cbtab[SI_CB_SECURITY].cbrtn) != NULL ) {	//   invoke the security callback function if there
 		status = (*cbptr)( gptr->cbtab[SI_CB_SECURITY].cbdata, buf );
 		if( status == SI_RET_ERROR ) {										//  session to be rejected
-			SIterm( gptr, newtp );											//  terminate new tp block
-			SItrash( TP_BLK, newtp );
+			SIterm( gptr, newtp );											//  terminate new tp block (do NOT call trash)
 			free( addr );
 			free( buf );
 			return SI_ERROR;
@@ -108,7 +103,6 @@ extern int SInewsession( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 
 	newtp->flags |= TPF_SESSION;     //  indicate a session here
 
-	//fprintf( stderr, ">>>> pending connection callback for: %s\n", buf );
 	if( (cbptr = gptr->cbtab[SI_CB_CONN].cbrtn) != NULL ) {		// drive connection callback
 		status=(*cbptr)( gptr->cbtab[SI_CB_CONN].cbdata, newtp->fd, buf );
 		SIcbstat(  gptr, status, SI_CB_CONN );               //  handle status

@@ -41,8 +41,7 @@ extern int SIgetaddr( struct ginfo_blk *gptr, char *buf ) {
 	int status = SI_ERROR;       //  return status
 	char	*ibuf;		//  SIaddr now points us at a string, rather than filling ours
 
-	for( tpptr = gptr->tplist; tpptr != NULL && !(tpptr->flags & TPF_LISTENFD);
-		tpptr = tpptr->next );
+	for( tpptr = gptr->tplist; tpptr != NULL && !(tpptr->flags & TPF_LISTENFD); tpptr = tpptr->next );
 
 	if( tpptr != NULL )
 	{

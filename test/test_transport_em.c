@@ -39,11 +39,15 @@ int tpem_conn_state = 0;		// states returned by emulated functions allowing fail
 int tpem_sock_state = 0;
 int tpem_listen_state = 0;
 int tpem_bind_state = 0;
+int tpem_accept_fd = 5;			// file desc returned by accept
+int tpem_sel_ef = -1;			// select sets this fd's error if >= 0
+int tpem_sel_block = 0;			// set if select call inidcates would block
+int	tpem_send_err = 0;			// set to cause send to return error
 
 // ------------ emulation control -------------------------------------------
 
 /*
-	All test prog to set various things
+	Allow test prog to set various things
 */
 static void tpem_set_conn_state( int s ) {
 	tpem_conn_state = s;
@@ -59,6 +63,22 @@ static void tpem_set_sock_state( int s ) {
 
 static void tpem_set_bind_state( int s ) {
 	tpem_bind_state = s;
+}
+
+static void tpem_set_accept_fd( int s ) {
+	tpem_accept_fd = s;
+}
+
+static void tpem_set_selef_fd( int s ) {
+	tpem_sel_ef = s;
+}
+
+static void tpem_set_sel_blk( int s ) {
+	tpem_sel_block = s;
+}
+
+static void tpem_set_send_err( int s ) {
+	tpem_send_err = s;
 }
 
 // ---- emulated functions ---------------------------------------------------
@@ -114,6 +134,43 @@ static int tpem_socket( int domain, int type, int protocol ) {
 	return -1;
 }
 
+static int tpem_accept( int socket, struct sockaddr *restrict address, socklen_t *restrict address_len) {
+	return tpem_accept_fd;
+}
+
+/*
+	Emulate a select. If tpem_sel_ef is set, then the error fd set for the fd is set to true.
+	If sel_woudl_block is set, then the select returns blocking
+*/
+static int tpem_select( int fd_count, fd_set* rf, fd_set* wf, fd_set* ef, void* time ) {
+	fprintf( stderr, "<SYSTEM> select returns %d (1==no-block)\n", tpem_sel_block ? -1 : 1  );
+
+	if( tpem_sel_block ) {
+		return -1;
+	}
+
+	if( tpem_sel_ef >= 0 ) {
+		FD_SET( tpem_sel_ef, ef );
+	} else {
+		FD_ZERO( ef );
+	}
+
+	return 1;
+}
+
+/*
+	If tpem_send_err is set, we return less than count;
+*/
+static int tpem_send( int fd, void* buf, int count, int flags ) {
+	errno = tpem_send_err;
+
+	fprintf( stderr, "<SYSTEM> send on fd=%d for %d bytes ret=%d\n", fd, count, tpem_send_err ? -1 : count );
+	return tpem_send_err ? -1 : count;
+}
+
+
+// ---------------------------------------------------------------------------------------
+
 /*
 	redefine all system calls to reference functions here. There are two defs
 	SI functions should use the capitalised verision so that sliding ff under
@@ -129,19 +186,22 @@ static int tpem_socket( int domain, int type, int protocol ) {
 #define socket tpem_socket
 #define LISTEN tpem_listen
 #define listen tpem_listen
+#define accept tpem_accept
+#define ACCEPT tpem_accept
+#define SEND	tpem_send
+#define SELECT	tpem_select
+#define select	tpem_select
 
 /*
 	these are defined in SI so that we can use the system stack or FFstack
 	they must exist and reference system calls if not defined above.
 */
-#define ACCEPT		accept
 #define CLOSE		close
 #define SHUTDOWN	shutdown
 #define	GETSOCKOPT	getscokopt
 #define SETSOCKOPT	setsockopt
 #define READ		read
 #define WRITE		write
-#define SEND		send
 #define SENDTO		sendto
 #define RECV		recv
 #define RECVFROM	recvfrom

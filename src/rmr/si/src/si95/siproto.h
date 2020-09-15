@@ -35,7 +35,7 @@
 extern void siabort_conn( int fd );		// use by applications discouraged
 
 extern void *SInew( int type );
-extern char *sigetname( int sid );
+extern char *SIgetname( int sid );
 extern void SIabort( struct ginfo_blk *gptr );
 extern int SIaddress( void *src, void **dest, int type );
 extern void SIbldpoll( struct ginfo_blk* gptr  );

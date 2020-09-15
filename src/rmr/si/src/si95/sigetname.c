@@ -29,7 +29,7 @@
 */
 #include "sisetup.h"
 
-extern char *sigetname( int sid ) { 
+extern char *SIgetname( int sid ) { 
  	struct sockaddr oaddr;     //  pointer to address in TCP binary format 
 	char	*buf;
 	int	len;

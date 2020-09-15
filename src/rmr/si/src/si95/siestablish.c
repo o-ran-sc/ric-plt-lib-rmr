@@ -25,10 +25,10 @@
 * Mnemonic:		SIestablish
 * Abstract:i	Prep functions that set up a socket for listening or making a
 *				connection.
-* Date:     	26 March 1995
-* Author:   	E. Scott Daniels
+* Date:			26 March 1995
+* Author:		E. Scott Daniels
 *
-* Modified: 	19 Apr 1995 - To keep returned address of the port.
+* Modified:	19 Apr 1995 - To keep returned address of the port.
 *				08 Mar 2007 - conversion for ipv6.
 *				12 Oct 2020 - split into connect prep and listen prep
 *								functions.
@@ -66,8 +66,8 @@
 */
 extern struct tp_blk *SIlisten_prep( struct ginfo_blk *gptr, int type, char* abuf, int family ) {
 	struct tp_blk *tptr;         //  pointer at new tp block
-	int status = SI_OK;             //  processing status
-	struct sockaddr *addr;    	//  IP address we are requesting
+	int status = SI_OK;          //  processing status
+	struct sockaddr *addr;		//  IP address we are requesting
 	int protocol;                //  protocol for socket call
 	char buf[256];               //  buffer to build request address in
 	int optval = 0;
@@ -107,21 +107,21 @@ extern struct tp_blk *SIlisten_prep( struct ginfo_blk *gptr, int type, char* abu
 
 			status = BIND( tptr->fd, (struct sockaddr *) addr, alen );
 			if( status == SI_OK ) {
-				tptr->addr = addr;         	//  save address
+				tptr->addr = addr;			//  save address
 			} else {
-				fprintf( stderr, ">>>>> siestablish: bind failed: fam=%d type=%d pro=%d %s\n", tptr->family, tptr->type, protocol, strerror( errno ) );
+				fprintf( stderr, "<ERR> siestablish: bind failed: fam=%d type=%d pro=%d %s\n", tptr->family, tptr->type, protocol, strerror( errno ) );
 				close( tptr->fd );
 			}
 		} else {
-			status = ! SI_OK;       		//  force bad return later
-			fprintf( stderr, ">>>>> siestablish: socket not esablished: fam=%d type=%d pro=%d %s\n", tptr->family, tptr->type, protocol, strerror( errno ) );
+			status = ! SI_OK;				//  force bad return later
+			fprintf( stderr, "<ERR> siestablish: socket not esablished: fam=%d type=%d pro=%d %s\n", tptr->family, tptr->type, protocol, strerror( errno ) );
 		}
 
-		if( status != SI_OK ) {    			//  socket or bind call failed - clean up stuff
-			fprintf( stderr, ">>>>> siestablish: bad state -- returning nil pointer\n" );
+		if( status != SI_OK ) {				//  socket or bind call failed - clean up stuff
+			fprintf( stderr, "<ERR> siestablish: bad state -- returning nil pointer\n" );
 			free( addr );
 			SItrash( TP_BLK, tptr );	//  free the trasnsport block
-			tptr = NULL;        		//  set to return nothing
+			tptr = NULL;				//  set to return nothing
 		}
 	}
 
@@ -163,7 +163,7 @@ static int need_smartc( char* abuf ) {
 */
 extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf, int family ) {
 	struct tp_blk *tptr;         //  pointer at new tp block
-	struct sockaddr *addr;    	//  IP address we are requesting
+	struct sockaddr *addr;		//  IP address we are requesting
 	int protocol;                //  protocol for socket call
 	char buf[256];               //  buffer to build request address in
 	int optval = 0;
@@ -189,10 +189,7 @@ extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf,
 		}
 
 		alen = SIgenaddr( abuf, protocol, family, tptr->type, &addr );	//  family == 0 for type that suits the address passed in
-		if( alen <= 0 )
-		{
-			//fprintf( stderr, ">>>>> siconn_prep: error generating an address struct for %s(abuf) %d(proto) %d(type): %s\n",
-			//	abuf, protocol, tptr->type, strerror( errno ) );
+		if( alen <= 0 ) {
 			return NULL;
 		}
 
@@ -222,7 +219,7 @@ extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf,
 			}
 		} else {
 			free( addr );
-			SItrash( TP_BLK, tptr );       	// free the trasnsport block
+			SItrash( TP_BLK, tptr );		// free the trasnsport block
 			tptr = NULL;					// we'll return nil
 		}
 	}
