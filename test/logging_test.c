@@ -44,7 +44,7 @@ int main( ) {
 	setenv( "RMR_HR_LOG", "1", 1 );			// drive for coverage in init
 	setenv( "RMR_LOG_VLEVEL", "90", 1 );	// force test for out of range during init
 
-	rmr_vlog( RMR_VL_CRIT, "debug message should not be written\n" );		// force coverage with init call 
+	rmr_vlog( RMR_VL_CRIT, "crit message should be written\n" );		// force coverage; should drive init
 
 	llevel = rmr_vlog_init( );
 	errors += fail_if_equal( llevel, 99, "llevel was not reset by vlog init" );
@@ -57,20 +57,26 @@ int main( ) {
 	errors += fail_if_equal( llevel, -10, "vlog init did not catch out of range (neg) vlog" );
 
 	rmr_set_vlevel( 2 );
-	
+
+	/*
+		The remainder of these tests can be validated only by looking at the stderr
+		for the process. If any "should not be written" messages appear, then the
+		test should be marked as a failure. In a similar vein, the number of
+		expected "should be written" messages should be found.
+	*/
 	rmr_vlog( RMR_VL_DEBUG, "debug message should not be written\n" );
 	rmr_vlog( RMR_VL_INFO, "info message should not be written\n" );
 	rmr_vlog( RMR_VL_WARN, "warn message should not be written\n" );
 	rmr_vlog( RMR_VL_ERR, "error message should be written\n" );
 	rmr_vlog( RMR_VL_CRIT, "crit message should be written\n" );
-	
+
 	rmr_set_vlevel( 5 );
 	rmr_vlog( RMR_VL_DEBUG, "debug message should be written\n" );
 	rmr_vlog( RMR_VL_INFO, "info message should be written\n" );
 	rmr_vlog( RMR_VL_WARN, "warn message should be written\n" );
 	rmr_vlog( RMR_VL_ERR, "error message should be written\n" );
 	rmr_vlog( RMR_VL_CRIT, "crit message should be written\n" );
-	
+
 	rmr_set_vlevel( 0 );
 	rmr_vlog( RMR_VL_DEBUG, "debug message should not be written\n" );
 	rmr_vlog( RMR_VL_INFO, "info message should not be written\n" );
@@ -85,12 +91,15 @@ int main( ) {
 	rmr_vlog_force( RMR_VL_ERR, "error forced message should be written\n" );
 	rmr_vlog_force( RMR_VL_CRIT, "crit forced message should be written\n" );
 
+	// CAUTION -- this needs to be manually updated when 'should be' messages are added!!
+	fprintf( stderr, "<INFO> expeted 'should be' messages count is 13\n" );
 
 	rmr_vlog( -1, "out of range message might be written\n" );			// drive range checks
 	rmr_vlog( 10, "out of range message should not be written\n" );
 
-	rmr_vlog_force( -1, "out of range message might be written\n" );			// drive range checks
-	rmr_vlog_force( 10, "out of range message should not be written\n" );
+	rmr_vlog_force( -1, "out of range message might be written\n" );				// drive range checks
+	rmr_vlog_force( 10, "out of range message should be written (as debug)\n" );	// force with high log level should set to debug
 
+	test_summary( errors, "logging tests" );
 	return errors > 0;
 }
