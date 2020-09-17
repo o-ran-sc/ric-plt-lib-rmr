@@ -38,6 +38,16 @@ ipaths = -I ../src/rmr/common/src/ -I ../src/rmr/common/include  \
 all:
 	unit_test.ksh
 
+# a generic rule driven from the unit_test script to run all stand alone
+# vetters after the build
+vet: logging_vet
+
+logging_vet:: logging_test always
+	bash vet_logging.sh
+
+# Make required hack to always force something to build
+always ::
+
 
 # remove intermediates
 clean:

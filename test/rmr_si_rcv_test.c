@@ -91,6 +91,7 @@ int main() {
 	errors += rmr_rcv_test();
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
+	test_summary( errors, "receive tests" );
 	if( errors == 0 ) {
 		fprintf( stderr, "<PASS> all tests were OK\n\n" );
 	} else {

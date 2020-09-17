@@ -44,39 +44,49 @@ int counter;								// global counter for for-each tests
 
 
 
-static void fetch( void* st, char* key, int class, int expected ) {
+static int fetch( void* st, char* key, int class, int expected ) {
 	char* val;
+	int error = 0;
 
 	val = rmr_sym_get( st, key, class );
 	if( val ) {
 		fprintf( stderr, "[%s] get returns key=%s val=%s\n",  !expected ? "FAIL" : "OK", key, val );
 		if( !expected ) {
 			state = BAD;
+			error = 1;
 		}
 
 	} else {
 		fprintf( stderr, "[%s] string key fetch return nil\n", expected ? "FAIL" : "OK" );
 		if( expected ) {
 			state = BAD;
+			error = 1;
 		}
 	}
+
+	return error;
 }
 
-static void nfetch( void* st, int key, int expected ) {
+static int nfetch( void* st, int key, int expected ) {
 	char* val;
+	int		error = 0;
 
 	val = rmr_sym_pull( st, key );
 	if( val ) {
 		fprintf( stderr, "[%s] get returns key=%d val=%s\n", !expected ? "FAIL" : "OK", key, val );
 		if( !expected )  {
 			state = BAD;
+			error = 1;
 		}
 	} else {
 		fprintf( stderr, "[%s] get return nil for key=%d\n", expected ? "FAIL" : "OK", key );
 		if( expected )  {
 			state = BAD;
+			error = 1;
 		}
 	}
+
+	return error;
 }
 
 
@@ -96,25 +106,26 @@ int main( ) {
 	int		class = 1;
 	int		s;
 	void*	p;
+	int		errors = 0;
 
 	st = rmr_sym_alloc( 10 );						// alloc with small value to force adjustment inside
-	fail_if_nil( st, "symtab pointer" );
+	errors += fail_if_nil( st, "symtab pointer" );
 
 	s = rmr_sym_put( st, foo, class, bar );			// add entry with string key; returns 1 if it was inserted
-	fail_if_false( s, "insert foo existed" );
+	errors += fail_if_false( s, "insert foo existed" );
 
 	s = rmr_sym_put( st, foo, class+1, bar );		// add to table with a different class
-	fail_if_false( s, "insert foo existed" );
+	errors += fail_if_false( s, "insert foo existed" );
 
 	s = rmr_sym_put( st, foo, class, bar );			// inserted above, should return not inserted (0)
-	fail_if_true( s, "insert foo existed" );
+	errors += fail_if_true( s, "insert foo existed" );
 
-	fetch( st, foo, class, 1 );
-	fetch( st, goo, class, 0 );					// fetch non existant
+	errors += fetch( st, foo, class, 1 );
+	errors += fetch( st, goo, class, 0 );			// fetch non existant
 	rmr_sym_stats( st, 4 );							// early stats at verbose level 4 so chatter is minimised
 	rmr_sym_dump( st );
 
-	for( i = 2000; i < 3000; i++ ) {			// bunch of dummy things to force chains in the table
+	for( i = 2000; i < 3000; i++ ) {				// bunch of dummy things to force chains in the table
 		rmr_sym_map( st, i, foo );					// add entry with unsigned integer key
 	}
 	rmr_sym_stats( st, 0 );							// just the small facts to verify the 1000 we stuffed in
@@ -122,17 +133,16 @@ int main( ) {
 	rmr_sym_ndel( st, 12001 );						// delete numeric key not there
 
 	s = rmr_sym_map( st, 1234, foo );					// add known entries with unsigned integer key
-	fail_if_false( s, "numeric add of key 1234 should not have existed" );
+	errors += fail_if_false( s, "numeric add of key 1234 should not have existed" );
 	s = rmr_sym_map( st, 2345, bar );
 	fail_if_true( s, "numeric add of key 2345 should have existed" );
 
 	counter = 0;
 	rmr_sym_foreach_class( st, 0, each_counter, NULL );
-	fail_if_false( counter, "expected counter after foreach to be non-zero" );
+	errors += fail_if_false( counter, "expected counter after foreach to be non-zero" );
 
-	nfetch( st, 1234, 1 );
-	nfetch( st, 2345, 1 );
-
+	errors += nfetch( st, 1234, 1 );
+	errors += nfetch( st, 2345, 1 );
 
 	rmr_sym_del( st, foo, 0 );
 
@@ -141,6 +151,13 @@ int main( ) {
 	rmr_sym_free( NULL );			// ensure it doesn't barf when given a nil pointer
 	rmr_sym_free( st );
 
-	return state;
+	test_summary( errors, "symtab tests" );
+	if( state + errors == 0 ) {
+		fprintf( stderr, "<PASS> all symtab tests were OK\n\n" );
+	} else {
+		fprintf( stderr, "<FAIL> %d errors in symtab code\n\n", errors );
+	}
+
+	return !!(state + errors);
 }
 

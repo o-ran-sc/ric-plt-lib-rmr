@@ -39,6 +39,7 @@
 #include <stdint.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <netdb.h>
 
 #include "rmr.h"
 #include "rmr_agnostic.h"
@@ -52,11 +53,12 @@ int main( ) {
 
 	errors += ring_test( );
 
+	test_summary( errors, "ring tests" );
 	if( errors ) {
 		fprintf( stderr, "<FAIL> ring tests failed\n" );
 	} else {
 		fprintf( stderr, "<OK>	 ring tests pass\n" );
 	}
 
-	return errors;
+	return !! errors;
 }
