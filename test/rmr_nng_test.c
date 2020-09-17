@@ -136,6 +136,7 @@ int main() {
 	errors +=  mbuf_api_test( );
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
+	test_summary( errors, "tool tests" );
 	if( errors == 0 ) {
 		fprintf( stderr, "<PASS> all tests were OK\n\n" );
 	} else {

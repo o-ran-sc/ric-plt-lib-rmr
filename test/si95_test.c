@@ -249,9 +249,10 @@ static int conn( ) {
 	errors += fail_if_true( state >= 0, "forced dup connect did not return error" );
 
 	tpem_set_addr_dup_state( 0 );						// back to normal
-	tpem_set_conn_state( 1 );
+	tpem_set_conn_state( -1 );
 	state = SIconnect( si_ctx, "localhost:4567" );		// driver regular connect
 	errors += fail_if_true( state >= 0, "connect to low port successful when failure expected" );
+	tpem_set_conn_state( 3 );
 
 	tpem_set_sock_state( 1 );							// make scoket calls fail
 	state = SIconnect( si_ctx, "localhost:4567" );		// driver regular connect
@@ -405,7 +406,7 @@ int main() {
 
 	errors += cleanup();
 
-	fprintf( stderr, "<INFO> si95 tests finished (%d)\n", errors );
+	test_summary( errors, "SI95 tests" );
 	if( errors == 0 ) {
 		fprintf( stderr, "<PASS> all tests were OK\n\n" );
 	} else {
