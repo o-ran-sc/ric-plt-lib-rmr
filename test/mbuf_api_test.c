@@ -100,6 +100,7 @@ int main( ) {
 
 	errors += mbuf_api_test( );
 
+	test_summary( errors, "mbuf API tests" );
 	if( errors ) {
 		fprintf( stderr, "<FAIL> mbuf_api tests failed\n" );
 	} else {

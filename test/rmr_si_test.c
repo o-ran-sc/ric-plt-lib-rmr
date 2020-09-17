@@ -144,10 +144,11 @@ int main() {
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 */
 
+	test_summary( errors, "rmr_si tests" );
 	if( errors == 0 ) {
-		fprintf( stderr, "<PASS> all tests were OK\n\n" );
+		fprintf( stderr, "<PASS> all rmr si tests were OK\n\n" );
 	} else {
-		fprintf( stderr, "<FAIL> %d modules reported errors\n\n", errors );
+		fprintf( stderr, "<FAIL> %d rmr si test modules reported errors\n\n", errors );
 	}
 
 	return !!errors;

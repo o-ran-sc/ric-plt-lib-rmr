@@ -69,6 +69,27 @@
 #define GOOD 0
 #endif
 
+// -----------  a couple of globals make it easier ---------------------------------------
+static int	ts_tests_driven = 0;			// number of fail_if calls made == numer of tests driven
+
+// ---------------------------------------------------------------------------------------
+
+/*
+	Support test counting, reset and summary.
+*/
+static int test_get_attempted() {
+	return ts_tests_driven;
+}
+
+static void test_reset_attempted() {
+	ts_tests_driven = 0;
+}
+
+static void test_summary( int ecount, char* tag ) {
+	fprintf( stderr, "<SUMMARY> %s completed;  %d total tests, %d passed, %d failed\n",
+		tag, ts_tests_driven, ts_tests_driven - ecount, ecount );
+}
+
 /*
 	Snag the optional positional parameter at pp, return defval if not there.
 */
@@ -111,7 +132,13 @@ static void set_signals( void ) {
 }
 
 
+/*
+	Assert like logic except these just record the test and return state so that we
+	can attempt all tests and not abort on the first failure as an assert would do.
+*/
 static int fail_if_nil( void* p, char* what ) {
+	ts_tests_driven++;
+
 	if( !p ) {
 		fprintf( stderr, "<FAIL> %s: pointer was nil\n", what );
 	}
@@ -119,6 +146,8 @@ static int fail_if_nil( void* p, char* what ) {
 }
 
 static int fail_not_nil( void* p, char* what ) {
+	ts_tests_driven++;
+
 	if( p ) {
 		fprintf( stderr, "<FAIL> %s: pointer was not nil\n", what );
 	}
@@ -126,6 +155,8 @@ static int fail_not_nil( void* p, char* what ) {
 }
 
 static int fail_if_false( int bv, char* what ) {
+	ts_tests_driven++;
+
 	if( !bv ) {
 		fprintf( stderr, "<FAIL> %s: expected true, boolean test was false (%d)\n", what, bv );
 	}
@@ -134,6 +165,8 @@ static int fail_if_false( int bv, char* what ) {
 }
 
 static int fail_if_true( int bv, char* what ) {
+	ts_tests_driven++;
+
 	if( bv ) {
 		fprintf( stderr, "<FAIL> %s: expected false, boolean test was true (%d)\n", what, bv );
 	}
@@ -144,6 +177,8 @@ static int fail_if_true( int bv, char* what ) {
 	Same as fail_if_true(), but reads easier in the test code.
 */
 static int fail_if( int bv, char* what ) {
+	ts_tests_driven++;
+
 
 	if( bv ) {
 		fprintf( stderr, "<FAIL> %s: expected false, boolean test was true (%d)\n", what, bv );
@@ -152,6 +187,8 @@ static int fail_if( int bv, char* what ) {
 }
 
 static int fail_not_equal( int a, int b, char* what ) {
+	ts_tests_driven++;
+
 	if( a != b ) {
 		fprintf( stderr, "<FAIL> %s: values were not equal a=%d b=%d\n", what, a, b );
 	}
@@ -159,6 +196,8 @@ static int fail_not_equal( int a, int b, char* what ) {
 }
 
 static int fail_if_equal( int a, int b, char* what ) {
+	ts_tests_driven++;
+
 		fprintf( stderr, "<TESTING> %s %d\n", what, a==b );
 	if( a == b ) {
 		fprintf( stderr, "<FAIL> %s values were equal a=%d b=%d\n", what, a, b );
@@ -167,6 +206,8 @@ static int fail_if_equal( int a, int b, char* what ) {
 }
 
 static int fail_not_equalp( void* a, void* b, char* what ) {
+	ts_tests_driven++;
+
 	if( a != b ) {
 		fprintf( stderr, "<FAIL> %s: pointers were not equal a=%p b=%p\n", what, a, b );
 	}
@@ -174,6 +215,8 @@ static int fail_not_equalp( void* a, void* b, char* what ) {
 }
 
 static int fail_if_equalp( void* a, void* b, char* what ) {
+	ts_tests_driven++;
+
 	if( a == b ) {
 		fprintf( stderr, "<FAIL> %s pointers were equal a=%p b=%p\n", what, a, b );
 	}
@@ -260,7 +303,7 @@ static void test_set_plen( rmr_mbuf_t* msg, int plen ) {
 
 /*
 	Build a message and populate both the msg buffer and the tranport header
-	with mid, sid, and payload len. Tr_len causes that much space in the 
+	with mid, sid, and payload len. Tr_len causes that much space in the
 	header for trace info to be reserved.
 */
 static rmr_mbuf_t* mk_populated_msg( int alloc_len, int tr_len, int mtype, int sid, int plen ) {
@@ -276,6 +319,7 @@ static rmr_mbuf_t* mk_populated_msg( int alloc_len, int tr_len, int mtype, int s
 }
 
 
+// end no dummy rmr
 #endif
 
 #endif
