@@ -109,6 +109,7 @@ int main() {
 	errors += rt_test();					// route table things specific to nano
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
+	test_summary( errors, "nanomsg API tests" );
 	if( errors == 0 ) {
 		fprintf( stderr, "<PASS> all tests were OK\n" );
 	} else {

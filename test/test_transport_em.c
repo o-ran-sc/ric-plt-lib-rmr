@@ -36,7 +36,7 @@ int		tpem_last_len = 0;
 
 int tpem_addr_dup = 0;			// getsockname duplicates last addr if true
 int tpem_conn_state = 0;		// states returned by emulated functions allowing failures to be driven
-int tpem_sock_state = 0;
+int tpem_sock_state = 0;		// if sock state 0, then socket call returns good fd
 int tpem_listen_state = 0;
 int tpem_bind_state = 0;
 int tpem_accept_fd = 5;			// file desc returned by accept
@@ -125,7 +125,7 @@ static int tpem_socket( int domain, int type, int protocol ) {
 
 	if( tpem_sock_state == 0 ) {
 		if( ++fd > 10 ) {
-			fd = 1;
+			fd = 3;				// ensure we don't stomp on std* descriptors
 		}
 
 		return fd;

@@ -51,7 +51,18 @@
 #include "tools_static_test.c"
 
 int main( ) {
+	int errors = 0;
+
 	fprintf( stderr, ">>>> starting tools_test\n" );
-	return tools_test() > 0;
+	errors += tools_test() > 0;
+
+	test_summary( errors, "tool tests" );
+	if( errors == 0 ) {
+		fprintf( stderr, "<PASS> all tool tests were OK\n\n" );
+	} else {
+		fprintf( stderr, "<FAIL> %d errors in tool code\n\n", errors );
+	}
+
+	return !!errors;
 }
 

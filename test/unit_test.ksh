@@ -71,6 +71,9 @@ function usage {
 	echo "  -c allows user to set the target coverage for a module to pass; default is 80"
 	echo "  -f forces a discount check (normally done only if coverage < target)"
 	echo "  -F show only failures at the function level"
+	echo "  -Q turns off quiet mode. Quiet mode (default) is less chatty about intermediate"
+	echo "     coverage results and test programme output when failures detected"
+	echo "  -q enable quiet mode (default, so this is no longer needed)"
 	echo "  -s strict mode; code coverage must also pass to result in a good exit code"
 	echo "  -v will write additional information to the tty and save the disccounted file if discount run or -f given"
 	echo "  -x generates the coverage XML files for Sonar (implies -f)"
@@ -342,7 +345,7 @@ verbose=0
 show_all=1										# show all things -F sets to show failures only
 strict=0										# -s (strict) will set; when off, coverage state ignored in final pass/fail
 show_output=0									# show output from each test execution (-S)
-quiet=0
+quiet=1											# less chatty with result output (only overall coverage, no intermediate coverage) -Q turns off
 gen_xml=0
 replace_flags=1									# replace ##### in gcov for discounted lines
 run_nano_tests=0								# can nolonger be turned on
@@ -379,6 +382,7 @@ do
 		-S)	show_output=1;;				# test output shown even on success
 		-v)	(( verbose++ ));;
 		-q)	quiet=1;;					# less chatty when spilling error log files
+		-Q)	quiet=0;;					# disable quiet mode
 		-x)	gen_xml=1
 			force_discounting=1
 			trigger_discount_str="WARN|FAIL|PASS"		# check all outcomes for each module
@@ -428,7 +432,10 @@ then
 				continue
 			fi
 
-			echo "<INFO> add test: $tfile" >&2
+			if (( ! quiet ))
+			then
+				echo "<INFO> add test: $tfile" >&2
+			fi
 			flist="${flist}$tfile "
 		fi
 	done
@@ -522,6 +529,8 @@ do
 				printf "\n============= test programme output =======================\n"
 				cat /tmp/PID$$.log
 				printf "===========================================================\n"
+			else
+				grep "SUMMARY" /tmp/PID$$.log
 			fi
 		fi
 
@@ -635,7 +644,7 @@ do
 
 		if (( rc  || force_discounting ))	# didn't pass, or forcing, see if discounting helps
 		then
-			if (( ! verbose ))
+			if (( ! verbose ))		# if verbose is on we don't need this (! is not a mistake!!)
 			then
 				echo "[INFO] checking to see if discounting improves coverage for failures listed above"
 			fi
@@ -684,6 +693,8 @@ do
 	if (( ! quiet ))
 	then
 		cat /tmp/PID$$.noise
+	else
+		grep "SUMMARY" /tmp/PID$$.noise
 	fi
 done
 
@@ -741,6 +752,16 @@ else						# not strict; fail only if unit tests themselves failed
 	then
 		state=1
 	fi
+fi
+
+# finally run any "vetters" which run programmes and analyse the output
+echo "[INFO] running vetters...."
+if ! make vet
+then
+	echo "[FAIL] one or more vetters failed"
+	state=1
+else
+	echo "[INFO] vetters all passed"
 fi
 
 echo""
