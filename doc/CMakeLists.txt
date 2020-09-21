@@ -79,6 +79,7 @@ if( BUILD_DOC )
 		rmr_rts_msg.3
 		rmr_send_msg.3
 		rmr_set_fack.3
+		rmr_set_low_lat.3
 		rmr_set_stimeout.3
 		rmr_set_trace.3
 		rmr_set_vlevel.3

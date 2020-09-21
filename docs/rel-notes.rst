@@ -22,6 +22,13 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2020 September 15; Version 4.2.4
+--------------------------------
+
+Add man page for the rmr_set_low_latency() function (RIC-631)
+
+
+
 2020 September 15; Version 4.2.3
 --------------------------------
 
