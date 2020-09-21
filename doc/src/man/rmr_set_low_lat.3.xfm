@@ -1,0 +1,75 @@
+.if false
+==================================================================================
+   Copyright (c) 2019-2020 Nokia
+   Copyright (c) 2018-2020 AT&T Intellectual Property.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+==================================================================================
+.fi
+.if false
+    Mnemonic    rmr_set_low_lat.3.xfm
+    Abstract    The manual page for the set low latency (no delay) function.
+    Author      E. Scott Daniels
+    Date        21 September 2020
+.fi
+
+.gv e LIB lib
+.im &{lib}/man/setup.im
+
+&line_len(6i)
+
+&h1(RMR Library Functions)
+&h2(NAME)
+    rmr_set_low_latency
+
+&h2(SYNOPSIS )
+&indent
+&ex_start
+#include <rmr/rmr.h>
+
+void rmr_set_low_latency( void* vctx );
+
+&ex_end
+&uindent
+
+&h2(DESCRIPTION)
+The &cw(rmr_set_low_latency) function enables &ital(TCP NO_DELAY) if
+the underlying transport library supports it.
+This might be useful for applications which must send messages at a maximum
+rate.
+
+&space
+A call to this function will cause all subsequent connections made by the application
+to set the no delay (low latency) option.
+When no delay is needed, it is recommended that this function be called immediately upon a successful call to
+the RMR initialisation function.
+
+&space
+The effect of setting "low latency" mode is to disable Nagel's algorithm and to send a packet
+on a connection as soon as it is given to the TCP transport.
+When this option is not enabled, TCP may employ Nagel's algorithm and hold the packet
+with the assumption that it can be combined with another and sent in the same datagram
+in an effort to improve bandwidth but at the expense of added latency.
+
+&h2(RETURN VALUE)
+There is no return value.
+
+
+&h2(ERRORS)
+This function does not generate any errors.
+
+&h2(SEE ALSO )
+.ju off
+rmr_init(3), rmr_fast_ack(3)
+.ju on
+

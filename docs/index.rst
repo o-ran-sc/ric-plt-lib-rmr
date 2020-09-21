@@ -58,6 +58,7 @@ for an overview of the library.
    rmr_rts_msg.3.rst
    rmr_send_msg.3.rst
    rmr_set_fack.3.rst
+   rmr_set_low_lat.3.rst
    rmr_set_stimeout.3.rst
    rmr_set_trace.3.rst
    rmr_set_vlevel.3.rst

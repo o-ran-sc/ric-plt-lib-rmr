@@ -5,6 +5,9 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 September 15; Version 4.2.4
+	Add man page for the rmr_set_low_latency() function (RIC-631)
+
 2020 September 15; Version 4.2.3
 	Correct arg processing bug in rmr_rpobe (RIC-645)
 
