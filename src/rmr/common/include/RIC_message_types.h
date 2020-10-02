@@ -231,6 +231,9 @@
 #define TS_UE_LIST                          30000        // traffic steering
 #define TS_QOE_PRED_REQ                     30001
 #define TS_QOE_PREDICTION                   30002
+#define TS_ANOMALY_UPDATE					30003
+#define TS_ANOMALY_ACK						30004
+
 
 #define MC_REPORT                           30010        // Measurement campaign xApp reports
 

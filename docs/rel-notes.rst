@@ -22,6 +22,13 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2020 October 2; Version 4.3.0
+-----------------------------
+
+Add message types for anomaly detection
+
+
+
 2020 September 15; Version 4.2.4
 --------------------------------
 

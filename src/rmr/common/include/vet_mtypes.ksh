@@ -22,7 +22,7 @@
 # the header file. The check is only to ensure that there are
 # no duplicate constant names or values for any #define in the file.
 #
-# By default RIC_message_types.h is parsed, but it will accept the 
+# By default RIC_message_types.h is parsed, but it will accept the
 # filename as the first positional parameter on the command line should
 # it be necessary.
 #
@@ -31,37 +31,39 @@
 # CAUTION:  this breaks if any define is more than a simple key/value
 #	pair in the header file.
 
-awk '
-	/#define/ { 
-		vcount[$NF]++; 
+sed 's!//.*!!' ${1:-RIC_message_types.h} | awk '
+	/#define/ {
+		vcount[$NF]++;
 		ncount[$2]++;
+		lines[$2] = lines[$2] " " NR
+		lines[$NF] = lines[$NF] " " NR
 		next
-	} 
+	}
 
-	END { 
+	END {
 		vgood = 0
 		ngood = 0
 		bad = 0
 
-		for( x in vcount ) { 
-			if( vcount[x] != 1 ) { 
-				printf( "duplicate value? %s\n", x ); 
-				bad++ 
-			} else { 
-				vgood++ 
-			} 
-		} 
+		for( x in vcount ) {
+			if( vcount[x] != 1 ) {
+				printf( "duplicate value? %s on lines: %s\n", x, lines[x] );
+				bad++
+			} else {
+				vgood++
+			}
+		}
 
-		for( x in ncount ) { 
-			if( ncount[x] != 1 ) { 
-				printf( "duplicate name? %s\n", x ); 
-				bad++ 
-			} else { 
-				ngood++ 
-			} 
-		} 
+		for( x in ncount ) {
+			if( ncount[x] != 1 ) {
+				printf( "duplicate name? %s on lines: %s\n", x, lines[x] );
+				bad++
+			} else {
+				ngood++
+			}
+		}
 
-		printf( "good values=%d good names=%d  bad things=%d\n", vgood, ngood, bad ) 
+		printf( "good values=%d good names=%d  bad things=%d\n", vgood, ngood, bad )
 
 		exit( !! bad )
-	}' ${1:-RIC_message_types.h}
+	}' 
