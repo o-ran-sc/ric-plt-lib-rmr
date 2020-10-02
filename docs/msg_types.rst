@@ -439,6 +439,14 @@ specific category.
         -
           |
 
+      * - **TS_ANOMALY_UPDATE**
+        -
+          |
+
+      * - **TS_ANOMALY_ACK**
+        -
+          |
+
       * - **MC_REPORT**
         -
           |
