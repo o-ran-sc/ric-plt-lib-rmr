@@ -40,6 +40,10 @@
 
 #include "rmr.h"				// things the users see
 #include "rmr_agnostic.h"		// agnostic things (must be included before private)
+#include "rmr_logging.h"
+
+//#define BUF_TOOLS_ONLY 1
+#include "tools_static.c"
 
 
 // ---------- some wrappers need explicit copy-in functions, also header field setters -----
@@ -429,7 +433,7 @@ extern unsigned char* rmr_get_src( rmr_mbuf_t* msg, unsigned char* dest ) {
 
 	if( dest != NULL ) {
 		hdr = msg->header;
-		strncpy( dest, hdr->src, RMR_MAX_SRC );
+		zt_buf_fill( dest, hdr->src, RMR_MAX_SRC );
 	}
 
 	return dest;
@@ -453,11 +457,11 @@ extern unsigned char* rmr_get_srcip( rmr_mbuf_t* msg, unsigned char* dest ) {
 		hdr = msg->header;
 		if( HDR_VERSION( msg->header ) > 2 ) {		// src ip was not present in hdr until ver 3
 			errno = 0;
-			strncpy( dest, hdr->srcip, RMR_MAX_SRC );
+			zt_buf_fill( dest, hdr->srcip, RMR_MAX_SRC );
 			rstr = dest;
 		} else  {
 			errno = 0;
-			strncpy( dest, hdr->src, RMR_MAX_SRC );				// reutrn the name:port for old messages
+			zt_buf_fill( dest, hdr->src, RMR_MAX_SRC );				// reutrn the name:port for old messages
 			rstr = dest;
 		}
 	}

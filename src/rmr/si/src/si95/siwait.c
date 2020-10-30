@@ -72,6 +72,7 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 	ibuf = (char *) malloc( 2048 );
 
 	if( gptr->flags & GIF_SHUTDOWN ) {				//  cannot do if we should shutdown 
+		free( ibuf );
 		return SI_ERROR;							//  so just get out 
 	}
 

@@ -4,7 +4,7 @@
 	Copyright (c) 2019-2020 Nokia
 	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
-   Licensed under the Apache License, Version 2.0 (the "License");
+   Licensed under the Apache License, Version 2.0 (the "License") ;
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
@@ -65,6 +65,10 @@ typedef struct thing_list {
 /*
 	Dump some stats for an endpoint in the RT. This is generally called to
 	verify endpoints after a table load/change.
+
+	This is called by the for-each mechanism of the symtab and the prototype is
+	fixe; we don't really use some of the parms, but have dummy references to
+	keep sonar from complaining.
 */
 static void ep_stats( void* st, void* entry, char const* name, void* thing, void* vcounter ) {
 	int*	counter;
@@ -76,6 +80,8 @@ static void ep_stats( void* st, void* entry, char const* name, void* thing, void
 
 	if( (counter = (int *) vcounter) != NULL ) {
 		(*counter)++;
+	} else {
+		rmr_vlog( RMR_VL_DEBUG, "ep_stas: nil counter %p %p %p", st, entry, name );	// dummy refs
 	}
 
 	rmr_vlog_force( RMR_VL_DEBUG, "rt endpoint: target=%s open=%d\n", ep->name, ep->open );
@@ -84,6 +90,8 @@ static void ep_stats( void* st, void* entry, char const* name, void* thing, void
 /*
 	Called to count meid entries in the table. The meid points to an 'owning' endpoint
 	so we can list what we find
+
+	See note in ep_stats about dummy refs.
 */
 static void meid_stats( void* st, void* entry, char const* name, void* thing, void* vcounter ) {
 	int*	counter;
@@ -95,6 +103,8 @@ static void meid_stats( void* st, void* entry, char const* name, void* thing, vo
 
 	if( (counter = (int *) vcounter) != NULL ) {
 		(*counter)++;
+	} else {
+		rmr_vlog( RMR_VL_DEBUG, "meid_stas: nil counter %p %p %p", st, entry, name );	// dummy refs
 	}
 
 	rmr_vlog_force( RMR_VL_DEBUG, "meid=%s owner=%s open=%d\n", name, ep->name, ep->open );
@@ -103,12 +113,15 @@ static void meid_stats( void* st, void* entry, char const* name, void* thing, vo
 /*
 	Dump counts for an endpoint in the RT. The vid parm is assumed to point to
 	the 'source' information and is added to each message.
+
+	See note above about dummy references.
 */
 static void ep_counts( void* st, void* entry, char const* name, void* thing, void* vid ) {
 	endpoint_t* ep;
 	char*	id;
 
 	if( (ep = (endpoint_t *) thing) == NULL ) {
+		rmr_vlog( RMR_VL_DEBUG, "ep_counts: nil thing %p %p %p", st, entry, name );	// dummy refs
 		return;
 	}
 
@@ -132,11 +145,12 @@ static void ep_counts( void* st, void* entry, char const* name, void* thing, voi
 */
 static void rte_stats( void* st, void* entry, char const* name, void* thing, void* vcounter ) {
 	int*	counter;
-	rtable_ent_t* rte;			// thing is really an rte
+	rtable_ent_t const* rte;		// thing is really an rte
 	int		mtype;
 	int		sid;
 
 	if( (rte = (rtable_ent_t *) thing) == NULL ) {
+		rmr_vlog( RMR_VL_DEBUG, "rte_stats: nil thing %p %p %p", st, entry, name );	// dummy refs
 		return;
 	}
 
@@ -217,7 +231,7 @@ static int send_update_req( uta_ctx_t* pctx, uta_ctx_t* ctx ) {
 	if( smsg != NULL ) {
 		smsg->mtype = RMRRM_REQ_TABLE;
 		smsg->sub_id = 0;
-		snprintf( smsg->payload, 1024, "%s ts=%ld\n", ctx->my_name, (long) time( NULL ) );
+		snprintf( smsg->payload, 1024, "%s ts=%ld\n", ctx->my_name, time( NULL ) );
 		rmr_vlog( RMR_VL_INFO, "rmr_rtc: requesting table: (%s) whid=%d\n", smsg->payload, ctx->rtg_whid );
 		smsg->len = strlen( smsg->payload ) + 1;
 
@@ -329,25 +343,38 @@ static char* clip( char* buf ) {
 */
 static char* ensure_nlterm( char* buf ) {
 	char*	nb = NULL;
-	int		len = 1;
+	int		len = 0;
 
-	nb = buf;
-	if( buf == NULL || (len = strlen( buf )) < 2 ) {
-		if( (nb = (char *) malloc( sizeof( char ) * 2 )) != NULL ) {
-			*nb = '\n';
-			*(nb+1) = 0;
-		}
-	} else {
-		if( buf[len-1] != '\n' ) {
-			rmr_vlog( RMR_VL_WARN, "rmr buf_check: input buffer was not newline terminated (file missing final \\n?)\n" );
-			if( (nb = (char *) malloc( sizeof( char ) * (len + 2) )) != NULL ) {
-				memcpy( nb, buf, len );
-				*(nb+len) = '\n';			// insert \n and nil into the two extra bytes we allocated
-				*(nb+len+1) = 0;
+	if( buf != NULL ) {
+		len = strlen( buf );
+	}
+
+	nb = buf;							// default to returning original as is
+	switch( len ) {
+		case 0:
+			nb = strdup( "\n" );
+			break;
+
+		case 1:
+			if( *buf != '\n' ) {		// not a newline; realloc
+				rmr_vlog( RMR_VL_WARN, "rmr buf_check: input buffer was not newline terminated (file missing final \\n?)\n" );
+				nb = strdup( " \n" );
+				*nb = *buf;
+				free( buf );
 			}
+			break;
 
-			free( buf );
-		}
+		default:
+			if( buf[len-1] != '\n' ) {		// not newline terminated, realloc
+				rmr_vlog( RMR_VL_WARN, "rmr buf_check: input buffer was not newline terminated (file missing final \\n?)\n" );
+				if( (nb = (char *) malloc( sizeof( char ) * (len + 2) )) != NULL ) {
+					memcpy( nb, buf, len );
+					*(nb+len) = '\n';			// insert \n and nil into the two extra bytes we allocated
+					*(nb+len+1) = 0;
+					free( buf );
+				}
+			}
+			break;
 	}
 
 	return nb;
@@ -417,7 +444,7 @@ static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups
 */
 static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* rr_field, int vlevel ) {
 	rtable_ent_t*	rte;		// route table entry added
-	char*	tok;
+	char const*	tok;
 	int		ntoks;
 	uint64_t key = 0;			// the symtab key will be mtype or sub_id+mtype
 	char*	tokens[128];
@@ -457,7 +484,7 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 		}
 	} else {
 		if( DEBUG || (vlevel > 2) ) {
-			rmr_vlog_force( RMR_VL_DEBUG, "entry not included, sender not matched: %s\n", tokens[1] );
+			rmr_vlog_force( RMR_VL_DEBUG, "build entry: ts_entry not of form msg-type,sender: %s\n", ts_field );
 		}
 	}
 }
@@ -471,7 +498,7 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 */
 static void trash_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, int vlevel ) {
 	rtable_ent_t*	rte;		// route table entry to be 'deleted'
-	char*	tok;
+	char const*	tok;
 	int		ntoks;
 	uint64_t key = 0;			// the symtab key will be mtype or sub_id+mtype
 	char*	tokens[128];
@@ -516,7 +543,7 @@ static void trash_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, int vle
 	to send messages to.
 */
 static void parse_meid_ar( route_table_t* rtab, char* owner, char* meid_list, int vlevel ) {
-	char*	tok;
+	char const*	tok;
 	int		ntoks;
 	char*	tokens[128];
 	int		i;
@@ -547,7 +574,7 @@ static void parse_meid_ar( route_table_t* rtab, char* owner, char* meid_list, in
 	This function assumes the caller has vetted the pointers as needed.
 */
 static void parse_meid_del( route_table_t* rtab, char* meid_list, int vlevel ) {
-	char*	tok;
+	char const*	tok;
 	int		ntoks;
 	char*	tokens[128];
 	int		i;
@@ -719,7 +746,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 	int ntoks;							// number of tokens found in something
 	int ngtoks;
 	int	grp;							// group number
-	rtable_ent_t*	rte;				// route table entry added
+	rtable_ent_t const*	rte;			// route table entry added
 	char*	tokens[128];
 	char*	tok;						// pointer into a token or string
 	char	wbuf[1024];
@@ -973,6 +1000,7 @@ static void collect_things( void* st, void* entry, char const* name, void* thing
 	}
 
 	if( thing == NULL ) {
+		rmr_vlog_force( RMR_VL_DEBUG, "collect things given nil thing: %p %p %p\n", st, entry, name );	// dummy ref for sonar
 		return;
 	}
 
@@ -1002,6 +1030,7 @@ static void del_rte( void* st, void* entry, char const* name, void* thing, void*
 	int i;
 
 	if( (rte = (rtable_ent_t *) thing) == NULL ) {
+		rmr_vlog_force( RMR_VL_DEBUG, "delrte given nil table: %p %p %p\n", st, entry, name );	// dummy ref for sonar
 		return;
 	}
 
@@ -1033,7 +1062,7 @@ static void del_rte( void* st, void* entry, char const* name, void* thing, void*
 	an empty buffer, as opposed to a nil, so the caller can generate defaults
 	or error if an empty/missing file isn't tolerated.
 */
-static char* uta_fib( char* fname ) {
+static char* uta_fib( char const* fname ) {
 	struct stat	stats;
 	off_t		fsize = 8192;	// size of the file
 	off_t		nread;			// number of bytes read
@@ -1110,8 +1139,8 @@ static route_table_t* uta_rt_init( ) {
 	references rte structs. All other spaces use a string key and reference endpoints.
 */
 static route_table_t* rt_clone_space( route_table_t* srt, route_table_t* nrt, int space ) {
-	endpoint_t*		ep;		// an endpoint
-	rtable_ent_t*	rte;	// a route table entry
+	endpoint_t*	ep;			// an endpoint (ignore sonar complaint about const*)
+	rtable_ent_t*	rte;	// a route table entry	(ignore sonar complaint about const*)
 	void*	sst;			// source symtab
 	void*	nst;			// new symtab
 	thing_list_t things;	// things from the space to copy
@@ -1121,6 +1150,9 @@ static route_table_t* rt_clone_space( route_table_t* srt, route_table_t* nrt, in
 	if( nrt == NULL ) {				// make a new table if needed
 		free_on_err = 1;
 		nrt = uta_rt_init();
+		if( nrt == NULL ) {
+			return NULL;
+		}
 	}
 
 	if( srt == NULL ) {		// source was nil, just give back the new table
@@ -1135,7 +1167,7 @@ static route_table_t* rt_clone_space( route_table_t* srt, route_table_t* nrt, in
 	memset( things.names, 0, sizeof( char * ) * things.nalloc );
 	if( things.things == NULL ) {
 		if( free_on_err ) {
-			free( nrt->hash );
+			rmr_sym_free( nrt->hash );
 			free( nrt );
 			nrt = NULL;
 		}
@@ -1168,6 +1200,12 @@ static route_table_t* rt_clone_space( route_table_t* srt, route_table_t* nrt, in
 /*
 	Creates a new route table and then clones the parts of the table which we must keep with each newrt|start.
 	The endpoint and meid entries in the hash must be preserved.
+
+	NOTE: The first call to rt_clone_space() will create the new table and subsequent
+		calls operate on the new table. The return of subsequent calls can be safely
+		ignored.  There are some code analysers which will claim that there are memory
+		leaks here; not true as they aren't understanding the logic, just looking at
+		an ignored return value and assuming it's different than what was passed in.
 */
 static route_table_t* uta_rt_clone( route_table_t* srt ) {
 	endpoint_t*		ep;				// an endpoint
@@ -1179,7 +1217,7 @@ static route_table_t* uta_rt_clone( route_table_t* srt ) {
 		return uta_rt_init();		// no source to clone, just return an empty table
 	}
 
-	nrt = rt_clone_space( srt, nrt, RT_NAME_SPACE );		// allocate a new one, add endpoint refs
+	nrt = rt_clone_space( srt, NULL, RT_NAME_SPACE );		// allocate a new one, add endpoint refs
 	rt_clone_space( srt, nrt, RT_ME_SPACE );				// add meid refs to new
 
 	return nrt;
@@ -1190,10 +1228,12 @@ static route_table_t* uta_rt_clone( route_table_t* srt ) {
 	both endpoints AND the route table entries. Needed to support a partial update where
 	some route table entries will not be deleted if not explicitly in the update and when
 	we are adding/replacing meid references.
+
+	NOTE  see note in uta_rt_clone() as it applies here too.
 */
 static route_table_t* uta_rt_clone_all( route_table_t* srt ) {
-	endpoint_t*		ep;				// an endpoint
-	rtable_ent_t*	rte;			// a route table entry
+	endpoint_t const*	ep;			// an endpoint
+	rtable_ent_t const*	rte;		// a route table entry
 	route_table_t*	nrt = NULL;		// new route table
 	int i;
 
@@ -1201,7 +1241,7 @@ static route_table_t* uta_rt_clone_all( route_table_t* srt ) {
 		return uta_rt_init();		// no source to clone, just return an empty table
 	}
 
-	nrt = rt_clone_space( srt, nrt, RT_MT_SPACE );			// create new, clone all spaces to it
+	nrt = rt_clone_space( srt, NULL, RT_MT_SPACE );			// create new, clone all spaces to it
 	rt_clone_space( srt, nrt, RT_NAME_SPACE );
 	rt_clone_space( srt, nrt, RT_ME_SPACE );
 
@@ -1288,8 +1328,8 @@ static inline uint64_t build_rt_key( int32_t sub_id, int32_t mtype ) {
 	Given a route table and meid string, find the owner (if known). Returns a pointer to
 	the endpoint struct or nil.
 */
-static inline endpoint_t*  get_meid_owner( route_table_t *rt, char* meid ) {
-	endpoint_t* ep;		// the ep we found in the hash
+static inline endpoint_t*  get_meid_owner( route_table_t *rt, char const* meid ) {
+	endpoint_t const* ep;		// the ep we found in the hash
 
 	if( rt == NULL || rt->hash == NULL || meid == NULL || *meid == 0 ) {
 		return NULL;

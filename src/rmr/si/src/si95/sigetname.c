@@ -21,21 +21,30 @@
 /*
  ------------------------------------------------------------------------
  Mnemonic:	sigetname
- Abstract:	returns the name of the socket for a given sid
- Parms:		sid - the socket id as returned by open/listen/connect
- Date:		21 July 2003 
- Author: 	E. Scott Daniels
+ Abstract:	returns the name of the socket for a given sid. On failure returns
+			a nil pointer.
+ Parms:		sid - the socket ID; a fd as returned by open/listen/connect
+ Date:		21 July 2003
+ Author:	E. Scott Daniels
+
+ Mods:		30 Oct 2020 - address issues raised by code scan 1654181
  ------------------------------------------------------------------------
 */
 #include "sisetup.h"
 
-extern char *SIgetname( int sid ) { 
- 	struct sockaddr oaddr;     //  pointer to address in TCP binary format 
-	char	*buf;
+extern char* SIgetname( int sid ) {
+	struct sockaddr oaddr;     //  pointer to address in TCP binary format
+	char	*buf = NULL;
 	int	len;
 
 	len = sizeof( oaddr );
-	getsockname( sid, &oaddr, &len );
-	SIaddress(  &oaddr, (void **) &buf, AC_TODOT );
+	if( getsockname( sid, &oaddr, &len ) < 0 ) {
+		return NULL;
+	}
+
+	if( SIaddress(  &oaddr, (void **) &buf, AC_TODOT ) <= 0 ) {
+		return NULL;
+	}
+
 	return buf;
 }

@@ -148,6 +148,10 @@ extern int SIaddress( void *src, void **dest, int type ) {
 	int i;
 	int	rlen = 0;					//  return len - len of address struct or string
 
+	if( src == NULL || dest == NULL ) {
+		return rlen;
+	}
+
 	switch( type ) {
 		case AC_TODOT:					//  convert from a struct to human readable "dotted decimal"
 			addr = (struct sockaddr_in *) src;

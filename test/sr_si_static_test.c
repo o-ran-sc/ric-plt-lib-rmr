@@ -82,7 +82,6 @@ static int sr_si_test() {
 	ctx->max_mlen = ctx->max_plen + sizeof( uta_mhdr_t );
 	ctx->my_name = strdup( "dummy-test" );
 	ctx->my_ip = strdup( "30.4.19.86:1111" );
-	uta_lookup_rtg( ctx );
 
 	gen_rt( ctx );								// forces a static load with some known info since we don't start the rtc()
 	gen_rt( ctx );								// force a second load to test cloning

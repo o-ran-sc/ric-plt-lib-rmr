@@ -48,8 +48,8 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
  int fd;                       //  file descriptor for use in this routine
  int ((*cbptr)());             //  pointer to callback routine to call
  int status = SI_OK;              //  return status
- int addrlen;                  //  length of address from recvfrom call
- char *buf; 	               //  work buffer pointer
+ int addrlen = 0;              //  length of address from recvfrom call
+ char *buf;		               //  work buffer pointer
  char ibuf[1025];
  int i;                        //  loop index
  struct tp_blk *tpptr;         //  pointer at tp stuff

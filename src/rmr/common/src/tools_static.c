@@ -1,8 +1,8 @@
 // :vi sw=4 ts=4 noet:
 /*
 ==================================================================================
-	Copyright (c) 2019 Nokia
-	Copyright (c) 2018-2019 AT&T Intellectual Property.
+	Copyright (c) 2019-2020 Nokia
+	Copyright (c) 2018-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -55,10 +55,46 @@
 #include <netdb.h>
 
 // --- some protos needed for better organisation --------
-int is_this_myip( if_addrs_t* l, char* addr );
+static int is_this_myip( if_addrs_t* l, char* addr );
 
 
 // ----------------------------------------------------------------------------------
+
+
+/*
+	A strncpy() replacement that ensures the resulting dest buffer has
+	a zero (nil) terminator even if the source is longer than the dest
+	length.
+	A max of len-1 bytes are copied from src to dest. The copy stops when
+	a zero (nil) is encountered in the src, or len-1 bytes are copied.
+	The string is always nil terminated.
+	The string length is returned.
+
+	It is the responsiblity of the caller to ensure that dest is at
+	least len bytes in length.
+
+	If either src/dest is invalid (nil) a value of -1 is returned.
+*/
+static inline int zt_buf_fill( char* dest, char const* src, int len ) {
+	char*		dp;
+	char const*	sp;
+	int			n;		// num moved
+
+	if( dest == NULL && src == NULL ) {
+		return -1;
+	}
+
+	dp = dest;
+	sp = src;
+	n = 0;
+	while(  *sp && n < len-1 ) {
+		*(dp++) = *(sp++);
+		n++;
+	}
+
+	*dp = 0;
+	return n;
+}
 
 /*
 	Simple tokeniser. Split a null terminated string into tokens recording the
@@ -175,6 +211,7 @@ static char* uta_h2ip( char const* hname ) {
 }
 
 
+#ifdef RTG_PUB
 /*
 	Looks for the environment variable RMR_RTG_SVC which we assume to be name[:port], and
 	does a dns lookup on the name. If the env does not have such a variable, we default to
@@ -223,6 +260,7 @@ static int uta_lookup_rtg( uta_ctx_t* ctx ) {
 
 	return ctx->rtg_addr != NULL;
 }
+#endif
 
 
 /*
@@ -290,7 +328,7 @@ static int uta_has_str( char const* buf, char const* str, char sep, int max ) {
 	The ENV_BIN_IF environment variable may be either an IP address (v6 must be in
 	square braces), or an interface name (e.g. eth0).
 */
-if_addrs_t*  mk_ip_list( char* port ) {
+static if_addrs_t*  mk_ip_list( char* port ) {
 	if_addrs_t* l;
 	struct	ifaddrs *ifs;		// pointer to head
 	struct	ifaddrs *ele;		// pointer into the list
@@ -340,18 +378,18 @@ if_addrs_t*  mk_ip_list( char* port ) {
 						fmt = "[%s]:%s";
 					}
 				}
-			}
 
-			if( *octs ) {
-				if( (tok = strchr( octs, '%' )) != NULL ) {			// for unknown reasons some ip6 addrs have %if-name appended; truncate
-					*tok = 0;
-				}
-				if( l->naddrs < 128 ) {
-					if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "capture address: %s: %s\n", ele->ifa_name, octs );
+				if( *octs ) {
+					if( (tok = strchr( octs, '%' )) != NULL ) {			// for unknown reasons some ip6 addrs have %if-name appended; truncate
+						*tok = 0;
+					}
+					if( l->naddrs < 128 ) {
+						if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "capture address: %s: %s\n", ele->ifa_name, octs );
 
-					snprintf( wbuf, sizeof( wbuf ), fmt, octs, port );		// smash port onto the addr
-					l->addrs[l->naddrs] = strdup( wbuf );
-					l->naddrs++;
+						snprintf( wbuf, sizeof( wbuf ), fmt, octs, port );		// smash port onto the addr
+						l->addrs[l->naddrs] = strdup( wbuf );
+						l->naddrs++;
+					}
 				}
 			}
 		}
@@ -371,7 +409,7 @@ if_addrs_t*  mk_ip_list( char* port ) {
 	do a straight search through the list. We don't expect this to
 	ever be a higly driven functions so not bothering to optimise.
 */
-int is_this_myip( if_addrs_t* l, char* addr ) {
+static int is_this_myip( if_addrs_t* l, char* addr ) {
 	int i;
 
 	if( l == NULL ) {

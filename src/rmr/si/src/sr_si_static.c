@@ -209,8 +209,8 @@ static rmr_mbuf_t* alloc_zcmsg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int size, int s
 	msg->state = state;										// fill in caller's state (likely the state of the last operation)
 	msg->flags = MFL_ZEROCOPY;								// this is a zerocopy sendable message
 	msg->ring = ctx->zcb_mring;								// original msg_free() api doesn't get context so must dup on eaach :(
-	strncpy( (char *) ((uta_mhdr_t *)msg->header)->src, ctx->my_name, RMR_MAX_SRC );
-	strncpy( (char *) ((uta_mhdr_t *)msg->header)->srcip, ctx->my_ip, RMR_MAX_SRC );
+	zt_buf_fill( (char *) ((uta_mhdr_t *)msg->header)->src, ctx->my_name, RMR_MAX_SRC );
+	zt_buf_fill( (char *) ((uta_mhdr_t *)msg->header)->srcip, ctx->my_ip, RMR_MAX_SRC );
 
 	if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "alloc_zcmsg mlen=%ld size=%d mpl=%d flags=%02x\n", (long) mlen, size, ctx->max_plen, msg->flags );
 
@@ -424,6 +424,7 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 	v1hdr = (uta_v1mhdr_t *) old_msg->header;				// v1 will work to dig header out of any version
 	switch( ntohl( v1hdr->rmr_ver ) ) {
 		case 1:
+			v1hdr = nm->header;
 			memcpy( v1hdr, old_msg->header, sizeof( *v1hdr ) );	 	// copy complete header
 			nm->payload = (void *) v1hdr + sizeof( *v1hdr );
 			break;
@@ -622,8 +623,8 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int nn_sock, int r
 	tr_len = RMR_TR_LEN( hdr );										// snarf trace len before sending as hdr is invalid after send
 
 	if( msg->flags & MFL_ADDSRC ) {									// buffer was allocated as a receive buffer; must add our source
-		strncpy( (char *) ((uta_mhdr_t *)msg->header)->src, ctx->my_name, RMR_MAX_SRC );					// must overlay the source to be ours
-		strncpy( (char *) ((uta_mhdr_t *)msg->header)->srcip, ctx->my_ip, RMR_MAX_SRC );
+		zt_buf_fill( (char *) ((uta_mhdr_t *)msg->header)->src, ctx->my_name, RMR_MAX_SRC );					// must overlay the source to be ours
+		zt_buf_fill( (char *) ((uta_mhdr_t *)msg->header)->srcip, ctx->my_ip, RMR_MAX_SRC );
 	}
 
 	if( retries == 0 ) {

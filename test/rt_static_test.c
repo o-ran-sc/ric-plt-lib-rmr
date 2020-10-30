@@ -123,6 +123,7 @@ static int rt_test( ) {
 	int		enu = 0;
 	int		state;
 	char	*buf;
+	char	*buf2;
 	char*	seed_fname;		// seed file
 	SOCKET_TYPE	nn_sock;	// differnt in each transport (nng == struct, SI/Nano == int)
 	rmr_mbuf_t*	mbuf;		// message for meid route testing
@@ -529,6 +530,36 @@ static int rt_test( ) {
 		ep_stats( ctx->rtable, NULL, "name", NULL, NULL );			// ensure no crash when given nil pointer
 		rt_epcounts( ctx->rtable, "testing" );
 		rt_epcounts( NULL, "testing" );
+
+		buf = ensure_nlterm( NULL );
+		errors += fail_if_nil( buf, "ensure nlterm returned null pointer when given nil ptr" );
+		if( buf ) {
+			errors += fail_not_equal( strlen( buf ), 1, "ensure nlterm returned incorrect length string when given nil pointer" );
+			free( buf );
+		}
+
+		buf = ensure_nlterm( strdup( "x" ) );			// should return "x\n"
+		errors += fail_if_nil( buf, "ensure nlterm returned null pointer when given single char string" );
+		if( buf ) {
+			errors += fail_not_equal( strlen( buf ), 2, "ensure nlterm returned incorrect length string when given single char string" );
+			free( buf );
+		}
+
+		buf = strdup( "x\n" );
+		buf2 = ensure_nlterm( buf );					// buffer returned should be the same
+		if( fail_not_pequal( buf, buf2, "ensure nlterm returned new buffer for one char string with newline" ) ) {
+			errors++;
+			free( buf2 );
+		}
+		free( buf );
+
+		buf = strdup( "Missing our trips to Gloria's for papossas.\n" );
+		buf2 = ensure_nlterm( buf );											// buffer returned should be the same
+		if( fail_not_pequal( buf, buf2, "ensure nlterm returned new buffer for string with newline" ) ) {
+			errors++;
+			free( buf2 );
+		}
+		free( buf );
 
 		buf = ensure_nlterm( strdup( "Stand up and cheer!" ) );					// force addition of newline
 		if( buf ) {

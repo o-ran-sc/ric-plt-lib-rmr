@@ -22,10 +22,18 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2020 October 30; Version 4.3.1
+------------------------------
+
+Changes to address code analyser scans and two bug fixes
+identified while addressing the analysis data. (RIC-673)
+
+
+
 2020 October 2; Version 4.3.0
 -----------------------------
 
-Add message types for anomaly detection
+Add message types for traffic steering anomaly messages
 
 
 

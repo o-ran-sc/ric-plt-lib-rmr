@@ -302,7 +302,7 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 	msg->state = RMR_OK;																// ensure it is clear before send
 	hold_src = strdup( (char *) ((uta_mhdr_t *)msg->header)->src );						// the dest where we're returning the message to
 	hold_ip = strdup( (char *) ((uta_mhdr_t *)msg->header)->srcip );					// both the src host and src ip
-	strncpy( (char *) ((uta_mhdr_t *)msg->header)->src, ctx->my_name, RMR_MAX_SRC );	// must overlay the source to be ours
+	zt_buf_fill( (char *) ((uta_mhdr_t *)msg->header)->src, ctx->my_name, RMR_MAX_SRC );	// must overlay the source to be ours
 	msg = send_msg( ctx, msg, nn_sock, -1 );
 	if( msg ) {
 		if( ep != NULL ) {
@@ -321,8 +321,8 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 					break;
 			}
 		}
-		strncpy( (char *) ((uta_mhdr_t *)msg->header)->src, hold_src, RMR_MAX_SRC );	// always return original source so rts can be called again
-		strncpy( (char *) ((uta_mhdr_t *)msg->header)->srcip, hold_ip, RMR_MAX_SRC );	// always return original source so rts can be called again
+		zt_buf_fill( (char *) ((uta_mhdr_t *)msg->header)->src, hold_src, RMR_MAX_SRC );	// always replace original source & ip so rts can be called again
+		zt_buf_fill( (char *) ((uta_mhdr_t *)msg->header)->srcip, hold_ip, RMR_MAX_SRC );
 		msg->flags |= MFL_ADDSRC;														// if msg given to send() it must add source
 	}
 
@@ -611,9 +611,6 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 		ctx->max_plen = def_msg_size;
 	}
 
-	// we're using a listener to get rtg updates, so we do NOT need this.
-	//uta_lookup_rtg( ctx );							// attempt to fill in rtg info; rtc will handle missing values/errors
-
 	ctx->si_ctx = SIinitialise( SI_OPT_FG );		// FIX ME: si needs to streamline and drop fork/bg stuff
 	if( ctx->si_ctx == NULL ) {
 		rmr_vlog( RMR_VL_CRIT, "unable to initialise SI95 interface\n" );
@@ -652,6 +649,7 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	} else {
 		if( (gethostname( wbuf, sizeof( wbuf ) )) != 0 ) {
 			rmr_vlog( RMR_VL_CRIT, "rmr_init: cannot determine localhost name: %s\n", strerror( errno ) );
+			free_ctx( ctx );
 			return NULL;
 		}
 		if( (tok = strchr( wbuf, '.' )) != NULL ) {
@@ -798,13 +796,6 @@ extern int rmr_get_rcvfd( void* vctx ) {
 	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
 		return -1;
 	}
-
-/*
-	if( (state = nng_getopt_int( ctx->nn_sock, NNG_OPT_RECVFD, &fd )) != 0 ) {
-		rmr_vlog( RMR_VL_WARN, "rmr cannot get recv fd: %s\n", nng_strerror( state ) );
-		return -1;
-	}
-*/
 
 	return uta_ring_getpfd( ctx->mring );
 }

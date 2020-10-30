@@ -186,6 +186,24 @@ static int fail_if( int bv, char* what ) {
 	return bv ? BAD : GOOD;
 }
 
+static int fail_pequal( void* a, void* b, char* what ) {
+	ts_tests_driven++;
+
+	if( a == b ) {
+		fprintf( stderr, "<FAIL> %s: pointers were not equal a=%p b=%p\n", what, a, b );
+	}
+	return a == b ? GOOD : BAD;			// user may override good/bad so do NOT return a==b directly!
+}
+
+static int fail_not_pequal( void* a, void* b, char* what ) {
+	ts_tests_driven++;
+
+	if( a != b ) {
+		fprintf( stderr, "<FAIL> %s: pointers were not equal a=%p b=%p\n", what, a, b );
+	}
+	return a == b ? GOOD : BAD;			// user may override good/bad so do NOT return a==b directly!
+}
+
 static int fail_not_equal( int a, int b, char* what ) {
 	ts_tests_driven++;
 

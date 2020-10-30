@@ -31,6 +31,31 @@
 	Date:		3 April 2019
 */
 
+// ------------ zero termianted buffer ---------------------------------------------------------
+static int ztbf_test() {
+	int errors = 0;
+	char buf[128];
+	char*	sshort = "Stand up and cheer! Cheer long and loud for old Ohio.";
+	char*	slong = "Now is the time for the bobcat in the forest to make its way back to Court St for a round of pints at the Pub.";
+	int l1;
+
+	l1 = zt_buf_fill( buf, sshort, 64 );
+	errors += fail_not_equal( l1, strlen( sshort ), "zt_buf_fill of short buf returned unexpected len" );
+	errors += fail_not_equal( l1, strlen( buf ), "zt_buf_fill of short buf returned len did not match strlen" );
+
+	l1 = zt_buf_fill( buf, slong, 64 );
+	errors += fail_if_equal( l1, strlen( slong ), "zt_buf_fill of long buf returned unexpected len" );
+	errors += fail_not_equal( l1, strlen( buf ), "zt_buf_fill of long buf returned len did not match strlen" );
+
+	l1 = zt_buf_fill( buf, sshort, strlen( sshort ) );		// edge case of exact size
+	errors += fail_not_equal( l1, strlen( sshort )-1, "zt_buf_fill exact length edge case failed" );
+
+	l1 = zt_buf_fill( buf, sshort, 1 );						// unrealistic edge case
+	errors += fail_not_equal( l1, 0, "zt_buf_fill dest len == 1 test failed" );
+
+	return errors;
+}
+
 /*
 	Returns an interface name that is valid in this environment (keeps us from
 	having to know/guess a name to test with.
@@ -120,6 +145,8 @@ static int tools_test( ) {
 	free( hname );
 
 	// ------------ rtg lookup test -------------------------------------------------------------
+#ifdef KEEP
+	// pub/sub route table generator is deprecated and should be removed at this point
 	ctx.rtg_port = 0;
 	ctx.rtg_addr = NULL;
 
@@ -140,6 +167,7 @@ static int tools_test( ) {
 	unsetenv( "RMR_RTG_SVC" );						// this should fail as the default name (rtg) will be unknown during testing
 	i = uta_lookup_rtg( &ctx );
 	errors += fail_if_true( i, "rtg lookup returned that it found something when not expected to" );
+#endif
 
 	// ------------ my_ip stuff -----------------------------------------------------------------
 
@@ -199,6 +227,8 @@ static int tools_test( ) {
 
 		free( ip );
 	}
+
+	errors += ztbf_test();					// test the zero term buffer fill function
 
 // -------------------------------------------------------------------------------------------------
 

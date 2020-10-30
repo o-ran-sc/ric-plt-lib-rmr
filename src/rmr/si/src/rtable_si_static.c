@@ -180,6 +180,7 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 
 		if( (rrg->epts = (endpoint_t **) malloc( sizeof( endpoint_t ) * MAX_EP_GROUP )) == NULL ) {
 			rmr_vlog( RMR_VL_WARN, "rmr_add_ep: malloc failed for group endpoint array: group=%d\n", group );
+			free( rrg );
 			return NULL;
 		}
 		memset( rrg->epts, 0, sizeof( endpoint_t ) * MAX_EP_GROUP );

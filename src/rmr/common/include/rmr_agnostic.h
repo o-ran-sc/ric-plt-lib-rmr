@@ -285,7 +285,10 @@ static int has_myip( char const* buf, if_addrs_t* list, char sep, int max );
 static int uta_tokenise( char* buf, char** tokens, int max, char sep );
 static int uta_rmip_tokenise( char* buf, if_addrs_t* iplist, char** toks, int max, char sep );
 static char* uta_h2ip( char const* hname );
+#ifdef RTG_PUB
+// deprecated funciton -- step 1 of removal
 static int uta_lookup_rtg( uta_ctx_t* ctx );
+#endif
 static int uta_has_str( char const* buf, char const* str, char sep, int max );
 static char* get_default_ip( if_addrs_t* iplist );
 
@@ -304,8 +307,8 @@ static int ie_test( void* r, int i_factor, long inserts );
 static inline uint64_t build_rt_key( int32_t sub_id, int32_t mtype );
 static void collect_things( void* st, void* entry, char const* name, void* thing, void* vthing_list );
 static void del_rte( void* st, void* entry, char const* name, void* thing, void* data );
-static endpoint_t*  get_meid_owner( route_table_t *rt, char* meid );
-static char* uta_fib( char* fname );
+static endpoint_t*  get_meid_owner( route_table_t *rt, char const* meid );
+static char* uta_fib( char const* fname );
 static route_table_t* uta_rt_init( );
 static route_table_t* uta_rt_clone( route_table_t* srt );
 static route_table_t* uta_rt_clone_all( route_table_t* srt );

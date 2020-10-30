@@ -48,6 +48,7 @@
 #include "rmr.h"
 #include "rmr_agnostic.h"
 
+#include "logging.c"
 #include "mbuf_api.c"
 
 #define MSG_VER 3
