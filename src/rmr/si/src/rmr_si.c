@@ -702,7 +702,21 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 												// finish all flag setting before threads to keep helgrind quiet
 	ctx->flags |= CFL_MTC_ENABLED;				// for SI threaded receiver is the only way
 
-	ctx->rtable = rt_clone_space( NULL, NULL, 0 );		// create an empty route table so that wormhole/rts calls can be used
+
+	// ---------------- setup for route table collector before invoking ----------------------------------
+	ctx->rtgate = (pthread_mutex_t *) malloc( sizeof( *ctx->rtgate ) );		// single mutex required to gate access to moving rtables
+	if( ctx->rtgate != NULL ) {
+		pthread_mutex_init( ctx->rtgate, NULL );
+	}
+
+	ctx->ephash = rmr_sym_alloc( 129 );					// host:port to ep symtab exists outside of any route table
+	if( ctx->ephash == NULL ) {
+		rmr_vlog( RMR_VL_CRIT, "rmr_init: unable to allocate ep hash\n" );
+		free_ctx( ctx );
+		return NULL;
+	}
+
+	ctx->rtable = rt_clone_space( ctx, NULL, NULL, 0 );	// create an empty route table so that wormhole/rts calls can be used
 	if( flags & RMRFL_NOTHREAD ) {						// no thread prevents the collector start for very special cases
 		ctx->rtable_ready = 1;							// route based sends will always fail, but rmr is ready for the non thread case
 	} else {

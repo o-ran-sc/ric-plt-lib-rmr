@@ -30,6 +30,7 @@
 #define _rmr_agnostic_h
 
 #include <semaphore.h>					// needed to support some structs
+#include <pthread.h>
 
 typedef struct endpoint endpoint_t;		// place holder for structs defined in nano/nng private.h
 typedef struct uta_ctx  uta_ctx_t;
@@ -224,9 +225,12 @@ typedef struct {
 	The route table.
 */
 typedef struct {
-	void*	hash;			// hash table.
+	void*	hash;			// hash table for msg type and meid.
+	void*	ephash;			// has for endpoint references
 	int		updates;		// counter of update records received
 	int		mupdates;		// counter of meid update records received
+	int		ref_count;		// num threads currently using
+	pthread_mutex_t*	gate;	// lock allowing update to ref counter
 } route_table_t;
 
 /*
@@ -309,16 +313,21 @@ static void collect_things( void* st, void* entry, char const* name, void* thing
 static void del_rte( void* st, void* entry, char const* name, void* thing, void* data );
 static endpoint_t*  get_meid_owner( route_table_t *rt, char const* meid );
 static char* uta_fib( char const* fname );
-static route_table_t* uta_rt_init( );
-static route_table_t* uta_rt_clone( route_table_t* srt );
-static route_table_t* uta_rt_clone_all( route_table_t* srt );
+static route_table_t* uta_rt_init( uta_ctx_t* ctx  );
+//static route_table_t* uta_rt_clone( route_table_t* srt );// old school remove before commit
+static route_table_t* uta_rt_clone( uta_ctx_t* ctx, route_table_t* srt, route_table_t* drt, int all );
+// clone all is deprecated -- drop before commit
+//static route_table_t* uta_rt_clone_all( route_table_t* srt );
 static void uta_rt_drop( route_table_t* rt );
+static inline route_table_t* get_rt( uta_ctx_t* ctx );
 static endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_name, int group  );
 static rtable_ent_t* uta_add_rte( route_table_t* rt, uint64_t key, int nrrgroups );
 static endpoint_t* uta_get_ep( route_table_t* rt, char const* ep_name );
 static void read_static_rt( uta_ctx_t* ctx, int vlevel );
+static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all );
 static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vlevel, rmr_mbuf_t* mbuf );
 static rmr_mbuf_t* realloc_msg( rmr_mbuf_t* msg, int size );
+static void release_rt( uta_ctx_t* ctx, route_table_t* rt );
 static void* rtc( void* vctx );
 static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name );
 
