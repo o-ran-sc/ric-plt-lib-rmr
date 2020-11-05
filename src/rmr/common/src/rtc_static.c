@@ -270,6 +270,11 @@ static void* rtc( void* vctx ) {
 		return NULL;
 	}
 
+	if( (ctx->ephash = rmr_sym_alloc( RT_SIZE )) == NULL ) {		// master hash table for endpoints (each rt will reference this)
+		rmr_vlog( RMR_VL_CRIT, "rmr_rtc: internal mishap: unable to allocate an endpoint hash table\n" );
+		return NULL;
+	}
+
 	if( (eptr = getenv( ENV_VERBOSE_FILE )) != NULL ) {
 		vfd = open( eptr, O_RDONLY );
 		vlevel = refresh_vlevel( vfd );

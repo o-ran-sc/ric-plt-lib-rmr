@@ -60,7 +60,6 @@
 											// specific test tools in this directory
 #undef NNG_UNDER_TEST 
 #include "test_support.c"					// things like fail_if()
-#include "test_ctx_support.c"				// dummy context support
 #include "test_msg_support.c"
 #include "test_gen_rt.c"
 
@@ -74,6 +73,8 @@
 #include "logging.c"
 #include "rmr_si.c"
 #include "mbuf_api.c"
+
+#include "test_ctx_support.c"				// dummy context support
 
 
 static void gen_rt( uta_ctx_t* ctx );		// defined in sr_si_static_test, but used by a few others (eliminate order requirement below)

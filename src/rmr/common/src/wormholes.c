@@ -187,6 +187,7 @@ extern rmr_whid_t rmr_wh_open( void* vctx, char const* target ) {
 	rmr_whid_t	whid = -1;		// wormhole id is the index into the list
 	wh_mgt_t*	whm;			// easy reference to wh mgt stuff
 	int			i;
+	route_table_t*	rt;			// the currently active route table
 
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL || target == NULL || *target == 0 ) {
@@ -207,8 +208,11 @@ extern rmr_whid_t rmr_wh_open( void* vctx, char const* target ) {
 
 	whm = ctx->wormholes;
 
-
-	if( (ep = rt_ensure_ep( ctx->rtable, target )) == NULL ) {		// get pointer to ep if there, create new if not
+	rt = get_rt( ctx );										// get and raise ref counter
+	ep = rt_ensure_ep( rt, target );						// get pointer to ep if there, create new if not
+	release_rt( ctx, rt );									// release use counter
+	//if( (ep = rt_ensure_ep( rt, target )) == NULL ) {				// get pointer to ep if there, create new if not
+	if( ep == NULL ) {
 		rmr_vlog( RMR_VL_ERR, "wormhole_open: ensure ep returned bad: target=(%s)\n", target );
 		return -1;			// ensure sets errno
 	}

@@ -724,6 +724,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 	int		 	sock_ok;			// got a valid socket from round robin select
 	char*		d1;
 	int			ok_sends = 0;		// track number of ok sends
+	route_table_t*	rt;				// active route table
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL || msg == NULL ) {		// bad stuff, bail fast
 		errno = EINVAL;												// if msg is null, this is their clue
@@ -748,7 +749,9 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 		max_to = ctx->send_retries;		// convert to retries
 	}
 
-	if( (rte = uta_get_rte( ctx->rtable, msg->sub_id, msg->mtype, TRUE )) == NULL ) {		// find the entry which matches subid/type allow fallback to type only key
+	rt = get_rt( ctx );										// get active route table and up ref count
+	if( (rte = uta_get_rte( rt, msg->sub_id, msg->mtype, TRUE )) == NULL ) {		// find the entry which matches subid/type allow fallback to type only key
+		release_rt( ctx, rt );
 		rmr_vlog( RMR_VL_WARN, "no route table entry for mtype=%d sub_id=%d\n", msg->mtype, msg->sub_id );
 		msg->state = RMR_ERR_NOENDPT;
 		errno = ENXIO;										// must ensure it's not eagain
@@ -762,7 +765,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 		if( rte->nrrgroups > 0 ) {							// this is a round robin entry if groups are listed
 			sock_ok = uta_epsock_rr( ctx, rte, group, &send_again, &nn_sock, &ep );		// select endpt from rr group and set again if more groups
 		} else {
-			sock_ok = epsock_meid( ctx, ctx->rtable, msg, &nn_sock, &ep );
+			sock_ok = epsock_meid( ctx, rt, msg, &nn_sock, &ep );
 			send_again = 0;
 		}
 
@@ -775,6 +778,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 			if( send_again ) {
 				clone_m = clone_msg( msg );								// must make a copy as once we send this message is not available
 				if( clone_m == NULL ) {
+					release_rt( ctx, rt );
 					msg->state = RMR_ERR_SENDFAILED;
 					errno = ENOMEM;
 					msg->tp_state = errno;
@@ -808,7 +812,7 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 					case RMR_OK:
 						ep->scounts[EPSC_GOOD]++;
 						break;
-	
+
 					case RMR_ERR_RETRY:
 						ep->scounts[EPSC_TRANS]++;
 						break;
@@ -825,6 +829,8 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 			errno = ENXIO;
 		}
 	}
+
+	release_rt( ctx, rt );				// we can safely dec the ref counter now
 
 	if( msg ) {							// call functions don't get a buffer back, so a nil check is required
 		msg->flags &= ~MFL_NOALLOC;		// must return with this flag off

@@ -193,7 +193,11 @@ static int rt_test( ) {
 	entries[enu].group = 0; entries[enu].ep_name = "localhost:5512"; enu++;
 
 
-	rt = uta_rt_init( );										// get us a route table
+	rt = uta_rt_init( NULL );
+	errors += fail_if_false( rt == NULL, "rt_init given a nil context didn't return nil" );
+
+	ctx = mk_dummy_ctx();		// make a dummy with rtgate mutex
+	rt = uta_rt_init( ctx );										// get us a route table
 	if( (errors += fail_if_nil( rt, "pointer to route table" )) ) {
 		fprintf( stderr, "<FAIL> abort: cannot continue without a route table\n" );
 		exit( 1 );
@@ -225,7 +229,7 @@ static int rt_test( ) {
 	// ----- end hacking together a route table ---------------------------------------------------
 
 
-	crt = uta_rt_clone( rt );								// clone only the endpoint entries
+	crt = uta_rt_clone( ctx, rt, NULL, 0 );								// create a new rt and clone only the me entries
 	errors += fail_if_nil( crt, "cloned route table" );
 	if( crt ) {
 		c1 = count_entries( rt, 1 );
@@ -234,12 +238,14 @@ static int rt_test( ) {
 
 		c2 = count_entries( crt, 0 );
 		errors += fail_not_equal( c2, 0, "cloned (endpoints) table entries space 0 count (a) was not zero as expected" );
+
+		errors += fail_if_false( crt->ephash == rt->ephash, "ephash pointer in cloned table is not right" );
 		uta_rt_drop( crt );
 	}
 
 
-	crt = uta_rt_clone_all( rt );							// clone all entries
-	errors += fail_if_nil( crt, "cloned all route table" );
+	crt = uta_rt_clone( ctx, rt, NULL, 1 );							// clone all entries (MT and ME)
+	errors += fail_if_nil( crt, "cloned (all) route table" );
 
 	if( crt ) {
 		c1 = count_entries( rt, 0 );
@@ -249,6 +255,8 @@ static int rt_test( ) {
 		c1 = count_entries( rt, 1 );
 		c2 = count_entries( crt, 1 );
 		errors += fail_not_equal( c1, c2, "cloned (all) table entries space 1 count (b) did not match original table count (a)" );
+
+		errors += fail_if_false( crt->ephash == rt->ephash, "ephash pointer in cloned table (all) is not right" );
 		uta_rt_drop( crt );
 	}
 
@@ -275,7 +283,7 @@ static int rt_test( ) {
 	#ifdef NNG_UNDER_TEST
 		state = uta_epsock_byname( rt, "localhost:4561", &nn_sock, &ep );		// this should be found
 	#else
-		state = uta_epsock_byname( ctx, "localhost:4561", &nn_sock, &ep );	// this should be found
+		state = uta_epsock_byname( ctx, "localhost:4561", &nn_sock, &ep );		// this should be found
 	#endif
 	errors += fail_if_equal( state, 0, "socket (by name)" );
 	errors += fail_if_nil( ep, "epsock_byname did not populate endpoint pointer when expected to" );
@@ -289,13 +297,15 @@ static int rt_test( ) {
 	#endif
 	errors += fail_not_equal( state, 0, "socket (by name) nil check returned true" );
 
-	ep->open = 1;
-	#if  NNG_UNDER_TEST
-		state = uta_epsock_byname( rt, "localhost:4561", &nn_sock, NULL );		// test coverage on nil checks
-	#else
-		state = uta_epsock_byname( ctx, "localhost:4561", &nn_sock, NULL );
-	#endif
-	errors += fail_if_equal( state, 0, "socket (by name) open ep check returned false" );
+	if( ep ) {					// if previous test fails, cant run this
+		ep->open = 1;
+		#if  NNG_UNDER_TEST
+			state = uta_epsock_byname( rt, "localhost:4561", &nn_sock, NULL );		// test coverage on nil checks
+		#else
+			state = uta_epsock_byname( ctx, "localhost:4561", &nn_sock, NULL );
+		#endif
+		errors += fail_if_equal( state, 0, "socket (by name) open ep check returned false" );
+	}
 
 
 	// --- test that the get_rte function finds expected keys, and retries to find 'bad' sid attempts for valid mtypes with no sid
@@ -372,7 +382,7 @@ static int rt_test( ) {
 	errors += fail_if_true( state, "uta_epsock_rr returned bad (non-zero) state when given nil socket pointer" );
 
 
-	uta_rt_clone( NULL );								// verify null parms don't crash things
+	uta_rt_clone( ctx, NULL, NULL, 0 );								// verify null parms don't crash things
 	uta_rt_drop( NULL );
 	#ifdef NNG_UNDER_TEST
 		uta_epsock_rr( NULL, 0,  &more, &nn_sock, &ep );			// drive null case for coverage
@@ -405,6 +415,7 @@ static int rt_test( ) {
 		free( buf );
 	}
 
+fprintf( stderr, ">>>>>> test is overtly dropping rt table at %p\n", rt );
 	uta_rt_drop( rt );
 	rt = NULL;
 

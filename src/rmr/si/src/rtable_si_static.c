@@ -195,7 +195,7 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 		if( DEBUG > 1 ) rmr_vlog( RMR_VL_DEBUG, "rrg added to rte: mtype=%d group=%d\n", rte->mtype, group );
 	}
 
-	ep = rt_ensure_ep( rt, ep_name ); 			// get the ep and create one if not known
+	ep = rt_ensure_ep( rt, ep_name );			// get the ep and create one if not known
 
 	if( rrg != NULL ) {
 		if( rrg->nused >= rrg->nendpts ) {
@@ -214,27 +214,33 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 
 
 /*
-	Given a name, find the nano socket needed to send to it. Returns the socket via
+	Given a name, find the socket fd needed to send to it. Returns the socket via
 	the user pointer passed in and sets the return value to true (1). If the
 	endpoint cannot be found false (0) is returned.
 */
 static int uta_epsock_byname( uta_ctx_t* ctx, char* ep_name, int* nn_sock, endpoint_t** uepp ) {
 	route_table_t*	rt = NULL;
-	si_ctx_t*		si_ctx;
+	si_ctx_t*		si_ctx = NULL;
 	endpoint_t*		ep;
 	int				state = FALSE;
 
 	if( PARANOID_CHECKS ) {
-		if( ctx == NULL || (rt = ctx->rtable) == NULL || (si_ctx = ctx->si_ctx) == NULL  ) {
-			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: parinoia check pop ctx=%p rt=%p\n", ctx, rt );
+		if( ctx == NULL ) {
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: parinoia check pop ctx=%p\n", ctx, rt );
+			return FALSE;
+		}
+		rt = get_rt( ctx );				// get active rt and bump ref count
+		if( rt == NULL || (si_ctx = ctx->si_ctx) == NULL  ) {
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: parinoia check pop rt=%p sictx=%p\n", rt, si_ctx );
+fprintf( stderr, ">>>>> unreleased in epsoc_byname\n" );
 			return FALSE;
 		}
 	} else {
-		rt = ctx->rtable;				// faster but more risky
+		rt = get_rt( ctx );				// get active rt and bump ref count
 		si_ctx = ctx->si_ctx;
 	}
 
-	ep =  rmr_sym_get( rt->hash, ep_name, 1 );
+	ep =  rmr_sym_get( rt->ephash, ep_name, 1 );
 	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: ep not found: %s\n", ep_name );
 	if( uepp != NULL ) {							// caller needs endpoint too, give it back
 		*uepp = ep;
@@ -242,9 +248,11 @@ static int uta_epsock_byname( uta_ctx_t* ctx, char* ep_name, int* nn_sock, endpo
 	if( ep == NULL ) {
 		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "get ep by name for %s not in hash!\n", ep_name );
 		if( ! ep_name || (ep = rt_ensure_ep( rt, ep_name)) == NULL ) {				// create one if not in rt (support rts without entry in our table)
+			release_rt( ctx, rt );							// drop ref count
 			return FALSE;
 		}
 	}
+	release_rt( ctx, rt );										// drop ref count
 
 	if( ! ep->open )  {										// not open -- connect now
 		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "get ep by name for %s session not started... starting\n", ep_name );
@@ -268,7 +276,7 @@ static int uta_epsock_byname( uta_ctx_t* ctx, char* ep_name, int* nn_sock, endpo
 
 /*
 	Make a round robin selection within a round robin group for a route table
-	entry. Returns the nanomsg socket if there is a rte for the message
+	entry. Returns the socket fd if there is a rte for the message
 	key, and group is defined. Socket is returned via pointer in the parm
 	list (nn_sock).
 
@@ -282,8 +290,7 @@ static int uta_epsock_byname( uta_ctx_t* ctx, char* ep_name, int* nn_sock, endpo
 	The return value is true (>0) if the socket was found and *nn_sock was updated
 	and false (0) if there is no associated socket for the msg type, group combination.
 	We return the index+1 from the round robin table on success so that we can verify
-	during test that different entries are being seleted; we cannot depend on the nng
-	socket being different as we could with nano.
+	during test that different entries are being seleted.
 
 	NOTE:	The round robin selection index increment might collide with other
 		threads if multiple threads are attempting to send to the same round
