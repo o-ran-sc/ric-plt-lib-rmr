@@ -53,6 +53,7 @@ Mod:		2016 23 Feb - converted Symtab refs so that caller need only a
 #include <stdlib.h>
 #include <memory.h>
 #include <netdb.h>
+#include <pthread.h>
 
 #include "rmr_symtab.h"
 
@@ -96,7 +97,7 @@ static int sym_hash( const char *n, long size )
 	return (int ) (t % size);
 }
 
-/* 
+/*
 	Delete element pointed to by eptr which is assumed to be
 	a member of the list at symtab[i].
 */
@@ -148,7 +149,7 @@ static void del_head_ele( Sym_tab *table, int hv ) {
 			sym_tab[hv]->prev = NULL;					// new head
 		}
 		eptr->next = NULL;								// take no chances
-			
+
 		if( eptr->class && eptr->name ) {				// class 0 entries are numeric, so name is NOT a pointer
 			free( (void *) eptr->name );
 		}
@@ -179,8 +180,8 @@ static inline int same( unsigned int c1, unsigned int c2, const char *s1, const 
 	much the same.
 */
 static int putin( Sym_tab *table, const char *name, unsigned int class, void *val ) {
-	Sym_ele *eptr;    		/* pointer into hash table */
-	Sym_ele **sym_tab;    	/* pointer into hash table */
+	Sym_ele *eptr;			/* pointer into hash table */
+	Sym_ele **sym_tab;		/* pointer into hash table */
 	int hv;                 /* hash value */
 	int rc = 0;             /* assume it existed */
 	uint64_t nkey = 0;		// numeric key if class == 0
@@ -196,7 +197,7 @@ static int putin( Sym_tab *table, const char *name, unsigned int class, void *va
 		for( eptr=sym_tab[hv]; eptr && eptr->nkey != nkey; eptr=eptr->next );
 	}
 
-	if( ! eptr ) { 			// not found above, so add
+	if( ! eptr ) {			// not found above, so add
 		rc++;
 		table->inhabitants++;
 
@@ -502,13 +503,13 @@ extern void rmr_sym_foreach_class( void *vst, unsigned int class, void (* user_f
 	Sym_ele **list;
 	Sym_ele *se;
 	Sym_ele *next;		/* allows user to delete the node(s) we return */
-	int 	i;
+	int		i;
 
 	st = (Sym_tab *) vst;
 
 	if( st && (list = st->symlist) != NULL && user_fun != NULL ) {
 		for( i = 0; i < st->size; i++ ) {
-			se = list[i]; 
+			se = list[i];
 			while( se ) {
 				next = se->next;			// allow callback to delete from the list w/o borking us
 				if( class == se->class ) {
