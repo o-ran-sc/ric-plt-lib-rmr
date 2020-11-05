@@ -5,6 +5,10 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 November 4; Version 4.4.0
+	Changes to address a potential race condition when route tables
+	arrive in quick succession.  (RIC-674)
+
 2020 October 30; Version 4.3.1
 	Changes to address code analyser scans and two bug fixes identified
 	while addressing the analysis data. (RIC-673)

@@ -45,9 +45,12 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <pthread.h>
 
 #include <RIC_message_types.h>		// needed for route manager messages
 
+#define ALL 1
+#define SOME 0
 
 /*
 	Passed to a symtab foreach callback to construct a list of pointers from
@@ -179,7 +182,7 @@ static void  rt_stats( route_table_t* rt ) {
 	*counter = 0;
 	rmr_vlog_force( RMR_VL_DEBUG, "route table stats:\n" );
 	rmr_vlog_force( RMR_VL_DEBUG, "route table endpoints:\n" );
-	rmr_sym_foreach_class( rt->hash, RT_NAME_SPACE, ep_stats, counter );		// run endpoints (names) in the active table
+	rmr_sym_foreach_class( rt->ephash, RT_NAME_SPACE, ep_stats, counter );		// run endpoints (names) in the active table
 	rmr_vlog_force( RMR_VL_DEBUG, "rtable: %d known endpoints\n", *counter );
 
 	rmr_vlog_force( RMR_VL_DEBUG, "route table entries:\n" );
@@ -306,7 +309,7 @@ static void send_rt_ack( uta_ctx_t* ctx, rmr_mbuf_t* smsg, char* table_id, int s
 	}
 }
 
-// ------------------------------------------------------------------------------------------------
+// ---- utility -----------------------------------------------------------------------------------
 /*
 	Little diddy to trim whitespace and trailing comments. Like shell, trailing comments
 	must be at the start of a word (i.e. must be immediatly preceeded by whitespace).
@@ -380,6 +383,26 @@ static char* ensure_nlterm( char* buf ) {
 	return nb;
 }
 
+/*
+	Roll the new table into the active and the active into the old table. We
+	must have the lock on the active table to do this. It's possible that there
+	is no active table (first load), so we have to account for that (no locking).
+*/
+static void roll_tables( uta_ctx_t* ctx ) {
+	if( ctx->rtable != NULL ) {							// initially there isn't one, so must check!
+		pthread_mutex_lock( ctx->rtgate );				// must hold lock to move to active
+		ctx->old_rtable = ctx->rtable;					// currently active becomes old and allowed to 'drain'
+		ctx->rtable = ctx->new_rtable;					// one we've been adding to becomes active
+		pthread_mutex_unlock( ctx->rtgate );
+	} else {
+		ctx->old_rtable = NULL;						// ensure there isn't an old reference
+		ctx->rtable = ctx->new_rtable;				// make new the active one
+	}
+
+	ctx->new_rtable = NULL;
+}
+
+// ------------ entry update functions ---------------------------------------------------------------
 /*
 	Given a message type create a route table entry and add to the hash keyed on the
 	message type.  Once in the hash, endpoints can be added with uta_add_ep. Size
@@ -531,6 +554,8 @@ static void trash_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, int vle
 	}
 }
 
+// -------------------------- parse functions --------------------------------------------------
+
 /*
 	Given the tokens from an mme_ar (meid add/replace) entry, add the entries.
 	the 'owner' which should be the dns name or IP address of an enpoint
@@ -617,25 +642,29 @@ static void meid_parser( uta_ctx_t* ctx, uta_ctx_t* pctx, rmr_mbuf_t* mbuf, char
 			if( ctx->new_rtable != NULL ) {					// one in progress?  this forces it out
 				if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "meid map start: dropping incomplete table\n" );
 				uta_rt_drop( ctx->new_rtable );
-				send_rt_ack( pctx, mbuf, ctx->table_id, !RMR_OK, "table not complete" );	// nack the one that was pending as end never made it
+				ctx->new_rtable = NULL;
+				send_rt_ack( pctx, mbuf, ctx->table_id, !RMR_OK, "table not complete" );	// nack the one that was pending as and never made it
 			}
 
 			if( ctx->table_id != NULL ) {
 				free( ctx->table_id );
 			}
-			if( ntoks >2 ) {
+			if( ntoks > 2 ) {
 				ctx->table_id = strdup( clip( tokens[2] ) );
 			} else {
 				ctx->table_id = NULL;
 			}
-			ctx->new_rtable = uta_rt_clone_all( ctx->rtable );		// start with a clone of everything (mtype, endpoint refs and meid)
+
+			ctx->new_rtable = prep_new_rt( ctx, ALL );					// start with a clone of everything (mtype, endpoint refs and meid)
 			ctx->new_rtable->mupdates = 0;
+
 			if( DEBUG || (vlevel > 1)  ) rmr_vlog_force( RMR_VL_DEBUG, "meid_parse: meid map start found\n" );
 		} else {
 			if( strcmp( tokens[1], "end" ) == 0 ) {								// wrap up the table we were building
 				if( ntoks > 2 ) {												// meid_map | end | <count> |??? given
 					if( ctx->new_rtable->mupdates != atoi( tokens[2] ) ) {		// count they added didn't match what we received
-						rmr_vlog( RMR_VL_ERR, "meid_parse: meid map update had wrong number of records: received %d expected %s\n", ctx->new_rtable->mupdates, tokens[2] );
+						rmr_vlog( RMR_VL_ERR, "meid_parse: meid map update had wrong number of records: received %d expected %s\n",
+								ctx->new_rtable->mupdates, tokens[2] );
 						snprintf( wbuf, sizeof( wbuf ), "missing table records: expected %s got %d\n", tokens[2], ctx->new_rtable->updates );
 						send_rt_ack( pctx, mbuf, ctx->table_id, !RMR_OK, wbuf );
 						uta_rt_drop( ctx->new_rtable );
@@ -647,16 +676,17 @@ static void meid_parser( uta_ctx_t* ctx, uta_ctx_t* pctx, rmr_mbuf_t* mbuf, char
 				}
 
 				if( ctx->new_rtable ) {
-					uta_rt_drop( ctx->old_rtable );				// time to drop one that was previously replaced
-					ctx->old_rtable = ctx->rtable;				// currently active becomes old and allowed to 'drain'
-					ctx->rtable = ctx->new_rtable;				// one we've been adding to becomes active
-					ctx->new_rtable = NULL;
+					roll_tables( ctx );						// roll active to old, and new to active with proper locking
 					if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "end of meid map noticed\n" );
 					send_rt_ack( pctx, mbuf, ctx->table_id, RMR_OK, NULL );
 
 					if( vlevel > 0 ) {
-						rmr_vlog_force( RMR_VL_DEBUG, "old route table:\n" );
-						rt_stats( ctx->old_rtable );
+						if( ctx->old_rtable != NULL ) {
+							rmr_vlog_force( RMR_VL_DEBUG, "old route table: (ref_count=%d)\n", ctx->old_rtable->ref_count );
+							rt_stats( ctx->old_rtable );
+						} else {
+							rmr_vlog_force( RMR_VL_DEBUG, "old route table was empty\n" );
+						}
 						rmr_vlog_force( RMR_VL_DEBUG, "new route table:\n" );
 						rt_stats( ctx->rtable );
 					}
@@ -800,15 +830,16 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 					}
 
 					if( ctx->new_rtable ) {
-						uta_rt_drop( ctx->old_rtable );				// time to drop one that was previously replaced
-						ctx->old_rtable = ctx->rtable;				// currently active becomes old and allowed to 'drain'
-						ctx->rtable = ctx->new_rtable;				// one we've been adding to becomes active
-						ctx->new_rtable = NULL;
 						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog( RMR_VL_DEBUG, "end of route table noticed\n" );
+						roll_tables( ctx );						// roll active to old, and new to active with proper locking
 
 						if( vlevel > 0 ) {
-							rmr_vlog_force( RMR_VL_DEBUG, "old route table:\n" );
-							rt_stats( ctx->old_rtable );
+							if( ctx->old_rtable != NULL ) {
+								rmr_vlog_force( RMR_VL_DEBUG, "old route table: (ref_count=%d)\n", ctx->old_rtable->ref_count );
+								rt_stats( ctx->old_rtable );
+							} else {
+								rmr_vlog_force( RMR_VL_DEBUG, "old route table was empty\n" );
+							}
 							rmr_vlog_force( RMR_VL_DEBUG, "new route table:\n" );
 							rt_stats( ctx->rtable );
 						}
@@ -825,6 +856,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 
 						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "new table; dropping incomplete table\n" );
 						uta_rt_drop( ctx->new_rtable );
+						ctx->new_rtable = NULL;
 					}
 
 					if( ctx->table_id != NULL ) {
@@ -836,9 +868,9 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 						ctx->table_id = NULL;
 					}
 
-					ctx->new_rtable = NULL;
-					ctx->new_rtable = uta_rt_clone( ctx->rtable );	// create by cloning endpoint and meidtentries from active table
+					ctx->new_rtable = prep_new_rt( ctx, SOME );			// wait for old table to drain and shift it back to new
 					ctx->new_rtable->updates = 0;						// init count of entries received
+
 					if( DEBUG > 1 || (vlevel > 1)  ) rmr_vlog_force( RMR_VL_DEBUG, "start of route table noticed\n" );
 				}
 				break;
@@ -892,15 +924,16 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 					}
 
 					if( ctx->new_rtable ) {
-						uta_rt_drop( ctx->old_rtable );				// time to drop one that was previously replaced
-						ctx->old_rtable = ctx->rtable;				// currently active becomes old and allowed to 'drain'
-						ctx->rtable = ctx->new_rtable;				// one we've been adding to becomes active
-						ctx->new_rtable = NULL;
+						roll_tables( ctx );						// roll active to old, and new to active with proper locking
 						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "end of rt update noticed\n" );
 
 						if( vlevel > 0 ) {
-							rmr_vlog_force( RMR_VL_DEBUG, "old route table:\n" );
-							rt_stats( ctx->old_rtable );
+							if( ctx->old_rtable != NULL ) {
+								rmr_vlog_force( RMR_VL_DEBUG, "old route table:  (ref_count=%d)\n", ctx->old_rtable->ref_count );
+								rt_stats( ctx->old_rtable );
+							} else {
+								rmr_vlog_force( RMR_VL_DEBUG, "old route table was empty\n" );
+							}
 							rmr_vlog_force( RMR_VL_DEBUG, "updated route table:\n" );
 							rt_stats( ctx->rtable );
 						}
@@ -912,17 +945,19 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 					if( ctx->new_rtable != NULL ) {					// one in progress?  this forces it out
 						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "new table; dropping incomplete table\n" );
 						uta_rt_drop( ctx->new_rtable );
+						ctx->new_rtable = NULL;
 					}
 
-					if( ntoks >2 ) {
+					if( ntoks > 2 ) {
 						if( ctx->table_id != NULL ) {
 							free( ctx->table_id );
 						}
 						ctx->table_id = strdup( clip( tokens[2] ) );
 					}
 
-					ctx->new_rtable = uta_rt_clone_all( ctx->rtable );	// start with a clone of everything (endpts and entries)
-					ctx->new_rtable->updates = 0;						// init count of updates received
+					ctx->new_rtable = prep_new_rt( ctx, ALL );				// start with a copy of everything in the live table
+					ctx->new_rtable->updates = 0;							// init count of updates received
+
 					if( DEBUG > 1 || (vlevel > 1)  ) rmr_vlog_force( RMR_VL_DEBUG, "start of rt update noticed\n" );
 				}
 				break;
@@ -1113,21 +1148,30 @@ static char* uta_fib( char const* fname ) {
 	return buf;
 }
 
+// --------------------- initialisation/creation ---------------------------------------------
 /*
 	Create and initialise a route table; Returns a pointer to the table struct.
 */
-static route_table_t* uta_rt_init( ) {
+static route_table_t* uta_rt_init( uta_ctx_t* ctx ) {
 	route_table_t*	rt;
 
+	if( ctx == NULL ) {
+		return NULL;
+	}
 	if( (rt = (route_table_t *) malloc( sizeof( route_table_t ) )) == NULL ) {
 		return NULL;
 	}
+
 	memset( rt, 0, sizeof( *rt ) );
 
 	if( (rt->hash = rmr_sym_alloc( RT_SIZE )) == NULL ) {
 		free( rt );
 		return NULL;
 	}
+
+	rt->gate = ctx->rtgate;						// single mutex needed for all route tables
+	rt->ephash = ctx->ephash;					// all route tables share a common endpoint hash
+	pthread_mutex_init( rt->gate, NULL );
 
 	return rt;
 }
@@ -1138,7 +1182,7 @@ static route_table_t* uta_rt_init( ) {
 	Space is the space in the old table to copy. Space 0 uses an integer key and
 	references rte structs. All other spaces use a string key and reference endpoints.
 */
-static route_table_t* rt_clone_space( route_table_t* srt, route_table_t* nrt, int space ) {
+static route_table_t* rt_clone_space( uta_ctx_t* ctx, route_table_t* srt, route_table_t* nrt, int space ) {
 	endpoint_t*	ep;			// an endpoint (ignore sonar complaint about const*)
 	rtable_ent_t*	rte;	// a route table entry	(ignore sonar complaint about const*)
 	void*	sst;			// source symtab
@@ -1147,9 +1191,12 @@ static route_table_t* rt_clone_space( route_table_t* srt, route_table_t* nrt, in
 	int		i;
 	int		free_on_err = 0;
 
+	if( ctx == NULL ) {
+		return NULL;
+	}
 	if( nrt == NULL ) {				// make a new table if needed
 		free_on_err = 1;
-		nrt = uta_rt_init();
+		nrt = uta_rt_init( ctx );
 		if( nrt == NULL ) {
 			return NULL;
 		}
@@ -1198,70 +1245,89 @@ static route_table_t* rt_clone_space( route_table_t* srt, route_table_t* nrt, in
 }
 
 /*
-	Creates a new route table and then clones the parts of the table which we must keep with each newrt|start.
-	The endpoint and meid entries in the hash must be preserved.
-
-	NOTE: The first call to rt_clone_space() will create the new table and subsequent
-		calls operate on the new table. The return of subsequent calls can be safely
-		ignored.  There are some code analysers which will claim that there are memory
-		leaks here; not true as they aren't understanding the logic, just looking at
-		an ignored return value and assuming it's different than what was passed in.
+	Given a destination route table (drt), clone from the source (srt) into it.
+	If drt is nil, alloc a new one. If srt is nil, then nothing is done (except to
+	allocate the drt if that was nil too). If all is true (1), then we will clone both
+	the MT and the ME spaces; otherwise only the ME space is cloned.
 */
-static route_table_t* uta_rt_clone( route_table_t* srt ) {
+static route_table_t* uta_rt_clone( uta_ctx_t* ctx, route_table_t* srt, route_table_t* drt, int all ) {
 	endpoint_t*		ep;				// an endpoint
 	rtable_ent_t*	rte;			// a route table entry
-	route_table_t*	nrt = NULL;		// new route table
 	int i;
 
+	if( ctx == NULL ) {
+		return NULL;
+	}
+	if( drt == NULL ) {
+		drt = uta_rt_init( ctx );
+	}
 	if( srt == NULL ) {
-		return uta_rt_init();		// no source to clone, just return an empty table
+		return drt;
 	}
 
-	nrt = rt_clone_space( srt, NULL, RT_NAME_SPACE );		// allocate a new one, add endpoint refs
-	rt_clone_space( srt, nrt, RT_ME_SPACE );				// add meid refs to new
+	drt->ephash = ctx->ephash;						// all rts reference the same EP symtab
+	rt_clone_space( ctx, srt, drt, RT_ME_SPACE );
+	if( all ) {
+		rt_clone_space( ctx, srt, drt, RT_MT_SPACE );
+	}
 
-	return nrt;
+	return drt;
 }
 
 /*
-	Creates a new route table and then clones  _all_ of the given route table (references
-	both endpoints AND the route table entries. Needed to support a partial update where
-	some route table entries will not be deleted if not explicitly in the update and when
-	we are adding/replacing meid references.
+	Prepares the "new" route table for populating. If the old_rtable is not nil, then
+	we wait for it's use count to reach 0. Then the table is cleared, and moved on the
+	context to be referenced by the new pointer; the old pointer is set to nil.
 
-	NOTE  see note in uta_rt_clone() as it applies here too.
+	If the old table doesn't exist, then a new table is created and the new pointer is
+	set to reference it.
 */
-static route_table_t* uta_rt_clone_all( route_table_t* srt ) {
-	endpoint_t const*	ep;			// an endpoint
-	rtable_ent_t const*	rte;		// a route table entry
-	route_table_t*	nrt = NULL;		// new route table
-	int i;
+static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all ) {
+	int counter = 0;
+	route_table_t*	rt;
 
-	if( srt == NULL ) {
-		return uta_rt_init();		// no source to clone, just return an empty table
+	if( ctx == NULL ) {
+		return NULL;
 	}
 
-	nrt = rt_clone_space( srt, NULL, RT_MT_SPACE );			// create new, clone all spaces to it
-	rt_clone_space( srt, nrt, RT_NAME_SPACE );
-	rt_clone_space( srt, nrt, RT_ME_SPACE );
+	if( (rt = ctx->old_rtable) != NULL ) {
+		ctx->old_rtable = NULL;
+		while( rt->ref_count > 0 ) {			// wait for all who are using to stop
+			if( counter++ > 1000 ) {
+				rmr_vlog( RMR_VL_WARN, "rt_prep_newrt:  internal mishap, ref count on table seems wedged" );
+				break;
+			}
 
-	return nrt;
+			usleep( 1000 );						// small sleep to yield the processer if that is needed
+		}
+
+		rmr_sym_clear( rt );					// clear all entries from the old table
+	} else {
+		rt = NULL;
+	}
+
+	rt = uta_rt_clone( ctx, ctx->rtable, rt, all );	// also sets the ephash pointer
+	rt->ref_count = 0;							// take no chances; ensure it's 0!
+
+	return rt;
 }
+
 
 /*
 	Given a name, find the endpoint struct in the provided route table.
 */
 static endpoint_t* uta_get_ep( route_table_t* rt, char const* ep_name ) {
 
-	if( rt == NULL || rt->hash == NULL || ep_name == NULL || *ep_name == 0 ) {
+	if( rt == NULL || rt->ephash == NULL || ep_name == NULL || *ep_name == 0 ) {
 		return NULL;
 	}
 
-	return rmr_sym_get( rt->hash, ep_name, 1 );
+	return rmr_sym_get( rt->ephash, ep_name, 1 );
 }
 
 /*
 	Drop the given route table. Purge all type 0 entries, then drop the symtab itself.
+	Does NOT destroy the gate as it's a common gate for ALL route tables.
 */
 static void uta_rt_drop( route_table_t* rt ) {
 	if( rt == NULL ) {
@@ -1301,7 +1367,7 @@ static endpoint_t* rt_ensure_ep( route_table_t* rt, char const* ep_name ) {
 		pthread_mutex_init( &ep->gate, NULL );		// init with default attrs
 		memset( &ep->scounts[0], 0, sizeof( ep->scounts ) );
 
-		rmr_sym_put( rt->hash, ep_name, 1, ep );
+		rmr_sym_put( rt->ephash, ep_name, 1, ep );
 	}
 
 	return ep;
@@ -1338,4 +1404,50 @@ static inline endpoint_t*  get_meid_owner( route_table_t *rt, char const* meid )
 	return (endpoint_t *) rmr_sym_get( rt->hash, meid, RT_ME_SPACE );
 }
 
+/*
+	This returns a pointer to the currently active route table and ups
+	the reference count so that the route table is not freed while it
+	is being used. The caller MUST call release_rt() when finished
+	with the pointer.
+
+	Care must be taken: the ctx->rtable pointer _could_ change during the time
+	between the release of the lock and the return. Therefore we MUST grab
+	the current pointer when we have the lock so that if it does we don't
+	return a pointer to the wrong table.
+
+	This will return NULL if there is no active table.
+*/
+static inline route_table_t* get_rt( uta_ctx_t* ctx ) {
+	route_table_t*	rrt;			// return value
+
+	if( ctx == NULL || ctx->rtable == NULL ) {
+		return NULL;
+	}
+
+	pthread_mutex_lock( ctx->rtgate );				// must hold lock to bump use
+	rrt = ctx->rtable;								// must stash the pointer while we hold lock
+	rrt->ref_count++;
+	pthread_mutex_unlock( ctx->rtgate );
+
+	return rrt;										// pointer we upped the count with
+}
+
+/*
+	This will "release" the route table by reducing the use counter
+	in the table. The table may not be freed until the counter reaches
+	0, so it's imparative that the pointer be "released" when it is
+	fetched by get_rt().  Once the caller has released the table it
+	may not safely use the pointer that it had.
+*/
+static inline void release_rt( uta_ctx_t* ctx, route_table_t* rt ) {
+	if( ctx == NULL || rt == NULL ) {
+		return;
+	}
+
+	pthread_mutex_lock( ctx->rtgate );				// must hold lock
+	if( rt->ref_count > 0 ) {						// something smells if it's already 0, don't do antyhing if it is
+		rt->ref_count--;
+	}
+	pthread_mutex_unlock( ctx->rtgate );
+}
 #endif

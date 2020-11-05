@@ -156,7 +156,10 @@ struct uta_ctx {
 	int			max_ibm;		// max size of an inbound message (river accum alloc size)
 	void*		zcb_mring;		// zero copy buffer mbuf ring
 	void*		fd2ep;				// the symtab mapping file des to endpoints for cleanup on disconnect
+	void*		ephash;				// hash  host:port or ip:port to endpoint struct
+
 	pthread_mutex_t	*fd2ep_gate;	// we must gate add/deletes to the fd2 symtab
+	pthread_mutex_t	*rtgate;		// master gate for accessing/moving route tables
 };
 
 typedef uta_ctx_t uta_ctx;

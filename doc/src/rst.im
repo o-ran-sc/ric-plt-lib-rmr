@@ -47,13 +47,15 @@
 	.dv _ch8 56p
 	.dv _ch10 70p
 
+
 	.** Long strings of equals and dashes needed to make title/subtitle easier to generate. Multi
 	.** line annotations for headers could be used, but the code is messy for what results in
-	.** 4 lines in the setup files.
+	.** 4 lines in the setup files.  CAUTION: tildas must be quoted with back-ticks.
 	.**
 	.dv many_equals ============================================================================================
 	.dv many_dashes --------------------------------------------------------------------------------------------
-	.dv many_tildas ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	.dv many_tildas `^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+
 
 	.gv semver
 	.if &_major 1 >

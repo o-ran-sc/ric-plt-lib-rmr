@@ -24,8 +24,10 @@
 				the symbol table portion of RMr.  Run with:
 					ksh unit_test.ksh symtab_test.c
 	Date:		1 April 2019
-	Author: 	E. Scott Daniels
+	Author:		E. Scott Daniels
 */
+
+#include <pthread.h>
 
 #define NO_DUMMY_RMR 1			// no dummy rmr functions; we don't pull in rmr.h or agnostic.h
 #define NO_EMULATION
@@ -39,6 +41,7 @@
 #include "symtab.c"							// module under test
 
 
+int terrors = 0;							// thread errors
 int state = GOOD;							// overall pass/fail state 0==fail
 int counter;								// global counter for for-each tests
 
@@ -89,6 +92,99 @@ static int nfetch( void* st, int key, int expected ) {
 	return error;
 }
 
+// ----------------- thread based tests -------------------------------------------------------------------
+#define NUM_KEYS	512					// number of unique keys
+#define NUM_ATTEMPTS	1000000
+
+/*
+	This is started in a thread and will attempt 10,000 reads on the symtable
+	in an attempt to ensure that there are no concurrent read/write issues.
+*/
+static void* reader( void* st ) {
+	char	key[1024];
+	int		i;
+	int		ncount = 0;			// number not found
+	int		fcount = 0;			// number found
+
+	for( i = 0; i < NUM_ATTEMPTS; i++ ) {
+		snprintf( key, sizeof( key ), "key_%d", i % NUM_KEYS );
+		if( rmr_sym_get( st, key, 1 ) == NULL ) {
+			ncount++;
+		} else {
+			fcount++;
+		}
+	}
+
+	fprintf( stderr, "<info> reader finished: n=%d f=%d\n", ncount, fcount );	// there is no right answer
+	return NULL;
+}
+
+/*
+	This is started in a thread and will attempt 10,000 writes on the symtable
+	in an attempt to ensure that there are no concurrent read/write issues. Keys are
+	written as key_n where n is an integer between 0 and 999 inclusive.
+*/
+static void* writer( void* st ) {
+	char	key[1024];
+	int		i;
+	int		ncount = 0;			// number first inserts
+	int		rcount = 0;			// number replacements
+	char*	value = NULL;
+	int		num_keys = 256;
+
+	fprintf( stderr, "<INFO> writer now turning\n" );
+	for( i = 0; i < NUM_ATTEMPTS; i++ ) {
+		value++;
+		snprintf( key, sizeof( key ), "key_%d", i % NUM_KEYS );
+		rmr_sym_del( st, key, 1 );
+		if( rmr_sym_put( st, key, 1, value )  ) {
+			ncount++;
+		} else {
+			rcount++;
+		}
+	}
+
+	if( ncount != NUM_ATTEMPTS ) {
+		fprintf( stderr, "<FAIL> writer finished: n=%d r=%d\n", ncount, rcount );	// there is no right answer
+		terrors++;
+	} else {
+		fprintf( stderr, "<INFO> writer finished: n=%d r=%d\n", ncount, rcount );	// there is no right answer
+	}
+
+	return NULL;
+}
+
+/*
+	Drive a concurrent read/write test to ensure no race issues.
+*/
+static int thread_test( ) {
+	pthread_t	tids[10];
+	int			n2start = 3;
+	int			i;
+	void*		st;
+
+	st = rmr_sym_alloc( 128 );			// should force collisions
+
+	fprintf( stderr, "<INFO> starting writer\n" );
+	pthread_create( &tids[0], NULL, writer, st );
+
+	for( i = 1; i <= n2start; i++ ) {
+		fprintf( stderr, "<INFO> starting reader %d\n", i );
+		pthread_create( &tids[i], NULL, reader, st );
+	}
+
+	fprintf( stderr, "<INFO> thread controller is waiting\n" );
+	for( i = 0; i <= n2start; i++ ) {
+		pthread_join( tids[i], NULL );				// status is unimportant, just hold until all are done
+		fprintf( stderr, "<INFO> thread %d  has reported complete\n", i );
+	}
+
+
+	rmr_sym_stats( st, 1 );
+	return terrors;
+}
+
+// ---------------------------------------------------------------------------------------------------------
 
 /*
 	Driven by foreach class -- just incr the counter.
@@ -157,6 +253,8 @@ int main( ) {
 	} else {
 		fprintf( stderr, "<FAIL> %d errors in symtab code\n\n", errors );
 	}
+
+	errors += thread_test();
 
 	return !!(state + errors);
 }
