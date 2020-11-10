@@ -94,6 +94,9 @@ extern struct tp_blk *SIlisten_prep( struct ginfo_blk *gptr, int type, char* abu
 
 		alen = SIgenaddr( abuf, protocol, family, tptr->type, &addr );	//  family == 0 for type that suits the address passed in
 		if( alen <= 0 ) {
+			if( addr != NULL ) {
+				free( addr );		// not needed, but scanners complain if we don't overtly do this
+			}
 			return NULL;
 		}
 
@@ -190,6 +193,9 @@ extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf,
 
 		alen = SIgenaddr( abuf, protocol, family, tptr->type, &addr );	//  family == 0 for type that suits the address passed in
 		if( alen <= 0 ) {
+			if( addr != NULL ) {		// not needed, but scanners complain if we don't overtly do this
+				free( addr );
+			}
 			return NULL;
 		}
 

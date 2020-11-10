@@ -544,7 +544,7 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	uta_ctx_t*	ctx = NULL;
 	char	bind_info[256];				// bind info
 	char*	proto = "tcp";				// pointer into the proto/port string user supplied
-	char*	port;
+	char*	port;						// pointer into the proto_port buffer at the port value
 	char*	interface = NULL;			// interface to bind to (from RMR_BIND_IF, 0.0.0.0 if not defined)
 	char*	proto_port;
 	char	wbuf[1024];					// work buffer
@@ -660,6 +660,7 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	ctx->my_name = (char *) malloc( sizeof( char ) * RMR_MAX_SRC );
 	if( snprintf( ctx->my_name, RMR_MAX_SRC, "%s:%s", wbuf, port ) >= RMR_MAX_SRC ) {			// our registered name is host:port
 		rmr_vlog( RMR_VL_CRIT, "rmr_init: hostname + port must be less than %d characters; %s:%s is not\n", RMR_MAX_SRC, wbuf, port );
+		free( proto_port );					// some scanners complain that port is not freed; it CANNOT be
 		return NULL;
 	}
 

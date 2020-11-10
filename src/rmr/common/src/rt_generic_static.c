@@ -712,15 +712,13 @@ static void meid_parser( uta_ctx_t* ctx, uta_ctx_t* pctx, rmr_mbuf_t* mbuf, char
 		}
 		parse_meid_ar( ctx->new_rtable,  tokens[1], tokens[2], vlevel );
 		ctx->new_rtable->mupdates++;
+		return;
 	}
 
-	if( strcmp( tokens[0], "mme_del" ) == 0 ) {
-		if( ntoks < 2 ) {
-			rmr_vlog( RMR_VL_ERR, "meid_parse: mme_del record didn't have enough tokens\n" );
-			return;
-		}
+	if( strcmp( tokens[0], "mme_del" ) == 0 ) {						// ntoks < 2 already validated
 		parse_meid_del( ctx->new_rtable,  tokens[1], vlevel );
 		ctx->new_rtable->mupdates++;
+		return;
 	}
 }
 

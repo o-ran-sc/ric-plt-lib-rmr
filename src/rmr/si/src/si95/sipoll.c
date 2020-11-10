@@ -42,9 +42,6 @@
 
 extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
 {
- //extern int deaths;       //  number of children that died and are zombies
- //extern int sigflags;     //  flags set by the signal handler routine
-
  int fd;                       //  file descriptor for use in this routine
  int ((*cbptr)());             //  pointer to callback routine to call
  int status = SI_OK;              //  return status
@@ -113,7 +110,7 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
 
          if( tpptr->flags & TPF_LISTENFD )     //  listen port setup by init?
           {                                    //  yes-assume new session req
-           status = SInewsession( gptr, tpptr );    //  make new session
+           SInewsession( gptr, tpptr );		   //  cannot do anything about failure, so ignore status
           }
          else                              //  data received on a regular port
           if( tpptr->type == SOCK_DGRAM )          //  udp socket?
@@ -128,6 +125,7 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
                 status = (*cbptr)( gptr->cbtab[SI_CB_RDATA].cbdata, gptr->rbuf, status, buf );
                 SIcbstat( gptr, status, SI_CB_RDATA );    //  handle status
 				free( buf );
+				buf = NULL;						// just to be safe
                }                              //  end if call back was defined
              }                                //  end if status was ok
             free( uaddr );

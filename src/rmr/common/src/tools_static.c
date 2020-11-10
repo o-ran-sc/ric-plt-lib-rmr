@@ -80,7 +80,7 @@ static inline int zt_buf_fill( char* dest, char const* src, int len ) {
 	char const*	sp;
 	int			n;		// num moved
 
-	if( dest == NULL && src == NULL ) {
+	if( dest == NULL || src == NULL ) {
 		return -1;
 	}
 
@@ -334,7 +334,7 @@ static if_addrs_t*  mk_ip_list( char* port ) {
 	struct	ifaddrs *ele;		// pointer into the list
 	char	octs[NI_MAXHOST+1];
 	char	wbuf[NI_MAXHOST+128];
-	char*	fmt;
+	char*	fmt = NULL;			// address format (v4 or v6)
 	char*	envp;				// at the environment var if there
 	char*	target_if = NULL;	// target interface supplied by ENV_BIND_IF
 	char*	tok;
@@ -379,7 +379,7 @@ static if_addrs_t*  mk_ip_list( char* port ) {
 					}
 				}
 
-				if( *octs ) {
+				if( *octs  && fmt != NULL ) {				// possible that we didn't recognise the format (v4 or v6), don't try if we didn't
 					if( (tok = strchr( octs, '%' )) != NULL ) {			// for unknown reasons some ip6 addrs have %if-name appended; truncate
 						*tok = 0;
 					}

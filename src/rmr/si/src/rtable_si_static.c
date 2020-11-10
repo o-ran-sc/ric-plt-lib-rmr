@@ -177,12 +177,12 @@ extern endpoint_t*  uta_add_ep( route_table_t* rt, rtable_ent_t* rte, char* ep_n
 		}
 		memset( rrg, 0, sizeof( *rrg ) );
 
-		if( (rrg->epts = (endpoint_t **) malloc( sizeof( endpoint_t ) * MAX_EP_GROUP )) == NULL ) {
+		if( (rrg->epts = (endpoint_t **) malloc( sizeof( endpoint_t* ) * MAX_EP_GROUP )) == NULL ) {
 			rmr_vlog( RMR_VL_WARN, "rmr_add_ep: malloc failed for group endpoint array: group=%d\n", group );
 			free( rrg );
 			return NULL;
 		}
-		memset( rrg->epts, 0, sizeof( endpoint_t ) * MAX_EP_GROUP );
+		memset( rrg->epts, 0, sizeof( endpoint_t* ) * MAX_EP_GROUP );
 
 		rte->rrgroups[group] = rrg;
 
@@ -224,7 +224,7 @@ static int uta_epsock_byname( uta_ctx_t* ctx, char* ep_name, int* nn_sock, endpo
 
 	if( PARANOID_CHECKS ) {
 		if( ctx == NULL ) {
-			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: parinoia check pop ctx=%p\n", ctx, rt );
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: parinoia check pop ctx=%p rt=%p\n", ctx, rt );
 			return FALSE;
 		}
 		rt = get_rt( ctx );				// get active rt and bump ref count

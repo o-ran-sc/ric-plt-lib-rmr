@@ -85,12 +85,12 @@ static void* uta_mk_ring( int size ) {
 	}
 
 	r->nelements = size;		// because we always have an empty element when full
-	if( (r->data = (void **) malloc( sizeof( void** ) * (r->nelements + 1) )) == NULL ) {
+	if( (r->data = (void **) malloc( sizeof( void* ) * (r->nelements + 1) )) == NULL ) {
 		free( r );
 		return NULL;
 	}
 
-	memset( r->data, 0, sizeof( void** ) * r->nelements );
+	memset( r->data, 0, sizeof( void* ) * r->nelements );
 	r->pfd = eventfd( 0, EFD_SEMAPHORE | EFD_NONBLOCK );		// in semaphore mode counter is maintained with each insert/extract
 	return (void *) r;
 }

@@ -78,8 +78,9 @@ static void* rtc_file( void* vctx ) {
 		if( vfd >= 0 ) {
 			wbuf[0] = 0;
 			lseek( vfd, 0, 0 );
-			read( vfd, wbuf, 10 );
-			vlevel = atoi( wbuf );
+			if( read( vfd, wbuf, 10 ) > 0 ) {
+				vlevel = atoi( wbuf );
+			}
 		}
 
 		read_static_rt( ctx, vlevel );						// seed the route table if one provided
@@ -98,8 +99,9 @@ static int refresh_vlevel( int vfd ) {
 	if( vfd >= 0 ) {					// if file is open, read current value
 		rbuf[0] = 0;
 		lseek( vfd, 0, 0 );
-		read( vfd, rbuf, 10 );
-		vlevel = atoi( rbuf );
+		if( read( vfd, rbuf, 10 ) > 0 ) {
+			vlevel = atoi( rbuf );
+		}
 	}
 
 	return vlevel;

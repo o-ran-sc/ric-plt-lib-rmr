@@ -156,6 +156,8 @@ extern void rmr_vlog( int write_level, char* fmt, ... ) {
 
 	vsnprintf( body, sizeof( msg ) - (hlen+2), fmt, argp );			// add in user message formatting it along the way
 	fprintf( stderr, "%s", msg );									// we grew from printfs so all existing msg have \n; assume there
+
+	va_end( argp );
 }
 
 /*
@@ -190,6 +192,8 @@ extern void rmr_vlog_force( int write_level, char* fmt, ... ) {
 
 	vsnprintf( body, sizeof( msg ) - (hlen+2), fmt, argp );			// add in user message formatting it along the way
 	fprintf( stderr, "%s", msg );									// we grew from printfs so all existing msg have \n; assume there
+
+	va_end( argp );
 }
 
 // -------------------- public functions that are needed -----------------
