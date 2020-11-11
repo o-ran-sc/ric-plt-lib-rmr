@@ -37,6 +37,9 @@
 	is a good update. The same applies to the meid map; first has a bad counter
 	and some bad records to drive coverage testing. The end should leave a good
 	meid map in the table.
+
+	Once the file is generated, it is forced in via static read and the file
+	is unlinked.
 */
 static void gen_rt( uta_ctx_t* ctx ) {
 	int		fd;
@@ -72,7 +75,7 @@ static void gen_rt( uta_ctx_t* ctx ) {
 
 	rt_stuff = 												// add an meid map which will fail
 		"meid_map | start\n"
-		"mme_ar | e2t-1 | one two three four\n"
+		"mme_ar | e2t-1 | one two three four\r"				// also test bloody apple way with \r
 		"mme_del | one two\n"
 		"mme_del \n"										// short entries drive various checks for coverage
 		"mme_ar \n"											
@@ -118,19 +121,23 @@ static void gen_rt( uta_ctx_t* ctx ) {
 
 /*
 	Generate a custom route table file using the buffer passed in.
+	Then force it to be read into the current route table. The file
+	is unlinked when finished.
 */
 static void gen_custom_rt( uta_ctx_t* ctx, char* buf ) {
 	int		fd;
-	char* 	rt_stuff;		// strings for the route table
 
-	fd = open( "utesting.rt", O_WRONLY | O_CREAT, 0600 );
+	fd = open( "Xutesting.rt", O_WRONLY | O_CREAT, 0600 );
 	if( fd < 0 ) {
 		fprintf( stderr, "<BUGGERED> unable to open file for testing route table gen\n" );
 		return;
 	}
-	setenv( "RMR_SEED_RT", "utesting.rt", 1 );
+	setenv( "RMR_SEED_RT", "Xutesting.rt", 1 );
 
-	write( fd, rt_stuff, strlen( buf ) );
+	fprintf( stderr, "<INFO> creating custom rt from buffer (%d bytes)\n", strlen (buf ) );
+	if( write( fd, buf, strlen( buf ) ) != strlen( buf ) ) {
+		fprintf( stderr, "<BUGGERED> write failed: %s\n", strerror( errno ) );
+	}
 
 	close( fd );
 	read_static_rt( ctx, 1 );								// force in verbose mode to see stats on tty if failure

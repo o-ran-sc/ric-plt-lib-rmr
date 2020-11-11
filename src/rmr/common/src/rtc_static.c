@@ -76,9 +76,8 @@ static void* rtc_file( void* vctx ) {
 	ctx->flags |= CFL_NO_RTACK;				// no attempt to ack when reading from a file
 	while( 1 ) {
 		if( vfd >= 0 ) {
-			wbuf[0] = 0;
-			lseek( vfd, 0, 0 );
-			if( read( vfd, wbuf, 10 ) > 0 ) {
+			memset( wbuf, 0, sizeof( char ) * 11 );
+			if( lseek( vfd, 0, SEEK_SET ) == 0 && read( vfd, wbuf, 10 ) > 0 ) {
 				vlevel = atoi( wbuf );
 			}
 		}
@@ -86,6 +85,9 @@ static void* rtc_file( void* vctx ) {
 		read_static_rt( ctx, vlevel );						// seed the route table if one provided
 
 		if( ctx->shutdown != 0 ) {							// allow for graceful termination and unit testing
+			if( vfd >= 0 ) {
+				close( vfd );
+			}
 			return NULL;
 		}
 		sleep( 60 );
@@ -98,8 +100,8 @@ static int refresh_vlevel( int vfd ) {
 
 	if( vfd >= 0 ) {					// if file is open, read current value
 		rbuf[0] = 0;
-		lseek( vfd, 0, 0 );
-		if( read( vfd, rbuf, 10 ) > 0 ) {
+		memset( rbuf, 0, sizeof( char ) * 11 );
+		if( lseek( vfd, 0, SEEK_SET ) == 0 && read( vfd, rbuf, 10 ) > 0 ) {
 			vlevel = atoi( rbuf );
 		}
 	}

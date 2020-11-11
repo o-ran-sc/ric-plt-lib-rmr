@@ -159,7 +159,7 @@ extern int SIaddress( void *src, void **dest, int type ) {
 			if( addr->sin_family == AF_INET6 ) {
 				addr6 = (struct sockaddr_in6 *) src;				// really an ip6 struct
 				byte = (uint8_t *) &addr6->sin6_addr;
-			snprintf( wbuf, sizeof( wbuf ),  "[%u:%u:%u:%u:%u:%u]:%d",
+				snprintf( wbuf, sizeof( wbuf ),  "[%u:%u:%u:%u:%u:%u]:%d",
 						*(byte+0), *(byte+1), *(byte+2),
 						*(byte+3), *(byte+4), *(byte+5) ,
 						(int) ntohs( addr6->sin6_port ) );

@@ -389,6 +389,7 @@ static char* ensure_nlterm( char* buf ) {
 	is no active table (first load), so we have to account for that (no locking).
 */
 static void roll_tables( uta_ctx_t* ctx ) {
+
 	if( ctx->rtable != NULL ) {							// initially there isn't one, so must check!
 		pthread_mutex_lock( ctx->rtgate );				// must hold lock to move to active
 		ctx->old_rtable = ctx->rtable;					// currently active becomes old and allowed to 'drain'
@@ -1304,8 +1305,8 @@ static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all ) {
 		rt = NULL;
 	}
 
-	rt = uta_rt_clone( ctx, ctx->rtable, rt, all );	// also sets the ephash pointer
-	rt->ref_count = 0;							// take no chances; ensure it's 0!
+	rt = uta_rt_clone( ctx, ctx->rtable, rt, all );		// also sets the ephash pointer
+	rt->ref_count = 0;									// take no chances; ensure it's 0!
 
 	return rt;
 }

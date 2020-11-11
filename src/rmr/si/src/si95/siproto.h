@@ -47,7 +47,7 @@ extern int SIconnect( struct ginfo_blk *gptr, char *abuf );
 extern struct tp_blk *SIestablish( int type, char *abuf, int family );
 extern int SIgenaddr( char *target, int proto, int family, int socktype, struct sockaddr **rap );
 extern int SIgetaddr( struct ginfo_blk *gptr, char *buf );
-extern struct tp_blk *SIlisten_prep( struct ginfo_blk *gptr, int type, char* abuf, int family );
+extern struct tp_blk *SIlisten_prep( int type, char* abuf, int family );
 extern int SIlistener( struct ginfo_blk *gptr, int type, char *abuf );
 extern void SImap_fd( struct ginfo_blk *gptr, int fd, struct tp_blk* tpptr );
 extern int SInewsession( struct ginfo_blk *gptr, struct tp_blk *tpptr );

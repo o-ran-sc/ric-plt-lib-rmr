@@ -88,9 +88,9 @@
 #include <si95/silisten.c>
 #include <si95/sinew.c>
 #include <si95/sinewses.c>
-//#include <si95/sipoll.c>
+#include <si95/sipoll.c>
 //#include <si95/sircv.c>
-//#include <si95/sisend.c>
+#include <si95/sisend.c>
 #include <si95/sisendt.c>
 #include <si95/sishutdown.c>
 #include <si95/siterm.c>
@@ -197,9 +197,9 @@ static int addr() {
 	int errors = 0;
 	int l;
 	struct sockaddr* addr;
-	char buf1[4096];
-	char buf2[4096];
-	char* dest;
+	char buf1[4096];			// space to build buffers for xlation
+	char*	hr_addr;			// human readable address returned
+	void* net_addr;				// a network address block of some type
 
 	addr = (struct sockaddr *) malloc( sizeof( struct sockaddr ) );
 /*
@@ -208,23 +208,72 @@ static int addr() {
 	SIgenaddr( "    [ff02::4]:4567", PF_INET6, IPPROTO_TCP, SOCK_STREAM, &addr );
 */
 
-	dest = NULL;
+	l = SIaddress( NULL, NULL, 0 );
+	errors += fail_if_true( l != 0, "SIaddress given two null pointers didn't return 0 len" );
+	l = SIaddress( buf1, NULL, 0 );
+	errors += fail_if_true( l != 0, "SIaddress given null dest pointer didn't return 0 len" );
+	l = SIaddress( NULL, buf1, 0 );
+	errors += fail_if_true( l != 0, "SIaddress given null src pointer didn't return 0 len" );
+
+	net_addr = NULL;
 	snprintf( buf1, sizeof( buf1 ), "   [ff02::5:4001" );		// invalid address, drive leading space eater too
-	l = SIaddress( buf1, (void **)  &dest, AC_TOADDR6 );
+	l = SIaddress( buf1, (void **)  &net_addr, AC_TOADDR6 );
 	errors += fail_if_true( l > 0, "to addr6 with bad addr convdersion returned valid len" );
+	free( net_addr );
 
 	snprintf( buf1, sizeof( buf1 ), "[ff02::5]:4002" );		// v6 might not be supported so failure is OK here; driving for coverage
-	l=SIaddress( buf1, (void **) &dest, AC_TOADDR6 );
+	l = SIaddress( buf1, &net_addr, AC_TOADDR6 );
+	if( l > 0 ) {
+		l = SIaddress( net_addr, &hr_addr, AC_TODOT );						// convert the address back to hr string
+		errors += fail_if_true( l < 1, "v6 to dot conversion failed" );
+		errors += fail_if_nil( hr_addr, "v6 to dot conversion yields a nil pointer" );
+		free( net_addr );
+	}
 
 	snprintf( buf1, sizeof( buf1 ), "localhost:43086" );
-	l = SIaddress( buf1, (void **) &dest, AC_TOADDR );
-	errors += fail_if_true( l < 1, "to addr convdersion failed" );
+	l = SIaddress( buf1, (void **) &net_addr, AC_TOADDR );
+	errors += fail_if_true( l < 1, "v4 to addr conversion failed" );
 
-	snprintf( buf1, sizeof( buf1 ), "localhost:4004" );
-	l = SIaddress( buf1, (void **) &dest, AC_TODOT );
+	l = SIaddress( net_addr, &hr_addr, AC_TODOT );						// convert the address back to hr string
 	errors += fail_if_true( l < 1, "to dot convdersion failed" );
+	errors += fail_if_nil( hr_addr, "v4 to dot conversion yields a nil pointer" );
+	free( net_addr );
 
 	fprintf( stderr, "<INFO> addr module finished with %d errors\n", errors );
+	return errors;
+}
+
+/*
+	Prep related tests. These mostly drive cases that aren't driven by "normal"
+	connect, send, receive tests (e.g. UDP branches).
+*/
+static int prep() {
+	int		errors = 0;
+	void*	thing;					// the thing that should be returned
+
+	thing = SIlisten_prep( UDP_DEVICE, "localhost:1234", AF_INET );
+	errors += fail_if_nil( thing, "listen prep udp returned nil block" );
+
+	thing = SIlisten_prep( UDP_DEVICE, "localhost:1234", 84306 );		// this should fail
+	errors += fail_not_nil( thing, "listen prep udp returned valid block ptr for bogus family" );
+
+	thing = SIconn_prep( si_ctx, UDP_DEVICE, "localhost:1234", 84306 );		// again, expect to fail; bogus family
+	errors += fail_not_nil( thing, "conn prep udp returned valid block ptr for bogus family" );
+
+	return errors;
+}
+
+/*
+	Polling/waiting tests.  These are difficult at best because of the blocking
+	nature of things, not to mention needing to have real ports open etc.
+*/
+static int poll() {
+	int errors  = 0;
+	int status;
+
+	status = SIpoll( si_ctx, 1 );
+	errors += fail_if_true( status != 0, "poll failed" );
+
 	return errors;
 }
 
@@ -290,7 +339,11 @@ static int conn( ) {
 		errors++;
 	} else {
 		errors += fail_if_true( buf[0] == 0, "get name returned buf with emtpy string" );
+		free( buf );
 	}
+
+	buf = SIgetname( -1 );			// invalid fd
+	errors += fail_not_nil( buf, "get name returned buf with non-emtpy string when given bad fd" );
 
 	fprintf( stderr, "<INFO> conn module finished with %d errors\n", errors );
 	return errors;
@@ -398,11 +451,14 @@ int main() {
 	errors += init();
 	errors += memory();
 	errors += addr();
+	errors += prep();
 	errors += conn();
 	errors += misc();
 
 	errors += new_sess();		// should leave a "connected" session at fd == 6
 	errors += send_tests();
+
+	errors += poll();
 
 	errors += cleanup();
 

@@ -74,7 +74,7 @@ extern int SIpoll( struct ginfo_blk *gptr, int msdelay )
     pstat = select( gptr->fdcount, &gptr->readfds, &gptr->writefds,
                                &gptr->execpfds, &delay );
 
-   if( (pstat < 0 && errno != EINTR)  )
+   if( pstat < 0 && errno != EINTR  )
     {                             //  poll fail or termination signal rcvd
      gptr->fdcount = 0;           //  prevent trying to look at a session
      gptr->flags |= GIF_SHUTDOWN; //  cause cleanup and exit at end

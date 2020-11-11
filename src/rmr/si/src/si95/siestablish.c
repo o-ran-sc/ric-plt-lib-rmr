@@ -57,19 +57,18 @@
 	Family is one of the AF_* constants (AF_ANY, AF_INET or AF_INET6)
 
 	The address should be one of these forms:
-			[::1]:port			// v6 localhost device (loop back)
-			localhost:port		// v4 or 6 loopback depending on /etc/hosts
-			0.0.0.0:port		// any interface
-			addr:port			// an address assigned to one of the devices
+			[::1]:port			   v6 localhost device (loop back)
+			localhost:port		   v4 or 6 loopback depending on /etc/hosts
+			0.0.0.0:port		   any interface
+			addr:port			   an address assigned to one of the devices
 
 	Returns a transport struct which is the main context for the listener.
 */
-extern struct tp_blk *SIlisten_prep( struct ginfo_blk *gptr, int type, char* abuf, int family ) {
+extern struct tp_blk *SIlisten_prep( int type, char* abuf, int family ) {
 	struct tp_blk *tptr;         //  pointer at new tp block
 	int status = SI_OK;          //  processing status
 	struct sockaddr *addr;		//  IP address we are requesting
 	int protocol;                //  protocol for socket call
-	char buf[256];               //  buffer to build request address in
 	int optval = 0;
 	int alen = 0;
 

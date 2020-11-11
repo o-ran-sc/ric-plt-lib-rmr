@@ -173,7 +173,7 @@ static int em_sigetaddr( struct ginfo_blk *gptr, char *buf ) {
 	return 0;
 }
 
-static struct tp_blk *em_silisten_prep( struct ginfo_blk *gptr, int type, char* abuf, int family ) {
+static struct tp_blk *em_silisten_prep( int type, char* abuf, int family ) {
 	return NULL;
 }
 

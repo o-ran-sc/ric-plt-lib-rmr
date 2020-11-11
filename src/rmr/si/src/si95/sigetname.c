@@ -38,7 +38,7 @@ extern char* SIgetname( int sid ) {
 	int	len;
 
 	len = sizeof( oaddr );
-	if( getsockname( sid, &oaddr, &len ) < 0 ) {
+	if( sid < 0 || getsockname( sid, &oaddr, &len ) < 0 || len != sizeof( oaddr ) ) {
 		return NULL;
 	}
 

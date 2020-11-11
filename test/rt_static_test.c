@@ -415,19 +415,57 @@ static int rt_test( ) {
 		free( buf );
 	}
 
-fprintf( stderr, ">>>>>> test is overtly dropping rt table at %p\n", rt );
+	fprintf( stderr, "<INFO> test is overtly dropping rt table at %p\n", rt );
+	ctx->rtable = NULL;
 	uta_rt_drop( rt );
 	rt = NULL;
 
 
+	// --- force the load of a RT which has some edge case forcing issues
 	if( ctx ) {
-		if( (seed_fname = getenv( "RMR_SEED_RT" )) != NULL ) {
-			read_static_rt( ctx, 0 );
-			rt = ctx->rtable;
-			errors += fail_if_nil( rt, "read seed table didn't generate a rtable pointer in context" );
-			unsetenv( "RMR_SEED_RT" );				// remove for next test
-		}
+		char*	rt_stuff =
+				"newrt | start | dummy-seed\n"
+				"mse | 1  | -1 | localhost:84306\n"
+				"mse | 10  | -1 | localhost:84306\n"
+				"mse | 10  | 1 | localhost:84306\n"
+				"# should cause failure because there aren't 10 entries above\n"
+				"newrt | end | 10\n"
 
+				"# this table has no end\n"
+				"newrt | start | dummy-seed\n"
+				"mse | 1  | -1 | localhost:84306\n"
+				"mse | 10  | -1 | localhost:84306\n"
+				"mse | 10  | 1 | localhost:84306\n"
+				"# short record to drive test\n"
+				"del\n"
+				"del | 12 | 12\n"
+
+				"# this table should be ok\n"
+				"newrt | start | dummy-seed\n"
+				"mse | 1  | -1 | localhost:84306\n"
+				"mse | 10  | -1 | localhost:84306\n"
+				"mse | 10  | 1 | localhost:84306\n"
+				"newrt | end | 3\n"
+
+				"# for an update to the existing table\n"
+
+				"# not in progress; drive that exception check\n"
+				"update | end | 23\n"
+
+				"update | start | dummy-seed\n"
+				"mse | 2 | 2 | localhost:2222\n"
+				"# no table end for exception handling\n"
+
+				"update | start | dummy-seed\n"
+				"mse | 2 | 2 | localhost:2222\n"
+				"update | end | 1\n";
+
+		fprintf( stderr, "<INFO> loading RT from edge case static table\n" );
+		fprintf( stderr, "<INFO> %s\n", rt_stuff );
+		gen_custom_rt( ctx, rt_stuff );
+		errors += fail_if_nil( ctx->rtable, "edge case route table didn't generate a pointer into the context" );
+
+		unsetenv( "RMR_SEED_RT" );			// remove for next read try
 		read_static_rt( ctx, 0 );			// drive for not there coverage
 	}
 
@@ -619,6 +657,11 @@ fprintf( stderr, ">>>>>> test is overtly dropping rt table at %p\n", rt );
 		ep = fd2ep_del( ctx, 20 );
 		errors += fail_not_nil( ep, "fd2ep delete returned a pointer for unknown mapping" );
 	#endif
+
+	// ---------------- misc coverage tests --------------------------------------------------------------------------
+		collect_things( NULL, NULL, NULL, NULL, NULL );				// these both return null, these test NP checks
+		collect_things( NULL, NULL, NULL, NULL, (void *) 1234 );		// the last is an invalid pointer, but check needed to force check on previous param
+		del_rte( NULL, NULL, NULL, NULL, NULL );
 
 	return !!errors;			// 1 or 0 regardless of count
 }

@@ -53,7 +53,7 @@ extern int SIlistener( struct ginfo_blk *gptr, int type, char *abuf ) {
 			return status;
 	}
 
-	tpptr = SIlisten_prep( gptr, type, abuf, 0 );
+	tpptr = SIlisten_prep( type, abuf, 0 );
 
 	if( tpptr != NULL )                          //  established a fd bound to the port ok
 	{                   	                        //  enable connection reqs

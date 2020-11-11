@@ -696,6 +696,7 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	snprintf( bind_info, sizeof( bind_info ), "%s:%s", interface, port );		// FIXME -- si only supports 0.0.0.0 by default
 	if( (state = SIlistener( ctx->si_ctx, TCP_DEVICE, bind_info )) < 0 ) {
 		rmr_vlog( RMR_VL_CRIT, "rmr_init: unable to start si listener for %s: %s\n", bind_info, strerror( errno ) );
+		free( proto_port );								// some scanners might complain that port is not freed; it CANNOT be
 		free_ctx( ctx );
 		return NULL;
 	}
@@ -713,6 +714,7 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	ctx->ephash = rmr_sym_alloc( 129 );					// host:port to ep symtab exists outside of any route table
 	if( ctx->ephash == NULL ) {
 		rmr_vlog( RMR_VL_CRIT, "rmr_init: unable to allocate ep hash\n" );
+		free( proto_port );								// some scanners might complain that port is not freed; it CANNOT be
 		free_ctx( ctx );
 		return NULL;
 	}
