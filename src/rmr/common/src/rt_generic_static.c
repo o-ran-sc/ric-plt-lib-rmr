@@ -291,7 +291,7 @@ static void send_rt_ack( uta_ctx_t* ctx, rmr_mbuf_t* smsg, char* table_id, int s
 
 		smsg->len = strlen( smsg->payload ) + 1;
 
-		rmr_vlog( RMR_VL_INFO, "rmr_rtc: sending table state: (%s) state=%d whid=%d\n", smsg->payload, state, ctx->rtg_whid );
+		rmr_vlog( RMR_VL_INFO, "rmr_rtc: sending table state: (%s) state=%d whid=%d table=%s\n", smsg->payload, state, ctx->rtg_whid, table_id );
 		if( use_rts ) {
 			smsg = rmr_rts_msg( ctx, smsg );
 		} else {
@@ -916,6 +916,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 						if( ctx->new_rtable->updates != atoi( tokens[2] ) ) {	// count they added didn't match what we received
 							rmr_vlog( RMR_VL_ERR, "rmr_rtc: RT update had wrong number of records: received %d expected %s\n",
 								ctx->new_rtable->updates, tokens[2] );
+							send_rt_ack( pctx, mbuf, ctx->table_id, !RMR_OK, wbuf );
 							uta_rt_drop( ctx->new_rtable );
 							ctx->new_rtable = NULL;
 							break;
@@ -936,6 +937,9 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 							rmr_vlog_force( RMR_VL_DEBUG, "updated route table:\n" );
 							rt_stats( ctx->rtable );
 						}
+
+						send_rt_ack( pctx, mbuf, ctx->table_id, RMR_OK, NULL );
+						ctx->rtable_ready = 1;							// route based sends can now happen
 					} else {
 						if( DEBUG > 1 ) rmr_vlog_force( RMR_VL_DEBUG, "end of rt update noticed, but one was not started!\n" );
 						ctx->new_rtable = NULL;
@@ -943,6 +947,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 				} else {											// start a new table.
 					if( ctx->new_rtable != NULL ) {					// one in progress?  this forces it out
 						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "new table; dropping incomplete table\n" );
+						send_rt_ack( pctx, mbuf, ctx->table_id, !RMR_OK, "table not complete" );			// nack the one that was pending as end never made it
 						uta_rt_drop( ctx->new_rtable );
 						ctx->new_rtable = NULL;
 					}
@@ -1300,7 +1305,10 @@ static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all ) {
 			usleep( 1000 );						// small sleep to yield the processer if that is needed
 		}
 
-		rmr_sym_clear( rt );					// clear all entries from the old table
+		if( rt->hash != NULL ) {
+			rmr_sym_foreach_class( rt->hash, 0, del_rte, NULL );		// deref and drop if needed
+			rmr_sym_clear( rt->hash );									// clear all entries from the old table
+		}
 	} else {
 		rt = NULL;
 	}

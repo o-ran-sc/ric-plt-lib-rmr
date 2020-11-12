@@ -127,6 +127,7 @@ static int rt_test( ) {
 	char*	seed_fname;		// seed file
 	SOCKET_TYPE	nn_sock;	// differnt in each transport (nng == struct, SI/Nano == int)
 	rmr_mbuf_t*	mbuf;		// message for meid route testing
+	void*	p;				// generic pointer
 
 	#ifndef NNG_UNDER_TEST
 		si_ctx_t* si_ctx = NULL;
@@ -294,6 +295,12 @@ static int rt_test( ) {
 		state = uta_epsock_byname( NULL, "localhost:4561", &nn_sock, &ep );		// test coverage on nil checks
 	#else
 		state = uta_epsock_byname( NULL, "localhost:4561", &nn_sock, &ep );
+		errors += fail_not_equal( state, 0, "socket (by name) nil context check returned true" );
+
+		p = ctx->si_ctx;
+		ctx->si_ctx = NULL;		// set to drive second test
+		state = uta_epsock_byname( ctx, "localhost:4561", &nn_sock, &ep );
+		ctx->si_ctx = p;
 	#endif
 	errors += fail_not_equal( state, 0, "socket (by name) nil check returned true" );
 
@@ -436,9 +443,6 @@ static int rt_test( ) {
 				"mse | 1  | -1 | localhost:84306\n"
 				"mse | 10  | -1 | localhost:84306\n"
 				"mse | 10  | 1 | localhost:84306\n"
-				"# short record to drive test\n"
-				"del\n"
-				"del | 12 | 12\n"
 
 				"# this table should be ok\n"
 				"newrt | start | dummy-seed\n"
@@ -448,21 +452,24 @@ static int rt_test( ) {
 				"newrt | end | 3\n"
 
 				"# for an update to the existing table\n"
-
 				"# not in progress; drive that exception check\n"
 				"update | end | 23\n"
 
 				"update | start | dummy-seed\n"
-				"mse | 2 | 2 | localhost:2222\n"
+				"mse | 3 | 2 | localhost:2222\n"
+				"# short record to drive test\n"
+				"del\n"
 				"# no table end for exception handling\n"
 
 				"update | start | dummy-seed\n"
 				"mse | 2 | 2 | localhost:2222\n"
-				"update | end | 1\n";
+				"del | 10 | 1\n"
+				"update | end | 2\n";
 
 		fprintf( stderr, "<INFO> loading RT from edge case static table\n" );
 		fprintf( stderr, "<INFO> %s\n", rt_stuff );
 		gen_custom_rt( ctx, rt_stuff );
+		fprintf( stderr, "<INFO> edge case load completed\n" );
 		errors += fail_if_nil( ctx->rtable, "edge case route table didn't generate a pointer into the context" );
 
 		unsetenv( "RMR_SEED_RT" );			// remove for next read try
