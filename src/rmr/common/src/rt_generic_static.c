@@ -1300,7 +1300,10 @@ static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all ) {
 			usleep( 1000 );						// small sleep to yield the processer if that is needed
 		}
 
-		rmr_sym_clear( rt );					// clear all entries from the old table
+		if( rt->hash != NULL ) {
+			rmr_sym_foreach_class( rt->hash, 0, del_rte, NULL );		// deref and drop if needed
+			rmr_sym_clear( rt->hash );									// clear all entries from the old table
+		}
 	} else {
 		rt = NULL;
 	}

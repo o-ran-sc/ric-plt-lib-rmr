@@ -224,12 +224,15 @@ static int uta_epsock_byname( uta_ctx_t* ctx, char* ep_name, int* nn_sock, endpo
 
 	if( PARANOID_CHECKS ) {
 		if( ctx == NULL ) {
-			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: parinoia check pop ctx=%p rt=%p\n", ctx, rt );
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: paranoia check pop ctx=%p rt=%p\n", ctx, rt );
 			return FALSE;
 		}
-		rt = get_rt( ctx );				// get active rt and bump ref count
-		if( rt == NULL || (si_ctx = ctx->si_ctx) == NULL  ) {
-			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: parinoia check pop rt=%p sictx=%p\n", rt, si_ctx );
+		if( (si_ctx = ctx->si_ctx) == NULL ) {
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: paranoia check pop sictx is nil\n" );
+			return FALSE;
+		}
+		if( (rt = get_rt( ctx )) == NULL ) {				// get active rt and bump ref count
+			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "epsock_byname: paranoia check pop no rtable\n" );
 			return FALSE;
 		}
 	} else {
