@@ -65,30 +65,24 @@
 	Returns a transport struct which is the main context for the listener.
 */
 extern struct tp_blk *SIlisten_prep( int type, char* abuf, int family ) {
-	struct tp_blk *tptr;         //  pointer at new tp block
-	int status = SI_OK;          //  processing status
+	struct tp_blk *tptr;        //  pointer at new tp block
 	struct sockaddr *addr;		//  IP address we are requesting
-	int protocol;                //  protocol for socket call
 	int optval = 0;
 	int alen = 0;
+	int status = SI_OK;          //  processing status
+	int protocol;                //  protocol for socket call
 
-	tptr = (struct tp_blk *) SInew( TP_BLK );     //  new transport info block
+	tptr = (struct tp_blk *) SInew( TP_BLK );     // transport info
 
-	if( tptr != NULL )
-	{
+	if( tptr != NULL ) {
 		addr = NULL;
 
-		switch( type )			//  things specifc to tcp or udp
-		{
-			case UDP_DEVICE:
-				tptr->type = SOCK_DGRAM;
-				protocol = IPPROTO_UDP;
-				break;
-
-			case TCP_DEVICE:
-			default:
-				tptr->type = SOCK_STREAM;
-				protocol = IPPROTO_TCP;
+		if( type == UDP_DEVICE ) {
+			tptr->type = SOCK_DGRAM;
+			protocol = IPPROTO_UDP;
+		} else {
+			tptr->type = SOCK_STREAM;
+			protocol = IPPROTO_TCP;
 		}
 
 		alen = SIgenaddr( abuf, protocol, family, tptr->type, &addr );	//  family == 0 for type that suits the address passed in

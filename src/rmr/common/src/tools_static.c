@@ -187,7 +187,7 @@ static char* uta_h2ip( char const* hname ) {
 		*(tok++) = 0;
 	}
 
-	hent = gethostbyname( dname );
+	hent = gethostbyname( dname );			// valgrind will complain that this leaks, but we cannot free it!
 	if( hent == NULL || hent->h_addr_list == NULL ) {
 		//rmr_vlog( RMR_VL_WARN, "h2ip: dns lookup failed for: %s\n", dname );
 		free( dname );

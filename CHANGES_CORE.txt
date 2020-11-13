@@ -5,6 +5,9 @@
 # API and build change  and fix summaries. Doc correctsions
 # and/or changes are not mentioned here; see the commit messages.
 
+2020 November 4; Version 4.4.4
+	Correct address memory leak in the RTE cleanup. (RIC-674)
+
 2020 November 4; Version 4.4.3
 	Correct bug introduced with race fix (4.4.0) (RIC-674)
 
