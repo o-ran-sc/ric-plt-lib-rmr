@@ -22,6 +22,13 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2020 November 4; Version 4.4.4
+------------------------------
+
+Correct address memory leak in the RTE cleanup. (RIC-674)
+
+
+
 2020 November 4; Version 4.4.3
 ------------------------------
 

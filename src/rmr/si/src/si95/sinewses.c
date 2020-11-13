@@ -88,8 +88,8 @@ extern int SInewsession( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 	}
 	SETSOCKOPT( tpptr->fd, SOL_TCP, TCP_QUICKACK, (void *)&optval, sizeof( optval) ) ;
 
-	SIaddress( addr, (void **) &buf, AC_TODOT );				// get addr of remote side
-	if( (cbptr = gptr->cbtab[SI_CB_SECURITY].cbrtn) != NULL ) {	//   invoke the security callback function if there
+	SIaddress( addr, (void **) &buf, AC_TODOT );							// get addr of remote side; buf must be freed
+	if( (cbptr = gptr->cbtab[SI_CB_SECURITY].cbrtn) != NULL ) {				//   invoke the security callback function if there
 		status = (*cbptr)( gptr->cbtab[SI_CB_SECURITY].cbdata, buf );
 		if( status == SI_RET_ERROR ) {										//  session to be rejected
 			SIterm( gptr, newtp );											//  terminate new tp block (do NOT call trash)
@@ -110,6 +110,7 @@ extern int SInewsession( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 
 	SImap_fd( gptr, newtp->fd, newtp );		// add fd to the map
 
+	free( buf );
 	return SI_OK;
 }
 

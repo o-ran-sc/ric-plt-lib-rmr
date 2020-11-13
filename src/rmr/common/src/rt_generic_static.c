@@ -211,6 +211,18 @@ static void  rt_epcounts( route_table_t* rt, char* id ) {
 	rmr_sym_foreach_class( rt->hash, 1, ep_counts, id );		// run endpoints in the active table
 }
 
+
+static void dump_tables( uta_ctx_t *ctx ) {
+	if( ctx->old_rtable != NULL ) {
+		rmr_vlog_force( RMR_VL_DEBUG, "old route table: (ref_count=%d)\n", ctx->old_rtable->ref_count );
+		rt_stats( ctx->old_rtable );
+	} else {
+		rmr_vlog_force( RMR_VL_DEBUG, "old route table was empty\n" );
+	}
+	rmr_vlog_force( RMR_VL_DEBUG, "new route table:\n" );
+	rt_stats( ctx->rtable );
+}
+
 // ------------ route manager communication -------------------------------------------------
 /*
 	Send a request for a table update to the route manager. Updates come in
@@ -829,18 +841,10 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 					}
 
 					if( ctx->new_rtable ) {
-						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog( RMR_VL_DEBUG, "end of route table noticed\n" );
 						roll_tables( ctx );						// roll active to old, and new to active with proper locking
-
-						if( vlevel > 0 ) {
-							if( ctx->old_rtable != NULL ) {
-								rmr_vlog_force( RMR_VL_DEBUG, "old route table: (ref_count=%d)\n", ctx->old_rtable->ref_count );
-								rt_stats( ctx->old_rtable );
-							} else {
-								rmr_vlog_force( RMR_VL_DEBUG, "old route table was empty\n" );
-							}
-							rmr_vlog_force( RMR_VL_DEBUG, "new route table:\n" );
-							rt_stats( ctx->rtable );
+						if( DEBUG > 1 || (vlevel > 1) ) {
+							rmr_vlog( RMR_VL_DEBUG, "end of route table noticed\n" );
+							dump_tables( ctx );
 						}
 
 						send_rt_ack( pctx, mbuf, ctx->table_id, RMR_OK, NULL );
@@ -925,17 +929,9 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 
 					if( ctx->new_rtable ) {
 						roll_tables( ctx );						// roll active to old, and new to active with proper locking
-						if( DEBUG > 1 || (vlevel > 1) ) rmr_vlog_force( RMR_VL_DEBUG, "end of rt update noticed\n" );
-
-						if( vlevel > 0 ) {
-							if( ctx->old_rtable != NULL ) {
-								rmr_vlog_force( RMR_VL_DEBUG, "old route table:  (ref_count=%d)\n", ctx->old_rtable->ref_count );
-								rt_stats( ctx->old_rtable );
-							} else {
-								rmr_vlog_force( RMR_VL_DEBUG, "old route table was empty\n" );
-							}
-							rmr_vlog_force( RMR_VL_DEBUG, "updated route table:\n" );
-							rt_stats( ctx->rtable );
+						if( DEBUG > 1 || (vlevel > 1) )  {
+							rmr_vlog_force( RMR_VL_DEBUG, "end of rt update noticed\n" );
+							dump_tables( ctx );
 						}
 
 						send_rt_ack( pctx, mbuf, ctx->table_id, RMR_OK, NULL );
@@ -1082,7 +1078,9 @@ static void del_rte( void* st, void* entry, char const* name, void* thing, void*
 		for( i = 0; i < rte->nrrgroups; i++ ) {
 			if( rte->rrgroups[i] ) {
 				free( rte->rrgroups[i]->epts );			// ditch list of endpoint pointers (end points are reused; don't trash them)
+				free( rte->rrgroups[i] );				// but must free the rrg itself too
 			}
+
 		}
 
 		free( rte->rrgroups );
