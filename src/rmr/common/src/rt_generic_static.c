@@ -488,6 +488,8 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 	int		i;
 	int		ngtoks;				// number of tokens in the group list
 	int		grp;				// index into group list
+	int		cgidx;				// contiguous group index (prevents the addition of a contiguous group without ep)
+	int		has_ep = FALSE;		// indicates if an endpoint was added in a given round robin group
 
 	ts_field = clip( ts_field );				// ditch extra whitespace and trailing comments
 	rr_field = clip( rr_field );
@@ -507,13 +509,18 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 			rte = uta_add_rte( ctx->new_rtable, key, ngtoks );								// get/create entry for this key
 			rte->mtype = atoi( ts_field );													// capture mtype for debugging
 
-			for( grp = 0; grp < ngtoks; grp++ ) {
-				if( (ntoks = uta_rmip_tokenise( gtokens[grp], ctx->ip_list, tokens, 64, ',' )) > 0 ) {		// remove any referneces to our ip addrs
+			for( grp = 0, cgidx = 0; grp < ngtoks; grp++ ) {
+				if( (ntoks = uta_rmip_tokenise( gtokens[grp], ctx->ip_list, tokens, 64, ',' )) > 0 ) {		// remove any references to our ip addrs
 					for( i = 0; i < ntoks; i++ ) {
 						if( strcmp( tokens[i], ctx->my_name ) != 0 ) {					// don't add if it is us -- cannot send to ourself
 							if( DEBUG > 1  || (vlevel > 1)) rmr_vlog_force( RMR_VL_DEBUG, "add endpoint  ts=%s %s\n", ts_field, tokens[i] );
-							uta_add_ep( ctx->new_rtable, rte, tokens[i], grp );
+							uta_add_ep( ctx->new_rtable, rte, tokens[i], cgidx );
+							has_ep = TRUE;
 						}
+					}
+					if( has_ep ) {
+						cgidx++;	// only increment to the next contiguous group if the current one has at least one endpoint
+						has_ep = FALSE;
 					}
 				}
 			}
