@@ -148,7 +148,15 @@ static void uta_ring_free( void* vr ) {
 	if( (r = (ring_t*) vr) == NULL ) {
 		return;
 	}
-
+	if( r->data ){
+		free( r->data );
+	}
+	if( r->rgate ){
+		free( r->rgate );
+	}
+	if( r->wgate ){
+		free( r->wgate );
+	}
 	free( r );
 }
 
@@ -183,6 +191,7 @@ static inline void* uta_ring_extract( void* vr ) {
 	if( r->rgate != NULL ) {						// if lock exists we must honour it
 		pthread_mutex_lock( r->rgate );
 		if( r->tail == r->head ) {					// ensure ring didn't go empty while waiting
+			pthread_mutex_unlock( r->rgate );
 			return NULL;
 		}
 	}

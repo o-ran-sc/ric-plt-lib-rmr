@@ -1218,10 +1218,11 @@ static route_table_t* rt_clone_space( uta_ctx_t* ctx, route_table_t* srt, route_
 	things.nalloc = 2048;
 	things.nused = 0;
 	things.things = (void **) malloc( sizeof( void * ) * things.nalloc );
-	memset( things.things, 0, sizeof( sizeof( void * ) * things.nalloc ) );
 	things.names = (const char **) malloc( sizeof( char * ) * things.nalloc );
-	memset( things.names, 0, sizeof( char * ) * things.nalloc );
-	if( things.things == NULL ) {
+	if( things.things == NULL || things.names == NULL ){
+		if( things.things != NULL) { free( things.things ); }
+		if( things.names != NULL) { free( things.names ); }
+
 		if( free_on_err ) {
 			rmr_sym_free( nrt->hash );
 			free( nrt );
@@ -1230,6 +1231,8 @@ static route_table_t* rt_clone_space( uta_ctx_t* ctx, route_table_t* srt, route_
 
 		return nrt;
 	}
+	memset( things.things, 0, sizeof( sizeof( void * ) * things.nalloc ) );
+	memset( things.names, 0, sizeof( char * ) * things.nalloc );
 
 	sst = srt->hash;											// convenience pointers (src symtab)
 	nst = nrt->hash;
