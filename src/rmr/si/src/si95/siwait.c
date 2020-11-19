@@ -69,7 +69,10 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 	char *buf;
 	char *ibuf;
 
-	ibuf = (char *) malloc( 2048 );
+	if( ( ibuf = (char *) malloc( 2048 ) ) == NULL ) {
+			rmr_vlog( RMR_VL_WARN, "ibuf malloc fail\n" );
+			return SI_ERROR;
+	}
 
 	if( gptr->flags & GIF_SHUTDOWN ) {				//  cannot do if we should shutdown 
 		free( ibuf );

@@ -82,8 +82,32 @@
 	Clean up a context.
 */
 static void free_ctx( uta_ctx_t* ctx ) {
-	if( ctx && ctx->rtg_addr ) {
-		free( ctx->rtg_addr );
+	if( ctx ) {
+		if( ctx->rtg_addr ){
+			free( ctx->rtg_addr );
+		}
+		uta_ring_free( ctx->mring );
+		uta_ring_free( ctx->zcb_mring );
+		if( ctx->chutes ){
+			free( ctx->chutes );
+		}
+		if( ctx->fd2ep ){
+			rmr_sym_free( ctx->fd2ep );
+		}
+		if( ctx->my_name ){
+			free( ctx->my_name );
+		}
+		if( ctx->my_ip ){
+			free( ctx->my_ip );
+		}
+		if( ctx->rtable ){
+			rmr_sym_free( ctx->rtable->hash );
+			free( ctx->rtable );
+		}
+		if ( ctx->ephash ){
+			free( ctx->ephash );
+		}
+		free( ctx );
 	}
 }
 
@@ -574,9 +598,14 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 		proto_port = strdup( uproto_port );		// so we can modify it
 	}
 
-	if( (ctx = (uta_ctx_t *) malloc( sizeof( uta_ctx_t ) )) == NULL ) {
+	if ( proto_port == NULL ){
 		errno = ENOMEM;
 		return NULL;
+	}
+
+	if( (ctx = (uta_ctx_t *) malloc( sizeof( uta_ctx_t ) )) == NULL ) {
+		errno = ENOMEM;
+		goto err;
 	}
 	memset( ctx, 0, sizeof( uta_ctx_t ) );
 
@@ -614,8 +643,7 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	ctx->si_ctx = SIinitialise( SI_OPT_FG );		// FIX ME: si needs to streamline and drop fork/bg stuff
 	if( ctx->si_ctx == NULL ) {
 		rmr_vlog( RMR_VL_CRIT, "unable to initialise SI95 interface\n" );
-		free_ctx( ctx );
-		return NULL;
+		goto err;
 	}
 
 	if( (port = strchr( proto_port, ':' )) != NULL ) {
@@ -649,8 +677,7 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	} else {
 		if( (gethostname( wbuf, sizeof( wbuf ) )) != 0 ) {
 			rmr_vlog( RMR_VL_CRIT, "rmr_init: cannot determine localhost name: %s\n", strerror( errno ) );
-			free_ctx( ctx );
-			return NULL;
+			goto err;
 		}
 		if( (tok = strchr( wbuf, '.' )) != NULL ) {
 			*tok = 0;									// we don't keep domain portion
@@ -660,8 +687,8 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	ctx->my_name = (char *) malloc( sizeof( char ) * RMR_MAX_SRC );
 	if( snprintf( ctx->my_name, RMR_MAX_SRC, "%s:%s", wbuf, port ) >= RMR_MAX_SRC ) {			// our registered name is host:port
 		rmr_vlog( RMR_VL_CRIT, "rmr_init: hostname + port must be less than %d characters; %s:%s is not\n", RMR_MAX_SRC, wbuf, port );
-		free( proto_port );					// some scanners complain that port is not freed; it CANNOT be
-		return NULL;
+		errno = EINVAL;
+		goto err;
 	}
 
 	if( (tok = getenv( ENV_NAME_ONLY )) != NULL ) {
@@ -696,9 +723,7 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	snprintf( bind_info, sizeof( bind_info ), "%s:%s", interface, port );		// FIXME -- si only supports 0.0.0.0 by default
 	if( (state = SIlistener( ctx->si_ctx, TCP_DEVICE, bind_info )) < 0 ) {
 		rmr_vlog( RMR_VL_CRIT, "rmr_init: unable to start si listener for %s: %s\n", bind_info, strerror( errno ) );
-		free( proto_port );								// some scanners might complain that port is not freed; it CANNOT be
-		free_ctx( ctx );
-		return NULL;
+		goto err;
 	}
 
 												// finish all flag setting before threads to keep helgrind quiet
@@ -714,9 +739,8 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	ctx->ephash = rmr_sym_alloc( 129 );					// host:port to ep symtab exists outside of any route table
 	if( ctx->ephash == NULL ) {
 		rmr_vlog( RMR_VL_CRIT, "rmr_init: unable to allocate ep hash\n" );
-		free( proto_port );								// some scanners might complain that port is not freed; it CANNOT be
-		free_ctx( ctx );
-		return NULL;
+		errno = ENOMEM;
+		goto err;
 	}
 
 	ctx->rtable = rt_clone_space( ctx, NULL, NULL, 0 );	// create an empty route table so that wormhole/rts calls can be used
@@ -744,6 +768,11 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 
 	free( proto_port );
 	return (void *) ctx;
+
+err:
+	free( proto_port );
+	free_ctx( ctx );
+	return NULL;
 }
 
 /*
