@@ -225,6 +225,7 @@ typedef struct {
 	The route table.
 */
 typedef struct {
+	int		error;			// set if there was a problem building the table
 	void*	hash;			// hash table for msg type and meid.
 	void*	ephash;			// hash for endpoint references
 	int		updates;		// counter of update records received

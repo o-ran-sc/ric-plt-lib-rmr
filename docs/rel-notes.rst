@@ -22,6 +22,14 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2020 December 4; Version 4.4.6
+------------------------------
+
+Correct a range check bug when cloning a route table in prep
+to load a new one. (RIC-720)
+
+
+
 2020 November 17; Version 4.4.5
 -------------------------------
 

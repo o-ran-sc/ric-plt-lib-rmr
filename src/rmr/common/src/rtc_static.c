@@ -168,7 +168,7 @@ static void rtc_parse_msg( uta_ctx_t *ctx, uta_ctx_t* pvt_cx, rmr_mbuf_t* msg, i
 				}
 
 				if( vlevel > 1 ) {
-					rmr_vlog_force( RMR_VL_DEBUG, "rmr_rtc: processing (%s)\n", curr );
+					rmr_vlog_force( RMR_VL_DEBUG, "rmr_rtc_parse_msg: processing (%s)\n", curr );
 				}
 				parse_rt_rec( ctx, pvt_cx, curr, vlevel, msg );		// parse record and add to in progress table; ack using rts to msg
 
@@ -358,11 +358,11 @@ static void* rtc( void* vctx ) {
 
 			if( time( NULL ) > blabber  ) {
 				vlevel = refresh_vlevel( vfd );
+				blabber = time( NULL ) + count_delay;				// set next time to blabber, then do so
+				if( blabber > bump_freq ) {
+					count_delay = 300;
+				}
 				if( vlevel >= 0 ) {										// allow it to be forced off with -n in verbose file
-					blabber = time( NULL ) + count_delay;				// set next time to blabber, then do so
-					if( blabber > bump_freq ) {
-						count_delay = 300;
-					}
 					rt_epcounts( ctx->rtable, ctx->my_name );
 				}
 			}
@@ -484,13 +484,6 @@ static void* raw_rtc( void* vctx ) {
 	} else {
 		port = strdup( port );
 	}
-
-/*
-	this test is now done in init and this function is started _only_ if the value was 1
-	if( (curr = getenv( ENV_RTG_RAW )) != NULL ) {
-		raw_interface = atoi( curr ) > 0;				// if > 0 we assume that rtg messages are NOT coming from an RMr based process
-	}
-*/
 
 	fport = port;		// must hold to free
 
