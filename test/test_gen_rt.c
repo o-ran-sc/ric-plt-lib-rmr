@@ -134,7 +134,7 @@ static void gen_custom_rt( uta_ctx_t* ctx, char* buf ) {
 	}
 	setenv( "RMR_SEED_RT", "Xutesting.rt", 1 );
 
-	fprintf( stderr, "<INFO> creating custom rt from buffer (%d bytes)\n", strlen (buf ) );
+	fprintf( stderr, "<INFO> creating custom rt from buffer (%d bytes)\n", (int) strlen (buf ) );
 	if( write( fd, buf, strlen( buf ) ) != strlen( buf ) ) {
 		fprintf( stderr, "<BUGGERED> write failed: %s\n", strerror( errno ) );
 	}

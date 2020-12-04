@@ -87,8 +87,35 @@ static uint64_t build_key( uint32_t mtype, uint32_t sid ) {
 	k = (uint64_t) sid << 32;
 	k += mtype;
 
-fprintf( stderr, "<INFO> build key: %x %x --> %llx\n", (int) mtype, (int) sid, (long long) k );
+	fprintf( stderr, "<INFO> build key: %x %x --> %llx\n", (int) mtype, (int) sid, (long long) k );
 	return k;
+}
+
+/*
+	Create a very large set of things to clone and ensure that the colleciton
+	buffers are properly resized without errors.
+*/
+static int lg_clone_test( ) {
+	int		errors = 0;
+	uta_ctx_t*	ctx;
+	char*	old_env;
+	route_table_t*	p;
+
+	old_env = getenv( "RMR_SEED_RT" );
+	setenv( "RMR_SEED_RT", "./large_meid.rt", 1 );
+
+	ctx = mk_dummy_ctx();
+
+	read_static_rt( ctx, 0 );
+	p = uta_rt_clone( ctx, ctx->rtable, NULL, 1 );						// clone to force the copy from the existing table
+	errors += fail_if_nil( p, "clone of large table returned nil" );
+	if( p != NULL ) {
+		errors += fail_not_equal( p->error, 0, "clone of large table had error" );
+	}
+
+	setenv( "RMR_SEED_RT", old_env, 1 );
+
+	return errors;
 }
 
 /*
@@ -666,9 +693,17 @@ static int rt_test( ) {
 	#endif
 
 	// ---------------- misc coverage tests --------------------------------------------------------------------------
-		collect_things( NULL, NULL, NULL, NULL, NULL );				// these both return null, these test NP checks
-		collect_things( NULL, NULL, NULL, NULL, (void *) 1234 );		// the last is an invalid pointer, but check needed to force check on previous param
-		del_rte( NULL, NULL, NULL, NULL, NULL );
+	collect_things( NULL, NULL, NULL, NULL, NULL );				// these both return null, these test NP checks
+	collect_things( NULL, NULL, NULL, NULL, (void *) 1234 );		// the last is an invalid pointer, but check needed to force check on previous param
+	del_rte( NULL, NULL, NULL, NULL, NULL );
+
+	ctx = mk_dummy_ctx();
+	roll_tables( ctx );				// drive nil rt check
+
+
+
+	// ------ specific edge case tests -------------------------------------------------------------------------------
+	errors += lg_clone_test( );
 
 	return !!errors;			// 1 or 0 regardless of count
 }

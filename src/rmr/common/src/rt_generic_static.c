@@ -57,6 +57,7 @@
 	a current symtab.
 */
 typedef struct thing_list {
+	int error;					// if a realloc failed, this will be set
 	int nalloc;
 	int nused;
 	void** things;
@@ -85,6 +86,7 @@ static void ep_stats( void* st, void* entry, char const* name, void* thing, void
 		(*counter)++;
 	} else {
 		rmr_vlog( RMR_VL_DEBUG, "ep_stas: nil counter %p %p %p", st, entry, name );	// dummy refs
+		return;
 	}
 
 	rmr_vlog_force( RMR_VL_DEBUG, "rt endpoint: target=%s open=%d\n", ep->name, ep->open );
@@ -208,7 +210,7 @@ static void  rt_epcounts( route_table_t* rt, char* id ) {
 		return;
 	}
 
-	rmr_sym_foreach_class( rt->hash, 1, ep_counts, id );		// run endpoints in the active table
+	rmr_sym_foreach_class( rt->ephash, 1, ep_counts, id );		// run endpoints in the active table
 }
 
 
@@ -402,6 +404,13 @@ static char* ensure_nlterm( char* buf ) {
 */
 static void roll_tables( uta_ctx_t* ctx ) {
 
+	if( ctx->new_rtable == NULL || ctx->new_rtable->error ) {
+		rmr_vlog( RMR_VL_WARN, "new route table NOT rolled in: nil pointer or error indicated\n" );
+		ctx->old_rtable = ctx->new_rtable;
+		ctx->new_rtable = NULL;
+		return;
+	}
+
 	if( ctx->rtable != NULL ) {							// initially there isn't one, so must check!
 		pthread_mutex_lock( ctx->rtgate );				// must hold lock to move to active
 		ctx->old_rtable = ctx->rtable;					// currently active becomes old and allowed to 'drain'
@@ -413,6 +422,42 @@ static void roll_tables( uta_ctx_t* ctx ) {
 	}
 
 	ctx->new_rtable = NULL;
+}
+
+/*
+	Given a thing list, extend the array of pointers by 1/2 of the current
+	number allocated. If we cannot realloc an array, then we set the error
+	flag.  Unlikely, but will prevent a crash, AND will prevent us from
+	trying to use the table since we couldn't capture everything.
+*/
+static void extend_things( thing_list_t* tl ) {
+	int old_alloc;
+	void*	old_things;
+	void*	old_names;
+
+	if( tl == NULL ) {
+		return;
+	}
+
+	old_alloc = tl->nalloc;				// capture current things
+	old_things = tl->things;
+	old_names = tl->names;
+
+	tl->nalloc += tl->nalloc/2;			// new allocation size
+
+	tl->things = (void **) malloc( sizeof( void * ) * tl->nalloc );			// allocate larger arrays
+	tl->names = (const char **) malloc( sizeof( char * ) * tl->nalloc );
+
+	if( tl->things == NULL || tl->names == NULL ){				// if either failed, then set error
+		tl->error = 1;
+		return;
+	}
+
+	memcpy( tl->things, old_things, sizeof( void * ) * old_alloc );
+	memcpy( tl->names, old_names, sizeof( void * ) * old_alloc );
+
+	free( old_things );
+	free( old_names );
 }
 
 // ------------ entry update functions ---------------------------------------------------------------
@@ -1031,7 +1076,7 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 }
 
 /*
-	Callback driven for each named thing in a symtab. We collect the pointers to those
+	Callback driven for each thing in a symtab. We collect the pointers to those
 	things for later use (cloning).
 */
 static void collect_things( void* st, void* entry, char const* name, void* thing, void* vthing_list ) {
@@ -1046,8 +1091,12 @@ static void collect_things( void* st, void* entry, char const* name, void* thing
 		return;
 	}
 
-	tl->names[tl->nused] = name;			// the name/key
+	tl->names[tl->nused] = name;			// the name/key (space 0 uses int keys, so name can be nil and that is OK)
 	tl->things[tl->nused++] = thing;		// save a reference to the thing
+
+	if( tl->nused >= tl->nalloc ) {
+		extend_things( tl );				// not enough allocated
+	}
 }
 
 /*
@@ -1217,16 +1266,23 @@ static route_table_t* rt_clone_space( uta_ctx_t* ctx, route_table_t* srt, route_
 
 	things.nalloc = 2048;
 	things.nused = 0;
+	things.error = 0;
 	things.things = (void **) malloc( sizeof( void * ) * things.nalloc );
 	things.names = (const char **) malloc( sizeof( char * ) * things.nalloc );
 	if( things.things == NULL || things.names == NULL ){
-		if( things.things != NULL) { free( things.things ); }
-		if( things.names != NULL) { free( things.names ); }
+		if( things.things != NULL ) {
+			free( things.things );
+		}
+		if( things.names != NULL ) {
+			free( things.names );
+		}
 
 		if( free_on_err ) {
 			rmr_sym_free( nrt->hash );
 			free( nrt );
 			nrt = NULL;
+		} else {
+			nrt->error = 1;
 		}
 
 		return nrt;
@@ -1238,6 +1294,19 @@ static route_table_t* rt_clone_space( uta_ctx_t* ctx, route_table_t* srt, route_
 	nst = nrt->hash;
 
 	rmr_sym_foreach_class( sst, space, collect_things, &things );		// collect things from this space
+	if( things.error ) {				// something happened and capture failed
+		rmr_vlog( RMR_VL_ERR, "unable to clone route table: unable to capture old contents\n" );
+		free( things.things );
+		free( things.names );
+		if( free_on_err ) {
+			rmr_sym_free( nrt->hash );
+			free( nrt );
+			nrt = NULL;
+		} else {
+			nrt->error = 1;
+		}
+		return nrt;
+	}
 
 	if( DEBUG ) rmr_vlog_force( RMR_VL_DEBUG, "clone space cloned %d things in space %d\n",  things.nused, space );
 	for( i = 0; i < things.nused; i++ ) {
@@ -1293,6 +1362,9 @@ static route_table_t* uta_rt_clone( uta_ctx_t* ctx, route_table_t* srt, route_ta
 
 	If the old table doesn't exist, then a new table is created and the new pointer is
 	set to reference it.
+
+	The ME namespace references endpoints which do not need to be released, therefore we
+	do not need to run that portion of the table to deref like we do for the RTEs.
 */
 static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all ) {
 	int counter = 0;
@@ -1317,12 +1389,20 @@ static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all ) {
 			rmr_sym_foreach_class( rt->hash, 0, del_rte, NULL );		// deref and drop if needed
 			rmr_sym_clear( rt->hash );									// clear all entries from the old table
 		}
+
+		rt->error = 0;									// table with errors can be here, so endure clear before attempt to load
 	} else {
 		rt = NULL;
 	}
 
 	rt = uta_rt_clone( ctx, ctx->rtable, rt, all );		// also sets the ephash pointer
-	rt->ref_count = 0;									// take no chances; ensure it's 0!
+	if( rt != NULL ) {									// very small chance for nil, but not zero, so test
+		rt->ref_count = 0;								// take no chances; ensure it's 0!
+	} else {
+		rmr_vlog( RMR_VL_ERR, "route table clone returned nil; marking dummy table as error\n" );
+		rt = uta_rt_init( ctx );						// must hav something, but mark it in error state
+		rt->error = 1;
+	}
 
 	return rt;
 }
