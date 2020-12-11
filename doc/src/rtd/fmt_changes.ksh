@@ -51,6 +51,7 @@ do
 		/^#/ { next }		# ditch all comments
 
 		# tag project releases by matching release tag associated
+		/4\.4\.6$/  { printf( "&h1(Cherry Release)\n" ); rheader = 1 }
 		/4\.0\.5$/  { printf( "&h1(Bronze Release)\n" ); rheader = 1 }
 		/1\.11\.1$/ { printf( "&h1(Amber Release)\n" ); rheader = 1 }
 
