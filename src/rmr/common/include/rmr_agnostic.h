@@ -258,6 +258,10 @@ typedef struct {
 #define RING_NONE	0			// no options
 #define RING_RLOCK	0x01		// create/destroy the read lock on the ring
 #define RING_WLOCK	0x02		// create/destroy the write lockk on the ring
+#define RING_FRLOCK	0x04		// read locking with no wait if locked option
+
+								// flag values
+#define RING_FL_FLOCK	0x01	// fast read lock (don't wait if locked when reading)
 
 typedef struct ring {
 	uint16_t head;				// index of the head of the ring (insert point)
@@ -265,6 +269,7 @@ typedef struct ring {
 	uint16_t nelements;			// number of elements in the ring
 	void**	data;				// the ring data (pointers to blobs of stuff)
 	int		pfd;				// event fd for the ring for epoll
+	int		flags;				// RING_FL_* constants
 	pthread_mutex_t*	rgate;	// read lock if used
 	pthread_mutex_t*	wgate;	// write lock if used
 } ring_t;

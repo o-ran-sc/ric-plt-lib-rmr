@@ -75,6 +75,7 @@ static void* uta_mk_ring( int size ) {
 		return NULL;
 	}
 
+	r->flags = 0;
 	r->rgate = NULL;
 	r->wgate = NULL;
 	r->head = r->tail = 0;
@@ -124,7 +125,7 @@ static int uta_ring_config( void* vr, int options ) {
 		}
 	}
 
-	if( options & RING_RLOCK ) {
+	if( options & (RING_RLOCK | RING_FRLOCK) ) {				// read locking
 		if( r->rgate == NULL ) {		// don't realloc
 			r->rgate = (pthread_mutex_t *) malloc( sizeof( *r->rgate ) );
 			if( r->rgate == NULL ) {
@@ -132,6 +133,9 @@ static int uta_ring_config( void* vr, int options ) {
 			}
 	
 			pthread_mutex_init( r->rgate, NULL );
+		}
+		if( options & RING_FRLOCK ) {
+			r->flags |= RING_FL_FLOCK;
 		}
 	}
 
@@ -188,8 +192,16 @@ static inline void* uta_ring_extract( void* vr ) {
 		return NULL;
 	}
 
-	if( r->rgate != NULL ) {						// if lock exists we must honour it
-		pthread_mutex_lock( r->rgate );
+	if( r->rgate != NULL ) {							// if lock exists we must honour it
+		if( r->flags & RING_FL_FLOCK ) {				// fast read locking try once and return nil if we cant lock
+			if( pthread_mutex_trylock( r->rgate ) != 0 ) {	// quick fail if not able to get a lock
+				return NULL;
+			}
+		} else {
+			if( pthread_mutex_lock( r->rgate ) != 0 ) {
+				return NULL;
+			}
+		}
 		if( r->tail == r->head ) {					// ensure ring didn't go empty while waiting
 			pthread_mutex_unlock( r->rgate );
 			return NULL;
@@ -219,9 +231,13 @@ future -- investigate if it's possible only to set/clear when empty or going to 
 	return data;
 }
 
+
 /*
 	Insert the pointer at the next open space in the ring.
-	Returns 1 if the inert was ok, and 0 if the ring is full.
+	Returns 1 if the inert was ok, and 0 if there is an error;
+	errno will be set to EXFULL if  the ring is full, if the attempt
+	fails with anyt other error that indicates the inability to obtain
+	a lock on the ring.
 */
 static inline int uta_ring_insert( void* vr, void* new_data ) {
 	ring_t*		r;
@@ -236,13 +252,16 @@ static inline int uta_ring_insert( void* vr, void* new_data ) {
 	}
 
 	if( r->wgate != NULL ) {						// if lock exists we must honour it
-		pthread_mutex_lock( r->wgate );
+		if( pthread_mutex_lock( r->wgate ) != 0 ) {
+			return 0;								// leave mutex reason in place
+		}
 	}
 
 	if( r->head+1 == r->tail || (r->head+1 >= r->nelements && !r->tail) ) {		// ring is full
-		if( r->wgate != NULL ) {					// ensure released if needed
+		if( r->wgate != NULL ) {												// ensure released if needed
 			pthread_mutex_unlock( r->wgate );
 		}
+		errno = EXFULL;
 		return 0;
 	}
 
