@@ -2,8 +2,12 @@
 # core RMR code and doc.  Other change files exist for other
 # things.
 
-# API and build change  and fix summaries. Doc correctsions
+# API and build change  and fix summaries. Doc corrections
 # and/or changes are not mentioned here; see the commit messages.
+
+2021 January 8; Version 4.5.0
+	Version bump for next release tracking.
+	Corrected a potential locking issue in message allocation. (RIC-732)
 
 2020 December 4; Version 4.4.6
 	Correct a range check bug when cloning a route table in prep

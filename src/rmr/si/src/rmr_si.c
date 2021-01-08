@@ -628,6 +628,7 @@ static void* init(  char* uproto_port, int def_msg_size, int flags ) {
 	if( ! (flags & RMRFL_NOLOCK) ) {				// user did not specifically ask that it be off; turn it on
 		uta_ring_config( ctx->mring, RING_RLOCK );			// concurrent rcv calls require read lock
 		uta_ring_config( ctx->zcb_mring, RING_WLOCK );		// concurrent free calls from userland require write lock
+		uta_ring_config( ctx->zcb_mring, RING_FRLOCK );		// concurrent message allocatieon calls from userland require read lock, but can be fast
 	} else {
 		rmr_vlog( RMR_VL_INFO, "receive ring locking disabled by user application\n" );
 	}

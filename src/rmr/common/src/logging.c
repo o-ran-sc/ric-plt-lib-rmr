@@ -101,8 +101,8 @@ extern int rmr_vlog_init( ) {
 
 	if( (data = getenv( ENV_LOG_VLEVEL )) != NULL ) {
 		log_vlevel = atoi( data );
-		if( log_vlevel < 0 ) {
-			log_vlevel = 0;
+		if( log_vlevel < -1 ) {							// allow housekeeping stats to be squelched with -1
+			log_vlevel = -1;
 		} else {
 			if( log_vlevel > RMR_VL_DEBUG ) {
 				log_vlevel = RMR_VL_DEBUG;

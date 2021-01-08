@@ -22,6 +22,14 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2021 January 8; Version 4.5.0
+-----------------------------
+
+Version bump for next release tracking. Corrected a potential
+locking issue in message allocation. (RIC-732)
+
+
+
 Cherry Release
 ==============
 
