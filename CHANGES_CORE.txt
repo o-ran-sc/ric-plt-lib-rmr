@@ -5,6 +5,10 @@
 # API and build change  and fix summaries. Doc corrections
 # and/or changes are not mentioned here; see the commit messages.
 
+2021 January 19; Version 4.5.1
+	Version bump to work round a CI job bug preventing push of the 4.5.0
+	packages from staging to release in package cloud.  (RIC-732)
+
 2021 January 8; Version 4.5.0
 	Version bump for next release tracking.
 	Corrected a potential locking issue in message allocation. (RIC-732)
