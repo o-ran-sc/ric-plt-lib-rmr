@@ -673,11 +673,12 @@ static rmr_mbuf_t* send_msg( uta_ctx_t* ctx, rmr_mbuf_t* msg, int nn_sock, int r
 			rmr_free_msg( msg );						// not wanting a meessage back, trash this one
 			return NULL;
 		}
-	} else {											// send failed -- return original message
-		if( msg->state == 98 ) {		// FIX ME: this is just broken, but needs SI changes to work correctly for us
+	} else {											// send failed or would block -- return original message
+		if( state == SI_ERR_BLOCKED || errno == EAGAIN ) {
 			errno = EAGAIN;
-			msg->state = RMR_ERR_RETRY;					// errno will have nano reason
+			msg->state = RMR_ERR_RETRY;
 		} else {
+			rmr_vlog( RMR_VL_WARN, "send failed: mt=%d errno=%d %s\n", msg->mtype, errno, strerror( errno ) );
 			msg->state = RMR_ERR_SENDFAILED;
 		}
 
