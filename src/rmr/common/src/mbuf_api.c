@@ -284,6 +284,10 @@ extern unsigned char*  rmr_get_meid( rmr_mbuf_t* mbuf, unsigned char* dest ) {
 	The return value is the number of bytes actually coppied. If 0 bytes are coppied
 	errno should indicate the reason. If 0 is returned and errno is 0, then size
 	passed was 0.  The state in the message is left UNCHANGED.
+
+	Regardless of action taken (actual realloc or not) the caller's reference to mbuf
+	is still valid follwing the call and will point to the correct spot (same tp
+	buffer if no realloc needed, or the new one if there was).
 */
 extern int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size ) {
 	uta_mhdr_t*	hdr;
@@ -312,7 +316,7 @@ extern int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size )
 
 	if( len != size ) {							// different sized trace data, must realloc the buffer
 		nm = rmr_realloc_msg( msg, size );		// realloc with changed trace size
-		old_tp_buf = msg->tp_buf;
+		old_tp_buf = msg->tp_buf;				// hold to repoint new mbuf at small buffer
 		old_hdr = msg->header;
 
 		msg->tp_buf = nm->tp_buf;				// reference the reallocated buffer
@@ -321,7 +325,7 @@ extern int rmr_set_trace( rmr_mbuf_t* msg, unsigned const char* data, int size )
 		msg->xaction = nm->xaction;
 		msg->payload = nm->payload;
 
-		nm->tp_buf = old_tp_buf;				// set to free
+		nm->tp_buf = old_tp_buf;				// set to free; point to the small buffer
 		nm->header = old_hdr;					// nano frees on hdr, so must set both
 		rmr_free_msg( nm );
 

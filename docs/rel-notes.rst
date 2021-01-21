@@ -22,6 +22,24 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2021 January21; Version 4.5.2
+-----------------------------
+
+Fixes the excessive TCP session bug when sending to a slow
+receiver and a related segment fault because of too many open
+file descriptors. (RIC-735)
+
+
+
+2021 January 19; Version 4.5.1
+------------------------------
+
+Version bump to work round a CI job bug preventing push of
+the 4.5.0 packages from staging to release in package cloud.
+(RIC-732)
+
+
+
 2021 January 8; Version 4.5.0
 -----------------------------
 

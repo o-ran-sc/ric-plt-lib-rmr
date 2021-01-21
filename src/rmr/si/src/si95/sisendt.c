@@ -28,13 +28,13 @@
 *
 *  Date:     27 March 1995
 *  Author:   E. Scott Daniels
-*  Mod:		22 Feb 2002 - To better process queued data 
+*  Mod:		22 Feb 2002 - To better process queued data
 *			14 Feb 2020 - To fix index bug if fd < 0.
 *
 *****************************************************************************
 */
 
-#include "sisetup.h"     //  get setup stuff 
+#include "sisetup.h"     //  get setup stuff
 #include "sitransport.h"
 
 /*
@@ -48,11 +48,11 @@
 //extern int SIsendt_nq( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 extern int SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 	int status = SI_ERROR;      //  assume we fail
-	fd_set writefds;            //  local write fdset to check blockage 
-	fd_set execpfds;            //  exception fdset to check errors 
-	struct tp_blk *tpptr;       //  pointer at the tp_blk for the session 
-	struct ioq_blk *qptr;       //  pointer at i/o queue block 
-	struct timeval time;        //  delay time parameter for select call 
+	fd_set writefds;            //  local write fdset to check blockage
+	fd_set execpfds;            //  exception fdset to check errors
+	struct tp_blk *tpptr;       //  pointer at the tp_blk for the session
+	struct ioq_blk *qptr;       //  pointer at i/o queue block
+	struct timeval time;        //  delay time parameter for select call
 	int	sidx = 0;				// send index
 
 	errno = EINVAL;
@@ -76,18 +76,18 @@ extern int SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 
 		tpptr->sent++;				// investigate: this may over count
 
-		FD_ZERO( &writefds );       //  clear for select call 
-		FD_SET( fd, &writefds );    //  set to see if this one was writable 
-		FD_ZERO( &execpfds );       //  clear and set execptions fdset 
+		FD_ZERO( &writefds );       //  clear for select call
+		FD_SET( fd, &writefds );    //  set to see if this one was writable
+		FD_ZERO( &execpfds );       //  clear and set execptions fdset
 		FD_SET( fd, &execpfds );
 
 		time.tv_sec = 0;			//  set both to 0 if we just want a poll, else we block at max this amount
 		time.tv_usec = 1;			// small pause on check to help drain things
 
 		if( select( fd + 1, NULL, &writefds, &execpfds, &time ) > 0 ) {		//  would block if <= 0
-			if( FD_ISSET( fd, &execpfds ) ) {   	//  error? 
+			if( FD_ISSET( fd, &execpfds ) ) {		//  error?
 				errno = EBADFD;
-				SIterm( gptr, tpptr );   			// mark block for deletion when safe
+				SIterm( gptr, tpptr );				// mark block for deletion when safe
 				return SI_ERROR;					// and bail from this sinking ship
 			} else {
 				errno = 0;
@@ -110,7 +110,7 @@ extern int SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 			status = SI_ERR_BLOCKED;
 		}
 	} else {
-		errno = EBADFD;  		// fd in a bad state (probably losed)
+		errno = EBADFD;			// fd in a bad state (probably lost)
 	}
 
 	return status;

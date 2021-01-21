@@ -56,6 +56,7 @@
 
 
 #define SI_MAX_ADDR_LEN		512
+#define MAX_RIVERS			1024	// max number of directly mapped rivers
 
 /*
 	Manages a river of inbound bytes.
@@ -153,6 +154,7 @@ struct uta_ctx {
 	si_ctx_t*	si_ctx;			// the socket context
 	int			nrivers;		// allocated rivers
 	river_t*	rivers;			// inbound flows (index is the socket fd)
+	void*		river_hash;		// flows with fd values > nrivers must be mapped through the hash
 	int			max_ibm;		// max size of an inbound message (river accum alloc size)
 	void*		zcb_mring;		// zero copy buffer mbuf ring
 	void*		fd2ep;				// the symtab mapping file des to endpoints for cleanup on disconnect
