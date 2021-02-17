@@ -736,11 +736,11 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 	}
 
 
-	if( (interface = getenv( ENV_BIND_IF )) == NULL ) {
+	if( (interface = getenv( ENV_BIND_IF )) == NULL ) {		// if specific interface not defined, listen on all
 		interface = "0.0.0.0";
 	}
 
-	snprintf( bind_info, sizeof( bind_info ), "%s:%s", interface, port );		// FIXME -- si only supports 0.0.0.0 by default
+	snprintf( bind_info, sizeof( bind_info ), "%s:%s", interface, port );
 	if( (state = SIlistener( ctx->si_ctx, TCP_DEVICE, bind_info )) < 0 ) {
 		rmr_vlog( RMR_VL_CRIT, "rmr_init: unable to start si listener for %s: %s\n", bind_info, strerror( errno ) );
 		goto err;

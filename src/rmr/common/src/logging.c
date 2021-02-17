@@ -90,6 +90,23 @@ static int log_pid = 0;
 static char* log_situations[RMR_VL_DEBUG+1];
 
 /*
+	Return the current unix timestamp as milliseconds since the epoch.
+	If time() returns 515300400, this function will add three didgets which
+	represent the milliseconds:  515300400123 (515300400.123).
+*/
+static long long mstime( ) {
+	struct timespec now;
+	long long rv = 0;
+
+	if( clock_gettime( CLOCK_REALTIME, &now ) ) {
+		return rv;
+	}
+
+	rv = ((long long) now.tv_sec * 1000) + ( (long long) now.tv_nsec/1000000 );
+	return rv;
+}
+
+/*
 	Initialise logging. Returns the current log level.
 */
 extern int rmr_vlog_init( ) {
@@ -146,7 +163,7 @@ extern void rmr_vlog( int write_level, char* fmt, ... ) {
 	}
 
 	memset( msg, 0, sizeof( msg ) );								// logging is slow; this ensures 0 term if msg is too large
-	hlen = snprintf( msg, sizeof( msg ), "%ld %d/RMR [%s] ", (long) time( NULL ), log_pid, log_situations[write_level] );
+	hlen = snprintf( msg, sizeof( msg ), "%lld %d/RMR [%s] ", mstime( ), log_pid, log_situations[write_level] );
 	if( hlen > sizeof( msg ) - 1024 ) {								// should never happen, but be parinoid
 		return;
 	}
@@ -185,7 +202,7 @@ extern void rmr_vlog_force( int write_level, char* fmt, ... ) {
 		write_level = RMR_VL_DEBUG;
 	}
 
-	hlen = snprintf( msg, sizeof( msg ), "%ld %d/RMR [%s] ", (long) time( NULL ), log_pid, log_situations[write_level] );
+	hlen = snprintf( msg, sizeof( msg ), "%lld %d/RMR [%s] ", mstime( ), log_pid, log_situations[write_level] );
 	body = msg + hlen;
 
 	va_start( argp, fmt );		// suss out parm past fmt
@@ -209,5 +226,17 @@ extern void rmr_set_vlevel( int new_level ) {
 		log_vlevel = new_level;
 	}
 }
+
+#ifdef QUICK_TEST
+/*
+	Quick tests are some simple "pre" unit tests.
+	Compile with:
+		gcc -DQUICK_TEST=1 logging.c
+*/
+int main( ) {
+	printf( "mstime=%lld   unix=%ld\n", mstime(), (long) time( NULL ) );
+}
+#endif
+
 
 #endif

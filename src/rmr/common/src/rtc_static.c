@@ -53,13 +53,58 @@
 // ------------------------------------------------------------------------------------------------
 
 /*
+	Opens the vlevel control file if needed and reads the vlevel from it.
+	The file is rewound if already open so that external updates are captured.
+	The current level is returnd; 0 on error.
+
+	The environment variable (ENV_VERBOSE_FILE) is used to supply the file to
+	open and read. If missing, we will try /tmp/rmr.v.  We will try to open the file
+	on each call if not alrady open; this allows the value to be supplied after
+	start which helps debugging.
+
+	If close_file is true, then we will close the open vfd and return 0;
+*/
+extern int refresh_vlevel( int close_file ) {
+	static int vfd = -1;
+
+	char*	eptr;
+	char	wbuf[128];			// read buffer; MUST be 11 or greater
+	int		vlevel = 0;
+
+	if( close_file ) {
+		if( vfd >= 0 ) {
+			close( vfd );
+			vfd = -1;
+		}
+		return 0;
+	}
+
+	if( vfd < 0 ) {				// attempt to find/open on all calls if not open
+		if( (eptr = getenv( ENV_VERBOSE_FILE )) != NULL ) {
+			vfd = open( eptr, O_RDONLY );
+		} else {
+			vfd = open( "/tmp/rmr.v", O_RDONLY );
+		}
+		if( vfd < 0 ) {
+			return 0;
+		}
+	}
+
+	memset( wbuf, 0, sizeof( char ) * 11 );			// ensure what we read will be nil terminated
+	if( lseek( vfd, 0, SEEK_SET ) == 0 && read( vfd, wbuf, 10 ) > 0 ) {
+		vlevel = atoi( wbuf );
+	}
+
+	return vlevel;
+}
+
+/*
 	Loop forever (assuming we're running in a pthread reading the static table
 	every minute or so.
 */
 static void* rtc_file( void* vctx ) {
 	uta_ctx_t*	ctx;					// context user has -- where we pin the route table
 	char*	eptr;
-	int		vfd = -1;					// verbose file des if we have one
 	int		vlevel = 0;					// how chatty we should be 0== no nattering allowed
 	char	wbuf[256];
 
@@ -69,44 +114,17 @@ static void* rtc_file( void* vctx ) {
 		return NULL;
 	}
 
-	if( (eptr = getenv( ENV_VERBOSE_FILE )) != NULL ) {
-		vfd = open( eptr, O_RDONLY );
-	}
-
 	ctx->flags |= CFL_NO_RTACK;				// no attempt to ack when reading from a file
 	while( 1 ) {
-		if( vfd >= 0 ) {
-			memset( wbuf, 0, sizeof( char ) * 11 );
-			if( lseek( vfd, 0, SEEK_SET ) == 0 && read( vfd, wbuf, 10 ) > 0 ) {
-				vlevel = atoi( wbuf );
-			}
-		}
-
+		vlevel = refresh_vlevel( 0 );
 		read_static_rt( ctx, vlevel );						// seed the route table if one provided
 
 		if( ctx->shutdown != 0 ) {							// allow for graceful termination and unit testing
-			if( vfd >= 0 ) {
-				close( vfd );
-			}
+			refresh_vlevel( 1 );								// close the verbose file if open
 			return NULL;
 		}
 		sleep( 60 );
 	}
-}
-
-static int refresh_vlevel( int vfd ) {
-	int vlevel = 0;
-	char	rbuf[128];
-
-	if( vfd >= 0 ) {					// if file is open, read current value
-		rbuf[0] = 0;
-		memset( rbuf, 0, sizeof( char ) * 11 );
-		if( lseek( vfd, 0, SEEK_SET ) == 0 && read( vfd, rbuf, 10 ) > 0 ) {
-			vlevel = atoi( rbuf );
-		}
-	}
-
-	return vlevel;
 }
 
 /*
@@ -256,7 +274,6 @@ static void* rtc( void* vctx ) {
 	char*	tokens[128];
 	char	wbuf[128];
 	int		ntoks;
-	int		vfd = -1;					// verbose file des if we have one
 	int		vlevel = 0;					// how chatty we should be 0== no nattering allowed
 	char*	eptr;
 	int		epfd = -1;					// fd for epoll so we can multi-task
@@ -274,10 +291,7 @@ static void* rtc( void* vctx ) {
 		return NULL;
 	}
 
-	if( (eptr = getenv( ENV_VERBOSE_FILE )) != NULL ) {
-		vfd = open( eptr, O_RDONLY );
-		vlevel = refresh_vlevel( vfd );
-	}
+	vlevel = refresh_vlevel( 0 );
 
 	if( (eptr = getenv( ENV_RTREQ_FREA )) != NULL ) {
 		rt_req_freq = atoi( eptr );
@@ -357,7 +371,7 @@ static void* rtc( void* vctx ) {
 			msg = rmr_torcv_msg( pvt_cx, msg, 1000 );
 
 			if( time( NULL ) > blabber  ) {
-				vlevel = refresh_vlevel( vfd );
+				vlevel = refresh_vlevel( 0 );
 				blabber = time( NULL ) + count_delay;				// set next time to blabber, then do so
 				if( blabber > bump_freq ) {
 					count_delay = 300;
@@ -372,7 +386,7 @@ static void* rtc( void* vctx ) {
 			}
 		}
 
-		vlevel = refresh_vlevel( vfd );			// ensure it's fresh when we get a message
+		vlevel = refresh_vlevel( 0 );			// ensure it's fresh when we get a message
 
 		if( msg != NULL && msg->len > 0 ) {
 			rtc_parse_msg( ctx, pvt_cx, msg, vlevel, &flags );
@@ -456,7 +470,6 @@ static void* raw_rtc( void* vctx ) {
 	int		pbuf_size = 0;				// number allocated in pbuf
 	int		ntoks;
 	int		raw_interface = 1;			// rtg is using raw NNG/Nano not RMr to send updates
-	int		vfd = -1;					// verbose file des if we have one
 	int		vlevel = 0;					// how chatty we should be 0== no nattering allowed
 	char*	eptr;
 	int		epfd = -1;					// fd for epoll so we can multi-task
@@ -472,11 +485,7 @@ static void* raw_rtc( void* vctx ) {
 		return NULL;
 	}
 
-	if( (eptr = getenv( ENV_VERBOSE_FILE )) != NULL ) {
-		vfd = open( eptr, O_RDONLY );
-		vlevel = refresh_vlevel( vfd );
-	}
-
+	vlevel = refresh_vlevel( 0 );
 	read_static_rt( ctx, vlevel );						// seed the route table if one provided
 
 	if( (port = getenv( ENV_RTG_PORT )) == NULL || ! *port ) {		// port we need to open to listen for RTG connections
@@ -556,7 +565,7 @@ static void* raw_rtc( void* vctx ) {
 			}
 
 			if( time( NULL ) > blabber  ) {
-				vlevel = refresh_vlevel( vfd );
+				vlevel = refresh_vlevel( 0 );
 				if( vlevel >= 0 ) {										// allow it to be forced off with -n in verbose file
 					blabber = time( NULL ) + count_delay;				// set next time to blabber, then do so
 					if( blabber > bump_freq ) {
@@ -567,7 +576,7 @@ static void* raw_rtc( void* vctx ) {
 			}
 		}
 
-		vlevel = refresh_vlevel( vfd );			// ensure it's fresh when we get a message
+		vlevel = refresh_vlevel( 0 );			// ensure it's fresh when we get a message
 
 		if( msg != NULL && msg->len > 0 ) {
 			payload = msg->payload;
