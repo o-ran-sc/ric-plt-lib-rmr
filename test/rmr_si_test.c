@@ -88,6 +88,7 @@ static void gen_rt( uta_ctx_t* ctx );		// defined in sr_si_static_test, but used
 #include "mbuf_api_static_test.c"
 #include "sr_si_static_test.c"
 #include "lg_buf_static_test.c"
+#include "alarm_static_test.c"
 // do NOT include the receive test static must be stand alone
 
 #include "rmr_si_api_static_test.c"
@@ -100,6 +101,10 @@ int main() {
 	int errors = 0;
 
 	rmr_set_vlevel( 5 );			// enable all debugging
+
+	fprintf( stderr, "\n<INFO> starting alarm tests (%d)\n", errors );
+	errors += alarm_test();
+	fprintf( stderr, "<INFO> error count: %d\n", errors );
 
 	fprintf( stderr, "\n<INFO> starting lg buffer tests (%d)\n", errors );
 	errors += rmr_lgbuf_test();

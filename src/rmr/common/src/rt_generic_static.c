@@ -323,6 +323,50 @@ static void send_rt_ack( uta_ctx_t* ctx, rmr_mbuf_t* smsg, char* table_id, int s
 	}
 }
 
+// ---- alarm generation --------------------------------------------------------------------------
+
+/*
+	Given the user's context (not the thread private context) look to see if the application isn't
+	working fast enough and we're dropping messages. If the drop counter has changed since the last
+	peeked, and we have not raised an alarm, then we will alarm. If the counter hasn't changed, then we
+	set a timer and if the counter still hasn't changed when it expires we will clear the alarm.
+
+	The private context is what we use to send so as not to interfere with the user flow.
+*/
+static void alarm_if_drops( uta_ctx_t* uctx, uta_ctx_t* pctx ) {
+	static	int alarm_raised = 0;
+	static	int ok2clear = 0;					// time that we can clear
+	static	int lastd = 0;						// the last counter value so we can compute delta
+	static	int prob_id = 0;					// problem ID we assume alarm manager handles dups between processes
+
+	rmr_vlog( RMR_VL_DEBUG, "checking for drops... raised=%d 0k2clear=%d lastd=%d probid=%d\n", alarm_raised, ok2clear, lastd, prob_id );
+	if( ! alarm_raised ) {
+		if( uctx->dcount - lastd == 0 ) {			// not actively dropping, ok to do nothing
+			return;
+		}
+
+		alarm_raised = 1;
+		uta_alarm( pctx, ALARM_DROPS | ALARM_RAISE, prob_id, "application running slow; RMR is dropping messages" );
+		rmr_vlog( RMR_VL_INFO, "drop alarm raised" );
+	} else {
+		if( uctx->dcount - lastd != 0 ) {			// still dropping or dropping again; we've alarmed so nothing to do
+			lastd = uctx->dcount;
+			ok2clear = 0;							// reset the timer
+			return;
+		}
+
+		if( ok2clear == 0 ) {						// first round where not dropping
+			ok2clear = time( NULL ) + 60;			// we'll clear the alarm in 60s
+		} else {
+			if( time( NULL ) > ok2clear ) {			// things still stable after expiry
+				rmr_vlog( RMR_VL_INFO, "drop alarm cleared\n" );
+				alarm_raised = 0;
+				uta_alarm( pctx, ALARM_DROPS | ALARM_CLEAR, prob_id++, "RMR message dropping has stopped" );
+			}
+		}
+	}
+}
+
 // ---- utility -----------------------------------------------------------------------------------
 /*
 	Little diddy to trim whitespace and trailing comments. Like shell, trailing comments

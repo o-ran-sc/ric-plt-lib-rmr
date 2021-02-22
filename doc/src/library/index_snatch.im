@@ -48,6 +48,11 @@
 .ix synonym `round robin` round-robin
 .ix snare `route table`
 
+.ix snare `standard error`
+.ix synonym `standard error` stderr
+.ix snare `standard out`
+.ix synonym `standard out` stdout
+
 .ix snare `subscription ID`
 .ix synonym `subscription ID` `subscription ID,`
 .ix synonym `subscription ID` `subID`

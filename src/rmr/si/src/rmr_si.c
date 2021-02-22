@@ -67,6 +67,7 @@
 #include "ring_static.c"			// message ring support
 #include "rt_generic_static.c"		// route table things not transport specific
 #include "rtable_si_static.c"		// route table things -- transport specific
+#include "alarm.c"
 #include "rtc_static.c"				// route table collector (thread code)
 #include "tools_static.c"
 #include "sr_si_static.c"			// send/receive static functions

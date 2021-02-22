@@ -1,8 +1,8 @@
 
 .if false
 ==================================================================================
-	Copyright (c) 2019-2020 Nokia
-	Copyright (c) 2019-2020 AT&T Intellectual Property.
+	Copyright (c) 2019-2021 Nokia
+	Copyright (c) 2019-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -44,9 +44,9 @@ copyright statement.
 .ln
 .ll -.5i
 .in +.25i
-Copyright (c) 2019-2020 Nokia
+Copyright (c) 2019-2021 Nokia
 .br
-Copyright (c) 2019-2020 AT&T Intellectual Property.
+Copyright (c) 2019-2021 AT&T Intellectual Property.
 .sp 1
 
    Licensed under the Apache License, Version 2.0 (the "License");

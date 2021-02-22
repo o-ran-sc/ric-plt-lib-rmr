@@ -384,6 +384,9 @@ static void* rtc( void* vctx ) {
 			if( ctx->shutdown != 0 ) {
 				break;							// mostly for unit test, but allows a forced stop
 			}
+
+												// extra housekeeping chores can be added here...
+			alarm_if_drops( ctx, pvt_cx );		// send an alarm if message are dropping, clear if we set one and thtings are better
 		}
 
 		vlevel = refresh_vlevel( 0 );			// ensure it's fresh when we get a message
@@ -574,6 +577,8 @@ static void* raw_rtc( void* vctx ) {
 					rt_epcounts( ctx->rtable, ctx->my_name );
 				}
 			}
+
+			alarm_if_drops( ctx );				// send an alarm if message are dropping, clear if we set one and thtings are better
 		}
 
 		vlevel = refresh_vlevel( 0 );			// ensure it's fresh when we get a message

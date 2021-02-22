@@ -5,7 +5,7 @@
 # API and build change  and fix summaries. Doc corrections
 # and/or changes are not mentioned here; see the commit messages.
 
-2021 February 08; Version 4.6.0
+2021 February 22; Version 4.6.0
 	Enhanced to use millisecond based timestamps when writing log messages.
 	(RIC-627)
 
@@ -16,6 +16,10 @@
 	and populate /tmp/rmr.v at any time and the contents of this file will
 	be used as if it were supplied via the environment variable. This should
 	make debugging in existing containers easier.
+
+	Enhanced to send an alarm manager when the user application is not
+	receiving messages fast enough.  The original messages written to
+	the standard error are still generated. (RIC-204)
 
 2021 January 21; Version 4.5.2
 	Fixes the excessive TCP session bug when sending to a slow receiver

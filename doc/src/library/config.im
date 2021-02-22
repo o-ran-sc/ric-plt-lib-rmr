@@ -62,6 +62,7 @@ application.  The following is a list of the environment variables
 which RMR recognises:
 
 &half_space
+.if false
 &indent
 &beg_dlist( 1.25i &ditext )
 	&ditem(RMR_BIND_IF)	The interface to bind to listen ports to. If not defined 0.0.0.0 (all interfaces) is assumed.
@@ -91,19 +92,48 @@ which RMR recognises:
 	&ditem(RMR_SRC_NAMEONLY) If the value of this variable is greater than 0, RMR will not permit the IP address to be
 						sent as the message source. Only the host name will be sent as the source in the message header.
 &end_dlist
+
 &uindent
 .st &textsize
+.fi
+
+.** pull from man pages to avoid 2 places for maint
+.im ../man/env_var_list.im
 &space
 
-&h2(Logging)
-RMR does &bold(not) use any logging libraries; any error or warning messages are written to standard error.
+There are other, non-RMR, variables which may exist and are used by RMR.
+These variable names are not under the control of RMR, so they are subject to change without potentiallyb being
+reflected in either RMR's code, or this document.
+The following is a list of these environment variables.
+
+&half_space
+&indent
+&beg_dlist( 1.25i &ditext )
+	&ditem(ALARM_MANAGER_SERVICE_NAME)
+		This is the DNS name, or IP address, of the process which is listening for RMR alarm messages.
+		If this variable is missing, &cw(service-ricplt-alarmmanager-rmr) is assumed.
+
+	&ditem(ALARM_MANAGER_SERVICE_PORT)
+		This is the port that the alarm manager is using to accept RMR messages. If the environment
+		variable is missing the value &cw(4560) is assumed.
+&end_dlist
+&uindent
+.st &textsize
+
+
+&h2(Logging and Alarms)
+As with nearly all UNIX libraries, errors, warnings and informational messages  are written in plain text to the
+standard error device  (stderr).
+All RMR messages are prefixed with the current time (in milliseconds past the standard UNIX epoch), the process ID,
+and a severity indicator.
 .if false
+RMR does &bold(not) use any logging libraries; any error or warning messages are written to standard error.
  &note .sm .
 .cn l=&cn_line_len i=0 start &atbot Times-roman 8p .7i
 	This is standard practice for container based applications as it makes error output easily available to operations.
 .cn end
 .fi
-RMR messages are written with one of three prefix strings:
+RMR messages are written with one of three severity strings:
 
 
 &half_space
@@ -121,3 +151,24 @@ RMR messages are written with one of three prefix strings:
 &end_dlist
 &space
 &uindent
+
+&h3(Log message supression)
+For the most part, the &ital(fast path) code in RMR does no logging; even when messages are squelched, there is a non-zero
+cosst to check for the setting each time a potential message is to be written.
+To that end, RMRM will log only severe errors once initialisation has completed.
+An exception to this policy exists in the route table collection thread.
+The thread of execution which collects route table updates does not need to be concerned with performance, and as such
+has the potential to log its actions in a very verbose manner.
+The environment variable &cw( RMR_VCTL_FILE ) can be used to define a file where the desired verbosity level (0 to 4
+where 0 is off) can be placed.
+If the environment variable is not set when the process starts, RMR will assume that the file &cw(/tmp/rmr.v) will be used.
+Beginning with version 4.6.0 this file does &bold(not) need to exist when the process is started.
+To change the verbosity level, the desired value is written to the file on the first line.
+
+&h3(Alarms)
+The route table colleciton thread is also responsible for watching for situations which need to be reported as alarms
+to the platform's alarm management service.
+When a state exists RMR will create and send an alarm (via RMR message) to the alarm service, and will send a &ital(clear)
+message when the state no longer exists.
+Currently RMR will alarm only when the application is not removing messages from the receive ring quicklye enough causing
+RMR to drop messages as they are received.

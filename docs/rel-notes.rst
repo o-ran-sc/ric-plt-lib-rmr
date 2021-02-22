@@ -22,8 +22,29 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
-2021 January21; Version 4.5.2
------------------------------
+2021 February 22; Version 4.6.0
+-------------------------------
+
+Enhanced to use millisecond based timestamps when writing log
+messages. (RIC-627)
+
+Enhanced to eliminate the reqirement that the file specified
+by the RMR_VCTL_FILE environment variable exist when RMR is
+initialised. RMR will correctly find this file if it is
+created after initialisation. Further, if the environment
+variable is not given, the user may create and populate
+/tmp/rmr.v at any time and the contents of this file will be
+used as if it were supplied via the environment variable.
+This should make debugging in existing containers easier.
+
+Enhanced to send an alarm manager when the user application
+is not receiving messages fast enough. The original messages
+written to the standard error are still generated. (RIC-204)
+
+
+
+2021 January 21; Version 4.5.2
+------------------------------
 
 Fixes the excessive TCP session bug when sending to a slow
 receiver and a related segment fault because of too many open

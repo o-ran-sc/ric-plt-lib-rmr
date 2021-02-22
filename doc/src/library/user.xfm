@@ -36,6 +36,7 @@
 .dv reverse_titles 1
 
 .** setup will do the right thing with the index configuration
+.dv toc_file user.toc
 .dv index_snare_file index_snatch.im
 .im ./setup.im
 
