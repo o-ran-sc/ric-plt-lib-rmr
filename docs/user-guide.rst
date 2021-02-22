@@ -750,72 +750,228 @@ recognises:
       :header-rows: 0
       :class: borderless
 
+      * - **RMR_ASYNC_CONN**
+        -
+          Allows the async connection mode to be turned off (by setting
+          the value to 0). When set to 1, or missing from the
+          environment, RMR will invoke the connection interface in the
+          transport mechanism using the non-blocking (async) mode. This
+          will likely result in many "soft failures" (retry) until the
+          connection is established, but allows the application to
+          continue unimpeded should the connection be slow to set up.
+
       * - **RMR_BIND_IF**
         -
-          The interface to bind to listen ports to. If not defined
-          0.0.0.0 (all interfaces) is assumed.
-
-      * - **RMR_RTG_SVC**
-        -
-          This variabe supplies the host:port (or address:port) of the
-          Route Manager (route table generator) process. RMR will
-          attempt to connect to this address port combination and
-          request a route table. If it is desired to prevent RMR from
-          attempting to request a dynamic route table, the value of
-          this variable should be set to "-1." If not set
-          ``routemgr`` is assumed.
+          This provides the interface that RMR will bind listen ports
+          to, allowing for a single interface to be used rather than
+          listening across all interfaces. This should be the IP
+          address assigned to the interface that RMR should listen on,
+          and if not defined RMR will listen on all interfaces.
 
       * - **RMR_CTL_PORT**
         -
-          This is the port which RMR's route table collector thread
-          will use to listen for RMR messages from the route manager
-          (route table generator). By default this is 4561, and must be
-          unique for each RMR process running on the host/container.
+          This variable defines the port that RMR should open for
+          communications with Route Manager, and other RMR control
+          applications. If not defined, the port 4561 is assumed.
+
+          Previously, the ``RMR_RTG_SVC`` (route table generator
+          service port) was used to define this port. However, a future
+          version of Route Manager will require RMR to connect and
+          request tables, thus that variable is now used to supply the
+          Route Manager's well-known address and port.
+
+          To maintain backwards compatibility with the older Route
+          Manager versions, the presence of this variable in the
+          environment will shift RMR's behaviour with respect to the
+          default value used when ``RMR_RTG_SVC`` is **not** defined.
+
+          When ``RMR_CTL_PORT`` is **defined:** RMR assumes that Route
+          Manager requires RMR to connect and request table updates is
+          made, and the default well-known address for Route manager is
+          used (routemgr:4561).
+
+          When ``RMR_CTL_PORT`` is **undefined:** RMR assumes that
+          Route Manager will connect and push table updates, thus the
+          default listen port (4561) is used.
+
+          To avoid any possible misinterpretation and/or incorrect
+          assumptions on the part of RMR, it is recommended that both
+          the ``RMR_CTL_PORT`` and ``RMR_RTG_SVC`` be defined. In the
+          case where both variables are defined, RMR will behave
+          exactly as is communicated with the variable's values.
 
       * - **RMR_RTREQ_FREQ**
         -
-          When a new route table is needed, the frequency that RMR
-          sends a route table request to the Route Manager defaults to
-          5 seconds. This variable can be used to set the frequency to
-          a value between 1 and 300 seconds inclusive.
+          When RMR needs a new route table it will send a request once
+          every ``n`` seconds. The default value for ``n`` is 5, but
+          can be changed if this variable is set prior to invoking the
+          process. Accepted values are between 1 and 300 inclusive.
 
-      * - **RMR_SEED_RT**
+      * - **RMR_RTG_SVC**
         -
-          Where RMR expects to find the name of the seed (static) route
-          table. If not defined no static table is read.
+          The value of this variable depends on the Route Manager in
+          use.
+
+          When the Route Manager is expecting to connect to an xAPP and
+          push route tables, this variable must indicate the
+          ``port`` which RMR should use to listen for these
+          connections.
+
+          When the Route Manager is expecting RMR to connect and
+          request a table update during initialisation, the variable
+          should be the ``host`` of the Route Manager process.
+
+          The ``RMR_CTL_PORT`` variable (added with the support of
+          sending table update requests to Route manager), controls the
+          behaviour if this variable is not set. See the description of
+          that variable for details.
+
+      * - **RMR_HR_LOG**
+        -
+          By default RMR writes messages to standard error (incorrectly
+          referred to as log messages) in human readable format. If
+          this environment variable is set to 0, the format of standard
+          error messages might be written in some format not easily
+          read by humans. If missing, a value of 1 is assumed.
+
+      * - **RMR_LOG_VLEVEL**
+        -
+          This is a numeric value which corresponds to the verbosity
+          level used to limit messages written to standard error. The
+          lower the number the less chatty RMR functions are during
+          execution. The following is the current relationship between
+          the value set on this variable and the messages written:
+
+
+              .. list-table::
+                :widths: auto
+                :header-rows: 0
+                :class: borderless
+
+                * - **0**
+                  -
+                    Off; no messages of any sort are written.
+
+                * - **1**
+                  -
+                    Only critical messages are written (default if this variable
+                    does not exist)
+
+                * - **2**
+                  -
+                    Errors and all messages written with a lower value.
+
+                * - **3**
+                  -
+                    Warnings and all messages written with a lower value.
+
+                * - **4**
+                  -
+                    Informational and all messages written with a lower value.
+
+                * - **5**
+                  -
+                    Debugging mode -- all messages written, however this requires
+                    RMR to have been compiled with debugging support enabled.
+
+
 
       * - **RMR_RTG_ISRAW**
         -
-          If the value set to 0, RMR expects the route table manager
-          messages to be messages with and RMR header. If this is not
-          defined messages are assumed to be "raw" (without an RMR
-          header.
+          **Deprecated.** Should be set to 1 if the route table
+          generator is sending "plain" messages (not using RMR to send
+          messages), 0 if the RTG is using RMR to send. The default is
+          1 as we don't expect the RTG to use RMR.
+
+          This variable is only recognised when using the NNG transport
+          library as it is not possible to support NNG "raw"
+          communications with other transport libraries. It is also
+          necessary to match the value of this variable with the
+          capabilities of the Route Manager; at some point in the
+          future RMR will assume that all Route Manager messages will
+          arrive via an RMR connection and will ignore this variable.
+
+      * - **RMR_SEED_RT**
+        -
+          This is used to supply a static route table which can be used
+          for debugging, testing, or if no route table generator
+          process is being used to supply the route table. If not
+          defined, no static table is used and RMR will not report
+          *ready* until a table is received. The static route table may
+          contain both the route table (between newrt start and end
+          records), and the MEID map (between meid_map start and end
+          records).
+
+      * - **RMR_SRC_ID**
+        -
+          This is either the name or IP address which is placed into
+          outbound messages as the message source. This will used when
+          an RMR based application uses the rmr_rts_msg() function to
+          return a response to the sender. If not supplied RMR will use
+          the hostname which in some container environments might not
+          be routable.
+
+          The value of this variable is also used for Route Manager
+          messages which are sent via an RMR connection.
 
       * - **RMR_VCTL_FILE**
         -
-          Provides a file which is used to set the verbose level of the
-          route table collection thread. The first line of the file is
-          read and expected to contain an integer value to set the
-          verbose level. The value may be changed at any time and the
-          route table thread will adjust accordingly.
+          This supplies the name of a verbosity control file. The core
+          RMR functions do not produce messages unless there is a
+          critical failure. However, the route table collection thread,
+          not a part of the main message processing component, can
+          write additional messages to standard error. If this variable
+          is set, RMR will extract the verbosity level for these
+          messages (0 is silent) from the first line of the file.
+          Changes to the file are detected and thus the level can be
+          changed dynamically, however RMR will only suss out this
+          variable during initialisation, so it is impossible to enable
+          verbosity after startup.
 
-      * - **RMR_SRC_NAMEONLY**
+      * - **RMR_WARNINGS**
         -
-          If the value of this variable is greater than 0, RMR will not
-          permit the IP address to be sent as the message source. Only
-          the host name will be sent as the source in the message
-          header.
+          If set to 1, RMR will write some warnings which are
+          non-performance impacting. If the variable is not defined, or
+          set to 0, RMR will not write these additional warnings.
+
+
+
+There are other, non-RMR, variables which may exist and are
+used by RMR. These variable names are not under the control
+of RMR, so they are subject to change without potentiallyb
+being reflected in either RMR's code, or this document. The
+following is a list of these environment variables.
+
+
+    .. list-table::
+      :widths: auto
+      :header-rows: 0
+      :class: borderless
+
+      * - **ALARM_MANAGER_SERVICE_NAME**
+        -
+          This is the DNS name, or IP address, of the process which is
+          listening for RMR alarm messages. If this variable is
+          missing, ``service-ricplt-alarmmanager-rmr`` is assumed.
+
+      * - **ALARM_MANAGER_SERVICE_PORT**
+        -
+          This is the port that the alarm manager is using to accept
+          RMR messages. If the environment variable is missing the
+          value ``4560`` is assumed.
 
 
 
 
+Logging and Alarms
+------------------
 
-Logging
--------
-
-RMR does **not** use any logging libraries; any error or
-warning messages are written to standard error. RMR messages
-are written with one of three prefix strings:
+As with nearly all UNIX libraries, errors, warnings and
+informational messages are written in plain text to the
+standard error device (stderr). All RMR messages are prefixed
+with the current time (in milliseconds past the standard UNIX
+epoch), the process ID, and a severity indicator. RMR
+messages are written with one of three severity strings:
 
 
     .. list-table::
@@ -845,6 +1001,42 @@ are written with one of three prefix strings:
 
 
 
+
+
+Log message supression
+----------------------
+
+For the most part, the *fast path* code in RMR does no
+logging; even when messages are squelched, there is a
+non-zero cosst to check for the setting each time a potential
+message is to be written. To that end, RMRM will log only
+severe errors once initialisation has completed. An exception
+to this policy exists in the route table collection thread.
+The thread of execution which collects route table updates
+does not need to be concerned with performance, and as such
+has the potential to log its actions in a very verbose
+manner. The environment variable `` RMR_VCTL_FILE `` can be
+used to define a file where the desired verbosity level (0 to
+4 where 0 is off) can be placed. If the environment variable
+is not set when the process starts, RMR will assume that the
+file ``/tmp/rmr.v`` will be used. Beginning with version
+4.6.0 this file does **not** need to exist when the process
+is started. To change the verbosity level, the desired value
+is written to the file on the first line.
+
+
+Alarms
+------
+
+The route table colleciton thread is also responsible for
+watching for situations which need to be reported as alarms
+to the platform's alarm management service. When a state
+exists RMR will create and send an alarm (via RMR message) to
+the alarm service, and will send a *clear* message when the
+state no longer exists. Currently RMR will alarm only when
+the application is not removing messages from the receive
+ring quicklye enough causing RMR to drop messages as they are
+received.
 
 
 Notes

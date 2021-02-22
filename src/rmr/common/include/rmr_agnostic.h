@@ -71,6 +71,10 @@ typedef struct uta_ctx  uta_ctx_t;
 #define ENV_CTL_PORT	"RMR_CTL_PORT"		// route collector will listen here for control messages (4561 default)
 #define ENV_RTREQ_FREA  "RMR_RTREQ_FREQ"	// frequency we will request route table updates when we want one (1-300 inclusive)
 
+
+#define ENV_AM_NAME		"ALARM_MGR_SERVICE_NAME"	// alarm manager env vars that we need
+#define ENV_AM_PORT		"ALARM_MGR_SERVICE_PORT"
+
 #define NO_FLAGS	0				// no flags to pass to a function
 
 #define FL_NOTHREAD	0x01			// do not start an additional thread (must be 'user land' to support rtg
@@ -147,6 +151,17 @@ typedef struct uta_ctx  uta_ctx_t;
 #define HFL_HAS_TRACE	0x01			// Trace data is populated
 #define HFL_SUBID		0x02			// subscription ID is populated
 #define HFL_CALL_MSG	0x04			// msg sent via blocking call
+
+/*
+	Alarm action constants describe the type (e.g. dropping messages) and whether or not
+	this is a "raise" or "clear" action. Raise/clear is determined by the least significant
+	bit; 1 == raise.
+*/
+#define ALARM_RAISE	0x01
+#define ALARM_CLEAR	0x00
+#define ALARM_KIND(a) (a&ALARM_MASK)
+#define ALARM_DROPS	0x02
+#define ALARM_MASK 0xfffe
 
 /*
 	Message header; interpreted by the other side, but never seen by
@@ -312,6 +327,10 @@ static inline int uta_ring_insert( void* vr, void* new_data );
 // --- message and context management --------
 static int ie_test( void* r, int i_factor, long inserts );
 
+
+// --- internal alarm generation  ---------------------
+static void uta_alarm( void* vctx, int kind, int prob_id, char* info );
+static void uta_alarm_send( void* vctx, rmr_mbuf_t* msg );
 
 // ----- route table generic static things ---------
 static inline uint64_t build_rt_key( int32_t sub_id, int32_t mtype );

@@ -36,17 +36,18 @@
 
 static inline void queue_normal( uta_ctx_t* ctx, rmr_mbuf_t* mbuf ) {
 	static	time_t last_warning = 0;
-	static	long dcount = 0;
+	//static	long dcount = 0;
 
 	chute_t*	chute;
 
 	if( ! uta_ring_insert( ctx->mring, mbuf ) ) {
 		rmr_free_msg( mbuf );								// drop if ring is full
-		dcount++;
+		//dcount++;
+		ctx->dcount++;
 		if( time( NULL ) > last_warning + 60 ) {			// issue warning no more frequently than every 60 sec
-			rmr_vlog( RMR_VL_ERR, "rmr_mt_receive: application is not receiving fast enough; %ld msgs dropped since last warning\n", dcount );
+			rmr_vlog( RMR_VL_ERR, "rmr_mt_receive: application is not receiving fast enough; %ld msgs dropped since last warning\n", ctx->dcount );
 			last_warning = time( NULL );
-			dcount = 0;
+			ctx->dcount = 0;
 		}
 
 		return;

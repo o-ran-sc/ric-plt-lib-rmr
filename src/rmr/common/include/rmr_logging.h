@@ -49,6 +49,7 @@
 
 
 // ----- prototypes ------------------------------
+extern long long mstime( );
 extern void rmr_vlog( int write_level, char* fmt, ... );
 extern void rmr_vlog_force( int write_level, char* fmt, ... );
 extern int rmr_vlog_init();

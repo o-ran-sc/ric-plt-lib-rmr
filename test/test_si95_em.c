@@ -144,13 +144,22 @@ static int em_siclose( struct ginfo_blk *gptr, int fd ) {
 /*
 	If em_send_failures is true, this will fail a small part of the time
 	to simualte connection failures.
+
+	If the port number is < 1000 it will fail -- allowing for specific,single
+	failure cases.
 */
 static int em_next_fd = 0;
 static int em_siconnect( struct ginfo_blk *gptr, char *abuf ) {
 	static int count = 0;
+	char*	tok;
 
 	if( em_send_failures && (count++ % 15 == 14) ) {
 		//fprintf( stderr, "<SIEM> siem is failing connect attempt\n\n" );
+		return -1;
+	}
+
+	if( (tok = strchr( abuf, ':' )) != NULL  && atoi( tok+1 ) < 1000 ) {
+		fprintf( stderr, "<SIEM> siem is emulating connect to (%s) with a failure; port <1000\n", abuf );
 		return -1;
 	}
 
