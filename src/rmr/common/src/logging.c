@@ -94,7 +94,7 @@ static char* log_situations[RMR_VL_DEBUG+1];
 	If time() returns 515300400, this function will add three didgets which
 	represent the milliseconds:  515300400123 (515300400.123).
 */
-static long long mstime( ) {
+extern long long mstime( ) {
 	struct timespec now;
 	long long rv = 0;
 
