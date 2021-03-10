@@ -1,8 +1,8 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019-2020 Nokia
-	Copyright (c) 2018-2020 AT&T Intellectual Property.
+	Copyright (c) 2019-2021 Nokia
+	Copyright (c) 2018-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -297,7 +297,7 @@ static void* rtc( void* vctx ) {
 		rt_req_freq = atoi( eptr );
 		if( rt_req_freq < 1 || rt_req_freq > 300 ) {
 			rt_req_freq = DEF_RTREQ_FREQ;
-			rmr_vlog( RMR_VL_WARN, "rmr_rtc: RT request frequency (%d) out of range (1-300), using default", DEF_RTREQ_FREQ );
+			rmr_vlog( RMR_VL_WARN, "rmr_rtc: RT request frequency (%d) out of range (1-300), using default (%d)\n", rt_req_freq, DEF_RTREQ_FREQ );
 		}
 	}
 	rmr_vlog( RMR_VL_INFO, "rmr_rtc: RT request frequency set to: %d seconds", rt_req_freq );

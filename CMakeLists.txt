@@ -1,7 +1,7 @@
 #
 #==================================================================================
-#	Copyright (c) 2019 Nokia
-#	Copyright (c) 2018-2019 AT&T Intellectual Property.
+#	Copyright (c) 2019-2021 Nokia
+#	Copyright (c) 2018-2021 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@
 #	-DGPROF=1			Enable profiling compile time flags
 #	-DSKIP_EXTERNALS=1	Do not use NNG submodule when building; uee installed packages
 #	-DMAN_PREFIX=<path>	Supply a path where man pages are installed (default: /usr/share/man)
+#	-DOPT_LEVEL=n		Set a custom optimisation level.
 
 #	See ci/build_all for an example of how to build and test
 
@@ -41,7 +42,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 set( major_version "4" )		# should be automatically populated from git tag later, but until CI process sets a tag we use this
 set( minor_version "6" )
-set( patch_level "0" )
+set( patch_level "1" )
 
 set( install_root "${CMAKE_INSTALL_PREFIX}" )
 set( install_inc "include/rmr" )
@@ -104,7 +105,7 @@ if( DEBUG )					# if set, we'll set debugging on in the compile
 	message( "+++ debugging is being set to ${DEBUG}" )
 else()
 	set( debugging 0 )
-	message( "+++ debugging is set to off" )
+	message( "+++ debugging is set to off (use -DDEBUG=1 to enable)" )
 endif()
 unset( DEBUG CACHE )					# we don't want this to persist
 
@@ -240,10 +241,21 @@ if( GPROF )					# if set, we'll set profiling flag on compiles
 	message( "+++ profiling is on" )
 	set( CMAKE_C_FLAGS "-pg " )
 else()
-	message( "+++ profiling is off" )
+	message( "+++ profiling is off (use -DGPROF=1 to enable" )
 	set( CMAKE_C_FLAGS "-g " )
 endif()
 unset( GPROF CACHE )					# we don't want this to persist
+
+if( DEFINED OPT_LEVEL )
+	message( "+++ optimisation is forced to ${OPT_LEVEL}" )
+	set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O${OPT_LEVEL} " )
+else()
+	message( "+++ optimisation will default (use -DOPT_LEVEL=n to force specific level, or disable)" )
+endif()
+unset( OPT_LEVEL  CACHE )			# no optimisation flage does NOT percist
+
+message( "+++ compiler flags: ${CMAKE_C_FLAGS}" )
+
 
 # Include modules
 add_subdirectory( src/rmr/common )

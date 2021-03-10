@@ -1,8 +1,8 @@
 #!/usr/bin/env ksh
 # vim: ts=4 sw=4 noet :
 #==================================================================================
-#    Copyright (c) 2019-2020 Nokia
-#    Copyright (c) 2018-2020 AT&T Intellectual Property.
+#    Copyright (c) 2019-2021 Nokia
+#    Copyright (c) 2018-2021 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -58,7 +58,6 @@ function run_test {
 
 build=""
 errors=0
-si_flag="-S"				# default to -S to prefer to run SI tests over NNG tests
 
 src_root="../.."
 if [[ -z $BUILD_PATH ]]						# if not explicitly set, assume one of our standard spots
@@ -125,14 +124,14 @@ do
 		-B)	build="-b";;			# build RMR without pulling
 		-e)	capture_file=$2; >$capture_file; shift;;
 		-i)	installed="-i";;
-		-N)	si_flag="";;			# turn on NNG tests (off si)
+		-N)	;;						# ignored for backwards compatability; nng no longer supported
 		-P)	build="-B";;			# build RMR with a pull first
 		-p)	purge=0;;				# don't purge binaries to ensure rebuild happens
-		-S)	si_flag="-S";;			# turn on si based tests
+		-S)	;;						# ignored; nng tests are not supported so all binaries are now si95
 		-s) shell=$2; shift;;
 		-v)	verbose=1;;
 
-		-\?) echo "usage: $0 [-B|-P] [-e err_file] [-i] [-N|-S] [-p] [-s shell] [-v]";;
+		-\?) echo "usage: $0 [-B|-P] [-e err_file] [-i] [-p] [-s shell] [-v]";;
 
 		*)	echo "'$1' is not a recognised option and is ignored";;
 	esac
@@ -153,30 +152,30 @@ export SHELL=$shell
 
 if (( purge ))
 then
-	rm -f sender sender_si receiver receiver_si
+	rm -f sender receiver 
 fi
 
 echo "----- app --------------------"
 if which ip >/dev/null 2>&1					# ip command rquired for the app test; skip if not found
 then
-	run_test run_app_test.sh $si_flag -v $installed $build
+	run_test run_app_test.sh -v $installed $build
 	build=""
 fi
 
 echo "----- multi ------------------"
-run_test run_multi_test.sh $si_flag $build
+run_test run_multi_test.sh  $build
 
 echo "----- round robin -----------"
-run_test run_rr_test.sh $si_flag
+run_test run_rr_test.sh 
 
 echo "----- rts -------------------"
-run_test run_rts_test.sh $si_flag -s 5 -d 100
+run_test run_rts_test.sh  -s 5 -d 100
 
 echo "----- extended payload nocopy no clone------"
-run_test run_exrts_test.sh $si_flag -d 10 -n 1000
+run_test run_exrts_test.sh  -d 10 -n 1000
 
 echo "----- extended payload copy clone------"
-run_test run_exrts_test.sh $si_flag -d 10 -n 1000 -c 11
+run_test run_exrts_test.sh  -d 10 -n 1000 -c 11
 
 if (( errors == 0 ))
 then

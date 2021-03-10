@@ -22,6 +22,15 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2021 March 10; version 4.6.1
+----------------------------
+
+Corrected unit test "framework" to make manual testing
+easier, and to add the ability to set the code optimisation
+level via the CMake command line parameter OPT_LEVEL=n.
+
+
+
 2021 February 22; Version 4.6.0
 -------------------------------
 

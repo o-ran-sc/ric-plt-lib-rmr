@@ -1,8 +1,8 @@
 #!/usr/bin/env ksh
 # vim: ts=4 sw=4 noet :
 #==================================================================================
-#    Copyright (c) 2019-2020 Nokia
-#    Copyright (c) 2018-2020 AT&T Intellectual Property.
+#    Copyright (c) 2019-2021 Nokia
+#    Copyright (c) 2018-2021 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ nthreads=3
 dev_base=1					# -D turns off to allow this to run on installed libs
 force_make=0
 si=""
-localhost="localhost"
+localhost="127.0.0.1"
 
 
 
@@ -128,10 +128,9 @@ do
 		-D)	dev_base=0;;
 		-n)	nmsg=$2; shift;;
 		-M)	force_make=1;;
+		-N)	si="";;							# ignored for back compat; NNG not supported; all binaries are si95
+		-S)	si="";;							# ignored for back compat; all binaries are si95 and no _si suffix is used
 		-N) si="";;						# enable NNG testing (off si)
-		-S) si="_si"					# enable SI95 testing
-			localhost="127.0.0.1"
-			;;
 		-t)	nthreads=$2; shift;;
 		-v)	verbose=1;;
 
