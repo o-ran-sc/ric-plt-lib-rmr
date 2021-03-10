@@ -1,8 +1,8 @@
 #!/usr/bin/env ksh
 # vim: ts=4 sw=4 noet :
 #==================================================================================
-#    Copyright (c) 2019-2020 Nokia
-#    Copyright (c) 2018-2020 AT&T Intellectual Property.
+#    Copyright (c) 2019-2021 Nokia
+#    Copyright (c) 2018-2021 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@
 function run_sender {
 	export RMR_RTG_SVC=$(( 9991 + $1 ))
 	port=$((  43080 + $1 ))
-	./sender${si} $nmsg $delay 5:6 $port
+	./sender $nmsg $delay 5:6 $port
 	echo $? >/tmp/PID$$.$1.src		# must communicate state back via file b/c asynch
 }
 
@@ -52,7 +52,7 @@ function run_rcvr {
 
 	port=4460
 	export RMR_RTG_SVC=9990
-	./receiver${si} $(( nmsg * nsenders ))  $port
+	./receiver $(( nmsg * nsenders ))  $port
 	echo $? >/tmp/PID$$.rrc
 }
 
@@ -63,7 +63,7 @@ function run_rcvr {
 function set_rt {
 	cat <<endKat >rts.rt
 		newrt | start
-		mse |5 | -1 | localhost:4460
+		mse |5 | -1 | 127.0.0.1:4460
 		newrt | end
 endKat
 
@@ -87,9 +87,9 @@ do
 		-b)	rebuild=1; nopull="nopull";;	# build without pulling
 		-d)	delay=$2; shift;;
 		-n)	nmsg=$2; shift;;
-		-N) si="";;							# enable NNG tests (disable si)
+		-N) ;;							# ignored for back compat -- nng no longer supported
 		-s)	nsenders=$2; shift;;
-		-S) si="_si";;						# enable SI95 tests
+		-S) ;;							# ignored for back compat -- si is only supported transport
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
@@ -141,11 +141,11 @@ export RMR_SEED_RT=./rts.rt
 
 set_rt 		# create the route table
 
-if [[ ! -f ./sender${si} || ! -f ./receiver${si} ]]
+if [[ ! -f ./sender || ! -f ./receiver ]]
 then
-	if ! make ./sender${si} ./receiver${si} >/dev/null 2>&1
+	if ! make ./sender ./receiver >/dev/null 2>&1
 	then
-		echo "[FAIL] cannot find sender${si} and/or receiver${si} binary, and cannot make them.... humm?"
+		echo "[FAIL] cannot find sender and/or receiver binary, and cannot make them.... humm?"
 		exit 1
 	fi
 fi

@@ -1,8 +1,8 @@
 // vim: ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019-2020 Nokia
-	Copyright (c) 2018-2020 AT&T Intellectual Property.
+	Copyright (c) 2019-2021 Nokia
+	Copyright (c) 2018-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -554,7 +554,7 @@ static inline rmr_mbuf_t* realloc_payload( rmr_mbuf_t* old_msg, int payload_len,
 	nm->header = ((char *) nm->tp_buf) + TP_HDR_LEN;			// point at the new header and copy from old
 	SET_HDR_LEN( nm->header );
 
-	if( copy ) {																// if we need to copy the old payload too
+	if( copy != 0 ) {											// if we need to copy the old payload too
 		memcpy( nm->header, omhdr, sizeof( char ) * (old_psize + RMR_HDR_LEN( omhdr )) );
 		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rmr_realloc_payload: copy payload into new message: %d bytes\n", old_psize );
 	} else {																	// just need to copy header

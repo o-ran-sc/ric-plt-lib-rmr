@@ -1,8 +1,8 @@
 // :vi sw=4 ts=4 noet:
 /*
 ==================================================================================
-	Copyright (c) 2019-2020 Nokia
-	Copyright (c) 2018-2020 AT&T Intellectual Property.
+	Copyright (c) 2019-2021 Nokia
+	Copyright (c) 2018-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -365,6 +365,7 @@ static if_addrs_t*  mk_ip_list( char* port ) {
 	getifaddrs( &ifs );
 	for( ele = ifs; ele; ele = ele->ifa_next ) {
 		memset( octs, 0, sizeof( octs ) );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "checking interface: %s\n", ele->ifa_name );
 		if( ele && strcmp( ele->ifa_name, "lo" ) &&									// do NOT capture the loopback interface address
 			(target_if == NULL || strcmp( ele->ifa_name, target_if ) == 0 ) ) {		// no target, or matches ENV_BIND_IF target
 
@@ -376,6 +377,9 @@ static if_addrs_t*  mk_ip_list( char* port ) {
 					if( ele->ifa_addr->sa_family == AF_INET6 ) {
 						getnameinfo( ele->ifa_addr, sizeof( struct sockaddr_in6 ),  octs, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
 						fmt = "[%s]:%s";
+					} else {
+						if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "unrecognised IF family (not v4 or v6)\n" );
+						continue;
 					}
 				}
 
@@ -390,7 +394,11 @@ static if_addrs_t*  mk_ip_list( char* port ) {
 						l->addrs[l->naddrs] = strdup( wbuf );
 						l->naddrs++;
 					}
+				} else {
+					if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "unrecognised or no octets octs=%x fmt=%p\n", *octs, fmt );
 				}
+			} else {
+				if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "no ip address for interface: %s\n", ele->ifa_name );
 			}
 		}
 	}

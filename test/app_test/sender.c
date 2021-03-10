@@ -149,6 +149,7 @@ int main( int argc, char** argv ) {
 	mtype = start_mt;
 
 	fprintf( stderr, "<SNDR> listen port: %s; sending %d messages; delay=%d\n", listen_port, nmsgs, delay );
+exit( 1 );
 
 	if( (mrc = rmr_init( listen_port, 1400, RMRFL_NONE )) == NULL ) {
 		fprintf( stderr, "<SNDR> unable to initialise RMr\n" );

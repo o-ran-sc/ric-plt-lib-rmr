@@ -1,7 +1,7 @@
 #
 #=================================================================================
-#    Copyright (c) 2019-2020 Nokia
-#    Copyright (c) 2018-2020 AT&T Intellectual Property.
+#    Copyright (c) 2019-2021 Nokia
+#    Copyright (c) 2018-2021 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -48,28 +48,18 @@ LIBRARY_PATH = $(LD_LIBRARY_PATH)
 
 
 .PHONY: all all_si
-all: sender receiver caller mt_receiver v_sender ex_rts_receiver sender_si receiver_si
+all: sender receiver caller mt_receiver v_sender ex_rts_receiver 
 
 all_si: sender_si receiver_si
 
 
-# ------ nng based builds ------------------------------------------------------------
+# ------ all builds are si95 now ---------------------------------------------------
 
 %:%.c
-	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
-
-# special build as it reuses an existing source module
-mt_receiver: receiver.c
-	gcc -I $${C_INCLUDE_PATH:-.} -DMTC $< -g -o $@ -lrmr_nng -lnng -lpthread -lm
-
-
-# ----- si test builds -------------------------------------------------------------
-
-%_si : %.c
 	gcc -I $${C_INCLUDE_PATH:-.} $< -g -o $@ -lrmr_si -lpthread -lm
 
-# explicit rule because there is no mt_recever.c
-mt_receiver_si: receiver.c
+# special build rule as it reuses an existing source module with a sepcial define
+mt_receiver: receiver.c
 	gcc -I $${C_INCLUDE_PATH:-.} -DMTC $< -g -o $@ -lrmr_si -lpthread -lm
 
 
