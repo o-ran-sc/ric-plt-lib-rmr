@@ -65,6 +65,7 @@ static char* get_ifname( ) {
 	struct	ifaddrs *ifs;		// pointer to head
 	struct	ifaddrs *ele;		// pointer into the list
 	char*	rstr = NULL;		// return string
+	char    octs[NI_MAXHOST+1];
 
 
 	if( (l = (if_addrs_t *) malloc( sizeof( if_addrs_t ) )) == NULL ) {
@@ -80,12 +81,20 @@ static char* get_ifname( ) {
 	getifaddrs( &ifs );
 	for( ele = ifs; ele; ele = ele->ifa_next ) {
 		if( ele && strcmp( ele->ifa_name, "lo" ) ) {
-			rstr = strdup( ele->ifa_name );
-			break;
+			memset( octs, 0, sizeof( octs ) );
+			getnameinfo( ele->ifa_addr, sizeof( struct sockaddr_in6 ),  octs, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
+			if( *octs ) {
+				rstr = strdup( ele->ifa_name );
+				fprintf( stderr, "<INFO> found interface with address: %s\n", rstr );
+				break;
+			}
 		}
 	}
 
 	free( l );
+	if( rstr == NULL ) {
+		fprintf( stderr, "<ERROR> no interface with an address was found!\n" );
+	}
 	return rstr;
 }
 
@@ -226,6 +235,8 @@ static int tools_test( ) {
 		}
 
 		free( ip );
+	} else {
+		fprintf( stderr, "<SKIP> test skipped because no interface with address could be found on system" );
 	}
 
 	errors += ztbf_test();					// test the zero term buffer fill function

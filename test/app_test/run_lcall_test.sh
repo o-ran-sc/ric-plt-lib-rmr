@@ -51,7 +51,7 @@
 # file in order for the 'main' to pick them up easily.
 #
 function run_sender {
-	./lcaller${si} ${nmsg:-10} ${delay:-500} ${cthreads:-3} 
+	./lcaller ${nmsg:-10} ${delay:-500} ${cthreads:-3} 
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -61,7 +61,7 @@ function run_rcvr {
 
 	port=$(( 4460 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	./lreceiver${si} $(( ((nmsg * cthreads)/nrcvrs) + 10 )) $port
+	./lreceiver $(( ((nmsg * cthreads)/nrcvrs) + 10 )) $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -70,10 +70,10 @@ function run_rcvr {
 #
 function set_rt {
 	typeset port=4460
-	typeset groups="localhost:4460"
+	typeset groups="127.0.0.1:4460"
 	for (( i=1; i < ${1:-3}; i++ ))
 	do
-		groups="$groups,localhost:$((port+i))"
+		groups="$groups,127.0.0.1:$((port+i))"
 	done
 
 	cat <<endKat >lcall.rt
@@ -184,11 +184,11 @@ export RMR_SEED_RT=./lcall.rt
 
 set_rt $nrcvrs						# set up the rt for n receivers
 
-if (( force_make || rebuild )) || [[ ! -f ./lcaller{$si} || ! -f ./lreceiver${si} ]]
+if (( force_make || rebuild )) || [[ ! -f ./lcaller || ! -f ./lreceiver ]]
 then
-	if ! make -B lcaller${si} lreceiver${si} >/dev/null 2>&1
+	if ! make -B lcaller lreceiver >/dev/null 2>&1
 	then
-		echo "[FAIL] cannot find lcaller${si} and/or lreceiver${si} binary, and cannot make them.... humm?"
+		echo "[FAIL] cannot find lcaller and/or lreceiver binary, and cannot make them.... humm?"
 		exit 1
 	fi
 fi

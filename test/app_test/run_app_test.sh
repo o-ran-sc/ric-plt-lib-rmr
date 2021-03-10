@@ -71,21 +71,21 @@ function set_rt {
 
 	cat <<endKat >app_test.rt
 		newrt | start
-			mse | 0 |  0 | localhost:$port,$my_ip:43086
-			mse | 1 | 10 | localhost:$port,${my_host//.*/}:43086
-			mse | 2 | 20 | localhost:$port
-			rte | 3 | localhost:$port
-			mse | 3 | 100 | localhost:$port	# special test to ensure that this does not affect previous entry
-			rte | 4 | localhost:$port
-			rte | 5 | localhost:$port
-			rte | 6 | localhost:$port
-			rte | 7 | localhost:$port
-			rte | 8 | localhost:$port
-			rte | 9 | localhost:$port
-			rte | 10 | localhost:$port
-			rte | 11 | localhost:$port
-			rte | 12 | localhost:$port
-			rte | 13 | localhost:$port
+			mse | 0 |  0 | 127.0.0.1:$port,$my_ip:43086
+			mse | 1 | 10 | 127.0.0.1:$port,${my_host//.*/}:43086
+			mse | 2 | 20 | 127.0.0.1:$port
+			rte | 3 | 127.0.0.1:$port
+			mse | 3 | 100 | 127.0.0.1:$port	# special test to ensure that this does not affect previous entry
+			rte | 4 | 127.0.0.1:$port
+			rte | 5 | 127.0.0.1:$port
+			rte | 6 | 127.0.0.1:$port
+			rte | 7 | 127.0.0.1:$port
+			rte | 8 | 127.0.0.1:$port
+			rte | 9 | 127.0.0.1:$port
+			rte | 10 | 127.0.0.1:$port
+			rte | 11 | 127.0.0.1:$port
+			rte | 12 | 127.0.0.1:$port
+			rte | 13 | 127.0.0.1:$port
 		newrt | end
 
 head -3 app_test.rt
@@ -108,7 +108,6 @@ my_ip=$(snarf_ip)			# get an ip to insert into the route table
 keep=0
 mt_receiver=0				# -m sets in order to test with multi-threaded receive stuff
 force_make=0
-si=""						# -S sets to build and test SI versions
 
 
 while [[ $1 == -* ]]
@@ -122,8 +121,8 @@ do
 		-M)	force_make=1;;
 		-m)	mt_receiver=1;;
 		-n)	nmsg=$2; shift;;
-		-N)	si="";;							# build and test NNG versions (off si)
-		-S)	si="_si";;						# build and test SI95 versions
+		-N)	;;							# ignored for back compat; NNG not supported; all binaries are si95
+		-S)	;;							# ignored for back compat; all binaries are si95 and no _si suffix is used
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
@@ -209,6 +208,7 @@ then
 	fi
 fi
 
+exit
 run_rcvr &
 sleep 2				# if sender starts faster than rcvr we can drop msgs, so pause a bit
 run_sender &

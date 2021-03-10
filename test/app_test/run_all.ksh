@@ -151,7 +151,7 @@ export SHELL=$shell
 
 if (( purge ))
 then
-	rm -f sender sender_si receiver receiver_si
+	rm -f sender receiver 
 fi
 
 echo "----- app --------------------"

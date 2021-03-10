@@ -297,7 +297,7 @@ static void* rtc( void* vctx ) {
 		rt_req_freq = atoi( eptr );
 		if( rt_req_freq < 1 || rt_req_freq > 300 ) {
 			rt_req_freq = DEF_RTREQ_FREQ;
-			rmr_vlog( RMR_VL_WARN, "rmr_rtc: RT request frequency (%d) out of range (1-300), using default", DEF_RTREQ_FREQ );
+			rmr_vlog( RMR_VL_WARN, "rmr_rtc: RT request frequency (%d) out of range (1-300), using default (%d)\n", rt_req_freq, DEF_RTREQ_FREQ );
 		}
 	}
 	rmr_vlog( RMR_VL_INFO, "rmr_rtc: RT request frequency set to: %d seconds", rt_req_freq );

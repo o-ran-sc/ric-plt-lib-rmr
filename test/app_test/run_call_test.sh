@@ -116,7 +116,7 @@ nthreads=3
 dev_base=1					# -D turns off to allow this to run on installed libs
 force_make=0
 si=""
-localhost="localhost"
+localhost="127.0.0.1"
 
 
 
@@ -128,10 +128,9 @@ do
 		-D)	dev_base=0;;
 		-n)	nmsg=$2; shift;;
 		-M)	force_make=1;;
+		-N)	si="";;							# ignored for back compat; NNG not supported; all binaries are si95
+		-S)	si="";;							# ignored for back compat; all binaries are si95 and no _si suffix is used
 		-N) si="";;						# enable NNG testing (off si)
-		-S) si="_si"					# enable SI95 testing
-			localhost="127.0.0.1"
-			;;
 		-t)	nthreads=$2; shift;;
 		-v)	verbose=1;;
 

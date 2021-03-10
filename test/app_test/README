@@ -10,3 +10,24 @@ and on trace data to verify that the messages are being reeived correctly.
 The receiver acks message type 5, so the reciver should receive acks at
 about the volume of 1/10th the number of messages sent.
 
+
+The contents of this directory are generally intended to support automated
+testing via the run_all.sh script. Howerver, there may be times where
+building and running the tools manually is needed. To support this two
+scripts, maker.sh and runner.sh, are provided. The maker.sh script will
+build RMR in ../../.build and install it in a /tmp directory so that the
+needed include files can be found when building the test programmes. The
+runner.sh script sets the environment and then starts the comand given.
+For example, to run the sencder:
+	RMR_SEED_RT=xx.rt runner.sh ./sender 1000 0 0
+
+The runner script accepts both -v and -d to set verbose and debug options
+for RMR when the programme is run.
+
+
+The maker script will always build the test programmes whether they've been
+changed or not.  By default the current .deb packages in ../../.build are
+used, but the -b option can be given to force a rebuild of the RMR libraries
+in addition to building the tools.  If the ../../.build directory does not
+exist, it should automatically be created and RMR built.
+

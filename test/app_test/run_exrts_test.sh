@@ -50,9 +50,9 @@ function leak_anal {
 function run_sender {
 	if (( la_sender ))
 	then
-		leak_anal ./v_sender${si} ${nmsg:-10} ${delay:-100000} ${mtype_start_stop:-0:1}  >/tmp/la.log 2>&1
+		leak_anal ./v_sender ${nmsg:-10} ${delay:-100000} ${mtype_start_stop:-0:1}  >/tmp/la.log 2>&1
 	else
-		./v_sender${si} ${nmsg:-10} ${delay:-100000} ${mtype_start_stop:-0:1}
+		./v_sender ${nmsg:-10} ${delay:-100000} ${mtype_start_stop:-0:1}
 	fi
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
@@ -65,9 +65,9 @@ function run_rcvr {
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
 	if (( la_receiver ))
 	then
-		leak_anal ./ex_rts_receiver${si} $copyclone -p $port >/tmp/la.log 2>&1
+		leak_anal ./ex_rts_receiver $copyclone -p $port >/tmp/la.log 2>&1
 	else
-		./ex_rts_receiver${si} $copyclone -p $port
+		./ex_rts_receiver $copyclone -p $port
 	fi
 	echo $? >/tmp/PID$$.$1.rrc
 }
@@ -77,10 +77,10 @@ function run_rcvr {
 #
 function set_rt {
 	typeset port=4460
-	typeset groups="localhost:4460"
+	typeset groups="127.0.0.1:4460"
 	for (( i=1; i < ${1:-3}; i++ ))
 	do
-		groups="$groups,localhost:$((port+i))"
+		groups="$groups,127.0.0.1:$((port+i))"
 	done
 
 	cat <<endKat >ex_rts.rt
@@ -121,7 +121,6 @@ verbose=0
 nrcvrs=1					# this is sane, but -r allows it to be set up
 use_installed=0
 mtype_start_stop=""
-si=""						# -S will enable si library testing
 
 while [[ $1 == -* ]]
 do
@@ -133,10 +132,10 @@ do
 		-L)	leak_anal=$2; shift;;
 		-m)	mtype_start_stop="$2"; shift;;
 		-M)	mt_call_flag="EX_CFLAGS=-DMTC=1";;	# turn on mt-call receiver option
-		-N)	si="";;								# enable nng based testing
+		-N)	;;									# ignored for back compat; nng not supported
 		-n)	nmsg=$2; shift;;
 		-r) nrcvrs=$2; shift;;
-		-S)	si="_si";;							# run SI95 based binaries
+		-S)	;;									# ignored for back compat; si95 is the only supported transport
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
@@ -208,7 +207,7 @@ export RMR_SEED_RT=./ex_rts.rt
 
 set_rt $nrcvrs														# set up the rt for n receivers
 
-if ! build_path=$build_path make -B $mt_call_flag v_sender${si} ex_rts_receiver${si} >/tmp/PID$$.log 2>&1			# for sanity, always rebuild test binaries
+if ! build_path=$build_path make -B $mt_call_flag v_sender ex_rts_receiver >/tmp/PID$$.log 2>&1			# for sanity, always rebuild test binaries
 then
 	echo "[FAIL] cannot make binaries"
 	echo "====="

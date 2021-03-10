@@ -45,7 +45,7 @@
 # It doesn't happen all of the time, but frequently enough to be annoying. 
 #
 function run_sender {
-	RMR_ASYNC_CONN=0 ./sender${si} $nmsg $delay
+	RMR_ASYNC_CONN=0 ./sender $nmsg $delay
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -55,7 +55,7 @@ function run_rcvr {
 
 	port=$(( 4460 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	./receiver${si} $nmsg $port
+	./receiver $nmsg $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -64,10 +64,10 @@ function run_rcvr {
 #
 function set_rt {
 	typeset port=4460
-	typeset groups="localhost:4460"
+	typeset groups="127.0.0.1:4460"
 	for (( i=1; i < ${1:-3}; i++ ))
 	do
-		groups="$groups;localhost:$((port+i))"
+		groups="$groups;127.0.0.1:$((port+i))"
 	done
 
 	cat <<endKat >multi.rt
@@ -114,10 +114,10 @@ do
 		-b)	rebuild=1; nopull="nopull";;		# enable build but without pull
 		-d)	delay=$2; shift;;
 		-n)	nmsg=$2; shift;;
-		-N)	si="";;								# buld/run NNG binaries (turn off si)
+		-N)	;;								# buld/run NNG binaries (turn off si)
 		-M)	force_make=1;;
 		-r)	nrcvrs=$2; shift;;
-		-S)	si="_si";;							# buld/run SI95 binaries
+		-S)	;;							# buld/run SI95 binaries
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
@@ -169,11 +169,11 @@ export RMR_SEED_RT=./multi.rt
 
 set_rt $nrcvrs						# set up the rt for n receivers
 
-if (( rebuild || force_make )) || [[ ! -f ./sender${si} || ! -f ./receiver${si} ]]
+if (( rebuild || force_make )) || [[ ! -f ./sender || ! -f ./receiver ]]
 then
 	if ! make >/dev/null 2>&1
 	then
-		echo "[FAIL] cannot find sender${si} and/or receiver${si} binary, and cannot make them.... humm?"
+		echo "[FAIL] cannot find sender and/or receiver binary, and cannot make them.... humm?"
 		exit 1
 	fi
 fi

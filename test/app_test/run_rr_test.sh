@@ -43,7 +43,7 @@
 #
 function run_sender {
 	export RMR_RTG_SVC=8990
-	./sender${si} $(( nmsg * nrcvrs ))  $delay $max_mtype
+	./sender $(( nmsg * nrcvrs ))  $delay $max_mtype
 	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 }
 
@@ -53,7 +53,7 @@ function run_rcvr {
 
 	port=$(( 4560 + ${1:-0} ))
 	export RMR_RTG_SVC=$(( 9990 + $1 ))
-	./receiver${si} $nmsg $port
+	./receiver $nmsg $port
 	echo $? >/tmp/PID$$.$1.rrc
 }
 
@@ -63,10 +63,10 @@ function run_rcvr {
 #
 function set_rt {
 	typeset port=4560
-	typeset endpoints="localhost:4560"
+	typeset endpoints="127.0.0.1:4560"
 	for (( i=1; i < ${1:-3}; i++ ))
 	do
-		endpoints="$endpoints,localhost:$((port+i))"
+		endpoints="$endpoints,127.0.0.1:$((port+i))"
 	done
 
 	cat <<endKat >rr.rt
@@ -117,9 +117,9 @@ do
 		-m) max_mtype=$2; shift;;
 		-M) force_make=1;;
 		-n)	nmsg=$2; shift;;
-		-N)	si="";;								# build/run NNG binaries
+		-N) ;;								# ignored for back compat; nng nolonger supported
 		-r)	nrcvrs=$2; shift;;
-		-S)	si="_si";;							# build/run SI95 binaries
+		-S)	;;							# ignored for back compat; only si95 is supported
 		-v)	verbose=1;;
 
 		*)	echo "unrecognised option: $1"
@@ -171,11 +171,11 @@ export RMR_SEED_RT=./rr.rt
 
 set_rt $nrcvrs
 
-if (( rebuild || force_make )) || [[ ! -f ./sender${si} || ! -f ./receiver${si} ]]
+if (( rebuild || force_make )) || [[ ! -f ./sender || ! -f ./receiver ]]
 then
 	if ! make >/dev/null 2>&1
 	then
-		echo "[FAIL] cannot find sender${si} and/or receiver${si} binary, and cannot make them.... humm?"
+		echo "[FAIL] cannot find sender and/or receiver binary, and cannot make them.... humm?"
 		exit 1
 	fi
 fi
