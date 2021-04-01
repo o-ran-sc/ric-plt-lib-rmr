@@ -832,6 +832,70 @@ static void meid_parser( uta_ctx_t* ctx, uta_ctx_t* pctx, rmr_mbuf_t* mbuf, char
 }
 
 /*
+	This will close the current table snarf file (in *.inc) and open a new one.
+	The curent one is renamed. The final file name is determined by the setting of
+	RMR_SNARF_RT, and if not set then the variable RMR_SEED_RT is used and given
+	an additional extension of .snarf.  If neither seed or snarf environment vars are
+	set then this does nothing.
+
+	If this is called before the tmp snarf file is opened, then this just opens the file.
+*/
+static void cycle_snarfed_rt( uta_ctx_t* ctx ) {
+	static int		ok2warn = 0;	// some warnings squelched on first call
+
+	char*	seed_fname;				// the filename from env
+	char	tfname[512];			// temp fname
+	char	wfname[512];			// working buffer for filename
+	char*	snarf_fname = NULL;		// prevent overlay of the static table if snarf_rt not given
+
+	if( ctx == NULL ) {
+		return;
+	}
+
+	if( (snarf_fname = getenv(  ENV_STASH_RT )) == NULL ) {			// specific place to stash the rt not given
+		if( (seed_fname = getenv( ENV_SEED_RT )) != NULL ) {			// no seed, we leave in the default file
+			memset( wfname, 0, sizeof( wfname ) );
+			snprintf( wfname, sizeof( wfname ) - 1, "%s.stash", seed_fname );
+			snarf_fname = wfname;
+		}
+	}
+
+	if( snarf_fname == NULL ) {
+		return;
+	}
+
+	memset( tfname, 0, sizeof( tfname ) );
+	snprintf( tfname, sizeof( tfname ) -1, "%s.inc", snarf_fname );		// must ensure tmp file is moveable
+
+	if( ctx->snarf_rt_fd >= 0 ) {
+		char* msg= "### captured from route manager\n";
+		write( ctx->snarf_rt_fd, msg, strlen( msg ) );
+		if( close( ctx->snarf_rt_fd ) < 0 ) {
+			rmr_vlog( RMR_VL_WARN, "rmr_rtc: unable to close working rt snarf file: %s\n", strerror( errno ) );
+			return;
+		}
+
+		if( unlink( snarf_fname ) < 0  && ok2warn ) {					// first time through this can fail and we ignore it
+			rmr_vlog( RMR_VL_WARN, "rmr_rtc: unable to unlink old static table: %s: %s\n", snarf_fname, strerror( errno ) );
+		}
+
+		if( rename( tfname, snarf_fname ) ) {
+			rmr_vlog( RMR_VL_WARN, "rmr_rtc: unable to move new route table to seed aname : %s -> %s: %s\n", tfname, snarf_fname, strerror( errno ) );
+		} else {
+			rmr_vlog( RMR_VL_INFO, "latest route table info saved in: %s\n", snarf_fname );
+		}
+	}
+	ok2warn = 1;
+
+	ctx->snarf_rt_fd = open( tfname, O_WRONLY | O_CREAT | O_TRUNC, 0660 );
+	if( ctx->snarf_rt_fd < 0 ) {
+		rmr_vlog( RMR_VL_WARN, "rmr_rtc: unable to open trt file: %s: %s\n", tfname, strerror( errno ) );
+	} else {
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rmr_rtc: rt snarf file opened: %s: %s\n", tfname );
+	}
+}
+
+/*
 	Parse a single record recevied from the route table generator, or read
 	from a static route table file.  Start records cause a new table to
 	be started (if a partial table was received it is discarded. Table
@@ -892,6 +956,11 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 		return;
 	}
 
+	if( ctx && ctx->snarf_rt_fd  >= 0 ) {								// if snarfing table as it arrives, write this puppy
+		write( ctx->snarf_rt_fd, buf, strlen( buf ) );
+		write( ctx->snarf_rt_fd, "\n", 1 );
+	}
+
 	while( *buf && isspace( *buf ) ) {							// skip leading whitespace
 		buf++;
 	}
@@ -924,6 +993,10 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 			case 'n':												// newrt|{start|end}
 				tokens[1] = clip( tokens[1] );
 				if( strcmp( tokens[1], "end" ) == 0 ) {				// wrap up the table we were building
+					if( ctx && ctx->snarf_rt_fd >= 0 ) {
+						cycle_snarfed_rt( ctx );					// make it available and open a new one
+					}
+
 					if( ntoks >2 ) {
 						if( ctx->new_rtable->updates != atoi( tokens[2] ) ) {	// count they added didn't match what we received
 							rmr_vlog( RMR_VL_ERR, "rmr_rtc: RT update had wrong number of records: received %d expected %s\n",
@@ -1010,6 +1083,9 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 				if( strcmp( tokens[1], "end" ) == 0 ) {				// wrap up the table we were building
 					if( ctx->new_rtable == NULL ) {					// update table not in progress
 						break;
+					}
+					if( ctx && ctx->snarf_rt_fd >= 0 ) {
+						cycle_snarfed_rt( ctx );					// make it available and open a new one
 					}
 
 					if( ntoks >2 ) {

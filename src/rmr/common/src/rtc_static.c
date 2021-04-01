@@ -117,13 +117,18 @@ static void* rtc_file( void* vctx ) {
 	ctx->flags |= CFL_NO_RTACK;				// no attempt to ack when reading from a file
 	while( 1 ) {
 		vlevel = refresh_vlevel( 0 );
-		read_static_rt( ctx, vlevel );						// seed the route table if one provided
+		read_static_rt( ctx, vlevel );						// refresh from the file
 
 		if( ctx->shutdown != 0 ) {							// allow for graceful termination and unit testing
 			refresh_vlevel( 1 );								// close the verbose file if open
 			return NULL;
 		}
-		sleep( 60 );
+
+		if( ctx->rtable_ready ) {
+			sleep( 60 );
+		} else {
+			sleep( 1 );										// check every second until we have a good one
+		}
 	}
 }
 
@@ -186,7 +191,7 @@ static void rtc_parse_msg( uta_ctx_t *ctx, uta_ctx_t* pvt_cx, rmr_mbuf_t* msg, i
 				}
 
 				if( vlevel > 1 ) {
-					rmr_vlog_force( RMR_VL_DEBUG, "rmr_rtc_parse_msg: processing (%s)\n", curr );
+					rmr_vlog_force( RMR_VL_DEBUG, "rmr_rtc_parse_msg: snarf_fd=%d processing (%s)\n", ctx ? ctx->snarf_rt_fd : -99, curr );
 				}
 				parse_rt_rec( ctx, pvt_cx, curr, vlevel, msg );		// parse record and add to in progress table; ack using rts to msg
 
@@ -353,6 +358,8 @@ static void* rtc( void* vctx ) {
 	}
 
 	ctx->rtg_whid = -1;
+
+	cycle_snarfed_rt( ctx );				// cause the nrt to be opened
 
 	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rtc thread is running and listening; listening for rtg conns on %s\n", my_port );
 

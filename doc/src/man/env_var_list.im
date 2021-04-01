@@ -164,6 +164,14 @@
     The value of this variable is also used for Route Manager messages which are
     sent via an RMR connection.
 
+&ditem(RMR_STASH_RT) Names the file where RMR should write the latest update it receives
+	from the source of route tables (generally Route Manager).  This is meant
+	to assist with debugging and/or troubleshooting when it is suspected that
+	route information isn't being sent and/or received correctly. If this variable
+	is not given, RMR will save the last update using the &cw(RMR_SEED_RT) variable
+	value and adding a &cw(.stash) suffix to the filename so as not to overwrite
+	the static table.
+
 &ditem(RMR_VCTL_FILE) This supplies the name of a verbosity control file. The core
     RMR functions do not produce messages unless there is a critical failure. However,
     the route table collection thread, not a part of the main message processing

@@ -22,6 +22,15 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2021 March 31; version 4.7.0
+----------------------------
+
+The route table collector thread will capture the current
+"offering" from the Route Manager (table generator) if the
+RMR_SEED_RT environment variable is set.
+
+
+
 2021 March 10; version 4.6.1
 ----------------------------
 

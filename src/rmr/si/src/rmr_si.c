@@ -600,7 +600,7 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 
 	if( ! announced ) {
 		rmr_set_vlevel( RMR_VL_INFO );		// we WILL announce our version
-		rmr_vlog( RMR_VL_INFO, "ric message routing library on SI95 p=%s mv=%d flg=%02x (%s %s.%s.%s built: %s)\n",
+		rmr_vlog( RMR_VL_INFO, "ric message routing library on SI95 p=%s mv=%d flg=%02x id=a (%s %s.%s.%s built: %s)\n",
 			uproto_port, RMR_MSG_VER, flags, QUOTE_DEF(GIT_ID), QUOTE_DEF(MAJOR_VER), QUOTE_DEF(MINOR_VER), QUOTE_DEF(PATCH_VER), __DATE__ );
 		announced = 1;
 
@@ -628,6 +628,7 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 	memset( ctx, 0, sizeof( uta_ctx_t ) );
 
 	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, " rmr_init: allocating 266 rivers\n" );
+	ctx->snarf_rt_fd = -1;
 	ctx->nrivers = MAX_RIVERS;						// the array allows for fast index mapping for fd values < max
 	ctx->rivers = (river_t *) malloc( sizeof( river_t ) * ctx->nrivers );
 	ctx->river_hash = rmr_sym_alloc( 129 );				// connections with fd values > FD_MAX have to e hashed

@@ -60,6 +60,7 @@ typedef struct uta_ctx  uta_ctx_t;
 #define ENV_RTG_PORT	"RMR_RTG_SVC"		// the port we'll listen on for rtg connections (deprecated; see RTG_SVC and CTL_PORT)
 #define ENV_RTG_ADDR	"RMR_RTG_SVC"		// the address we will connect to for route manager updates
 #define ENV_SEED_RT		"RMR_SEED_RT"		// where we expect to find the name of the seed route table
+#define ENV_STASH_RT	"RMR_STASH_RT"		// location for the last Route Table received from the generator we snarfed and saved
 #define ENV_SEED_MEMAP	"RMR_SEED_MEMAP"	// where we expect to find the name of the seed route table
 #define ENV_RTG_RAW		"RMR_RTG_ISRAW"		// if > 0 we expect route table gen messages as raw (not sent from an RMr application)
 #define ENV_VERBOSE_FILE "RMR_VCTL_FILE"	// file where vlevel may be managed for some (non-time critical) functions

@@ -337,11 +337,54 @@ initialisation and if set is expected to reference a file
 containing a route table. This table will be loaded and used
 until overlaid by a table sent by the *Route Manager*.
 
-For testing, the static table will be reloaded periodically
-if the ``RMR_RTG_SVC`` environment variable is set to -1.
-When this testing feature is enabled RMR will not listen for
-*Route Manager* connections, nor will it attempt to request a
+To simulate dynamic reloads during testing, and for some
+specialised use cases, the static table will be reloaded
+periodically if the ``RMR_RTG_SVC`` environment variable is
+set to -1. When set to -1 RMR will not listen for *Route
+Manager* connections, nor will it attempt to request a
 dynamic table.
+
+If the file given by the ``RMR_SEED_RT`` variable does not
+exist, and the ``RMR_RTG_SVC`` variable is set to -1, RMR
+will block until the table is created. This simulates a
+delayed dynamic load during testing, and can be used when the
+xAPP is reading the route table saved by another local
+process rather than one sent directly by the *Route Manager*.
+
+
+Table Stashing
+--------------
+
+To assist with debugging, and to allow an application to
+share the route table received from *Route Manager*, RMR will
+stash the route table updates it received. Updates are
+stashed in a file named by the ``RMR_STASH_RT`` environment
+variable, and if that variable is not present, the
+``RR_SEED_RT`` variable will be used with an added
+``.stash`` extension.
+
+The primary use of route table stashing is to assist with
+debugging of applications, and because there are risks for an
+application to share its table, table sharing is **NOT**
+recommended. Table sharing can be enabled by setting the
+``RMR_STASH_RT`` variable for the application that will be
+the source of the route table updates, and using the file
+named for tha application when defining the
+``RMR_SEED_RT`` variable for applications which are to read
+the table information. Obviously, all applications must be
+running in the same container, on the same host, or have a
+common disk volum between their environments. Known risks to
+using table sharing include
+
+
+* An update to the table (not a complete table) may be
+  received prior to one or more readers accessing the file,
+  and thus the reader may not receive a valid or complete
+  table.
+
+* Any entry which has a sender:port associated with the
+  message type will likely be ignored by all readers.
+
 
 
 Routing Using MEID

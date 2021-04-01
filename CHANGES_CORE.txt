@@ -5,6 +5,11 @@
 # API and build change  and fix summaries. Doc corrections
 # and/or changes are not mentioned here; see the commit messages.
 
+2021 March 31; version 4.7.0
+	The route table collector thread will capture the current "offering"
+	from the Route Manager (table generator) if the RMR_SEED_RT environment
+	variable is set.
+
 2021 March 10; version 4.6.1
 	Corrected unit test "framework" to make manual testing easier, and to
 	add the ability to set the code optimisation level via the CMake

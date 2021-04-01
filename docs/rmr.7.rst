@@ -383,6 +383,17 @@ if undefined.
           The value of this variable is also used for Route Manager
           messages which are sent via an RMR connection.
 
+      * - **RMR_STASH_RT**
+        -
+          Names the file where RMR should write the latest update it
+          receives from the source of route tables (generally Route
+          Manager). This is meant to assist with debugging and/or
+          troubleshooting when it is suspected that route information
+          isn't being sent and/or received correctly. If this variable
+          is not given, RMR will save the last update using the
+          ``RMR_SEED_RT`` variable value and adding a ``.stash`` suffix
+          to the filename so as not to overwrite the static table.
+
       * - **RMR_VCTL_FILE**
         -
           This supplies the name of a verbosity control file. The core
