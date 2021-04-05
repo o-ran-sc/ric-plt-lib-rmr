@@ -45,7 +45,7 @@ static inline void queue_normal( uta_ctx_t* ctx, rmr_mbuf_t* mbuf ) {
 		//dcount++;
 		ctx->dcount++;
 		if( time( NULL ) > last_warning + 60 ) {			// issue warning no more frequently than every 60 sec
-			rmr_vlog( RMR_VL_ERR, "rmr_mt_receive: application is not receiving fast enough; %ld msgs dropped since last warning\n", ctx->dcount );
+			rmr_vlog( RMR_VL_ERR, "rmr_mt_receive: application is not receiving fast enough; %d msgs dropped since last warning\n", ctx->dcount );
 			last_warning = time( NULL );
 			ctx->dcount = 0;
 		}

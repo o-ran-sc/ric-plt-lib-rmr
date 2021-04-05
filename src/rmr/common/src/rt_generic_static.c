@@ -891,7 +891,7 @@ static void cycle_snarfed_rt( uta_ctx_t* ctx ) {
 	if( ctx->snarf_rt_fd < 0 ) {
 		rmr_vlog( RMR_VL_WARN, "rmr_rtc: unable to open trt file: %s: %s\n", tfname, strerror( errno ) );
 	} else {
-		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rmr_rtc: rt snarf file opened: %s: %s\n", tfname );
+		if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "rmr_rtc: rt snarf file opened: %s\n", tfname );
 	}
 }
 
@@ -1084,7 +1084,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 					if( ctx->new_rtable == NULL ) {					// update table not in progress
 						break;
 					}
-					if( ctx && ctx->snarf_rt_fd >= 0 ) {
+					if( ctx->snarf_rt_fd >= 0 ) {
 						cycle_snarfed_rt( ctx );					// make it available and open a new one
 					}
 
