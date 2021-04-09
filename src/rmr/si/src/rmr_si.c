@@ -733,7 +733,7 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 
 	if( (tok = getenv( ENV_WARNINGS )) != NULL ) {
 		if( *tok == '1' ) {
-			ctx->flags |= CTXFL_WARN;					// turn on some warnings (not all, just ones that shouldn't impact performance)
+			ctx->flags |= CFL_WARN;					// turn on some warnings (not all, just ones that shouldn't impact performance)
 		}
 	}
 
@@ -882,6 +882,10 @@ extern void rmr_close( void* vctx ) {
 
 	if( (ctx = (uta_ctx_t *) vctx) == NULL ) {
 		return;
+	}
+
+	if( ctx->seed_rt_fname != NULL ) {
+		free( ctx->seed_rt_fname );
 	}
 
 	ctx->shutdown = 1;

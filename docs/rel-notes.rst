@@ -22,6 +22,21 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2021 April 9; version 4.7.2
+---------------------------
+
+Ensure that route table update received from route generator
+is not applied before a full route table is received.
+
+
+
+2021 April 2; version 4.7.1
+---------------------------
+
+Correct issues found during static code analysis.
+
+
+
 2021 March 31; version 4.7.0
 ----------------------------
 

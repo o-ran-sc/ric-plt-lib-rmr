@@ -1,3 +1,4 @@
+
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
@@ -500,6 +501,10 @@ static int rt_test( ) {
 		errors += fail_if_nil( ctx->rtable, "edge case route table didn't generate a pointer into the context" );
 
 		unsetenv( "RMR_SEED_RT" );			// remove for next read try
+		if( ctx && ctx->seed_rt_fname != NULL ) {
+			free( ctx->seed_rt_fname );
+			ctx->seed_rt_fname = NULL;
+		}
 		read_static_rt( ctx, 0 );			// drive for not there coverage
 	}
 
@@ -571,6 +576,10 @@ static int rt_test( ) {
 	ctx->rtable = NULL;
 	ctx->my_name = strdup( "my_host_name" );		// set up to load a rtable
 	ctx->my_ip = strdup( "192.168.1.30" );
+	if( ctx && ctx->seed_rt_fname != NULL ) {
+		free( ctx->seed_rt_fname );
+		ctx->seed_rt_fname = NULL;
+	}
 	gen_rt( ctx );									// generate a route table with meid entries and hang off ctx
 
 	mbuf = rmr_alloc_msg( ctx, 2048 );               //  buffer to play with

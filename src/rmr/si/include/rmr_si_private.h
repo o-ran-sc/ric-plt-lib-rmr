@@ -122,7 +122,7 @@ struct uta_ctx {
 	int	shutdown;				// thread notification if we need to tell them to stop
 	int max_mlen;				// max message length payload+header
 	int	max_plen;				// max payload length
-	int	flags;					// CTXFL_ constants
+	int	flags;					// CFL_ constants
 	int nrtele;					// number of elements in the routing table
 	int send_retries;			// number of retries send_msg() should attempt if eagain/timeout indicated by nng
 	int	trace_data_len;			// number of bytes to allocate in header for trace data
@@ -132,6 +132,7 @@ struct uta_ctx {
 	int rtable_ready;			// set to true when rt is received or loaded
 	int snarf_rt_fd;			// the file des where we save the last rt from RM
 	int dcount;					// drop counter when app is slow
+	char*	seed_rt_fname;		// the static/seed route table; name captured at start
 	route_table_t* rtable;		// the active route table
 	route_table_t* old_rtable;	// the previously used rt, sits here to allow for draining
 	route_table_t* new_rtable;	// route table under construction

@@ -852,7 +852,7 @@ static void cycle_snarfed_rt( uta_ctx_t* ctx ) {
 		return;
 	}
 
-	if( (snarf_fname = getenv(  ENV_STASH_RT )) == NULL ) {			// specific place to stash the rt not given
+	if( (snarf_fname = getenv(  ENV_STASH_RT )) == NULL ) {				// specific place to stash the rt not given
 		if( (seed_fname = getenv( ENV_SEED_RT )) != NULL ) {			// no seed, we leave in the default file
 			memset( wfname, 0, sizeof( wfname ) );
 			snprintf( wfname, sizeof( wfname ) - 1, "%s.stash", seed_fname );
@@ -861,6 +861,7 @@ static void cycle_snarfed_rt( uta_ctx_t* ctx ) {
 	}
 
 	if( snarf_fname == NULL ) {
+		rmr_vlog( RMR_VL_DEBUG, "cycle_snarf: no file to save in" );
 		return;
 	}
 
@@ -1018,6 +1019,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 
 						send_rt_ack( pctx, mbuf, ctx->table_id, RMR_OK, NULL );
 						ctx->rtable_ready = 1;							// route based sends can now happen
+						ctx->flags |= CFL_FULLRT;						// indicate we have seen a complete route table
 					} else {
 						if( DEBUG > 1 ) rmr_vlog_force( RMR_VL_DEBUG, "end of route table noticed, but one was not started!\n" );
 						ctx->new_rtable = NULL;
@@ -1079,6 +1081,11 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 				break;
 
 			case 'u':												// update current table, not a total replacement
+				if( ! ctx->flags & CFL_FULLRT ) {					// we cannot update until we have a full table from route generator
+					rmr_vlog( RMR_VL_WARN, "route table update ignored: full table not previously recevied" );
+					break;
+				}
+
 				tokens[1] = clip( tokens[1] );
 				if( strcmp( tokens[1], "end" ) == 0 ) {				// wrap up the table we were building
 					if( ctx->new_rtable == NULL ) {					// update table not in progress
@@ -1158,8 +1165,13 @@ static void read_static_rt( uta_ctx_t* ctx, int vlevel ) {
 	char*	eor;				// end of the record
 	int		rcount = 0;			// record count for debug
 
-	if( (fname = getenv( ENV_SEED_RT )) == NULL ) {
-		return;
+	if( (fname = ctx->seed_rt_fname) == NULL ) {
+		if( (fname = getenv( ENV_SEED_RT )) == NULL ) {
+			return;
+		}
+
+		ctx->seed_rt_fname = strdup( fname );
+		fname = ctx->seed_rt_fname;
 	}
 
 	if( (fbuf = ensure_nlterm( uta_fib( fname ) ) ) == NULL ) {			// read file into a single buffer (nil terminated string)

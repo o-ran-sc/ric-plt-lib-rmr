@@ -83,11 +83,11 @@ typedef struct uta_ctx  uta_ctx_t;
 									// internal flags, must be > than UFLAG_MASK
 //#define IFL_....
 
+									// context flags
 #define CFL_MTC_ENABLED	0x01		// multi-threaded call is enabled
 #define CFL_NO_RTACK	0x02		// no route table ack needed when end received
-
-									// context flags
-#define CTXFL_WARN		0x01		// ok to warn on stderr for some things that shouldn't happen
+#define CFL_WARN		0x04		// ok to warn on stderr for some things that shouldn't happen
+#define CFL_FULLRT		0x08		// set when we have received an initial full route table (prevent updates before one arrives)
 
 									// msg buffer flags
 #define MFL_ZEROCOPY	0x01		// the message is an allocated zero copy message and can be sent.

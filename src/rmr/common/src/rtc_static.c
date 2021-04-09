@@ -310,6 +310,7 @@ static void* rtc( void* vctx ) {
 	ctx->flags |= CFL_NO_RTACK;				// don't ack when reading from a file
 	read_static_rt( ctx, vlevel );			// seed the route table if one provided
 	ctx->flags &= ~CFL_NO_RTACK;
+	ctx->flags &= ~CFL_FULLRT;				// even though rmr-ready goes true, the seed doesn't count as a full RT from route generator
 
 
 	my_port = getenv( ENV_CTL_PORT );				// default port to listen on (likely 4561)

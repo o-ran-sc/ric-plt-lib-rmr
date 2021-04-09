@@ -45,6 +45,7 @@ static inline uta_ctx_t *mk_dummy_ctx() {
 	}
 
 	memset( ctx, 0, sizeof( *ctx ) );
+	ctx->snarf_rt_fd = -1;
 
 	return ctx;
 }
@@ -70,6 +71,7 @@ static inline uta_ctx_t *mk_dummy_ctx() {
 	ctx->si_ctx = malloc( 1024 );
 	ctx->my_name = strdup( "hostname1" );
 	ctx->my_ip = strdup( "123.45.67.89" );
+	ctx->snarf_rt_fd = -1;
 
 	ctx->rtgate = (pthread_mutex_t *) malloc( sizeof( *ctx->rtgate ) );
     if( ctx->rtgate != NULL ) {

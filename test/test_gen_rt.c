@@ -45,6 +45,7 @@ static void gen_rt( uta_ctx_t* ctx ) {
 	int		fd;
 	char* 	rt_stuff;		// strings for the route table
 
+ctx->flags |= 0x08;
 	fd = open( "utesting.rt", O_WRONLY | O_CREAT, 0600 );
 	if( fd < 0 ) {
 		fprintf( stderr, "<BUGGERED> unable to open file for testing route table gen\n" );
