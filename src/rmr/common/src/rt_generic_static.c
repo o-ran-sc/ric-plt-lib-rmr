@@ -1081,7 +1081,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 				break;
 
 			case 'u':												// update current table, not a total replacement
-				if( ! ctx->flags & CFL_FULLRT ) {					// we cannot update until we have a full table from route generator
+				if( ! (ctx->flags & CFL_FULLRT) ) {					// we cannot update until we have a full table from route generator
 					rmr_vlog( RMR_VL_WARN, "route table update ignored: full table not previously recevied" );
 					break;
 				}

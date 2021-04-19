@@ -49,12 +49,16 @@
 #include "tools_static.c"
 
 #include "tools_static_test.c"
+#include "wrapper_static_test.c"
 
 int main( ) {
 	int errors = 0;
 
-	fprintf( stderr, ">>>> starting tools_test\n" );
+	fprintf( stderr, "<INFO> starting tools_test\n" );
 	errors += tools_test() > 0;
+
+	fprintf( stderr, "<INFO> testing wrapper\n" );
+	errors += wrapper_test();
 
 	test_summary( errors, "tool tests" );
 	if( errors == 0 ) {

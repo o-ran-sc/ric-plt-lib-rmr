@@ -1,8 +1,9 @@
+	if_addrs_t*	ifl;			// interface lis2
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	    Copyright (c) 2019 Nokia
-	    Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019-2021 Nokia
+	    Copyright (c) 2018-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,13 +32,94 @@
 	Date:		3 April 2019
 */
 
-// ------------ zero termianted buffer ---------------------------------------------------------
+#define MAX_TOKENS 127
+
+// -------------------- testing support internal functions ------------------------------
+/*
+	Returns an interface name that is valid in this environment (keeps us from
+	having to know/guess a name to test with.
+*/
+static char* get_ifname( ) {
+	struct	ifaddrs *ifs;		// pointer to head
+	struct	ifaddrs *ele;		// pointer into the list
+	char*	rstr = NULL;		// return string
+	char    octs[NI_MAXHOST+1];
+
+	getifaddrs( &ifs );
+	for( ele = ifs; ele; ele = ele->ifa_next ) {
+		if( ele && strcmp( ele->ifa_name, "lo" ) ) {
+			memset( octs, 0, sizeof( octs ) );
+			getnameinfo( ele->ifa_addr, sizeof( struct sockaddr_in6 ),  octs, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
+			if( *octs ) {
+				rstr = strdup( ele->ifa_name );
+				fprintf( stderr, "<INFO> found interface with address: %s\n", rstr );
+				break;
+			}
+		}
+	}
+
+	if( rstr == NULL ) {
+		fprintf( stderr, "<ERROR> no interface with an address was found!\n" );
+	}
+	return rstr;
+}
+
+/*
+	Build an if-addr list from what we "see" on the current system. Keeps us from
+	having to guess about what we _might_ find in some random test setup.
+	If the inc_lo0 boolean is true, then the loop back address(es) will be
+	included.
+*/
+static if_addrs_t* get_iflist( int inc_lo0 ) {
+	if_addrs_t* l;
+	struct	ifaddrs *ifs;		// pointer to head
+	struct	ifaddrs *ele;		// pointer into the list
+	char    octs[NI_MAXHOST+1];
+	int		max_addrs = 128;
+
+
+	if( (l = (if_addrs_t *) malloc( sizeof( if_addrs_t ) )) == NULL ) {
+		fprintf( stderr, "<FAIL> malloc of if_addrs failed\n" );
+		return NULL;
+	}
+	memset( l, 0, sizeof( if_addrs_t ) );
+	l->addrs = (char **) malloc( sizeof( char* ) * max_addrs );
+	if( l->addrs == NULL ) {
+		fprintf( stderr, "<FAIL> malloc of if_addrs array failed\n" );
+		free( l );
+		return NULL;
+	}
+
+	getifaddrs( &ifs );
+	for( ele = ifs; ele; ele = ele->ifa_next ) {
+		if( ele && (inc_lo0 || strcmp( ele->ifa_name, "lo" )) ) {
+			memset( octs, 0, sizeof( octs ) );
+			getnameinfo( ele->ifa_addr, sizeof( struct sockaddr_in6 ),  octs, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
+			if( *octs  && l->naddrs < max_addrs ) {
+				l->addrs[l->naddrs] = strdup( ele->ifa_name );
+				l->naddrs++;
+			}
+		}
+	}
+
+	return l;
+}
+
+
+
+// ------------ internal functions to drive various categories of tests --------------------------------------
+
 static int ztbf_test() {
 	int errors = 0;
 	char buf[128];
 	char*	sshort = "Stand up and cheer! Cheer long and loud for old Ohio.";
 	char*	slong = "Now is the time for the bobcat in the forest to make its way back to Court St for a round of pints at the Pub.";
 	int l1;
+
+	l1 = zt_buf_fill( NULL, sshort, 64 );		// drive for coverage
+	errors += fail_not_equal( l1, -1, "nil check (buf) on zt_buf_fill did not return expected value" );
+	l1 = zt_buf_fill( buf, NULL, 64 );
+	errors += fail_not_equal( l1, -1, "nil check (str) on zt_buf_fill did not return expected value" );
 
 	l1 = zt_buf_fill( buf, sshort, 64 );
 	errors += fail_not_equal( l1, strlen( sshort ), "zt_buf_fill of short buf returned unexpected len" );
@@ -57,65 +139,23 @@ static int ztbf_test() {
 }
 
 /*
-	Returns an interface name that is valid in this environment (keeps us from
-	having to know/guess a name to test with.
+	various tokenising tests.
 */
-static char* get_ifname( ) {
-	if_addrs_t* l;
-	struct	ifaddrs *ifs;		// pointer to head
-	struct	ifaddrs *ele;		// pointer into the list
-	char*	rstr = NULL;		// return string
-	char    octs[NI_MAXHOST+1];
-
-
-	if( (l = (if_addrs_t *) malloc( sizeof( if_addrs_t ) )) == NULL ) {
-		return NULL;
-	}
-	memset( l, 0, sizeof( if_addrs_t ) );
-	l->addrs = (char **) malloc( sizeof( char* ) * 128 );
-	if( l->addrs == NULL ) {
-		free( l );
-		return NULL;
-	}
-
-	getifaddrs( &ifs );
-	for( ele = ifs; ele; ele = ele->ifa_next ) {
-		if( ele && strcmp( ele->ifa_name, "lo" ) ) {
-			memset( octs, 0, sizeof( octs ) );
-			getnameinfo( ele->ifa_addr, sizeof( struct sockaddr_in6 ),  octs, NI_MAXHOST, NULL, 0, NI_NUMERICHOST );
-			if( *octs ) {
-				rstr = strdup( ele->ifa_name );
-				fprintf( stderr, "<INFO> found interface with address: %s\n", rstr );
-				break;
-			}
-		}
-	}
-
-	free( l );
-	if( rstr == NULL ) {
-		fprintf( stderr, "<ERROR> no interface with an address was found!\n" );
-	}
-	return rstr;
-}
-
-static int tools_test( ) {
+static int tok_tests( ) {
 	int i;
 	int j;
-	int errors = 0;
-	char* tokens[127];
-	char* buf = "2,Fred,Wilma,Barney,Betty,Dino,Pebbles,Bambam,Mr. Slate,Gazoo";
 	char*	dbuf;				// duplicated buf since C marks a const string is unumtable
-	char*	hname;
-	char*	ip;					// ip address string
-	uta_ctx_t ctx;				// context for uta_lookup test
-	void*	if_list;
+	char* buf = "2,Fred,Wilma,Barney,Betty,Dino,Pebbles,Bambam,Mr. Slate,Gazoo";
+	char* tokens[MAX_TOKENS];
+	int errors = 0;
+	if_addrs_t*	ifl;			// interface list
+	int		ntokens;
 
+	i = uta_tokenise( NULL, tokens, MAX_TOKENS, ',' );			// nil check coverage
+	errors += fail_not_equal( i, 0, "uta_tokenise did not fail when given nil pointer" );
 
-	uta_dump_env();
-
-	// ------------------ tokenise tests -----------------------------------------------------------
 	dbuf = strdup( buf );
-	i = uta_tokenise( dbuf, tokens, 127, ',' );
+	i = uta_tokenise( dbuf, tokens, MAX_TOKENS, ',' );
 	errors += fail_not_equal( i, 10, "unexpected number of tokens returned (comma sep)" );
 	for( j = 0; j < i; j++ ) {
 		//fprintf( stderr, ">>>> [%d] (%s)\n", j, tokens[j] );
@@ -125,60 +165,31 @@ static int tools_test( ) {
 
 	free( dbuf );
 	dbuf = strdup( buf );
-	i = uta_tokenise( dbuf, tokens, 127, '|' );
+	i = uta_tokenise( dbuf, tokens, MAX_TOKENS, '|' );
 	errors += fail_not_equal( i, 1, "unexpected number of tokens returned (bar sep)" );
 	free( dbuf );
 
-	// ------------ has str tests -----------------------------------------------------------------
-	j = uta_has_str( buf, "Mr. Slate", ',', 1 );			// should fail (-1) because user should use strcmp in this situation
-	errors += fail_if_true( j >= 0, "test to ensure has str rejects small max" );
+	if( (ifl = get_iflist( 1 )) == NULL ) {
+		errors++;
+		fprintf( stderr, "<FAIL> unable to generate an interface list for tokenising tests\n" );
+		return errors;
+	}
 
-	j = uta_has_str( buf, "Mr. Slate", ',', 27 );
-	errors += fail_if_true( j < 0, "has string did not find Mr. Slate" );
+	dbuf = strdup( "lo0,en0,en1,wlan0,wlan1"  );		// must have a mutable string for call
+	ntokens = uta_rmip_tokenise( dbuf, ifl, tokens, MAX_TOKENS, ',' );		// should find at least lo0
+	errors += fail_if_true( ntokens < 1, "rmip tokenise didn't find an interface in the list" );
 
-	j = uta_has_str( buf, "Mrs. Slate", ',', 27 );
-	errors += fail_if_true( j >= 0, "has string not found Mrs. Slate" );
+	return errors;
+}
 
-	// ------------ host name 2 ip tests ---------------------------------------------------------
-	hname = uta_h2ip( "192.168.1.2" );
-	errors += fail_not_equal( strcmp( hname, "192.168.1.2" ), 0, "h2ip did not return IP address when given address" );
-	errors += fail_if_nil( hname, "h2ip did not return a pointer" );
-	free( hname );
-
-	hname = uta_h2ip( "yahoo.com" );
-	errors += fail_if_nil( hname, "h2ip did not return a pointer" );
-	free( hname );
-
-	hname = uta_h2ip( "yahoo.com:1234" );							// should ignore the port
-	errors += fail_if_nil( hname, "h2ip did not return a pointer" );
-	free( hname );
-
-	// ------------ rtg lookup test -------------------------------------------------------------
-#ifdef KEEP
-	// pub/sub route table generator is deprecated and should be removed at this point
-	ctx.rtg_port = 0;
-	ctx.rtg_addr = NULL;
-
-	i = uta_lookup_rtg( NULL );						// ensure it handles a nil context
-	errors += fail_if_true( i, "rtg lookup returned that it found something when not expected to (nil context)" );
-
-	setenv( "RMR_RTG_SVC", "localhost:1234", 1);
-	i = uta_lookup_rtg( &ctx );
-	errors += fail_if_false( i, "rtg lookup returned that it did not find something when expected to" );
-	errors += fail_if_nil( ctx.rtg_addr, "rtg lookup did not return a pointer (with port)" );
-	errors += fail_not_equal( ctx.rtg_port, 1234, "rtg lookup did not capture the port" );
-
-	setenv( "RMR_RTG_SVC", "localhost", 1);			// test ability to generate default port
-	uta_lookup_rtg( &ctx );
-	errors += fail_if_nil( ctx.rtg_addr, "rtg lookup did not return a pointer (no port)" );
-	errors += fail_not_equal( ctx.rtg_port, 5656, "rtg lookup did not return default port" );
-
-	unsetenv( "RMR_RTG_SVC" );						// this should fail as the default name (rtg) will be unknown during testing
-	i = uta_lookup_rtg( &ctx );
-	errors += fail_if_true( i, "rtg lookup returned that it found something when not expected to" );
-#endif
-
-	// ------------ my_ip stuff -----------------------------------------------------------------
+/*
+	Tests related to finding and validating my ip address.
+*/
+static int my_ip() {
+	int i;
+	int errors = 0;
+	char*	ip;					// ip address string
+	void*	if_list;
 
 	if_list = mk_ip_list( "1235" );
 	errors += fail_if_nil( if_list, "mk_ip_list returned nil pointer" );
@@ -239,9 +250,97 @@ static int tools_test( ) {
 		fprintf( stderr, "<SKIP> test skipped because no interface with address could be found on system" );
 	}
 
-	errors += ztbf_test();					// test the zero term buffer fill function
+	return errors;
+}
 
-// -------------------------------------------------------------------------------------------------
+/*
+	String tools related tests.
+*/
+static int str_tests() {
+	int j;
+	char* buf = "2,Fred,Wilma,Barney,Betty,Dino,Pebbles,Bambam,Mr. Slate,Gazoo";
+	int errors = 0;
 
+	j = uta_has_str( buf, "Mr. Slate", ',', 1 );			// should fail (-1) because user should use strcmp in this situation
+	errors += fail_if_true( j >= 0, "test to ensure has str rejects small max" );
+
+	j = uta_has_str( buf, "Mr. Slate", ',', 27 );
+	errors += fail_if_true( j < 0, "has string did not find Mr. Slate" );
+
+	j = uta_has_str( buf, "Mrs. Slate", ',', 27 );
+	errors += fail_if_true( j >= 0, "has string not found Mrs. Slate" );
+
+	return errors;
+}
+
+/*
+	Tests related to host name tools.
+*/
+static int hostname_tests() {
+	int errors = 0;
+	char*	hname;
+
+
+	hname = uta_h2ip( "192.168.1.2" );
+	errors += fail_not_equal( strcmp( hname, "192.168.1.2" ), 0, "h2ip did not return IP address when given address" );
+	errors += fail_if_nil( hname, "h2ip did not return a pointer" );
+	free( hname );
+
+	hname = uta_h2ip( "yahoo.com" );
+	errors += fail_if_nil( hname, "h2ip did not return a pointer" );
+	free( hname );
+
+	hname = uta_h2ip( "yahoo.com:1234" );							// should ignore the port
+	errors += fail_if_nil( hname, "h2ip did not return a pointer" );
+	free( hname );
+
+	hname = uta_h2ip( "bugaboofoo.com:1234" );							// should not be there
+	errors += fail_not_nil( hname, "h2ip lookup returned non-nil when given bogus name" );
+
+	return errors;
+}
+
+/*
+	Misc coverage mostly.
+*/
+static int misc_tests() {
+	int errors = 0;
+	int v;
+	if_addrs_t*	ifl;			// interface list
+
+	if( (ifl = get_iflist( 1 )) != NULL ) {
+		v = is_this_myip( ifl, NULL );
+		errors += fail_if_false( v == 0, "is this my ip didn't fail when given nil address" );
+	}
+
+	return errors;
+}
+// ----------------------------------------------------------------------------------------------------------------------
+
+
+/*
+	Primary test function driven by the testing main().
+*/
+static int tools_test( ) {
+	//int i;
+	//int j;
+	int errors = 0;
+	//char* tokens[127];
+	//char* buf = "2,Fred,Wilma,Barney,Betty,Dino,Pebbles,Bambam,Mr. Slate,Gazoo";
+	//char*	dbuf;				// duplicated buf since C marks a const string is unumtable
+	//char*	hname;
+	//char*	ip;					// ip address string
+	//uta_ctx_t ctx;				// context for uta_lookup test
+	//void*	if_list;
+
+	uta_dump_env();
+
+	errors += tok_tests();
+	errors += my_ip();
+	errors += str_tests();
+	errors += hostname_tests();
+	errors += ztbf_test();
+
+	test_summary( errors, "tools" );
 	return !!errors;			// 1 or 0 regardless of count
 }
