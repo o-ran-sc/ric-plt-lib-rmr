@@ -1,8 +1,8 @@
 // vim: ts=4 sw=4 noet :
 /*
 ==================================================================================
-	Copyright (c) 2019-2020 Nokia
-	Copyright (c) 2018-2020 AT&T Intellectual Property.
+	Copyright (c) 2019-2021 Nokia
+	Copyright (c) 2018-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -56,11 +56,13 @@
 #include "si95/socket_if.h"
 #include "si95/siproto.h"
 
+
 #define SI95_BUILD	1			// we drop some common functions for si
 
 #include "rmr.h"				// things the users see
 #include "rmr_agnostic.h"		// agnostic things (must be included before private)
 #include "rmr_si_private.h"		// things that we need too
+
 #include "rmr_symtab.h"
 #include "rmr_logging.h"
 
@@ -78,6 +80,28 @@
 
 //------------------------------------------------------------------------------
 
+/*
+	If we have an EP, up the counters based on state.
+	This isn't needed, but it makes driving the code under unit test easier so we
+	induldge in the bean counter's desire for coverage numbers.
+*/
+static inline void incr_ep_counts( int state, endpoint_t* ep ) {
+	if( ep != NULL ) {
+		switch( state ) {
+			case RMR_OK:
+				ep->scounts[EPSC_GOOD]++;
+				break;
+
+			case RMR_ERR_RETRY:
+				ep->scounts[EPSC_TRANS]++;
+				break;
+
+			default:
+				ep->scounts[EPSC_FAIL]++;
+				break;
+		}
+	}
+}
 
 /*
 	Clean up a context.
@@ -339,29 +363,14 @@ extern rmr_mbuf_t*  rmr_rts_msg( void* vctx, rmr_mbuf_t* msg ) {
 		}
 	}
 
-
 	msg->state = RMR_OK;																// ensure it is clear before send
 	hold_src = strdup( (char *) ((uta_mhdr_t *)msg->header)->src );						// the dest where we're returning the message to
 	hold_ip = strdup( (char *) ((uta_mhdr_t *)msg->header)->srcip );					// both the src host and src ip
 	zt_buf_fill( (char *) ((uta_mhdr_t *)msg->header)->src, ctx->my_name, RMR_MAX_SRC );	// must overlay the source to be ours
 	msg = send_msg( ctx, msg, nn_sock, -1 );
 	if( msg ) {
-		if( ep != NULL ) {
-			switch( msg->state ) {
-				case RMR_OK:
-					ep->scounts[EPSC_GOOD]++;
-					break;
+		incr_ep_counts(  msg->state, ep );				// update counts
 
-				case RMR_ERR_RETRY:
-					ep->scounts[EPSC_TRANS]++;
-					break;
-
-				default:
-					// FIX ME uta_fd_failed( nn_sock );			// we don't have an ep so this requires a look up/search to mark it failed
-					ep->scounts[EPSC_FAIL]++;
-					break;
-			}
-		}
 		zt_buf_fill( (char *) ((uta_mhdr_t *)msg->header)->src, hold_src, RMR_MAX_SRC );	// always replace original source & ip so rts can be called again
 		zt_buf_fill( (char *) ((uta_mhdr_t *)msg->header)->srcip, hold_ip, RMR_MAX_SRC );
 		msg->flags |= MFL_ADDSRC;														// if msg given to send() it must add source
@@ -568,6 +577,35 @@ extern int rmr_set_rtimeout( void* vctx, int time ) {
 	return 0;
 }
 
+/*
+	Common cleanup on initialisation error. These are hard to force, and this helps to ensure
+	all code is tested by providing a callable rather than a block of "goto" code.
+
+	There is a return value so that where we need this we get dinked only for one
+	uncovered line rather than two:
+		init_err(...);
+		return NULL;
+
+	That's a hack, and is yet another example of the testing tail wagging the dog.
+*/
+static inline void* init_err( char* msg, void* ctx, void* port, int errval ) {
+	if( errval != 0 ) {			// if not letting it be what a sysllib set it to...
+		errno = errval;
+	}
+
+	if( port ) {				// free things if allocated
+		free( port );
+	}
+	if( ctx ) {
+		free_ctx( ctx );
+	}
+
+	if( msg ) {									// crit message if supplied
+		rmr_vlog( RMR_VL_CRIT, "rmr_init: %s: %s", msg, strerror( errno ) );
+	}
+
+	return NULL;
+}
 
 /*
 	This is the actual init workhorse. The user visible function meerly ensures that the
@@ -617,13 +655,11 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 	}
 
 	if ( proto_port == NULL ){
-		errno = ENOMEM;
-		return NULL;
+		return init_err( "unable to alloc proto port string", NULL, NULL, ENOMEM );
 	}
 
 	if( (ctx = (uta_ctx_t *) malloc( sizeof( uta_ctx_t ) )) == NULL ) {
-		errno = ENOMEM;
-		goto err;
+		return init_err( "unable to allocate context", ctx, proto_port, ENOMEM );
 	}
 	memset( ctx, 0, sizeof( uta_ctx_t ) );
 
@@ -663,8 +699,7 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 
 	ctx->si_ctx = SIinitialise( SI_OPT_FG );		// FIX ME: si needs to streamline and drop fork/bg stuff
 	if( ctx->si_ctx == NULL ) {
-		rmr_vlog( RMR_VL_CRIT, "unable to initialise SI95 interface\n" );
-		goto err;
+		return init_err( "unable to initialise SI95 interface\n", ctx, proto_port, 0 );
 	}
 
 	if( (port = strchr( proto_port, ':' )) != NULL ) {
@@ -698,8 +733,7 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 		free( tok );
 	} else {
 		if( (gethostname( wbuf, sizeof( wbuf ) )) != 0 ) {
-			rmr_vlog( RMR_VL_CRIT, "rmr_init: cannot determine localhost name: %s\n", strerror( errno ) );
-			goto err;
+			return init_err( "cannot determine localhost name\n", ctx, proto_port, 0 );
 		}
 		if( (tok = strchr( wbuf, '.' )) != NULL ) {
 			*tok = 0;									// we don't keep domain portion
@@ -708,9 +742,7 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 
 	ctx->my_name = (char *) malloc( sizeof( char ) * RMR_MAX_SRC );
 	if( snprintf( ctx->my_name, RMR_MAX_SRC, "%s:%s", wbuf, port ) >= RMR_MAX_SRC ) {			// our registered name is host:port
-		rmr_vlog( RMR_VL_CRIT, "rmr_init: hostname + port must be less than %d characters; %s:%s is not\n", RMR_MAX_SRC, wbuf, port );
-		errno = EINVAL;
-		goto err;
+		return init_err( "hostname + port is too long", ctx, proto_port, EINVAL );
 	}
 
 	if( (tok = getenv( ENV_NAME_ONLY )) != NULL ) {
@@ -745,7 +777,7 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 	snprintf( bind_info, sizeof( bind_info ), "%s:%s", interface, port );
 	if( (state = SIlistener( ctx->si_ctx, TCP_DEVICE, bind_info )) < 0 ) {
 		rmr_vlog( RMR_VL_CRIT, "rmr_init: unable to start si listener for %s: %s\n", bind_info, strerror( errno ) );
-		goto err;
+		return init_err( NULL, ctx, proto_port, 0 );
 	}
 
 												// finish all flag setting before threads to keep helgrind quiet
@@ -760,9 +792,7 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 
 	ctx->ephash = rmr_sym_alloc( 129 );					// host:port to ep symtab exists outside of any route table
 	if( ctx->ephash == NULL ) {
-		rmr_vlog( RMR_VL_CRIT, "rmr_init: unable to allocate ep hash\n" );
-		errno = ENOMEM;
-		goto err;
+		return init_err( "unable to allocate ep hash\n", ctx, proto_port, ENOMEM );
 	}
 
 	ctx->rtable = rt_clone_space( ctx, NULL, NULL, 0 );	// create an empty route table so that wormhole/rts calls can be used
@@ -790,11 +820,6 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 
 	free( proto_port );
 	return (void *) ctx;
-
-err:
-	free( proto_port );
-	free_ctx( ctx );
-	return NULL;
 }
 
 /*

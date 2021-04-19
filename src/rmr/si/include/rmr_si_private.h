@@ -210,4 +210,7 @@ static endpoint_t*  fd2ep_get( uta_ctx_t* ctx, int fd );
 static void fd2ep_init( uta_ctx_t* ctx );
 static void fd2ep_add( uta_ctx_t* ctx, int fd, endpoint_t* ep );
 
+// ------ misc ---------------------------------------------------
+static inline void incr_ep_counts( int state, endpoint_t* ep );		// must declare for static includes, but after headers
+
 #endif

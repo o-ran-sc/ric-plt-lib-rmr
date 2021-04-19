@@ -271,5 +271,12 @@ static int sr_si_test() {
 	errors += fail_not_equal( strncmp( payload_str, mbuf->payload, strlen( payload_str )), 0, "realloc payload (clone+nocopy) validation of unchanged payload fails" );
 
 
+	// ---------------------- misc coverage tests; nothing to verify other than they don't crash -----------------------
+	payload_str = strdup( "The Marching 110 will play the OU fightsong after every touchdown or field goal; it is a common sound echoing from Peden Stadium in the fall." );
+
+	dump_n( payload_str, "A dump", strlen( payload_str ) );
+	dump_40( payload_str, "another dump" );
+
 	return !!errors;
+
 }

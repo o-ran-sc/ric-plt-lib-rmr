@@ -181,7 +181,7 @@ static int cleanup() {
 	SItp_stats( si_ctx );		// drive for coverage only
 	SItp_stats( NULL );
 
-	SIconnect( si_ctx, "localhost:43086" );	// ensure context has a tp block to free on shutdown
+	SIconnect( si_ctx, "127.0.0.1:43086" );	// ensure context has a tp block to free on shutdown
 	SIshutdown( NULL );
 	SIabort( si_ctx );
 
@@ -212,7 +212,7 @@ static int addr() {
 	errors += fail_if_true( l != 0, "SIaddress given two null pointers didn't return 0 len" );
 	l = SIaddress( buf1, NULL, 0 );
 	errors += fail_if_true( l != 0, "SIaddress given null dest pointer didn't return 0 len" );
-	l = SIaddress( NULL, buf1, 0 );
+	l = SIaddress( NULL, (void *) &buf1, 0 );
 	errors += fail_if_true( l != 0, "SIaddress given null src pointer didn't return 0 len" );
 
 	net_addr = NULL;
@@ -224,7 +224,7 @@ static int addr() {
 	snprintf( buf1, sizeof( buf1 ), "[ff02::5]:4002" );		// v6 might not be supported so failure is OK here; driving for coverage
 	l = SIaddress( buf1, &net_addr, AC_TOADDR6 );
 	if( l > 0 ) {
-		l = SIaddress( net_addr, &hr_addr, AC_TODOT );						// convert the address back to hr string
+		l = SIaddress( net_addr, (void *) &hr_addr, AC_TODOT );						// convert the address back to hr string
 		errors += fail_if_true( l < 1, "v6 to dot conversion failed" );
 		errors += fail_if_nil( hr_addr, "v6 to dot conversion yields a nil pointer" );
 		free( net_addr );
@@ -234,7 +234,7 @@ static int addr() {
 	l = SIaddress( buf1, (void **) &net_addr, AC_TOADDR );
 	errors += fail_if_true( l < 1, "v4 to addr conversion failed" );
 
-	l = SIaddress( net_addr, &hr_addr, AC_TODOT );						// convert the address back to hr string
+	l = SIaddress( net_addr, (void *) &hr_addr, AC_TODOT );						// convert the address back to hr string
 	errors += fail_if_true( l < 1, "to dot convdersion failed" );
 	errors += fail_if_nil( hr_addr, "v4 to dot conversion yields a nil pointer" );
 	free( net_addr );

@@ -22,6 +22,13 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2021 April 19; version 4.7.3
+----------------------------
+
+Correct flag check bug in route table functions (RIC-777).
+
+
+
 2021 April 9; version 4.7.2
 ---------------------------
 

@@ -66,6 +66,30 @@
 #include "rmr.h"
 #include "rmr_agnostic.h"
 
+/*
+	Driving ep counts is tricky when trying to do it as a part of the rts function, so
+	we drive that code on it's own.
+*/
+static int test_ep_counts() {
+	int errors = 0;
+	struct endpoint ep;			// need a dummy endpoint
+
+	memset( &ep, 0, sizeof( ep ) );
+
+	incr_ep_counts( RMR_OK, &ep );
+	errors += fail_if_false(  ep.scounts[EPSC_GOOD] == 1, "ep inc good counter had bad value" );
+
+	incr_ep_counts( RMR_ERR_RETRY, &ep );
+	errors += fail_if_false(  ep.scounts[EPSC_TRANS] == 1, "ep inc trans counter had bad value" );
+
+	incr_ep_counts( 99, &ep );				// any non-retry/ok value
+	errors += fail_if_false(  ep.scounts[EPSC_FAIL] == 1, "ep inc fail counter had bad value" );
+
+	incr_ep_counts( RMR_OK, NULL );			// ensure nil pointer doesn't crash us
+
+	return errors;
+}
+
 static int rmr_api_test( ) {
 	int		errors = 0;
 	void*	rmc;				// route manager context
@@ -282,6 +306,11 @@ static int rmr_api_test( ) {
 	rmr_init( ":6789", 1024, 0 );		// threaded mode with defined/default RM target
 	setenv( "RMR_RTG_SVC", "-1", 1 );	// force into static table mode
 	rmr_init( ":6789", 1024, 0 );		// threaded mode with static table
+
+
+	// ---- some things must be pushed specifically for edge cases and such ------------------------------------
+	errors += test_ep_counts();
+	init_err( "test error message", rmc, rmc2, ENOMEM );		// drive for coverage
 
 	// --------------- phew, done ------------------------------------------------------------------------------
 

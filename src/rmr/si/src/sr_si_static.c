@@ -281,27 +281,14 @@ static void ref_tpbuf( rmr_mbuf_t* msg, size_t alen )  {
 	msg->header = ((char *) msg->tp_buf) + TP_HDR_LEN;
 
 	v1hdr = (uta_v1mhdr_t *) msg->header;					// v1 will always allow us to suss out the version
-
-	if( v1hdr->rmr_ver == 1 ) {			// bug in verion 1 didn't encode the version in network byte order
-		ver = 1;
-		v1hdr->rmr_ver = htonl( 1 );		// save it correctly in case we clone the message
-	} else {
-		ver = ntohl( v1hdr->rmr_ver );
-	}
+	ver = ntohl( v1hdr->rmr_ver );
 
 	switch( ver ) {
-		case 1:
-			msg->len = ntohl( v1hdr->plen );						// length sender says is in the payload (received length could be larger)
-			msg->alloc_len = alen;									// length of whole tp buffer (including header, trace and data bits)
-			msg->payload = msg->header + sizeof( uta_v1mhdr_t );	// point past header to payload (single buffer allocation above)
+		// version 1 is deprecated  case 1:
+		// version 2 is deprecated  case 2:
 
-			msg->xaction = &v1hdr->xid[0];							// point at transaction id in header area
-			msg->flags |= MFL_ZEROCOPY;								// this is a zerocopy sendable message
-			msg->mtype = ntohl( v1hdr->mtype );						// capture and convert from network order to local order
-			msg->sub_id = UNSET_SUBID;								// type 1 messages didn't have this
-			msg->state = RMR_OK;
-			hlen = sizeof( uta_v1mhdr_t );
-			break;
+		case 3:
+			// fall-through
 
 		default:													// current version always lands here
 			hdr = (uta_mhdr_t *) msg->header;
@@ -351,12 +338,11 @@ static inline rmr_mbuf_t* clone_msg( rmr_mbuf_t* old_msg  ) {
 	nm->header = ((char *) nm->tp_buf) + TP_HDR_LEN;
 	v1hdr = (uta_v1mhdr_t *) old_msg->header;				// v1 will work to dig header out of any version
 	switch( ntohl( v1hdr->rmr_ver ) ) {
-		case 1:
-			hdr = nm->header;
-			memcpy( hdr, old_msg->header, sizeof( *v1hdr ) );	 	// copy complete header
-			nm->payload = (void *) v1hdr + sizeof( *v1hdr );
-			break;
+		// version 1 deprecated case 1:
+		// version 2 deprecated 
 
+		case 3:
+			// fall-through
 		default:											// current message always caught  here
 			hdr = nm->header;
 			memcpy( hdr, old_msg->header, RMR_HDR_LEN( old_msg->header ) + RMR_TR_LEN( old_msg->header ) + RMR_D1_LEN( old_msg->header ) + RMR_D2_LEN( old_msg->header )); 	// copy complete header, trace and other data
@@ -423,11 +409,10 @@ static inline rmr_mbuf_t* realloc_msg( rmr_mbuf_t* old_msg, int tr_len  ) {
 
 	v1hdr = (uta_v1mhdr_t *) old_msg->header;				// v1 will work to dig header out of any version
 	switch( ntohl( v1hdr->rmr_ver ) ) {
-		case 1:
-			v1hdr = nm->header;
-			memcpy( v1hdr, old_msg->header, sizeof( *v1hdr ) );	 	// copy complete header
-			nm->payload = (void *) v1hdr + sizeof( *v1hdr );
-			break;
+		// version 1 not supported
+		// version 2 not supported
+		case 3:
+			// fall-through
 
 		default:											// current message version always caught  here
 			hdr = nm->header;
@@ -579,19 +564,6 @@ static inline rmr_mbuf_t* realloc_payload( rmr_mbuf_t* old_msg, int payload_len,
 	}
 
 	return nm;
-}
-
-/*
-	For SI95 based transport all receives are driven through the threaded
-	ring and thus this function should NOT be called. If it is we will panic
-	and abort straight away.
-*/
-static rmr_mbuf_t* rcv_msg( uta_ctx_t* ctx, rmr_mbuf_t* old_msg ) {
-
-fprintf( stderr, "\n\n>>> rcv_msg: bad things just happened!\n\n>>>>>> abort!  rcv_msg called and it shouldn't be\n" );
-exit( 1 );
-
-	return NULL;
 }
 
 /*
@@ -808,21 +780,8 @@ static  rmr_mbuf_t* mtosend_msg( void* vctx, rmr_mbuf_t* msg, int max_to ) {
 				}
 			}
 
-			if( ep != NULL && msg != NULL ) {
-				switch( msg->state ) {
-					case RMR_OK:
-						ep->scounts[EPSC_GOOD]++;
-						break;
-
-					case RMR_ERR_RETRY:
-						ep->scounts[EPSC_TRANS]++;
-						break;
-
-					default:
-						ep->scounts[EPSC_FAIL]++;
-						uta_ep_failed( ep );								// sending to ep failed; set up to reconnect
-						break;
-				}
+			if( msg != NULL ) {
+				incr_ep_counts( msg->state, ep );
 			}
 		} else {
 			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "invalid socket for rte, setting no endpoint err: mtype=%d sub_id=%d\n", msg->mtype, msg->sub_id );
