@@ -1,8 +1,8 @@
 // :vi sw=4 ts=4 noet:
 /*
 ==================================================================================
-	Copyright (c) 2020 Nokia
-	Copyright (c) 2020 AT&T Intellectual Property.
+	Copyright (c) 2020-2021 Nokia
+	Copyright (c) 2020-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -35,25 +35,17 @@
 #include <errno.h>
 #include <pthread.h>
 #include <ctype.h>
+#include <unistd.h>
+#include <strings.h>
+#include <stdint.h>
+#include <sys/epoll.h>
+#include <semaphore.h>
+
 
 #include <netdb.h>		// these four needed for si address tests
 #include <stdio.h>
 #include <ctype.h>
 #include <netinet/in.h>
-
-
-
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
-#include <errno.h>
-#include <string.h>
-#include <stdint.h>
-#include <ctype.h>
-#include <sys/epoll.h>
-#include <pthread.h>
-#include <semaphore.h>
 
 #define DEBUG 1
 
@@ -66,13 +58,38 @@
 #include "test_support.c"					// things like fail_if()
 #include "test_transport_em.c"				// system/transport emulation (open, close, connect, etc)
 
-/*
-#include "rmr.h"					// things the users see
-#include "rmr_symtab.h"
-#include "rmr_agnostic.h"			// transport agnostic header
-*/
 #include <rmr_logging.h>
 #include <logging.c>
+
+
+// ------------- dummy functions to force edge cases when we can ---------------------------------------
+
+#define SYSTEM_UNDER_TEST	1				// for conditional code
+
+/*
+	These are global so they can be reset for individual tests.
+*/
+static int good_mallocs = 0;		// number of initial good malocs before failurs
+static int bad_mallocs = 1;			// number of failed mallocs (consecutive)
+
+static void* test_malloc( size_t n ) {
+
+fprintf( stderr, ">>>> test malloc: %d %d\n", good_mallocs, bad_mallocs );
+	if( good_mallocs ) {
+		good_mallocs--;
+		return malloc( n );
+	}
+
+	if( bad_mallocs ) {
+		bad_mallocs--;
+		errno = ENOMEM;
+		return NULL;
+	}
+
+	return malloc( n );
+}
+
+// -----------------------------------------------------------------------------------------------------
 
 #include <si95/siaddress.c>
 //#include <si95/sialloc.c>
@@ -95,7 +112,9 @@
 #include <si95/sishutdown.c>
 #include <si95/siterm.c>
 #include <si95/sitrash.c>
-//#include <si95/siwait.c>
+#define malloc test_malloc
+#include <si95/siwait.c>
+#undef malloc
 
 // ---------------------------------------------------------------------
 
@@ -270,6 +289,15 @@ static int prep() {
 static int poll() {
 	int errors  = 0;
 	int status;
+	struct ginfo_blk* dummy;
+
+
+	dummy = SIinitialise( 0 );				// get one to fiddle to drive edge cases
+	dummy->flags |= GIF_SHUTDOWN;			// shutdown edge condition
+	SIpoll( dummy, 1 );
+
+	memset( dummy, 0, sizeof( *dummy ) );	// force bad cookie check code to drive
+	SIpoll( dummy, 1 );
 
 	status = SIpoll( si_ctx, 1 );
 	errors += fail_if_true( status != 0, "poll failed" );
@@ -436,6 +464,29 @@ static int send_tests( ) {
 }
 
 
+/*
+	Wait testing.  This is tricky because we don't have any sessions and thus it's difficult
+	to drive much of SIwait().
+*/
+static int wait_tests() {
+	int errors = 0;
+	struct ginfo_blk* dummy;
+
+
+	dummy = SIinitialise( 0 );				// get one to fiddle to drive edge cases
+	SIwait( dummy );						// malloc should "fail"
+
+	dummy->flags |= GIF_SHUTDOWN;
+	SIwait( dummy );
+
+	memset( dummy, 0, sizeof( *dummy ) );	// force bad cookie check code to drive
+	SIwait( dummy );
+
+	SIwait( si_ctx );						// should drive once through the loop
+
+	return errors;
+}
+
 // ----------------------------------------------------------------------------------------
 
 /*
@@ -459,6 +510,7 @@ int main() {
 	errors += send_tests();
 
 	errors += poll();
+	errors += wait_tests();
 
 	errors += cleanup();
 

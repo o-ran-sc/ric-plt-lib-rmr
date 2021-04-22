@@ -1,4 +1,4 @@
-// :vi sw=4 ts=4 noet:
+ // :vi sw=4 ts=4 noet2
 /*
 ==================================================================================
 	Copyright (c) 2019-2020 Nokia
@@ -361,7 +361,8 @@ static void alarm_if_drops( uta_ctx_t* uctx, uta_ctx_t* pctx ) {
 			if( time( NULL ) > ok2clear ) {			// things still stable after expiry
 				rmr_vlog( RMR_VL_INFO, "drop alarm cleared\n" );
 				alarm_raised = 0;
-				uta_alarm( pctx, ALARM_DROPS | ALARM_CLEAR, prob_id++, "RMR message dropping has stopped" );
+				uta_alarm( pctx, ALARM_DROPS | ALARM_CLEAR, prob_id, "RMR message dropping has stopped" );
+				prob_id++;
 			}
 		}
 	}
@@ -574,7 +575,6 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 	uint64_t key = 0;			// the symtab key will be mtype or sub_id+mtype
 	char*	tokens[128];
 	char*	gtokens[64];
-	int		i;
 	int		ngtoks;				// number of tokens in the group list
 	int		grp;				// index into group list
 	int		cgidx;				// contiguous group index (prevents the addition of a contiguous group without ep)
@@ -599,6 +599,8 @@ static void build_entry( uta_ctx_t* ctx, char* ts_field, uint32_t subid, char* r
 			rte->mtype = atoi( ts_field );													// capture mtype for debugging
 
 			for( grp = 0, cgidx = 0; grp < ngtoks; grp++ ) {
+				int		i;					// avoid sonar grumbling by defining this here
+
 				if( (ntoks = uta_rmip_tokenise( gtokens[grp], ctx->ip_list, tokens, 64, ',' )) > 0 ) {		// remove any references to our ip addrs
 					for( i = 0; i < ntoks; i++ ) {
 						if( strcmp( tokens[i], ctx->my_name ) != 0 ) {					// don't add if it is us -- cannot send to ourself

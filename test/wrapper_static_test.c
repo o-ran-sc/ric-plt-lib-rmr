@@ -59,5 +59,5 @@ static int wrapper_test( ) {
 
 	// -------------------------------------------------------------------------------------------------
 
-	return !!errors;			// 1 or 0 regardless of count
+	return errors;
 }

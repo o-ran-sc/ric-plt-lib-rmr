@@ -1,8 +1,8 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	    Copyright (c) 2019-2020 Nokia
-	    Copyright (c) 2018-2020 AT&T Intellectual Property.
+	    Copyright (c) 2019-2021 Nokia
+	    Copyright (c) 2018-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -99,8 +99,10 @@ static int rmr_api_test( ) {
 	int		v = 0;					// some value
 	char	wbuf[128];
 	int		i;
+	void*	p;					// generic pointer to test return value
 	int		state;
 	int		max_tries;			// prevent a sticking in any loop
+	uta_ctx_t* ctx;
 
 	v = rmr_ready( NULL );
 	errors += fail_if( v != 0, "rmr_ready returned true before initialisation "  );
@@ -280,9 +282,20 @@ static int rmr_api_test( ) {
 	rmr_close( rmc );			// no return to check; drive for coverage
 
 
-	// --------------- nil pointer exception checks
+	// ----- mt_rcv edge cases -------------------------------------------------------------------------------------
+	ctx = mk_dummy_ctx();
+	p = rmr_mt_rcv( NULL, msg, 0 );				// give a valid message to cover additional lines
+	errors += fail_if_nil( p, "rmr_rt_rcv did not pointer when given a message with a nil context" );
+	if( msg ) {
+		errors += fail_if_equal( msg->state, RMR_OK, "rmr_mt_rcv returned OK state when given nil context" );
+	}
+
+	p = rmr_mt_rcv( ctx, msg, 0 );				// one shot receive "poll" case
+	errors += fail_if_nil( p, "mt_rcv with one shot time length did not return a pointer" );
+
+
+	// --------------- nil pointer exception checks ----------------------------------------------------------------
 	rmr_rcv_specific( NULL, NULL, "foo", 0 );
-	rmr_mt_rcv( NULL, NULL, 0 );
 	mt_call( NULL, NULL, 0, 1, NULL );
 	rmr_mt_call( NULL, NULL, 0, 1 );
 	rmr_set_low_latency( NULL );
@@ -312,10 +325,32 @@ static int rmr_api_test( ) {
 	errors += test_ep_counts();
 	init_err( "test error message", rmc, rmc2, ENOMEM );		// drive for coverage
 
+	ctx = mk_dummy_ctx();
+	ctx->river_hash = rmr_sym_alloc( 129 );
+
+	buf2mbuf( NULL, NULL, 0, 0 );								// things in mt_call_si_static
+
+	state = mt_data_cb( NULL, 0, "123", 3 );
+	errors += fail_not_equal( state, 0, "mt_data_cb didn't respond correctly when ctx is nil" );
+
+	state = mt_data_cb( ctx, -1, "123", 3 );
+	errors += fail_not_equal( state, 0, "mt_data_cb didn't respond correctly when ctx is nil" );
+
+	ctx->nrivers = 1;
+	state = mt_data_cb( ctx, 23, "123", 3 );					// force add river to hash reference
+	errors += fail_not_equal( state, 0, "mt_data_cb didn't respond correctly when ctx is nil" );
+
+	mt_disc_cb( NULL, 0 );
+	mt_disc_cb( ctx, 128 );					// for a FD we know isn't there
+
+
+	p = mt_receive( NULL );
+	errors += fail_not_nil( p, "mt_receive returned non-nil pointer when given nil context" );
+
 	// --------------- phew, done ------------------------------------------------------------------------------
 
 	if( ! errors ) {
 		fprintf( stderr, "<INFO> all RMr API tests pass\n" );
 	}
-	return !!errors;
+	return errors;
 }

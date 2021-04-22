@@ -1,8 +1,8 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	    Copyright (c) 2020 Nokia
-	    Copyright (c) 2020 AT&T Intellectual Property.
+	    Copyright (c) 2020-2021 Nokia
+	    Copyright (c) 2020-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -277,6 +277,6 @@ static int sr_si_test() {
 	dump_n( payload_str, "A dump", strlen( payload_str ) );
 	dump_40( payload_str, "another dump" );
 
-	return !!errors;
+	return errors;
 
 }

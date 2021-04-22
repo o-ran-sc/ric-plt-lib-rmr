@@ -1,4 +1,3 @@
-	if_addrs_t*	ifl;			// interface lis2
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
@@ -333,5 +332,5 @@ static int tools_test( ) {
 	errors += ztbf_test();
 
 	test_summary( errors, "tools" );
-	return !!errors;			// 1 or 0 regardless of count
+	return errors;
 }

@@ -26,82 +26,15 @@
 	Date:		22 February 2021
 */
 
-#ifdef KEEP
-
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
-#include <errno.h>
-#include <string.h>
-#include <stdint.h>
-#include <pthread.h>
-#include <semaphore.h>
-
-
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
-#include <errno.h>
-#include <string.h>
-#include <stdint.h>
-#include <ctype.h>
-//#include <sys/epoll.h>
-//#include <pthread.h>
-//#include <semaphore.h>
-
-#define DEBUG 1								// must define before pulling in rmr header files
-#define PARANOID_CHECKS	1					// must have parinoid testing on to not fail on nil pointer tests
-
-
-											// specific test tools in this directory
-#undef NNG_UNDER_TEST
-#include "test_support.c"					// things like fail_if()
-#include "test_msg_support.c"
-#include "test_gen_rt.c"
-
-
-#include "rmr.h"					// things the users see
-#include "rmr_agnostic.h"			// rmr private things
-
-#include "rmr_symtab.h"				// must pull in for context setup
-#include "rmr_agnostic.h"			// transport agnostic header
-
-#include "logging.c"
-#include "rt_generic_static.c"
-#include "tools_static.c"
-#include "symtab.c"
-//#include "rmr_si.c"
-//#include "mbuf_api.c"
-
-#include "test_ctx_support.c"				// dummy context support (needs symtab defs, so not with others above)
-
-
-//static void gen_rt( uta_ctx_t* ctx );		// defined in sr_si_static_test, but used by a few others (eliminate order requirement below)
-
-											// and finally.... the things under test
-#include "alarm.c"
-//#include "tools_static_test.c"				// local test functions pulled directly because of static nature of things
-//#include "symtab_static_test.c"
-//#include "ring_static_test.c"
-//#include "rt_static_test.c"
-//#include "wormhole_static_test.c"
-//#include "mbuf_api_static_test.c"
-//#include "sr_si_static_test.c"
-//#include "lg_buf_static_test.c"
-// do NOT include the receive test static must be stand alone
-
-
-#endif
 
 /*
 	These tests assume there is a dummy process listening on 127.0.0.1:1986; if it's not there
 	the tests still pass, but coverage is reduced because the sends never happen.
 */
 static int alarm_test( ) {
-	int errors = 0;			// number errors found
+	int errors = 0;				// number errors found
 	uta_ctx_t* ctx;
+	uta_ctx_t* pctx;			// tests  into rtable functions need a second context
 	char*	endpt = NULL;
 
 	ctx = mk_dummy_ctx();
@@ -140,20 +73,42 @@ static int alarm_test( ) {
 	uta_alarm_send( ctx, NULL );									// ensure nil message doesn't crash us
 
 
+	// ------ drive the alarm if dropping function in the route table code --------------------------------
+
+	pctx = mk_dummy_ctx();				// grab a private context for rt to use
+
+	/*
+		These tests don't return anything that we can check; driving just to cover the lines and ensure
+		we don't segfault or something bad like that.
+	*/
+	ctx->dcount - 0;
+	alarm_if_drops( ctx,  pctx );			// should do nothing; no drops indicated
+
+	ctx->dcount = 1024;						// make it look like we dropped things
+	alarm_if_drops( ctx,  pctx );			// should drive the code block to send alarm and put is in dropping mode
+
+	ctx->dcount = 1028;						// make it look like we are still  dropping
+	alarm_if_drops( ctx,  pctx );			// drive the just reset time to clear block
+
+	alarm_if_drops( ctx,  pctx );			// drive the check to see if past the clear time (it's not) to reset timer
+
+	fprintf( stderr, "<TEST> pausing 65 seconds before driving last alarm if drops call\n" );
+	sleep( 65 );							// we must pause for longer than the timer so we can drive last block
+	alarm_if_drops( ctx,  pctx );			// should appear that we're not dropping and reset the alarm
+
+
+	// -------------------------- tidy the house ---------------------------------------------------------
 	if( ctx ) {
 		free( ctx->my_name );
 		free( ctx->my_ip );
 		free( ctx );
 	}
 
-	return !!errors;			// 1 or 0 regardless of count
-}
-/*
+	if( pctx ) {
+		free( pctx->my_name );
+		free( pctx->my_ip );
+		free( pctx );
+	}
 
-int main( ) {
-	int errors = 0;
-
-	errors += alarm_test();
-	exit( !!errors );
+	return errors;
 }
-*/

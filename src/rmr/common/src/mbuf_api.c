@@ -109,7 +109,7 @@ extern int rmr_str2meid( rmr_mbuf_t* mbuf, unsigned char const* str ) {
 	}
 
 	errno = 0;
-	if( (len = strlen( (char *) str )) > RMR_MAX_MEID-1 ) {
+	if( (len = strlen( (char const *) str )) > (size_t) (RMR_MAX_MEID-1) ) {		// cast keep sonar from twisting its knickers
 		errno = EOVERFLOW;
 		return RMR_ERR_OVERFLOW;
 	}
@@ -148,7 +148,7 @@ extern void rmr_bytes2payload( rmr_mbuf_t* mbuf, unsigned char const* src, int l
 	is set to the string length.
 */
 extern void rmr_str2payload( rmr_mbuf_t* mbuf, unsigned char const* str ) {
-	rmr_bytes2payload( mbuf, str, strlen( (char *) str ) + 1 );
+	rmr_bytes2payload( mbuf, str, strlen( (char const *) str ) + 1 );
 }
 
 
@@ -200,7 +200,7 @@ extern int rmr_str2xact( rmr_mbuf_t* mbuf, unsigned char const* str ) {
 	}
 
 	errno = 0;
-	if( (len = strlen( (char *) str )) > RMR_MAX_XID-1 ) {
+	if( (len = strlen( (char const *) str )) > RMR_MAX_XID-1 ) {
 		errno = EOVERFLOW;
 		return RMR_ERR_OVERFLOW;
 	}
