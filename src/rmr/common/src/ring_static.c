@@ -71,7 +71,10 @@ static void* uta_mk_ring( int size ) {
 	ring_t*	r;
 	uint16_t max;
 
-	if( size <= 0 || (r = (ring_t *) malloc( sizeof( *r ) )) == NULL ) {
+	if( size <= 0 ) {
+		return NULL;
+	}
+	if( (r = (ring_t *) malloc( sizeof( *r ) )) == NULL ) {
 		return NULL;
 	}
 
@@ -114,15 +117,13 @@ static int uta_ring_config( void* vr, int options ) {
 		return 0;
 	}
 
-	if( options & RING_WLOCK ) {
-		if( r->wgate == NULL ) {		// don't realloc
-			r->wgate = (pthread_mutex_t *) malloc( sizeof( *r->wgate ) );
-			if( r->wgate == NULL ) {
-				return 0;
-			}
-	
-			pthread_mutex_init( r->wgate, NULL );
+	if( options & RING_WLOCK  &&  r->wgate == NULL ) {		// don't realloc if we have one
+		r->wgate = (pthread_mutex_t *) malloc( sizeof( *r->wgate ) );
+		if( r->wgate == NULL ) {
+			return 0;
 		}
+
+		pthread_mutex_init( r->wgate, NULL );
 	}
 
 	if( options & (RING_RLOCK | RING_FRLOCK) ) {				// read locking

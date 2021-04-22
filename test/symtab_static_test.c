@@ -1,7 +1,7 @@
 /*
 ==================================================================================
-	    Copyright (c) 2019 Nokia
-	    Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019-2021 Nokia
+	    Copyright (c) 2018-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -136,6 +136,6 @@ static int symtab_test( ) {
 	rmr_sym_free( NULL );			// ensure it doesn't barf when given a nil pointer
 	rmr_sym_free( st );
 
-	return !!( errors + symtab_state );
+	return  errors + (!!symtab_state );
 }
 

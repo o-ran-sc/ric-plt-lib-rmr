@@ -22,6 +22,14 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2021 April 22; version 4.7.4
+----------------------------
+
+Beef up unit testing in SI package and fix a few static
+analysis bugs. (RIC-777)
+
+
+
 2021 April 19; version 4.7.3
 ----------------------------
 

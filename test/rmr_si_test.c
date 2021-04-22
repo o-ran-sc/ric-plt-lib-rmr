@@ -1,8 +1,8 @@
 // :vi sw=4 ts=4 noet:
 /*
 ==================================================================================
-	Copyright (c) 2020 Nokia
-	Copyright (c) 2020 AT&T Intellectual Property.
+	Copyright (c) 2020-2021 Nokia
+	Copyright (c) 2020-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -142,13 +142,10 @@ int main() {
 	fprintf( stderr, "\n<INFO> starting RMr API tests\n" );
 	errors += rmr_api_test();
 
-/// ---- all ok above here
-/*
 	fprintf( stderr, "\n<INFO> run RMr API tests with src name only env var set\n" );
 	setenv( "RMR_SRC_NAMEONLY", "1", 1 );
 	errors += rmr_api_test();
 	fprintf( stderr, "<INFO> error count: %d\n", errors );
-*/
 
 	test_summary( errors, "rmr_si tests" );
 	if( errors == 0 ) {

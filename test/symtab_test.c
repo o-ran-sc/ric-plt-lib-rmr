@@ -1,7 +1,7 @@
 /*
 ==================================================================================
-	    Copyright (c) 2019 Nokia
-	    Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019-2021 Nokia
+	    Copyright (c) 2018-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -247,6 +247,8 @@ int main( ) {
 	rmr_sym_free( NULL );			// ensure it doesn't barf when given a nil pointer
 	rmr_sym_free( st );
 
+	errors += thread_test();		// test as best we can for race issues
+
 	test_summary( errors, "symtab tests" );
 	if( state + errors == 0 ) {
 		fprintf( stderr, "<PASS> all symtab tests were OK\n\n" );
@@ -254,7 +256,6 @@ int main( ) {
 		fprintf( stderr, "<FAIL> %d errors in symtab code\n\n", errors );
 	}
 
-	errors += thread_test();
 
 	return !!(state + errors);
 }

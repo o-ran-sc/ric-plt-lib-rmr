@@ -1,8 +1,8 @@
 // : vi ts=4 sw=4 noet :
 /*
 ==================================================================================
-	    Copyright (c) 2019 Nokia
-	    Copyright (c) 2018-2019 AT&T Intellectual Property.
+	    Copyright (c) 2019-2021 Nokia
+	    Copyright (c) 2018-2021 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -463,5 +463,5 @@ static int rmr_api_test( ) {
 	if( ! errors ) {
 		fprintf( stderr, "<INFO> all RMr API tests pass\n" );
 	}
-	return !!errors;
+	return errors;
 }

@@ -85,8 +85,6 @@ static int sym_hash( const char *n, long size )
 {
 	const char *p;
 	long t = 0;
-	unsigned long tt = 0;
-	unsigned long x = 79;
 
 	for( p = n; *p; p++ )      /* a bit of magic */
 		t = (t * 79 ) + *p;
@@ -275,15 +273,14 @@ extern void rmr_sym_dump( void *vtable )
 	table = (Sym_tab *) vtable;
 	sym_tab = table->symlist;
 
-	for( i = 0; i < table->size; i++ )
-	{
-		if( sym_tab[i] )
-		for( eptr = sym_tab[i]; eptr; eptr = eptr->next )
-		{
-			if( eptr->val && eptr->class ) {
-				fprintf( stderr, "symtab dump: key=%s val@=%p\n", eptr->name, eptr->val );
-			} else {
-				fprintf( stderr, "symtab dump: nkey=%lu val@=%p\n", (unsigned long) eptr->nkey, eptr->val );
+	for( i = 0; i < table->size; i++ ) {
+		if( sym_tab[i] ) {
+			for( eptr = sym_tab[i]; eptr; eptr = eptr->next ) {
+				if( eptr->val && eptr->class ) {
+					fprintf( stderr, "symtab dump: key=%s val@=%p\n", eptr->name, eptr->val );
+				} else {
+					fprintf( stderr, "symtab dump: nkey=%lu val@=%p\n", (unsigned long) eptr->nkey, eptr->val );
+				}
 			}
 		}
 	}
@@ -295,7 +292,6 @@ extern void rmr_sym_dump( void *vtable )
 */
 extern void *rmr_sym_alloc( int size )
 {
-	int i;
 	Sym_tab *table;
 
 	if( size < 11 )     /* provide a bit of sanity */
@@ -505,9 +501,11 @@ extern void rmr_sym_foreach_class( void *vst, unsigned int class, void (* user_f
 	Sym_ele *next;		/* allows user to delete the node(s) we return */
 	int		i;
 
-	st = (Sym_tab *) vst;
+	if( (st = (Sym_tab *) vst) == NULL ) {
+		return;
+	}
 
-	if( st && (list = st->symlist) != NULL && user_fun != NULL ) {
+	if( (list = st->symlist) != NULL && user_fun != NULL ) {
 		for( i = 0; i < st->size; i++ ) {
 			se = list[i];
 			while( se ) {
