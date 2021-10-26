@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "361a2593_aae6cc19",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000406
+      },
+      "writtenOn": "2021-10-26T04:19:55Z",
+      "side": 1,
+      "message": "Hi, This is Daniel Chung again\nSorry for making you wait and possibly wonder what\u0027s going on.\nIt took me longer than I expected due to internal review!\nBelow is the JIRA ticket that I made for this review!!\nhttps://jira.o-ran-sc.org/browse/RIC-838\n\nThank you so much for the guidance! It was really big help and it will be a big help \nfrom now and then!! \n\nI will keep my senses up with the review\n\nThank you so much again!!\n\nSincerely, \nChung, Seung Wook",
+      "revId": "4facb0a5c3cb1ebb3ed2b04ce3bcb057b6fe8865",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    }
+  ]
+}
