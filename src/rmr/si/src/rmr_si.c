@@ -76,6 +76,7 @@
 #include "wormholes.c"				// wormhole api externals and related static functions (must be LAST!)
 #include "mt_call_static.c"
 #include "mt_call_si_static.c"
+#include "rmr_debug_si.c"           // debuging functions
 
 
 //------------------------------------------------------------------------------
