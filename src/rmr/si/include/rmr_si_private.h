@@ -132,6 +132,10 @@ struct uta_ctx {
 	int rtable_ready;			// set to true when rt is received or loaded
 	int snarf_rt_fd;			// the file des where we save the last rt from RM
 	int dcount;					// drop counter when app is slow
+
+	uint64_t acc_dcount;		// accumulated drop counter when app is slow
+	uint64_t acc_ecount;		// accumulated enqueue counter
+
 	char*	seed_rt_fname;		// the static/seed route table; name captured at start
 	route_table_t* rtable;		// the active route table
 	route_table_t* old_rtable;	// the previously used rt, sits here to allow for draining

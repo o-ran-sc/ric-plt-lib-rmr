@@ -44,6 +44,7 @@ static inline void queue_normal( uta_ctx_t* ctx, rmr_mbuf_t* mbuf ) {
 		rmr_free_msg( mbuf );								// drop if ring is full
 		//dcount++;
 		ctx->dcount++;
+		ctx->acc_dcount++;
 		if( time( NULL ) > last_warning + 60 ) {			// issue warning no more frequently than every 60 sec
 			rmr_vlog( RMR_VL_ERR, "rmr_mt_receive: application is not receiving fast enough; %d msgs dropped since last warning\n", ctx->dcount );
 			last_warning = time( NULL );
@@ -52,7 +53,7 @@ static inline void queue_normal( uta_ctx_t* ctx, rmr_mbuf_t* mbuf ) {
 
 		return;
 	}
-
+	ctx->acc_ecount++;
 	chute = &ctx->chutes[0];
 	sem_post( &chute->barrier );								// tickle the ring monitor
 }

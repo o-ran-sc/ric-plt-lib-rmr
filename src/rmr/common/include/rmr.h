@@ -179,6 +179,16 @@ extern int rmr_send_to( void* vctx, int time );		// DEPRECATED -- replaced with 
 // ---- misc user interface stuff ----------------------------------------------------------------------
 extern void rmr_set_vlevel( int new_level );
 
+// ---- rmr status debug structures --------------------------------------------------------------------
+typedef struct {
+  uint64_t drop;    // accumulated number of dropped msg
+  uint64_t enqueue; // accumulated number of enqueued msg
+} rmr_rx_debug_t;
+
+// ---- rmr status debug api ---------------------------------------------------------------------------
+extern int rmr_reset_rx_debug_count(void *vctx);
+extern int rmr_get_rx_debug_info(void *vctx, rmr_rx_debug_t *rx_rst);
+
 // --- uta compatability defs if needed user should define UTA_COMPAT  ----------------------------------
 #ifdef UTA_COMPAT
 #pragma message( "use of UTA_COMPAT is deprecated and soon to be removed" )
