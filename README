@@ -72,3 +72,16 @@ be ignored:
 
     .readthedocs.yaml -- this seems to be some configuration for the docs
             scraping process(es).
+
+
+### Building rmr deb packages on arm64-based instance
+NOTE: cmake is required for building rmr deb packages 
+
+
+cd <path>/rmr/ci
+cmake .. 
+cmake --build .
+cpack
+cmake .. -DDEV_PKG=1
+cmake --build .
+cpack
