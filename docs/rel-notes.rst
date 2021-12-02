@@ -22,6 +22,14 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2021 December 2; version 4.8.0
+------------------------------
+
+Fixing memory leak in python support function (RIC-858).
+New API added for debugging rmr rx queue (RIC-838).
+
+
+
 2021 April 22; version 4.7.4
 ----------------------------
 
