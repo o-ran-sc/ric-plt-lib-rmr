@@ -1,10 +1,10 @@
 ---
 package_name: rmr
-log_dir: ric-plt-lib-rmr-rt-cmake-packagecloud-stage-master/26
-ref: 11838bcf76f3614384459cb56e2ce80dea788cef
-version: 4.7.4
+log_dir: ric-plt-lib-rmr-rt-cmake-packagecloud-stage-master/27
+ref: d5197f5f72c5b5a2b43ded00a5ded70662fa8eab
+version: 4.8.0
 packages:
-    - name: rmr_4.7.4_amd64.deb
-    - name: rmr-dev_4.7.4_amd64.deb
-    - name: rmr-devel-4.7.4-1.x86_64.rpm
-    - name: rmr-4.7.4-1.x86_64.rpm
+    - name: rmr_4.8.0_amd64.deb
+    - name: rmr-dev_4.8.0_amd64.deb
+    - name: rmr-devel-4.8.0-1.x86_64.rpm
+    - name: rmr-4.8.0-1.x86_64.rpm
