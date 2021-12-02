@@ -85,7 +85,15 @@ static int bang_on( char* target, char* src, int max ) {
 }
 
 /*
+	Frees the string that was allocated and returned using rmr_get_consts()
+*/
+extern void rmr_free_consts( char* p) {
+	free(p);
+}
+
+/*
 	Returns a set of json with the constants which are set in the header.
+	Caller must free the returned string using rmr_free_consts()
 */
 extern char* rmr_get_consts( ) {
 	int		remain;				// bytes remaining in wbuf

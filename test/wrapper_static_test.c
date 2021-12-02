@@ -46,7 +46,7 @@ static int wrapper_test( ) {
 	errors += fail_if_true( *b != '{', "first character in buffer not valid json" );
 	len = strlen( b ) - 1;
 	errors += fail_if_true( *(b+len) != '}', "last character in buffer not valid json" );
-	free( b );
+	rmr_free_consts( b ); 
 
 	b = build_sval( "foobar", "value", 1 );
 	errors += fail_if_equal( strlen( b ), 0, "build svalue with sep returned nil buffer" );
