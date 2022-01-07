@@ -52,6 +52,7 @@ extern int SInewsession( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 
 	addr = (struct sockaddr *) malloc( sizeof( struct sockaddr ) );
 	addrlen = sizeof( struct sockaddr );
+	memset( addr, 0, sizeof( struct sockaddr ) );
 
 	status = accept( tpptr->fd, addr, &addrlen );	//  accept and assign new fd (status)
 	if( status < 0 ) {
@@ -93,7 +94,7 @@ extern int SInewsession( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 		status = (*cbptr)( gptr->cbtab[SI_CB_SECURITY].cbdata, buf );
 		if( status == SI_RET_ERROR ) {										//  session to be rejected
 			SIterm( gptr, newtp );											//  terminate new tp block (do NOT call trash)
-			free( addr );
+			// free( addr ); // not required, will be eventually freed by SItrash
 			free( buf );
 			return SI_ERROR;
 		} else {

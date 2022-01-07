@@ -90,6 +90,7 @@ extern struct tp_blk *SIlisten_prep( int type, char* abuf, int family ) {
 			if( addr != NULL ) {
 				free( addr );		// not needed, but scanners complain if we don't overtly do this
 			}
+			free( tptr );
 			return NULL;
 		}
 
@@ -189,6 +190,7 @@ extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf,
 			if( addr != NULL ) {		// not needed, but scanners complain if we don't overtly do this
 				free( addr );
 			}
+			free( tptr );
 			return NULL;
 		}
 

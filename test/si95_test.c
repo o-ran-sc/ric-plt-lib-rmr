@@ -32,7 +32,6 @@
 #include <netdb.h>
 #include <errno.h>
 #include <string.h>
-#include <errno.h>
 #include <pthread.h>
 #include <ctype.h>
 #include <unistd.h>
@@ -74,7 +73,7 @@ static int bad_mallocs = 1;			// number of failed mallocs (consecutive)
 
 static void* test_malloc( size_t n ) {
 
-fprintf( stderr, ">>>> test malloc: %d %d\n", good_mallocs, bad_mallocs );
+	fprintf( stderr, ">>>> test malloc: %d %d\n", good_mallocs, bad_mallocs );
 	if( good_mallocs ) {
 		good_mallocs--;
 		return malloc( n );
@@ -164,6 +163,7 @@ static int memory( ) {
 	ptr = SInew( GI_BLK );
 	errors += fail_if_nil( ptr, "memory: sinew returned nil when given giblk request" );
 	SItrash(  GI_BLK, ptr );		// GI block cannot be trashed, ensure this (valgind will complain about a leak)
+	free( ptr );					// we can free GI block only in tests
 
 	fprintf( stderr, "<INFO> memory module finished with %d errors\n", errors );
 	return errors;
@@ -204,6 +204,13 @@ static int cleanup() {
 	SIshutdown( NULL );
 	SIabort( si_ctx );
 
+	// cleaning up the remaining global resources
+	struct ginfo_blk *gptr = (struct ginfo_blk*)si_ctx;
+	SItrash( TP_BLK, gptr->tplist );
+	free( gptr->tp_map );
+	free( gptr->rbuf );
+	free( gptr->cbtab );
+	free( si_ctx );
 
 	fprintf( stderr, "<INFO> cleanup  module finished with %d errors\n", errors );
 	return errors;
@@ -215,13 +222,14 @@ static int cleanup() {
 static int addr() {
 	int errors = 0;
 	int l;
-	struct sockaddr* addr;
 	char buf1[4096];			// space to build buffers for xlation
 	char*	hr_addr;			// human readable address returned
 	void* net_addr;				// a network address block of some type
 
-	addr = (struct sockaddr *) malloc( sizeof( struct sockaddr ) );
 /*
+	struct sockaddr* addr;
+	addr = (struct sockaddr *) malloc( sizeof( struct sockaddr ) );
+
 	l = SIgenaddr( "    [ff02::4]:4567", PF_INET6, IPPROTO_TCP, SOCK_STREAM, &addr );
 
 	SIgenaddr( "    [ff02::4]:4567", PF_INET6, IPPROTO_TCP, SOCK_STREAM, &addr );
@@ -247,6 +255,7 @@ static int addr() {
 		errors += fail_if_true( l < 1, "v6 to dot conversion failed" );
 		errors += fail_if_nil( hr_addr, "v6 to dot conversion yields a nil pointer" );
 		free( net_addr );
+		free( hr_addr );
 	}
 
 	snprintf( buf1, sizeof( buf1 ), "localhost:43086" );
@@ -257,6 +266,7 @@ static int addr() {
 	errors += fail_if_true( l < 1, "to dot convdersion failed" );
 	errors += fail_if_nil( hr_addr, "v4 to dot conversion yields a nil pointer" );
 	free( net_addr );
+	free( hr_addr );
 
 	fprintf( stderr, "<INFO> addr module finished with %d errors\n", errors );
 	return errors;
@@ -272,6 +282,7 @@ static int prep() {
 
 	thing = SIlisten_prep( UDP_DEVICE, "localhost:1234", AF_INET );
 	errors += fail_if_nil( thing, "listen prep udp returned nil block" );
+	SItrash( TP_BLK, thing );
 
 	thing = SIlisten_prep( UDP_DEVICE, "localhost:1234", 84306 );		// this should fail
 	errors += fail_not_nil( thing, "listen prep udp returned valid block ptr for bogus family" );
@@ -296,8 +307,14 @@ static int poll() {
 	dummy->flags |= GIF_SHUTDOWN;			// shutdown edge condition
 	SIpoll( dummy, 1 );
 
+	free( dummy->tp_map );
+	free( dummy->rbuf );
+	free( dummy->cbtab );
+
 	memset( dummy, 0, sizeof( *dummy ) );	// force bad cookie check code to drive
 	SIpoll( dummy, 1 );
+
+	free (dummy );
 
 	status = SIpoll( si_ctx, 1 );
 	errors += fail_if_true( status != 0, "poll failed" );
@@ -426,6 +443,8 @@ static int new_sess( ) {
 	status = SInewsession( si_ctx, tpptr );
 	errors += fail_if_true( status < 0, "newsession did failed when accept was good" );
 
+	free( tpptr );
+
 	fprintf( stderr, "<INFO> new_sess module finished with %d errors\n", errors );
 	return errors;
 }
@@ -479,8 +498,15 @@ static int wait_tests() {
 	dummy->flags |= GIF_SHUTDOWN;
 	SIwait( dummy );
 
+	free( dummy->tp_map );
+	free( dummy->rbuf );
+	free( dummy->cbtab );
+
 	memset( dummy, 0, sizeof( *dummy ) );	// force bad cookie check code to drive
 	SIwait( dummy );
+
+	free( dummy );
+
 
 	SIwait( si_ctx );						// should drive once through the loop
 
