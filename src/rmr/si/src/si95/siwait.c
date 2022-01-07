@@ -70,8 +70,8 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 	struct tp_blk *nextone= NULL;	//  point at next block to process in loop
 	int pstat = 0;					//  poll status
 	struct timeval  timeout;		//  delay to use on select call
-	char *buf = NULL;
-	char *ibuf = NULL;
+	// char *buf = NULL;	// DEPRECATED -- seems unnecessary
+	// char *ibuf = NULL;	// DEPRECATED -- seems unnecessary
 
 	if( gptr->magicnum != MAGICNUM ) {				//  if not a valid ginfo block
 		rmr_vlog( RMR_VL_CRIT, "SI95: wait: bad global info struct magic number is wrong\n" );
@@ -82,10 +82,11 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 		return SI_ERROR;							//  so just get out
 	}
 
-	if( ( ibuf = (char *) malloc( 2048 ) ) == NULL ) {
-			rmr_vlog( RMR_VL_WARN, "ibuf malloc fail\n" );
-			return SI_ERROR;
-	}
+	// DEPRECATED -- seems unnecessary
+	// if( ( ibuf = (char *) malloc( 2048 ) ) == NULL ) {
+	// 		rmr_vlog( RMR_VL_WARN, "ibuf malloc fail\n" );
+	// 		return SI_ERROR;
+	// }
 
 	do {									// spin until a callback says to stop (likely never)
 		timeout.tv_sec = 0;					// must be reset on every call!
@@ -147,7 +148,7 @@ extern int SIwait( struct ginfo_blk *gptr ) {
 		}
 	} while( gptr->tplist != NULL && !(gptr->flags & GIF_SHUTDOWN) );
 
-	free( ibuf );
+	// free( ibuf );	// DEPRECATED -- seems unnecessary
 	if( gptr->tplist == NULL )					//  indicate all fds closed
 
 	if( gptr->flags & GIF_SHUTDOWN ) {			//  we need to stop for some reason

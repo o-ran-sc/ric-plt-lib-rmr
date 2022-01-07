@@ -44,7 +44,7 @@
 *           hostent structure. It claims that h_addr_list is a pointer
 *           to character pointers, but it is really a pointer to a list
 *           of pointers to integers!!!
-*  
+*
 ***************************************************************************
 */
 #include "sisetup.h"      //  get necessary defs and other stuff
@@ -165,7 +165,7 @@ extern int SIaddress( void *src, void **dest, int type ) {
 						(int) ntohs( addr6->sin6_port ) );
 			} else {
 				num = (char *) &addr->sin_addr.s_addr;    //  point at the long
-				snprintf( wbuf, sizeof( wbuf ),  "%u.%u.%u.%u;%d", *(num+0), *(num+1), *(num+2), *(num+3), (int) ntohs(addr->sin_port) );
+				snprintf( wbuf, sizeof( wbuf ),  "%u.%u.%u.%u:%d", *(num+0), *(num+1), *(num+2), *(num+3), (int) ntohs(addr->sin_port) );
 			}
 
 			*dest = (void *) strdup( wbuf );

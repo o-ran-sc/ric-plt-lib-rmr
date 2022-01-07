@@ -22,6 +22,15 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2022 January 7; version 4.8.1
+------------------------------
+
+Re-enables RMR libary's module tests (RIC-861).
+Creates a new unit test for the debugging rmr rx queue API.
+Fixes some bugs and possible memory likeage in SI95 code.
+
+
+
 2021 December 2; version 4.8.0
 ------------------------------
 

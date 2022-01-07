@@ -20,20 +20,20 @@
 
 /*
 ***************************************************************************
-*  
+*
 *  Mnemonic: sitrash
 *  Abstract: Delete all things referenced by a struct and then free the memory.
-*    
+*
 *  Returns:  Nothing
 *  Date:     08 March 2007
-*  Author:   E. Scott Daniels                            
+*  Author:   E. Scott Daniels
 *
-******************************************************************************   
+******************************************************************************
 */
 
 #include        "sisetup.h"
 #include		"sitransport.h"
-                 
+
 extern void SItrash( int type, void *bp )
 {
         struct tp_blk *tp = NULL;
@@ -52,14 +52,14 @@ extern void SItrash( int type, void *bp )
                         free( iptr->addr );
                         free( iptr );
                         break;
-            
-                case TP_BLK:                                            //  we assume its off the list 
+
+                case TP_BLK:                                            //  we assume its off the list
                         tp = (struct tp_blk *) bp;
-						iptr = tp->squeue; 
+						iptr = tp->squeue;
 						while( iptr != NULL ) {
                                 inext = iptr->next;
 
-                                free( iptr->data );          //  we could recurse, but that seems silly 
+                                free( iptr->data );          //  we could recurse, but that seems silly
                                 free( iptr->addr );
                                 free( iptr );
 
@@ -69,10 +69,10 @@ extern void SItrash( int type, void *bp )
 						if( tp->fd >= 0 ) {
 							CLOSE( tp->fd );
 						}
-     
-                        free( tp->addr );             //  release the address bufers 
-                        free( tp->paddr );        
-                        free( tp );                   //  and release the block 
+
+                        free( tp->addr );             //  release the address bufers
+                        free( tp->paddr );
+                        free( tp );                   //  and release the block
                         break;
         }
 }

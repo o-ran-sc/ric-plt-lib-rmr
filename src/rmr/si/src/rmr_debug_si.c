@@ -70,7 +70,7 @@ extern int rmr_reset_rx_debug_count(void *vctx) {
 */
 extern int rmr_get_rx_debug_info(void *vctx, rmr_rx_debug_t *rx_debug) {
   uta_ctx_t *ctx;
-  if ((ctx = (uta_ctx_t *)vctx) == NULL) {
+  if ((ctx = (uta_ctx_t *)vctx) == NULL || rx_debug == NULL ) {
     errno = EINVAL;
     return EINVAL;
   }

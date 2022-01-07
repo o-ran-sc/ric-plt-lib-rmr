@@ -5,6 +5,11 @@
 # API and build change  and fix summaries. Doc corrections
 # and/or changes are not mentioned here; see the commit messages.
 
+2022 January 7; version 4.8.1
+	Re-enables RMR libary's module tests (RIC-861).
+	Creates a new unit test for the debugging rmr rx queue API.
+	Fixes some bugs and possible memory likeage in SI95 code.
+
 2021 December 2; version 4.8.0
 	Fixing memory leak in python support function (RIC-858).
 	New API added for debugging rmr rx queue (RIC-838).
