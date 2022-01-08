@@ -16,6 +16,46 @@
       "message": "Could you please review this code?",
       "revId": "7b81f927324cdec59dea60dc2fdca8ac00eaebec",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0edef368_be784a37",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2022-01-08T17:19:47Z",
+      "side": 1,
+      "message": "Looks good. If you want to pull the deprecated code where I\u0027ve commented that would make sense. No harm to leave it and remove it later, but might make it cleaner in the repo. ",
+      "revId": "7b81f927324cdec59dea60dc2fdca8ac00eaebec",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6af7cd85_c68c034f",
+        "filename": "src/rmr/si/src/si95/siwait.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2022-01-08T17:19:47Z",
+      "side": 1,
+      "message": "Agree -- it was probably used in the original code to support UDP or something that was removed for SI95 conversion and this was not cleaned out.",
+      "range": {
+        "startLine": 85,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 15
+      },
+      "revId": "7b81f927324cdec59dea60dc2fdca8ac00eaebec",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
     }
   ]
 }
