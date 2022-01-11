@@ -1,0 +1,9 @@
+Verified+1: ORAN Jobbuilder <releng+oran-jobbuilder@linuxfoundation.org>
+Verified+1: Thoralf Czichy <thoralf.czichy@nokia.com>
+Code-Review+1: Scott Daniels <escottdaniels@gmail.com>
+Code-Review+2: Thoralf Czichy <thoralf.czichy@nokia.com>
+Submitted-by: Thoralf Czichy <thoralf.czichy@nokia.com>
+Submitted-at: Tue, 11 Jan 2022 06:38:29 +0000
+Reviewed-on: https://gerrit.o-ran-sc.org/r/c/ric-plt/lib/rmr/+/7519
+Project: ric-plt/lib/rmr
+Branch: refs/heads/master
