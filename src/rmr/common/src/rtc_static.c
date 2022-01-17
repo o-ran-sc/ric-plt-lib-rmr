@@ -268,6 +268,7 @@ static void* rtc( void* vctx ) {
 	uta_ctx_t*	ctx;					// context user has -- where we pin the route table
 	uta_ctx_t*	pvt_cx;					// private context for session with rtg
 	rmr_mbuf_t*	msg = NULL;				// message from rtg
+	route_table_t* rt;					// the routing table that will be traversed to print statistics
 	char*	my_port;					// the port number that we will listen on (4561 has been the default for this)
 	char*	rtg_addr;					// host:port address of route table generator (route manager)
 	char*	daddr;						// duplicated rtg address string to parse/trash
@@ -385,7 +386,9 @@ static void* rtc( void* vctx ) {
 					count_delay = 300;
 				}
 				if( vlevel >= 0 ) {										// allow it to be forced off with -n in verbose file
-					rt_epcounts( ctx->rtable, ctx->my_name );
+					rt = get_rt( ctx );									// get active route table and up ref count
+					rt_epcounts( rt, ctx->my_name );
+					release_rt( ctx, rt );								// dec safely the ref counter
 				}
 			}
 
@@ -464,6 +467,7 @@ static void* raw_rtc( void* vctx ) {
 	uta_ctx_t*	ctx;					// context user has -- where we pin the route table
 	uta_ctx_t*	pvt_cx;					// private context for session with rtg
 	rmr_mbuf_t*	msg = NULL;				// message from rtg
+	route_table_t* rt;					// the routing table that will be traversed to print statistics
 	char*	payload;					// payload in the message
 	size_t	mlen;
 	char*	port;						// a port number we listen/connect to
@@ -582,7 +586,9 @@ static void* raw_rtc( void* vctx ) {
 					if( blabber > bump_freq ) {
 						count_delay = 300;
 					}
-					rt_epcounts( ctx->rtable, ctx->my_name );
+					rt = get_rt( ctx );									// get active route table and up ref count
+					rt_epcounts( rt, ctx->my_name );
+					release_rt( ctx, rt );								// dec safely the ref counter
 				}
 			}
 

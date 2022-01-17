@@ -1502,6 +1502,7 @@ static route_table_t* uta_rt_clone( uta_ctx_t* ctx, route_table_t* srt, route_ta
 */
 static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all ) {
 	int counter = 0;
+	int ref_count;
 	route_table_t*	rt;
 
 	if( ctx == NULL ) {
@@ -1510,13 +1511,22 @@ static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all ) {
 
 	if( (rt = ctx->old_rtable) != NULL ) {
 		ctx->old_rtable = NULL;
-		while( rt->ref_count > 0 ) {			// wait for all who are using to stop
+
+		pthread_mutex_lock( ctx->rtgate );
+		ref_count = rt->ref_count;
+		pthread_mutex_unlock( ctx->rtgate );
+
+		while( ref_count > 0 ) {				// wait for all who are using to stop
 			if( counter++ > 1000 ) {
 				rmr_vlog( RMR_VL_WARN, "rt_prep_newrt:  internal mishap, ref count on table seems wedged" );
 				break;
 			}
 
 			usleep( 1000 );						// small sleep to yield the processer if that is needed
+
+			pthread_mutex_lock( ctx->rtgate );
+			ref_count = rt->ref_count;
+			pthread_mutex_unlock( ctx->rtgate );
 		}
 
 		if( rt->hash != NULL ) {

@@ -22,6 +22,13 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2022 January 17; version 4.8.2
+------------------------------
+
+Fixes routing statistics printout crash (RIC-872).
+
+
+
 2022 January 7; version 4.8.1
 ------------------------------
 
