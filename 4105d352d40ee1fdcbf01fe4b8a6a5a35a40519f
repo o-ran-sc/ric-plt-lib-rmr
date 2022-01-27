@@ -16,6 +16,24 @@
       "message": "The new code looks fine, but I think there\u0027s a related problem in rt_generic_static.c:prep_new_rt() line 1513 in which there\u0027s a read-access to rt-\u003eref_count that is not protected by a mutex (and its implicit memory barrier). I.e., there\u0027s a possibility (though unlikely) that if scheduled at the same time that prep_new_rt() reads a (slightly) stale copy of ref_count, esp. considering that the while loop in 1513 is quite tight and might be optimized by the compiler into a few instructions. The rest after the while loop in line 1513 seems to be fine, because we know that if accessed through ctx-\u003eold_rtable the ref_count of a routing table object never goes up and the content is immutable (once created, once deleted, but never changed). \n\nI think we should also place the mutex around the \"while( rt-\u003eref_count \u003e 0 )\"",
       "revId": "4105d352d40ee1fdcbf01fe4b8a6a5a35a40519f",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6b22901e_36f9cc18",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-01-27T21:08:57Z",
+      "side": 1,
+      "message": "Thanks for pointing this out. I agree that we still have a synchronization problem in line 1513.\n\nI can see three different solutions to fix this:\n\n1. declare \"ref_count\" as volatile in rmr_agnostic.h:249 (route_table_t struct). This would avoid compiler optimization and also would not need a mutex to protect line 1513. One advantage of this approach is that ref_count would no longer be cached into a CPU register avoiding reading stale data. The mutex would still be required for updating rt-\u003eref_count as it is already being done.\n\n2. place a mutex around the \"while( rt-\u003eref_count \u003e 0 )\" as you suggested. That would definitely fix the problem at the cost of decreasing performance due to mutex synchronization. Also, a pthread_cond_timedwait (in place of usleep, line 1519) would consume extra unlock/lock CPU cycles and time.\n\n3. Optimize the code suggested in solution 2. We could keep using usleep (line 1519) and avoid wasting those extra CPU cycles and time on pthread_cond_timedwait. Basically, we could rewrite that while block (line 1513) and place a mutex only around rt-\u003eref_count, requiring only one lock per iteration.\n\nI would go with \"solution 1\" if there is no objection by both of you (Thoralf and Scott). Otherwise, we could use solution 3 that is less expensive in terms of performance compared to solution 2.",
+      "parentUuid": "cde89fcc_586916e7",
+      "revId": "4105d352d40ee1fdcbf01fe4b8a6a5a35a40519f",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
     }
   ]
 }
