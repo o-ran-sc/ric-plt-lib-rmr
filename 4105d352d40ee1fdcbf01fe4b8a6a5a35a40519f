@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cde89fcc_586916e7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000108
+      },
+      "writtenOn": "2022-01-27T15:22:08Z",
+      "side": 1,
+      "message": "The new code looks fine, but I think there\u0027s a related problem in rt_generic_static.c:prep_new_rt() line 1513 in which there\u0027s a read-access to rt-\u003eref_count that is not protected by a mutex (and its implicit memory barrier). I.e., there\u0027s a possibility (though unlikely) that if scheduled at the same time that prep_new_rt() reads a (slightly) stale copy of ref_count, esp. considering that the while loop in 1513 is quite tight and might be optimized by the compiler into a few instructions. The rest after the while loop in line 1513 seems to be fine, because we know that if accessed through ctx-\u003eold_rtable the ref_count of a routing table object never goes up and the content is immutable (once created, once deleted, but never changed). \n\nI think we should also place the mutex around the \"while( rt-\u003eref_count \u003e 0 )\"",
+      "revId": "4105d352d40ee1fdcbf01fe4b8a6a5a35a40519f",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    }
+  ]
+}
