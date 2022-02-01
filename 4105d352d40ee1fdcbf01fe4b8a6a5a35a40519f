@@ -34,6 +34,24 @@
       "parentUuid": "cde89fcc_586916e7",
       "revId": "4105d352d40ee1fdcbf01fe4b8a6a5a35a40519f",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "268a66d9_522c4e05",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000108
+      },
+      "writtenOn": "2022-02-01T14:11:04Z",
+      "side": 1,
+      "message": "I am no expert on using \"volatile\" vs memory barriers (as in mutex). I\u0027d avoid that solution simply to avoid any pitfalls with \"volatile\" in different compilers and in different CPU architectures now and in the future (think, e.g., ARM pipeline re-ordering). I have more trust in compilers and CPUs doing the right thing (including the right kind of optimizations also in the face of speculative execution) when going for a mutex. \n\nSo, I would go for (3).",
+      "parentUuid": "6b22901e_36f9cc18",
+      "revId": "4105d352d40ee1fdcbf01fe4b8a6a5a35a40519f",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
     }
   ]
 }
