@@ -216,6 +216,10 @@
 
 #define RIC_SERVICE_QUERY                   12060
 
+#define RIC_E2NODE_CONFIG_UPDATE            12070
+#define RIC_E2NODE_CONFIG_UPDATE_ACK        12071
+#define RIC_E2NODE_CONFIG_UPDATE_FAILURE    12072
+
 #define DC_ADM_INT_CONTROL                  20000
 #define DC_ADM_INT_CONTROL_ACK              20001
 #define DC_ADM_GET_POLICY                   20002
