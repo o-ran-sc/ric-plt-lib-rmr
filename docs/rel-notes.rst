@@ -22,6 +22,11 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2022 May 11; version 4.8.3
+------------------------------
+
+Added header definitions for config transfer messages (RIC-638)
+
 2022 January 17; version 4.8.2
 ------------------------------
 

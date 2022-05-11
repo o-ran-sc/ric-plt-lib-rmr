@@ -5,6 +5,9 @@
 # API and build change  and fix summaries. Doc corrections
 # and/or changes are not mentioned here; see the commit messages.
 
+2022 May 11; version 4.8.3
+        Added config transfer related message types (RIC-638)
+
 2022 January 17; version 4.8.2
 	Fixes routing statistics printout crash (RIC-872).
 
