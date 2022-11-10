@@ -46,6 +46,8 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <pthread.h>
+#include <immintrin.h>
+#include <stdbool.h>
 
 #include <RIC_message_types.h>		// needed for route manager messages
 
@@ -374,7 +376,7 @@ static void alarm_if_drops( uta_ctx_t* uctx, uta_ctx_t* pctx ) {
 	must be at the start of a word (i.e. must be immediatly preceeded by whitespace).
 */
 static char* clip( char* buf ) {
-	char*	tok;
+	char*	tok=NULL;
 
 	while( *buf && isspace( *buf ) ) {							// skip leading whitespace
 		buf++;
@@ -390,7 +392,7 @@ static char* clip( char* buf ) {
 		}
 	}
 
-	for( tok = buf + (strlen( buf ) - 1); tok > buf && isspace( *tok ); tok-- );	// trim trailing spaces too
+	for( tok = buf + (strlen( buf ) - 1); tok > buf && isspace_with_fence( *tok ); tok-- );	// trim trailing spaces too
 	*(tok+1) = 0;
 
 	return buf;
@@ -952,7 +954,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 	int	grp;							// group number
 	rtable_ent_t const*	rte;			// route table entry added
 	char*	tokens[128];
-	char*	tok;						// pointer into a token or string
+	char*	tok=NULL;						// pointer into a token or string
 	char	wbuf[1024];
 
 	if( ! buf ) {
@@ -967,7 +969,7 @@ static void parse_rt_rec( uta_ctx_t* ctx,  uta_ctx_t* pctx, char* buf, int vleve
 	while( *buf && isspace( *buf ) ) {							// skip leading whitespace
 		buf++;
 	}
-	for( tok = buf + (strlen( buf ) - 1); tok > buf && isspace( *tok ); tok-- );	// trim trailing spaces too
+	for( tok = buf + (strlen( buf ) - 1); tok > buf && isspace_with_fence( *tok ); tok-- );	// trim trailing spaces too
 	*(tok+1) = 0;
 
 	memset( tokens, 0, sizeof( tokens ) );
@@ -1539,6 +1541,7 @@ static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all ) {
 		rt = NULL;
 	}
 
+	pthread_mutex_destroy(ctx->rtgate);
 	rt = uta_rt_clone( ctx, ctx->rtable, rt, all );		// also sets the ephash pointer
 	if( rt != NULL ) {									// very small chance for nil, but not zero, so test
 		rt->ref_count = 0;								// take no chances; ensure it's 0!
@@ -1689,4 +1692,10 @@ static inline void release_rt( uta_ctx_t* ctx, route_table_t* rt ) {
 	}
 	pthread_mutex_unlock( ctx->rtgate );
 }
+
+int isspace_with_fence(int c) {
+	_mm_lfence();
+	return isspace( c );
+}
+
 #endif

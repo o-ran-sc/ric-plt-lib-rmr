@@ -69,7 +69,7 @@ extern int SIsendt( struct ginfo_blk *gptr, int fd, char *ubuf, int ulen ) {
 		for( tpptr = gptr->tplist; tpptr != NULL && tpptr->fd != fd; tpptr = tpptr->next ) ; //  find the block if out of map's range
 	}
 	if( tpptr != NULL ) {
-		if( (fd = tpptr->fd) < 0 ) {			// fd user given might not be real, and this might be closed already
+		if( (fd = tpptr->fd) < 0 || (fd = tpptr->fd) >= FD_SETSIZE ) {			// fd user given might not be real, and this might be closed already
 			errno = EBADFD;
 			return SI_ERROR;
 		}
