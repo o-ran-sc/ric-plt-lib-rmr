@@ -22,6 +22,11 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2022 Nov 10; version 4.8.4
+------------------------------
+
+Fixes for errors detected by source code scanning (RIC-939)
+
 2022 May 11; version 4.8.3
 ------------------------------
 
