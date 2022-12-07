@@ -5,7 +5,7 @@
 # API and build change  and fix summaries. Doc corrections
 # and/or changes are not mentioned here; see the commit messages.
 
-2022 Nov 10; version 4.8.4
+2022 Nov 10; version 4.8.5
         Fixes for errors detected by source code scanning
 
 2022 May 11; version 4.8.3
