@@ -203,6 +203,7 @@
 #define RIC_SUB_DEL_REQ                     12020
 #define RIC_SUB_DEL_RESP                    12021
 #define RIC_SUB_DEL_FAILURE                 12022
+#define RIC_SUB_DEL_REQUIRED		    12023
 
 #define RIC_SERVICE_UPDATE                  12030
 #define RIC_SERVICE_UPDATE_ACK              12031
