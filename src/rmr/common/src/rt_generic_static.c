@@ -371,6 +371,12 @@ static void alarm_if_drops( uta_ctx_t* uctx, uta_ctx_t* pctx ) {
 }
 
 // ---- utility -----------------------------------------------------------------------------------
+
+int isspace_with_fence(int c) {
+	_mm_lfence();
+	return isspace( c );
+}
+
 /*
 	Little diddy to trim whitespace and trailing comments. Like shell, trailing comments
 	must be at the start of a word (i.e. must be immediatly preceeded by whitespace).
@@ -1691,11 +1697,6 @@ static inline void release_rt( uta_ctx_t* ctx, route_table_t* rt ) {
 		rt->ref_count--;
 	}
 	pthread_mutex_unlock( ctx->rtgate );
-}
-
-int isspace_with_fence(int c) {
-	_mm_lfence();
-	return isspace( c );
 }
 
 #endif

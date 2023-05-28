@@ -31,7 +31,7 @@
 
 /*
 	Generate a simple route table (for all but direct route table testing).
-	This gets tricky inasmuch as we generate two in one; first a whole table 
+	This gets tricky inasmuch as we generate two in one; first a whole table
 	and then two update tables. The first is a table with a bad counter in the
 	last record to test that we don't load that table and error. The second
 	is a good update. The same applies to the meid map; first has a bad counter
@@ -80,8 +80,8 @@ static void gen_rt( uta_ctx_t* ctx ) {
 		"mme_ar | e2t-1 | one two three four\r"				// also test bloody apple way with \r
 		"mme_del | one two\n"
 		"mme_del \n"										// short entries drive various checks for coverage
-		"mme_ar \n"											
-		"mme_ar | e2t-0 \n"									
+		"mme_ar \n"
+		"mme_ar | e2t-0 \n"
 		"meid_map | end | 5\n";								// this will fail as the short recs don't "count"
 	write( fd, rt_stuff, strlen( rt_stuff ) );
 
@@ -113,7 +113,7 @@ static void gen_rt( uta_ctx_t* ctx ) {
 		"mme_del | meid11 meid12 meid13\n"		// includes a non-existant meid
 		"meid_map | end | 1\n";
 	write( fd, rt_stuff, strlen( rt_stuff ) );
-	
+
 	close( fd );
 	read_static_rt( ctx, 1 );								// force in verbose mode to see stats on tty if failure
 	unlink( "utesting.rt" );
@@ -143,7 +143,7 @@ static void gen_custom_rt( uta_ctx_t* ctx, char* buf ) {
 
 	close( fd );
 	read_static_rt( ctx, 1 );								// force in verbose mode to see stats on tty if failure
-	unlink( "utesting.rt" );
+	unlink( "Xutesting.rt" );
 }
 
 
