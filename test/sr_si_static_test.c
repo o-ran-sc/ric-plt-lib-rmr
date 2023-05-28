@@ -277,6 +277,8 @@ static int sr_si_test() {
 	dump_n( payload_str, "A dump", strlen( payload_str ) );
 	dump_40( payload_str, "another dump" );
 
+	unlink( ".ut_rmr_verbose" );
+
 	return errors;
 
 }
