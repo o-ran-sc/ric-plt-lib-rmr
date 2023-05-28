@@ -43,7 +43,7 @@
 /*
 	Generate a simple route table (for all but direct route table testing).
 	This table contains multiple tables inasmuch as a second update set of
-	records follows the initial set. 
+	records follows the initial set.
 */
 static void gen_rt( uta_ctx_t* ctx ) {
 	int		fd;
@@ -198,7 +198,7 @@ static int sr_nano_test() {
 	ctx->rtable = NULL;
 	gen_mlnl_rt( ctx );						// ensure that a file with missing last new line does not trip us up
 	errors += fail_if_nil( ctx->rtable, "read  route table file with missing last newline did not produce a table" );
-	
+
 	ctx->rtable = NULL;
 	gen_rt( ctx );								// forces a static load with some known info since we don't start the rtc()
 	errors += fail_if_nil( ctx->rtable, "read  multi test route table file did not produce a table" );
@@ -268,6 +268,7 @@ static int sr_nano_test() {
 	rtc( NULL );				// coverage test with nil pointer
 	rtc( ctx );
 
+	unlink( ".ut_rmr_verbose" );
 
 	return errors;
 }

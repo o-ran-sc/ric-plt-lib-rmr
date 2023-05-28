@@ -22,20 +22,29 @@ the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
 
+2023 May 28; version 4.9.1
+------------------------------
+
+Fixes IPv6 binding in RMR (RIC-985)
+
+
 2023 Feb 14; version 4.9.0
 ------------------------------
 
 Added new message type for subscription delete required
+
 
 2022 Nov 10; version 4.8.5
 ------------------------------
 
 Fixes for errors detected by source code scanning (RIC-939)
 
+
 2022 May 11; version 4.8.3
 ------------------------------
 
 Added header definitions for config transfer messages (RIC-638)
+
 
 2022 January 17; version 4.8.2
 ------------------------------

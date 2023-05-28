@@ -23,7 +23,7 @@
 	Abstract:	This version of the sender will perform verification on response
 				messages received back from the receiver.
 
-				It is expected that the response messages are created with the 
+				It is expected that the response messages are created with the
 				functions in the test_support module so that they can easily be
 				vetted here.
 
@@ -79,7 +79,7 @@ int main( int argc, char** argv ) {
 	int		stats_freq = 100;
 	int		successful = 0;					// set to true after we have a successful send
 	char	wbuf[DATA_SIZE];
-	char	me[128];						// who I am to vet rts was actually from me
+	char	me[256];						// who I am to vet rts was actually from me
 	char	trace[1024];
 	long	timeout = 0;
 	long	rep_timeout = 0;				// report/stats timeout
@@ -134,7 +134,7 @@ int main( int argc, char** argv ) {
 			exit( 1 );
 		}
 	} else {
-		fprintf( stderr, "<VSNDR> abort: epoll not supported, can't listen for messages\n" );	
+		fprintf( stderr, "<VSNDR> abort: epoll not supported, can't listen for messages\n" );
 	}
 
 	sbuf = rmr_alloc_msg( mrc, MSG_SIZE );						// alloc first send buffer; subsequent buffers allcoated on send
@@ -230,7 +230,7 @@ int main( int argc, char** argv ) {
 					if( rbuf && rbuf->state == RMR_OK ) {
 						if( rmr_payload_size( rbuf ) >= HDR_SIZE+DATA_SIZE ) {		// vet message
 							rts_ok += validate_msg( rbuf->payload, rbuf->len );
-						} else { 
+						} else {
 							fprintf( stderr, "<VSNDR> received short response: >%d expected, got %d\n", HDR_SIZE+DATA_SIZE, rmr_payload_size( rbuf ) );
 							short_count++;
 						}

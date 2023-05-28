@@ -18,7 +18,7 @@
 #
 
 # NOTE:  this makefile assumes that RMR has been built using the directory .build
-#		at the top most repo directory (e.g. ../../.build). It can be changed 
+#		at the top most repo directory (e.g. ../../.build). It can be changed
 #		if you need to by adding "build_path=<path>" to the make command line.
 #		To use this makefile to build on a system where RMR is already installed
 #		try:    make build_path=/usr/local/lib
@@ -44,13 +44,11 @@ LD_LIBRARY_PATH ?= $(build_path):$(build_path)/lib
 LIBRARY_PATH = $(LD_LIBRARY_PATH)
 
 # These programmes are designed to test some basic application level functions
-# from the perspective of two, or more, communicating processes. 
+# from the perspective of two, or more, communicating processes.
 
 
-.PHONY: all all_si
-all: sender receiver caller mt_receiver v_sender ex_rts_receiver 
-
-all_si: sender_si receiver_si
+.PHONY: all
+all: sender receiver caller mt_receiver v_sender ex_rts_receiver lreceiver lsender
 
 
 # ------ all builds are si95 now ---------------------------------------------------
@@ -68,7 +66,7 @@ mt_receiver: receiver.c
 # clean removes intermediates; nuke removes everything that can be built
 .PHONY: clean nuke
 clean:
-	rm -f *.o
+	rm -f *.o *stash.inc
 
 nuke: clean
-	rm -f sender receiver caller mt_receiver
+	rm -f sender receiver caller mt_receiver v_sender ex_rts_receiver lreceiver lsender
