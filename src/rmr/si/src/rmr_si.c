@@ -623,6 +623,7 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 	static	int announced = 0;
 	uta_ctx_t*	ctx = NULL;
 	char	bind_info[256];				// bind info
+	char*	my_ip = NULL;
 	char*	proto = "tcp";				// pointer into the proto/port string user supplied
 	char*	port;						// pointer into the proto_port buffer at the port value
 	char*	interface = NULL;			// interface to bind to (from RMR_BIND_IF, 0.0.0.0 if not defined)
@@ -752,17 +753,19 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 		}
 	}
 
-	ctx->ip_list = mk_ip_list( port );				// suss out all IP addresses we can find on the box, and bang on our port for RT comparisons
+	ctx->ip_list = mk_ip_list( port );			// suss out all IP addresses we can find on the box, and bang on our port for RT comparisons
+	my_ip = get_default_ip( ctx->ip_list );		// and (guess) at what should be the default to put into messages as src
+	if( my_ip == NULL ) {
+		rmr_vlog( RMR_VL_WARN, "rmr_init: default ip address could not be sussed out, using name\n" );
+		my_ip = strdup( ctx->my_name );			// if we cannot suss it out, use the name rather than a nil pointer
+	}
+
 	if( flags & RMRFL_NAME_ONLY ) {
 		ctx->my_ip = strdup( ctx->my_name );			// user application or env var has specified that IP address is NOT sent out, use name
 	} else {
-		ctx->my_ip = get_default_ip( ctx->ip_list );	// and (guess) at what should be the default to put into messages as src
-		if( ctx->my_ip == NULL ) {
-			rmr_vlog( RMR_VL_WARN, "rmr_init: default ip address could not be sussed out, using name\n" );
-			ctx->my_ip = strdup( ctx->my_name );		// if we cannot suss it out, use the name rather than a nil pointer
-		}
+		ctx->my_ip = strdup( my_ip );
 	}
-	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, " default ip address: %s\n", ctx->my_ip );
+	if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "default ip address: %s\n", ctx->my_ip );
 
 	if( (tok = getenv( ENV_WARNINGS )) != NULL ) {
 		if( *tok == '1' ) {
@@ -770,9 +773,19 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 		}
 	}
 
-
 	if( (interface = getenv( ENV_BIND_IF )) == NULL ) {		// if specific interface not defined, listen on all
-		interface = "0.0.0.0";
+		if( my_ip[0] == '[' ) {			// IPv6
+			interface = "[::]";
+		} else {
+			interface = "0.0.0.0";		// IPv4 or device name
+			if ( !isdigit(my_ip[0] )) {	// device name
+				if( DEBUG ) rmr_vlog( RMR_VL_WARN, "rmr_init: unable to suss out the default binding interface address, falling back to any IPv4\n" );
+			}
+		}
+	}
+
+	if( my_ip != NULL ) {
+		free( my_ip );
 	}
 
 	snprintf( bind_info, sizeof( bind_info ), "%s:%s", interface, port );

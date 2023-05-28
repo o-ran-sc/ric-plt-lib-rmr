@@ -277,6 +277,7 @@ static int sr_nng_test() {
 	errors += fail_not_equal( rmr_payload_size( mbuf ), 1024, "realloc payload (clone+nocopy) validation of unchanged alloc length fails" );
 	errors += fail_not_equal( strncmp( payload_str, mbuf->payload, strlen( payload_str )), 0, "realloc payload (clone+nocopy) validation of unchanged payload fails" );
 
+	unlink( ".ut_rmr_verbose" );
 
 	return errors;
 }

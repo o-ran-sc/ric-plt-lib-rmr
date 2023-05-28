@@ -5,6 +5,9 @@
 # API and build change  and fix summaries. Doc corrections
 # and/or changes are not mentioned here; see the commit messages.
 
+2023 May 28; version 4.9.1
+        Fixes IPv6 support for binding to IPv6 interfaces (RIC-985)
+
 2023 Feb 14; version 4.9.0
         Added new message type for RIC subscription delete required
 

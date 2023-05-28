@@ -211,6 +211,9 @@ int main( int argc, char** argv ) {
 
 		sbuf->len =  strlen( sbuf->payload ) + 1;		// our receiver likely wants a nice acsii-z string
 		sbuf->state = 0;
+
+		fprintf( stderr, "<SNDR> sending msg type %d\n", sbuf->mtype );
+
 		sbuf = rmr_send_msg( mrc, sbuf );				// send it (send returns an empty payload on success, or the original payload on fail/retry)
 
 		switch( sbuf->state ) {
@@ -285,7 +288,7 @@ int main( int argc, char** argv ) {
 	}
 
 	fprintf( stderr, "<SNDR> draining begins\n" );
-	timeout = time( NULL ) + 20;				// allow 20 seconds for the pipe to drain from the receiver
+	timeout = time( NULL ) + 10;				// allow 10 seconds for the pipe to drain from the receiver
 	while( time( NULL ) < timeout ) {
 		if( rcv_fd >= 0 ) {
 			while( (nready = epoll_wait( ep_fd, events, 1, 100 )) > 0 ) {			// if something ready to receive (non-blocking check)
@@ -314,7 +317,7 @@ int main( int argc, char** argv ) {
 		pass = 0;
 	}
 
-	fprintf( stderr, "<SNDR> [%s] sent=%d  rcvd=%d  rts-ok=%d failures=%d retries=%d\n", 
+	fprintf( stderr, "<SNDR> [%s] sent=%d  rcvd=%d  rts-ok=%d failures=%d retries=%d\n",
 		pass ? "PASS" : "FAIL",  count, rcvd_count, rts_ok, fail_count, rt_count );
 	rmr_close( mrc );
 
