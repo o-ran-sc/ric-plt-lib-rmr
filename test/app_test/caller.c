@@ -64,7 +64,7 @@
 #include <rmr/rmr.h>
 
 #define TRACE_SIZE 40		// bytes in header to provide for trace junk
-#define WBUF_SIZE 1024
+#define WBUF_SIZE 2048
 
 /*
 	Thread data
@@ -125,12 +125,12 @@ static void* mk_calls( void* data ) {
 
 	sbuf = rmr_alloc_msg( control->mrc, 512 );	// alloc first send buffer; subsequent buffers allcoated on send
 
-	memset( trace, 0, sizeof( trace ) );	
+	memset( trace, 0, sizeof( trace ) );
 	while( count < control->n2send ) {								// we send n messages after the first message is successful
 		snprintf( trace, 100, "%lld", (long long) time( NULL ) );
 		rmr_set_trace( sbuf, trace, TRACE_SIZE );					// fully populate so we dont cause a buffer realloc
 
-		snprintf( wbuf, 200, "count=%d tr=%s %d stand up and cheer! @ %d", count, trace, rand(), control->id );
+		snprintf( wbuf, WBUF_SIZE, "count=%d tr=%s %d stand up and cheer! @ %d", count, trace, rand(), control->id );
 		snprintf( sbuf->payload, 300, "%d %d|%s", sum( wbuf ), sum( trace ), wbuf );
 		snprintf( xbuf, 200, "%31d", xaction_id );
 		rmr_bytes2xact( sbuf, xbuf, 32 );
@@ -197,7 +197,7 @@ static void* mk_calls( void* data ) {
 	}
 
 	control->state = -state;				// signal inactive to main thread; -1 == pass, 0 == fail
-	fprintf( stderr, "<THRD> [%s]  tid=%-2d sent=%d  ok-acks=%d bad-acks=%d  drops=%d failures=%d retries=%d\n", 
+	fprintf( stderr, "<THRD> [%s]  tid=%-2d sent=%d  ok-acks=%d bad-acks=%d  drops=%d failures=%d retries=%d\n",
 		state ? "PASS" : "FAIL",  control->id, count, ok_msg, bad_msg, drops, fail_count, rt_count );
 
 
@@ -270,7 +270,7 @@ int main( int argc, char** argv ) {
 	pt_info = malloc( sizeof( pthread_t ) * nthreads );
 	if( cvs == NULL ) {
 		fprintf( stderr, "<CALL> unable to allocate control vector\n" );
-		exit( 1 );	
+		exit( 1 );
 	}
 
 

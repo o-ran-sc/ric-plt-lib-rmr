@@ -36,7 +36,7 @@ ipaths = -I ../src/rmr/common/src/ -I ../src/rmr/common/include  \
 
 # run all tests; generates .gcov and .dcov files.
 all:
-	unit_test.ksh
+	bash unit_test.ksh
 
 # a generic rule driven from the unit_test script to run all stand alone
 # vetters after the build
@@ -51,8 +51,8 @@ always ::
 
 # remove intermediates
 clean:
-	rm -f *.gcov *.gcda *.dcov *.gcno
+	rm -f *.gcov *.gcda *.dcov *.gcno *.stash*
 
 # remove anything that can be built
 nuke: clean
-	rm -f ring_test symtab_test
+	rm -f ring_test symtab_test logging_test mbuf_api_test rmr_debug_si_test rmr_si_rcv_test rmr_si_test si95_test tools_test

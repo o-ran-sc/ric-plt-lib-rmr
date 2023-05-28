@@ -34,7 +34,7 @@
 #				If the var is not set, and nether of these directories exists,
 #				the tests will not be executed.
 #
-#				At the moment, it assumes a deb based system for tests. 
+#				At the moment, it assumes a deb based system for tests.
 #
 #	Author:		E. Scott Daniels
 #	Date:		2019
@@ -152,7 +152,7 @@ export SHELL=$shell
 
 if (( purge ))
 then
-	rm -f sender receiver 
+	rm -f sender receiver
 fi
 
 echo "----- app --------------------"
@@ -166,16 +166,19 @@ echo "----- multi ------------------"
 run_test run_multi_test.sh  $build
 
 echo "----- round robin -----------"
-run_test run_rr_test.sh 
+run_test run_rr_test.sh
 
 echo "----- rts -------------------"
 run_test run_rts_test.sh  -s 5 -d 100
 
-echo "----- extended payload nocopy no clone------"
+echo "----- extended payload nocopy no clone ------"
 run_test run_exrts_test.sh  -d 10 -n 1000
 
-echo "----- extended payload copy clone------"
+echo "----- extended payload copy clone ------"
 run_test run_exrts_test.sh  -d 10 -n 1000 -c 11
+
+echo "----- ipv6 support ------"
+run_test run_ipv6_test.sh -n 10 -d 100000
 
 if (( errors == 0 ))
 then

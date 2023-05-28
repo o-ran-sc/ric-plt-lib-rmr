@@ -714,5 +714,7 @@ static int rt_test( ) {
 	// ------ specific edge case tests -------------------------------------------------------------------------------
 	errors += lg_clone_test( );
 
+	unlink( ".ut_rmr_verbose" );
+
 	return errors;			// 1 or 0 regardless of count
 }

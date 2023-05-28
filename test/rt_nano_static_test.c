@@ -260,6 +260,7 @@ static int rt_test( ) {
 	state = rt_link2_ep( NULL );
 	errors += fail_if_equal( state, -1, "call to link2_ep with nil ep returned true when false expected" );
 
+	unlink( ".ut_rmr_verbose" );
 
 	return errors;
 }
