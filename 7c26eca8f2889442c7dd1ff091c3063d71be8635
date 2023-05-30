@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f7b458ac_20108efc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2023-05-30T20:52:45Z",
+      "side": 1,
+      "message": "Thoralf, please let me know your thoughts before I proceed.\nThanks,",
+      "revId": "7c26eca8f2889442c7dd1ff091c3063d71be8635",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "30d230ea_e43f0e5e",
@@ -14,6 +31,30 @@
       "writtenOn": "2023-05-30T09:20:41Z",
       "side": 1,
       "message": "I understand that get_default_ip will return the first IP in the list of IPs returned by mk_ip_list(). In dual-stack the lookup probably doesn\u0027t work very predictable (assuming that interfaces have IP v4 and IPv6 addresses assigned). So, I see this primarily used with “RMR_BIND_IF” being set to a concrete (IPv4 or IPv6) IP address - in which case  mk_ip_list() anyway only returns exactly the IP address given in the environment variable. And I understand that case worked with IPv6 already. Now the only added case that works seems to be an IPv6-only stack. I am fine with that. Maybe one more comment explaining this here (where we have the ‘[‘ comparison) would keep this more maintainable without now trying to invent some elaborate scheme to select IPv4 vs IPv6 in dual-stack environments. Let me know if I misunderstood the logic here.",
+      "range": {
+        "startLine": 777,
+        "startChar": 18,
+        "endLine": 777,
+        "endChar": 20
+      },
+      "revId": "7c26eca8f2889442c7dd1ff091c3063d71be8635",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9e567d2b_84fd29bf",
+        "filename": "src/rmr/si/src/rmr_si.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 777,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2023-05-30T20:52:45Z",
+      "side": 1,
+      "message": "Exactly, mk_ip_list() will return all IPv* addresses but the ones from lo interface.\nSince get_default_ip() will return the first IP from the list, in fact, in dual stack it could be non-deterministic by returning an IPv4 address, and then it might return an IPv6 on restarting the application.\n\nWe have two possibilities here:\n1 - Write a better documentation in line 777 as you mentioned.\n2- Another solution for this non-deterministic behavior is improving the logic on get_default_ip() to return always the same IP address. I mean, we can prioritize IPv6 over IP4 (or vice-versa) on dual-stack, while sorting interface names in mk_ip_list() if there is more than one.\nThis can be easily implemented if it sounds reasonable to you.\n\nPlease, let me know your thoughts on this.",
+      "parentUuid": "30d230ea_e43f0e5e",
       "range": {
         "startLine": 777,
         "startChar": 18,
