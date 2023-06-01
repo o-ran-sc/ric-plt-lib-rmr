@@ -63,6 +63,30 @@
       },
       "revId": "7c26eca8f2889442c7dd1ff091c3063d71be8635",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e2aaa444_cc46a3ca",
+        "filename": "src/rmr/si/src/rmr_si.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 777,
+      "author": {
+        "id": 1000108
+      },
+      "writtenOn": "2023-06-01T06:03:02Z",
+      "side": 1,
+      "message": "First thing coming to my mind was an environment variable telling RMR whether it should use IPv6, IPv4, or existing behavior. But that makes things even more complex.\n\nWhen I saw ENV_BIND_IF, I actually thought it is used to bind to specific interfaces, i.e., SO_BINDTODEVICE. But changing it now is probably too late and it\u0027s a bigger change. And it would still leave it open what kind of specific IP address to bind to - which I think is anyway better passed as explicit value. \n\nMaybe we should interpret the existing ENV_BIND_IF as normally defining an IP Address (either IPv4 or IPv6 \"ANY\" or a specific IPv4 or IPv6 address). \n\nAnd if it defines an interface, then we just use ANY as IP address and additionally bind to the interface via SO_BINDTODEVICE. And the combination of specific IP address plus also usage of SO_BINDTODEVICE we don\u0027t support.\n\nThis changes behavior slightly in that currently if an interface is given, it listens on that unpredictable IP address of that interface to a behavior where it listens on ANY (i.e., also the IP address it previously used, but also additional ones of that interface) and also applies SO_BINDTODEVICE.\n\nThe problem that remains is how decide whether to have IPv4 or IPv6 sockets. Maybe we add that new environment variable I mentioned in the beginning, but with slightly different semantics: ENV_BIND_IF_IPV6 which has exactly the same semantics as ENV_BIND_IF I described in the paragraph above. If both are defined, we only do only the things that ENV_BIND_IF tells us to do.  If none is defined, we do IPv4 with 0.0.0.0 and no SO_BINDTODEVICE.\n\nLooks to me like a bit of cleanup, well defined behavior, backwards compatible and some logic that is easy to explain.\n\nWhat do you think?",
+      "parentUuid": "9e567d2b_84fd29bf",
+      "range": {
+        "startLine": 777,
+        "startChar": 18,
+        "endLine": 777,
+        "endChar": 20
+      },
+      "revId": "7c26eca8f2889442c7dd1ff091c3063d71be8635",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
     }
   ]
 }
