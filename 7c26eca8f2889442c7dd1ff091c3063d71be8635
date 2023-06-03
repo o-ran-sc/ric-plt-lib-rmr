@@ -87,6 +87,30 @@
       },
       "revId": "7c26eca8f2889442c7dd1ff091c3063d71be8635",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7bb3fe6c_0a4e5e87",
+        "filename": "src/rmr/si/src/rmr_si.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 777,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2023-06-03T03:02:19Z",
+      "side": 1,
+      "message": "Not sure if introducing a new environment variable (ENV_BIND_IF_IPV6) with slightly different semantics of ENV_BIND_IF would be even more confusing. It would be difficult to explain as well.\n\nI have been thinking here, what is the possibility (in a production deployment) of a given container restarting and having its interfaces renamed, or reordering some of its IP addresses of an interface that would break the logic proposed in this commit?\n\nMay be writing a better documentation on line 777 as you proposed initially is the best for now.",
+      "parentUuid": "e2aaa444_cc46a3ca",
+      "range": {
+        "startLine": 777,
+        "startChar": 18,
+        "endLine": 777,
+        "endChar": 20
+      },
+      "revId": "7c26eca8f2889442c7dd1ff091c3063d71be8635",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
     }
   ]
 }
