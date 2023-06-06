@@ -16,6 +16,23 @@
       "message": "Could you please check the conflict in \"ric-plt-lib-rmr-packagecloud-release-verify\" jenkins job?\nIt seems that there is a conflict with the version of the python setuptools package.\n\nThank you.",
       "revId": "d5e663fe0b25b6330dc2e242efb5b70ea563d80d",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "475fa6a3_06b2bd10",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000059
+      },
+      "writtenOn": "2023-06-06T16:08:43Z",
+      "side": 1,
+      "message": "hi Alex, seems like the issue is that the build does not exist:\nhttps://logs.o-ran-sc.org/production/vex-sjc-oran-jenkins-prod-1/ric-plt-lib-rmr-rt-cmake-packagecloud-stage-master/34\n\nCan you please file a ticket so we can help you further?\nhttps://support.linuxfoundation.org/",
+      "revId": "d5e663fe0b25b6330dc2e242efb5b70ea563d80d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
     }
   ]
 }
