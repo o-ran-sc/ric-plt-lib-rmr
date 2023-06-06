@@ -16,6 +16,24 @@
       "message": "Hi all,\nStill having the same issue with Sphinx and urllib after submitting the latest patchset.",
       "revId": "53ea06bd376fa9e6a382783fbcf65c2344584163",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ec1923c8_bda9c8d1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000108
+      },
+      "writtenOn": "2023-06-06T07:40:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7955df1f_218964c6",
+      "revId": "53ea06bd376fa9e6a382783fbcf65c2344584163",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
     }
   ]
 }
