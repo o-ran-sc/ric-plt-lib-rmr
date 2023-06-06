@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7bd029f9_f0bda25c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2023-06-06T14:30:03Z",
+      "side": 1,
+      "message": "Could you please check the conflict in \"ric-plt-lib-rmr-packagecloud-release-verify\" jenkins job?\nIt seems that there is a conflict with the version of the python setuptools package.\n\nThank you.",
+      "revId": "d5e663fe0b25b6330dc2e242efb5b70ea563d80d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    }
+  ]
+}
