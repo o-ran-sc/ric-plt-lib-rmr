@@ -50,6 +50,24 @@
       "message": "recheck",
       "revId": "d5e663fe0b25b6330dc2e242efb5b70ea563d80d",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "80560a9f_26032a3f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000108
+      },
+      "writtenOn": "2023-06-07T12:03:53Z",
+      "side": 1,
+      "message": "After triggering the stage-release job in the previous review, the referred-to job was created and now this release job should pass",
+      "parentUuid": "7bd029f9_f0bda25c",
+      "revId": "d5e663fe0b25b6330dc2e242efb5b70ea563d80d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
     }
   ],
   "submitRequirementResults": [
