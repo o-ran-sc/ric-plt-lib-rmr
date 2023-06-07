@@ -33,6 +33,23 @@
       "message": "hi Alex, seems like the issue is that the build does not exist:\nhttps://logs.o-ran-sc.org/production/vex-sjc-oran-jenkins-prod-1/ric-plt-lib-rmr-rt-cmake-packagecloud-stage-master/34\n\nCan you please file a ticket so we can help you further?\nhttps://support.linuxfoundation.org/",
       "revId": "d5e663fe0b25b6330dc2e242efb5b70ea563d80d",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fc83de63_6eb2aec4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000108
+      },
+      "writtenOn": "2023-06-07T11:29:12Z",
+      "side": 1,
+      "message": "recheck",
+      "revId": "d5e663fe0b25b6330dc2e242efb5b70ea563d80d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
     }
   ]
 }
