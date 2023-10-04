@@ -89,6 +89,17 @@ extern int SInewsession( struct ginfo_blk *gptr, struct tp_blk *tpptr ) {
 	}
 	SETSOCKOPT( tpptr->fd, SOL_TCP, TCP_QUICKACK, (void *)&optval, sizeof( optval) ) ;
 
+	if( gptr->tcp_flags & SI_TF_QUICK ) {
+		optval = 1;
+		SETSOCKOPT( tpptr->fd, SOL_SOCKET, SO_KEEPALIVE, (void *)&optval, sizeof( optval) ) ;
+		optval = 1;
+		SETSOCKOPT( tpptr->fd, IPPROTO_TCP, TCP_KEEPIDLE, (void *)&optval, sizeof( optval) ) ;
+		optval = 1;
+		SETSOCKOPT( tpptr->fd, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&optval, sizeof( optval) ) ;
+		optval = 5;
+		SETSOCKOPT( tpptr->fd, IPPROTO_TCP, TCP_KEEPCNT, (void *)&optval, sizeof( optval) ) ;
+	}
+
 	SIaddress( addr, (void **) &buf, AC_TODOT );							// get addr of remote side; buf must be freed
 	if( (cbptr = gptr->cbtab[SI_CB_SECURITY].cbrtn) != NULL ) {				//   invoke the security callback function if there
 		status = (*cbptr)( gptr->cbtab[SI_CB_SECURITY].cbdata, buf );

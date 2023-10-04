@@ -247,7 +247,6 @@ typedef struct {
 	int		updates;		// counter of update records received
 	int		mupdates;		// counter of meid update records received
 	int		ref_count;		// num threads currently using
-	pthread_mutex_t*	gate;	// lock allowing update to ref counter
 } route_table_t;
 
 /*

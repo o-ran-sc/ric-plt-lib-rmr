@@ -456,25 +456,19 @@ static char* ensure_nlterm( char* buf ) {
 	is no active table (first load), so we have to account for that (no locking).
 */
 static void roll_tables( uta_ctx_t* ctx ) {
-
+	pthread_mutex_lock( ctx->rtgate );				// must hold lock to move to active
 	if( ctx->new_rtable == NULL || ctx->new_rtable->error ) {
 		rmr_vlog( RMR_VL_WARN, "new route table NOT rolled in: nil pointer or error indicated\n" );
 		ctx->old_rtable = ctx->new_rtable;
-		ctx->new_rtable = NULL;
-		return;
-	}
-
-	if( ctx->rtable != NULL ) {							// initially there isn't one, so must check!
-		pthread_mutex_lock( ctx->rtgate );				// must hold lock to move to active
+	}else if( ctx->rtable != NULL ) {							// initially there isn't one, so must check!
 		ctx->old_rtable = ctx->rtable;					// currently active becomes old and allowed to 'drain'
 		ctx->rtable = ctx->new_rtable;					// one we've been adding to becomes active
-		pthread_mutex_unlock( ctx->rtgate );
 	} else {
 		ctx->old_rtable = NULL;						// ensure there isn't an old reference
 		ctx->rtable = ctx->new_rtable;				// make new the active one
 	}
-
 	ctx->new_rtable = NULL;
+	pthread_mutex_unlock( ctx->rtgate );
 }
 
 /*
@@ -1369,10 +1363,7 @@ static route_table_t* uta_rt_init( uta_ctx_t* ctx ) {
 		return NULL;
 	}
 
-	rt->gate = ctx->rtgate;						// single mutex needed for all route tables
 	rt->ephash = ctx->ephash;					// all route tables share a common endpoint hash
-	pthread_mutex_init( rt->gate, NULL );
-
 	return rt;
 }
 
@@ -1509,32 +1500,27 @@ static route_table_t* uta_rt_clone( uta_ctx_t* ctx, route_table_t* srt, route_ta
 	do not need to run that portion of the table to deref like we do for the RTEs.
 */
 static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all ) {
-	int counter = 0;
-	int ref_count;
+	//int counter = 0;
 	route_table_t*	rt;
 
 	if( ctx == NULL ) {
 		return NULL;
 	}
 
+	pthread_mutex_lock( ctx->rtgate );
 	if( (rt = ctx->old_rtable) != NULL ) {
 		ctx->old_rtable = NULL;
 
-		pthread_mutex_lock( ctx->rtgate );
-		ref_count = rt->ref_count;
-		pthread_mutex_unlock( ctx->rtgate );
+		while(  rt->ref_count > 0 ) {				// wait for all who are using to stop
+			//if( counter++ > 1000 ) {
+			//	rmr_vlog( RMR_VL_WARN, "rt_prep_newrt:  internal mishap, ref count on table seems wedged" );
+			//	break;
+			//}
 
-		while( ref_count > 0 ) {				// wait for all who are using to stop
-			if( counter++ > 1000 ) {
-				rmr_vlog( RMR_VL_WARN, "rt_prep_newrt:  internal mishap, ref count on table seems wedged" );
-				break;
-			}
-
-			usleep( 1000 );						// small sleep to yield the processer if that is needed
-
-			pthread_mutex_lock( ctx->rtgate );
-			ref_count = rt->ref_count;
 			pthread_mutex_unlock( ctx->rtgate );
+			usleep( 1000 );						// small sleep to yield the processer if that is needed
+			pthread_mutex_lock( ctx->rtgate );
+
 		}
 
 		if( rt->hash != NULL ) {
@@ -1546,8 +1532,8 @@ static route_table_t* prep_new_rt( uta_ctx_t* ctx, int all ) {
 	} else {
 		rt = NULL;
 	}
+	pthread_mutex_unlock( ctx->rtgate );
 
-	pthread_mutex_destroy(ctx->rtgate);
 	rt = uta_rt_clone( ctx, ctx->rtable, rt, all );		// also sets the ephash pointer
 	if( rt != NULL ) {									// very small chance for nil, but not zero, so test
 		rt->ref_count = 0;								// take no chances; ensure it's 0!

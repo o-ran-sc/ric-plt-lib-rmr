@@ -5,6 +5,13 @@
 # API and build change  and fix summaries. Doc corrections
 # and/or changes are not mentioned here; see the commit messages.
 
+2023 Oct 4; version 4.9.2
+    Fixes some stability issues seen during route table update.
+    Dont allow clean old_rtable until it's reference count is really 0.
+    Added more faster recognition for connect failure so route table
+    update will not stuck so long in preparing new rtable.
+	rtgate lock is not needed to init and destroy continouosly.
+
 2023 May 28; version 4.9.1
         Fixes IPv6 support for binding to IPv6 interfaces (RIC-985)
 

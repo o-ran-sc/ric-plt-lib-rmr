@@ -110,6 +110,7 @@
 #define SI_TF_NONE		0		// tcp flags in the global info applied to each session
 #define SI_TF_NODELAY	0x01	// set nagle's off for each connection
 #define SI_TF_FASTACK	0x02	// set fast ack on for each connection
+#define SI_TF_QUICK     0x04	// set keepalive for each connection and reduce syn amount while doing connect
 
 #ifndef _SI_ERRNO
 extern int SIerrno;               //  error number set by public routines

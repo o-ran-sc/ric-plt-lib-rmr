@@ -198,7 +198,7 @@ static int tpem_send( int fd, void* buf, int count, int flags ) {
 */
 #define CLOSE		close
 #define SHUTDOWN	shutdown
-#define	GETSOCKOPT	getscokopt
+#define	GETSOCKOPT	getsockopt
 #define SETSOCKOPT	setsockopt
 #define READ		read
 #define WRITE		write

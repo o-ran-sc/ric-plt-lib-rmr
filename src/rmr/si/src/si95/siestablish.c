@@ -214,6 +214,17 @@ extern struct tp_blk *SIconn_prep( struct ginfo_blk *gptr, int type, char *abuf,
 			}
 			SETSOCKOPT( tptr->fd, SOL_TCP, TCP_QUICKACK, (void *)&optval, sizeof( optval) ) ;
 
+			if( gptr->tcp_flags & SI_TF_QUICK ) {
+				optval = 1;
+				SETSOCKOPT( tptr->fd, SOL_SOCKET, SO_KEEPALIVE, (void *)&optval, sizeof( optval) ) ;
+				optval = 1;
+				SETSOCKOPT( tptr->fd, IPPROTO_TCP, TCP_KEEPIDLE, (void *)&optval, sizeof( optval) ) ;
+				optval = 1;
+				SETSOCKOPT( tptr->fd, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&optval, sizeof( optval) ) ;
+				optval = 5;
+				SETSOCKOPT( tptr->fd, IPPROTO_TCP, TCP_KEEPCNT, (void *)&optval, sizeof( optval) ) ;
+			}
+
 			tptr->paddr = addr;				// tuck the remote peer address away
 			if( need_smartc( abuf ) ) {
 				tptr->flags |= TPF_SAFEC;

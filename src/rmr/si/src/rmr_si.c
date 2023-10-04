@@ -703,6 +703,7 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 	if( ctx->si_ctx == NULL ) {
 		return init_err( "unable to initialise SI95 interface\n", ctx, proto_port, 0 );
 	}
+	SIset_tflags(ctx->si_ctx,SI_TF_QUICK);
 
 	if( (port = strchr( proto_port, ':' )) != NULL ) {
 		if( port == proto_port ) {		// ":1234" supplied; leave proto to default and point port correctly
@@ -814,7 +815,6 @@ static void* init( char* uproto_port, int def_msg_size, int flags ) {
 		return init_err( "unable to allocate ep hash\n", ctx, proto_port, ENOMEM );
 	}
 
-	pthread_mutex_destroy(ctx->rtgate);
 	ctx->rtable = rt_clone_space( ctx, NULL, NULL, 0 );	// create an empty route table so that wormhole/rts calls can be used
 	if( flags & RMRFL_NOTHREAD ) {						// no thread prevents the collector start for very special cases
 		ctx->rtable_ready = 1;							// route based sends will always fail, but rmr is ready for the non thread case

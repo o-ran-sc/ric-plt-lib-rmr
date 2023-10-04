@@ -33,6 +33,8 @@
 *				17 Apr 2020 - Add safe connect capabilities
 ******************************************************************************
 */
+#include <netinet/tcp.h>
+
 #include "sisetup.h"
 #include "sitransport.h"
 
@@ -114,7 +116,9 @@ extern int SIconnect( struct ginfo_blk *gptr, char *abuf ) {
 	struct sockaddr *taddr;     	// convenience pointer to addr of target
 	int alen = 0;					//  len of address struct
 	int fd = SI_ERROR;             	//  file descriptor to return to caller
-
+	int optvalrlen;
+	int optvalr;
+	int optvalw;
 	if( PARANOID_CHECKS ) {
 		if( gptr == NULL ) {
 			return SI_ERROR;
@@ -129,6 +133,14 @@ extern int SIconnect( struct ginfo_blk *gptr, char *abuf ) {
 	if( tpptr != NULL ) {
 		taddr = tpptr->paddr;
 		errno = 0;
+
+		if( gptr->tcp_flags & SI_TF_QUICK ) {
+			optvalrlen = sizeof(optvalr);
+			GETSOCKOPT( tpptr->fd, IPPROTO_TCP, TCP_SYNCNT, (void *)&optvalr, &optvalrlen) ;
+			optvalw=2;
+			SETSOCKOPT( tpptr->fd, IPPROTO_TCP, TCP_SYNCNT, (void *)&optvalw, sizeof( optvalw) ) ;
+		}
+
 		if( tpptr->flags & TPF_SAFEC ) {
 			if( safe_connect( tpptr->fd, taddr, tpptr->palen ) != 0 ) {		// fd closed on failure
 				tpptr->fd = -1;
@@ -141,6 +153,10 @@ extern int SIconnect( struct ginfo_blk *gptr, char *abuf ) {
 		}
 
 		if( tpptr->fd >= 0 ) {								// connect ok
+			if( gptr->tcp_flags & SI_TF_QUICK ) {
+				SETSOCKOPT( tpptr->fd, IPPROTO_TCP, TCP_SYNCNT, (void *)&optvalr, sizeof( optvalr) ) ;
+			}
+
 			tpptr->flags |= TPF_SESSION;    		//  indicate we have a session here
 			tpptr->next = gptr->tplist;     		//  add block to the list
 			if( tpptr->next != NULL ) {

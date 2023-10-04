@@ -21,6 +21,15 @@ the RMR core library was assigned odd major numbers (e.g.
 the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
+2023 Oct 4; version 4.9.2
+------------------------------
+
+Fixes some stability issues seen during route table update.
+Dont allow clean old_rtable until it's reference count is really 0.
+Added more faster recognition for connect failure so route table
+update will not stuck so long in preparing new rtable.
+rtgate lock is not needed to init and destroy continouosly.
+
 
 2023 May 28; version 4.9.1
 ------------------------------
