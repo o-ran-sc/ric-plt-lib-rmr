@@ -1,0 +1,11 @@
+Code-Review+1: Konstantinos Archangelof <konstantinos.archangelof@nokia.com>
+Code-Review+2: Matti Hiltunen <hiltunen@att.com>
+Verified+1: ORAN Required GHA <releng+oran.required.gha@linuxfoundation.org>
+Verified+1: Matti Hiltunen <hiltunen@att.com>
+Verified+1: ORAN Jobbuilder <releng+oran-jobbuilder@linuxfoundation.org>
+Code-Review+1: Juha Hyttinen <juha.hyttinen@nokia.com>
+Submitted-by: Matti Hiltunen <hiltunen@att.com>
+Submitted-at: Tue, 10 Oct 2023 07:55:41 +0000
+Reviewed-on: https://gerrit.o-ran-sc.org/r/c/ric-plt/lib/rmr/+/11744
+Project: ric-plt/lib/rmr
+Branch: refs/heads/master
