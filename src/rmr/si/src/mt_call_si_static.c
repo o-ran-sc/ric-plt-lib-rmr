@@ -199,8 +199,13 @@ static int mt_data_cb( void* vctx, int fd, char* buf, int buflen ) {
 			river->accum = (char *) malloc( river->nbytes );
 			river->ipt = 0;
 		} else {
-			// future -- sync to next marker
-			river->ipt = 0;						// insert point
+			if( river->state == RS_RESET ) {
+				// future -- reset not implemented
+				return SI_RET_OK;
+			} else {
+				// future -- sync to next marker
+				river->ipt = 0;						// insert point
+			}
 		}
 	}
 
@@ -238,6 +243,12 @@ static int mt_data_cb( void* vctx, int fd, char* buf, int buflen ) {
 			} else {
 				river->msg_size = extract_mlen( &buf[bidx] );			// pull from buf as it's all there; it will copy later
 			}
+
+                        if( river->msg_size < 0) { // addressing RIC-989
+                                river->state=RS_RESET;
+                        	return SI_RET_OK;
+                        }
+
 			if( DEBUG ) rmr_vlog( RMR_VL_DEBUG, "data callback setting msg size: %d\n", river->msg_size );
 
 			if( river->msg_size > river->nbytes ) {						// message bigger than app max size; grab huge buffer

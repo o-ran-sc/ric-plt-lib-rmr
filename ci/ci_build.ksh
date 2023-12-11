@@ -112,7 +112,7 @@ mkdir -p .build
 	cd test                 		# execute tests
 	ksh unit_test.ksh				# unit tests first
 	cd app_test
-	ksh run_all.ksh					# application based tests if units pass
+	ksh run_all.sh					# application based tests if units pass
 )
 
 printf "---\nfiles:\n" >$yaml_file 	# initialise the yaml file

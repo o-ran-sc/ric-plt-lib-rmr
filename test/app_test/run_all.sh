@@ -162,6 +162,9 @@ then
 	build=""
 fi
 
+echo "----- testing RIC-989 --------"
+run_test run_neg_rmr_size_test.sh -v $installed $build
+
 echo "----- multi ------------------"
 run_test run_multi_test.sh  $build
 
