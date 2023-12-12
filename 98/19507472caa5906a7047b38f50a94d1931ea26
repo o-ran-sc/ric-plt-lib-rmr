@@ -1,0 +1,11 @@
+Verified+1: Thoralf Czichy <thoralf.czichy@nokia.com>
+Verified+1: ORAN Jobbuilder <releng+oran-jobbuilder@linuxfoundation.org>
+Verified+1: ORAN Required GHA <releng+oran.required.gha@linuxfoundation.org>
+Code-Review+1: Alexandre Huff <alexandrehuff@utfpr.edu.br>
+Code-Review+2: Thoralf Czichy <thoralf.czichy@nokia.com>
+Code-Review+1: Abdul Wahid W <abdulwahid.w@nokia.com>
+Submitted-by: Thoralf Czichy <thoralf.czichy@nokia.com>
+Submitted-at: Tue, 12 Dec 2023 10:10:45 +0000
+Reviewed-on: https://gerrit.o-ran-sc.org/r/c/ric-plt/lib/rmr/+/12230
+Project: ric-plt/lib/rmr
+Branch: refs/heads/master
