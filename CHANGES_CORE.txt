@@ -5,6 +5,10 @@
 # API and build change  and fix summaries. Doc corrections
 # and/or changes are not mentioned here; see the commit messages.
 
+2023 Dec 12; version 4.9.3
+    Fixes for CVE-2023-40998 (RIC-989) and CVE-2023-40997 (RIC-991)
+    related to incorrect parsing of RMR messages
+
 2023 Oct 4; version 4.9.2
     Fixes some stability issues seen during route table update.
     Dont allow clean old_rtable until it's reference count is really 0.

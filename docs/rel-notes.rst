@@ -21,6 +21,12 @@ the RMR core library was assigned odd major numbers (e.g.
 the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
+2023 Dec 12; version 4.9.3
+------------------------------
+
+Fixes for CVE-2023-40998 (RIC-989) and CVE-2023-40997 (RIC-991)
+related to incorrect parsing of RMR messages
+
 2023 Oct 4; version 4.9.2
 ------------------------------
 

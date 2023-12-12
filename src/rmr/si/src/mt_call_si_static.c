@@ -77,6 +77,17 @@ static void buf2mbuf( uta_ctx_t* ctx, char *raw_msg, int msg_size, int sender_fd
 		}
 	}
 
+	// cross-check that header length indicators are not longer than actual message
+	uta_mhdr_t* hdr_check = (uta_mhdr_t*)(((char *) raw_msg) + TP_HDR_LEN);
+        uint32_t header_len=(uint32_t)RMR_HDR_LEN(hdr_check);
+        uint32_t payload_len=(uint32_t)ntohl(hdr_check->plen);
+        if (header_len+TP_HDR_LEN+payload_len> msg_size) {
+                rmr_vlog( RMR_VL_ERR, "Message dropped because %u + %u + %u > %u\n", header_len, payload_len, TP_HDR_LEN, msg_size);
+                free (raw_msg);
+                return;
+        }
+
+
 	if( (mbuf = alloc_mbuf( ctx, RMR_ERR_UNSET )) != NULL ) {
 		mbuf->tp_buf = raw_msg;
 		mbuf->rts_fd = sender_fd;
