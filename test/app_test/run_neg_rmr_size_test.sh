@@ -45,17 +45,21 @@ function run_sender {
 #	as per RIC-989 / CVE-2023-40998 processes used to  crash for such 
 #	invalid size data. So this test case would fail with a crash
 #	if for some reason the bug comes back.
-#
-  bash ./create_invalid_request.sh
-  cat /tmp/invalid_data.bin |netcat -w 2 127.0.0.1 4560
+	bash ./create_invalid_request.sh
+	cat /tmp/invalid_data.bin |netcat -w 2 127.0.0.1 4560
 	
-	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
-
+#   An invalid request with invalid header length information
+#   As per RIC-919 / CVE-2023-40997 this caused a crash. This
+#   test case is to make sure the bug does not come back
+	bash ./create_invalid_request2.sh
+	cat /tmp/invalid_data2.bin |netcat -w 2 127.0.0.1 4560
   
-#      now let's send still one valid message over another TCP 
-#      connection
-  bash ./create_valid_request.sh
-  cat /tmp/valid_data.bin|netcat -w 2 127.0.0.1 4560
+#   now let's send still one valid message over another TCP 
+#   connection
+	bash ./create_valid_request.sh
+	cat /tmp/valid_data.bin|netcat -w 2 127.0.0.1 4560
+
+	echo $? >/tmp/PID$$.src		# must communicate state back via file b/c asynch
 
 }
 
