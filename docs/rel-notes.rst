@@ -21,6 +21,11 @@ the RMR core library was assigned odd major numbers (e.g.
 the need to leap frog versions ceased, and beginning with
 version 4.0.0, the RMR versions should no longer skip.
 
+2023 Dec 13; version 4.9.4
+------------------------------
+
+same as 4.9.3
+
 2023 Dec 12; version 4.9.3
 ------------------------------
 
