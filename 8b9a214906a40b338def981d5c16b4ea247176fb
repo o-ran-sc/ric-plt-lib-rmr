@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8bebfa05_8a179a41",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000103
+      },
+      "writtenOn": "2024-06-19T18:31:15Z",
+      "side": 1,
+      "message": "Could also add srao@linuxfoundation.org as a reviewer for verification. \n\nRef TOC call: 29/Feb: \u0027Wahid elected PTL\u0027\nhttps://wiki.o-ran-sc.org/display/TOC#ORANSCTechnicalOversightCommittee(TOC)-20240229 #Section 6.(d)\u0027Near RT RIC PTL\u0027",
+      "revId": "8b9a214906a40b338def981d5c16b4ea247176fb",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    }
+  ]
+}
